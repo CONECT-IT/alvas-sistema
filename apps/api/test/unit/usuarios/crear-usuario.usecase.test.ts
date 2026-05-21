@@ -1,5 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
 
+import { ActualizarUsuarioUseCase } from "../../../src/lib/usuarios/application/use-cases/ActualizarUsuarioUseCase";
 import { CrearUsuarioUseCase } from "../../../src/lib/usuarios/application/use-cases/CrearUsuarioUseCase";
 import { Usuario } from "../../../src/lib/usuarios/domain/entities";
 import {
@@ -97,5 +98,52 @@ describe("usuarios / CrearUsuarioUseCase", () => {
     });
 
     expect(duplicado.esExito).toBe(false);
+  });
+});
+
+describe("usuarios / ActualizarUsuarioUseCase", () => {
+  test("actualiza nombre, username y rol preservando id y estado", async () => {
+    const repo = new FakeUsuarioRepository();
+    await repo.guardar(
+      Usuario.crear({
+        id: "user-001",
+        username: "asesor1",
+        nombre: "Asesor Uno",
+        hashClave: "hash-seguro-001",
+        rol: "ASESOR",
+      }),
+    );
+
+    const resultado = await new ActualizarUsuarioUseCase(repo).ejecutar({
+      idUsuario: "user-001",
+      nombre: " Asesor Principal ",
+      username: " AsesorPrincipal ",
+      rol: "ADMIN",
+    });
+
+    expect(resultado.esExito).toBe(true);
+    if (resultado.esExito) {
+      expect(resultado.valor.id).toBe("user-001");
+      expect(resultado.valor.nombre).toBe("Asesor Principal");
+      expect(resultado.valor.username).toBe("asesorprincipal");
+      expect(resultado.valor.rol).toBe("ADMIN");
+      expect(resultado.valor.estado).toBe("ACTIVO");
+      expect(resultado.valor.creadoEn).toContain("T");
+      expect(resultado.valor.actualizadoEn).toContain("T");
+    }
+    expect(repo.usuarios.get("user-001")?.username.valor).toBe("asesorprincipal");
+  });
+
+  test("rechaza usuario inexistente y no guarda cambios", async () => {
+    const repo = new FakeUsuarioRepository();
+
+    const resultado = await new ActualizarUsuarioUseCase(repo).ejecutar({
+      idUsuario: "user-no-existe",
+      nombre: "No importa",
+    });
+
+    expect(resultado.esExito).toBe(false);
+    expect(resultado.esExito ? undefined : resultado.error.codigo).toBe("USER_NOT_FOUND");
+    expect(repo.usuarios.size).toBe(0);
   });
 });

@@ -3,6 +3,7 @@ import { describe, expect, test } from "bun:test";
 import {
   ActualizarPropiedadUseCase,
   CrearPropiedadUseCase,
+  EliminarPropiedadUseCase,
   ListarPropiedadesUseCase,
 } from "../../../src/lib/propiedades/application/use-cases";
 import { Propiedad } from "../../../src/lib/propiedades/domain/entities/Propiedad";
@@ -312,5 +313,51 @@ describe("propiedades / use cases", () => {
 
     expect(resultado.esExito).toBe(true);
     expect(repo.propiedades.get("prop-004")?.precio).toBe(520000);
+  });
+
+  test("EliminarPropiedadUseCase elimina solo con permisos de admin", async () => {
+    const repo = new FakePropiedadRepository();
+    await repo.guardar(
+      Propiedad.crear({
+        id: "prop-005",
+        titulo: "Casa a retirar",
+        descripcion: "Inventario duplicado",
+        precio: 500000,
+        origen: "ALVAS",
+        estado: "DISPONIBLE",
+      }),
+    );
+    const useCase = new EliminarPropiedadUseCase(repo, new AutorizadorPropiedadesAdapter());
+
+    const asesor = await useCase.ejecutar({
+      idPropiedad: "prop-005",
+      usuarioAutenticado: { id: "asesor-1", rol: "ASESOR" },
+    });
+    expect(asesor.esExito).toBe(false);
+    expect(asesor.esExito ? undefined : asesor.error.codigo).toBe("SIN_PERMISOS");
+    expect(repo.propiedades.has("prop-005")).toBe(true);
+
+    const admin = await useCase.ejecutar({
+      idPropiedad: "prop-005",
+      usuarioAutenticado: { id: "admin-1", rol: "ADMIN" },
+    });
+
+    expect(admin.esExito).toBe(true);
+    expect(repo.propiedades.has("prop-005")).toBe(false);
+  });
+
+  test("EliminarPropiedadUseCase rechaza propiedades inexistentes", async () => {
+    const repo = new FakePropiedadRepository();
+
+    const resultado = await new EliminarPropiedadUseCase(
+      repo,
+      new AutorizadorPropiedadesAdapter(),
+    ).ejecutar({
+      idPropiedad: "prop-no-existe",
+      usuarioAutenticado: { id: "admin-1", rol: "ADMIN" },
+    });
+
+    expect(resultado.esExito).toBe(false);
+    expect(resultado.esExito ? undefined : resultado.error.codigo).toBe("NO_ENCONTRADA");
   });
 });

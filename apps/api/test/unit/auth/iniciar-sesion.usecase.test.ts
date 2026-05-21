@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 import { IniciarSesionUseCase } from "../../../src/lib/auth/application/use-cases/IniciarSesionUseCase";
+import { RenovarSesionUseCase } from "../../../src/lib/auth/application/use-cases/RenovarSesionUseCase";
 import {
   type CredencialesUsuario,
   type IConsultaCredencialesUsuario,
@@ -83,5 +84,54 @@ describe("auth / IniciarSesionUseCase", () => {
     ).ejecutar({ username: "asesor1", clave: "secreto" });
 
     expect(resultado.esExito).toBe(false);
+  });
+});
+
+describe("auth / RenovarSesionUseCase", () => {
+  test("renueva tokens para refresh token valido y usuario activo", async () => {
+    const tokenProvider = new FakeTokenProvider();
+
+    const resultado = await new RenovarSesionUseCase(
+      new FakeConsultaCredenciales({
+        idUsuario: "user-001",
+        username: "asesor1",
+        hashClave: "hash-seguro-001",
+        rol: "ASESOR",
+        estado: "ACTIVO",
+      }),
+      tokenProvider,
+    ).ejecutar({ refreshToken: " refresh-token " });
+
+    expect(resultado.esExito).toBe(true);
+    if (resultado.esExito) {
+      expect(resultado.valor.authToken).toBe("auth-token");
+      expect(resultado.valor.refreshToken).toBe("refresh-token");
+      expect(resultado.valor.usuario).toEqual({
+        id: "user-001",
+        username: "asesor1",
+        rol: "ASESOR",
+      });
+    }
+  });
+
+  test("rechaza renovacion si usuario no existe o esta deshabilitado", async () => {
+    const tokenProvider = new FakeTokenProvider();
+    const usuarioInexistente = await new RenovarSesionUseCase(
+      new FakeConsultaCredenciales(null),
+      tokenProvider,
+    ).ejecutar({ refreshToken: "refresh-token" });
+    const usuarioDeshabilitado = await new RenovarSesionUseCase(
+      new FakeConsultaCredenciales({
+        idUsuario: "user-001",
+        username: "asesor1",
+        hashClave: "hash-seguro-001",
+        rol: "ASESOR",
+        estado: "DESHABILITADO",
+      }),
+      tokenProvider,
+    ).ejecutar({ refreshToken: "refresh-token" });
+
+    expect(usuarioInexistente.esExito).toBe(false);
+    expect(usuarioDeshabilitado.esExito).toBe(false);
   });
 });

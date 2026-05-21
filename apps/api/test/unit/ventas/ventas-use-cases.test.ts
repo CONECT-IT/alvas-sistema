@@ -6,14 +6,19 @@ import {
   idUsuarioRef,
 } from "../../../src/lib/shared/domain/value-objects/IdUsuarioRef";
 import { AgendarCitaUseCase } from "../../../src/lib/ventas/application/use-cases/AgendarCitaUseCase";
+import { ActualizarCitaUseCase } from "../../../src/lib/ventas/application/use-cases/ActualizarCitaUseCase";
 import { ActualizarLeadUseCase } from "../../../src/lib/ventas/application/use-cases/ActualizarLeadUseCase";
 import { ConvertirLeadAClienteUseCase } from "../../../src/lib/ventas/application/use-cases/ConvertirLeadAClienteUseCase";
+import { ListarClientesUseCase } from "../../../src/lib/ventas/application/use-cases/ListarClientesUseCase";
+import { ListarLeadsUseCase } from "../../../src/lib/ventas/application/use-cases/ListarLeadsUseCase";
+import { ObtenerClienteUseCase } from "../../../src/lib/ventas/application/use-cases/ObtenerClienteUseCase";
+import { ObtenerLeadUseCase } from "../../../src/lib/ventas/application/use-cases/ObtenerLeadUseCase";
 import { RegistrarLeadUseCase } from "../../../src/lib/ventas/application/use-cases/RegistrarLeadUseCase";
 import { Cliente } from "../../../src/lib/ventas/domain/entities/Cliente";
 import { Lead } from "../../../src/lib/ventas/domain/entities/Lead";
 import { type IConsultaPropiedadInteres } from "../../../src/lib/ventas/domain/ports/IConsultaPropiedadInteres";
 import { type IVentasRepository } from "../../../src/lib/ventas/domain/ports/IVentasRepository";
-import { type IdCliente, type IdLead } from "../../../src/lib/ventas/domain/value-objects/Ids";
+import { idCliente, idLead, type IdCliente, type IdLead } from "../../../src/lib/ventas/domain/value-objects/Ids";
 import { AutorizadorVentasAdapter } from "../../../src/lib/ventas/infrastructure/security/AutorizadorVentasAdapter";
 
 class SecuenciaGeneradorId implements IGeneradorId {
@@ -104,6 +109,16 @@ function crearLead(id = "lead-001"): Lead {
     telefono: "999888777",
     tipo: "COMPRA",
     idAsesor: "asesor-1",
+  });
+}
+
+function crearCliente(id = "cliente-001"): Cliente {
+  return Cliente.crear({
+    id,
+    nombre: "Maria Cliente",
+    email: "cliente@example.com",
+    telefono: "300123456",
+    idAsesor: idUsuarioRef("asesor-1"),
   });
 }
 
@@ -291,5 +306,155 @@ describe("ventas / use cases", () => {
     const lead = await repo.obtenerLeadPorId("lead-001" as IdLead);
     expect(resultado.esExito).toBe(true);
     expect(lead?.nombre).toBe("Nombre admin");
+  });
+
+  test("ActualizarCitaUseCase reprograma cita existente y registra actividad", async () => {
+    const repo = new FakeVentasRepository();
+    await repo.guardarLead(crearLead());
+    await new AgendarCitaUseCase(
+      repo,
+      new SecuenciaGeneradorId(["cita-001"]),
+      new AutorizadorVentasAdapter(),
+    ).ejecutar({
+      idLead: "lead-001",
+      fechaInicio: new Date("2026-06-01T10:00:00.000Z"),
+      duracionMinutos: 60,
+      observacion: "Primera visita",
+      usuarioAutenticado: { id: "asesor-1", rol: "ASESOR" },
+    });
+
+    const resultado = await new ActualizarCitaUseCase(
+      repo,
+      new AutorizadorVentasAdapter(),
+    ).ejecutar({
+      idLead: "lead-001",
+      idCita: "cita-001",
+      fechaInicio: new Date("2026-06-02T15:30:00.000Z"),
+      duracionMinutos: 45,
+      observacion: "Reprogramada por cliente",
+      usuarioAutenticado: { id: "asesor-1", rol: "ASESOR" },
+    });
+
+    const lead = await repo.obtenerLeadPorId("lead-001" as IdLead);
+    const cita = lead?.obtenerCitaPorId("cita-001" as never);
+    expect(resultado.esExito).toBe(true);
+    expect(cita?.fechaInicio.toISOString()).toBe("2026-06-02T15:30:00.000Z");
+    expect(cita?.fechaFin.toISOString()).toBe("2026-06-02T16:15:00.000Z");
+    expect(cita?.estado).toBe("REPROGRAMADA");
+    expect(cita?.observacion).toBe("Reprogramada por cliente");
+    expect(repo.actividades).toContain("CITA_ACTUALIZADA");
+  });
+
+  test("ActualizarCitaUseCase rechaza lead, cita o asesor no autorizado", async () => {
+    const repo = new FakeVentasRepository();
+    await repo.guardarLead(crearLead());
+    await new AgendarCitaUseCase(
+      repo,
+      new SecuenciaGeneradorId(["cita-001"]),
+      new AutorizadorVentasAdapter(),
+    ).ejecutar({
+      idLead: "lead-001",
+      fechaInicio: new Date("2026-06-01T10:00:00.000Z"),
+      duracionMinutos: 60,
+      usuarioAutenticado: { id: "asesor-1", rol: "ASESOR" },
+    });
+    const useCase = new ActualizarCitaUseCase(repo, new AutorizadorVentasAdapter());
+
+    const leadInexistente = await useCase.ejecutar({
+      idLead: "lead-no-existe",
+      idCita: "cita-001",
+      observacion: "No aplica",
+    });
+    const sinPermisos = await useCase.ejecutar({
+      idLead: "lead-001",
+      idCita: "cita-001",
+      observacion: "No autorizado",
+      usuarioAutenticado: { id: "asesor-2", rol: "ASESOR" },
+    });
+    const citaInexistente = await useCase.ejecutar({
+      idLead: "lead-001",
+      idCita: "cita-no-existe",
+      observacion: "No aplica",
+      usuarioAutenticado: { id: "asesor-1", rol: "ASESOR" },
+    });
+
+    expect(leadInexistente.esExito).toBe(false);
+    expect(leadInexistente.esExito ? undefined : leadInexistente.error.codigo).toBe(
+      "LEAD_NOT_FOUND",
+    );
+    expect(sinPermisos.esExito).toBe(false);
+    expect(sinPermisos.esExito ? undefined : sinPermisos.error.codigo).toBe("SIN_PERMISOS_LEAD");
+    expect(citaInexistente.esExito).toBe(false);
+    expect(citaInexistente.esExito ? undefined : citaInexistente.error.codigo).toBe(
+      "CITA_NOT_FOUND",
+    );
+  });
+
+  test("ListarLeadsUseCase devuelve todos para admin y solo propios para asesor", async () => {
+    const repo = new FakeVentasRepository();
+    await repo.guardarLead(crearLead("lead-001"));
+    await repo.guardarLead(
+      Lead.registrar({
+        id: "lead-002",
+        nombre: "Luis",
+        email: "luis@example.com",
+        telefono: "111222333",
+        tipo: "COMPRA",
+        idAsesor: "asesor-2",
+      }),
+    );
+    const useCase = new ListarLeadsUseCase(repo, new AutorizadorVentasAdapter());
+
+    const admin = await useCase.ejecutar({ idUsuarioEjecutor: "admin-1", rolEjecutor: "ADMIN" });
+    const asesor = await useCase.ejecutar({
+      idUsuarioEjecutor: "asesor-1",
+      rolEjecutor: "ASESOR",
+    });
+
+    expect(admin.esExito).toBe(true);
+    expect(admin.esExito ? admin.valor.map((lead) => lead.id) : []).toEqual([
+      idLead("lead-001"),
+      idLead("lead-002"),
+    ]);
+    expect(asesor.esExito).toBe(true);
+    expect(asesor.esExito ? asesor.valor.map((lead) => lead.id) : []).toEqual([idLead("lead-001")]);
+  });
+
+  test("ObtenerLeadUseCase devuelve lead o error de no encontrado", async () => {
+    const repo = new FakeVentasRepository();
+    await repo.guardarLead(crearLead("lead-001"));
+    const useCase = new ObtenerLeadUseCase(repo);
+
+    const encontrado = await useCase.ejecutar({ id: "lead-001" });
+    const inexistente = await useCase.ejecutar({ id: "lead-no-existe" });
+
+    expect(encontrado.esExito).toBe(true);
+    expect(encontrado.esExito ? encontrado.valor.id : undefined).toBe(idLead("lead-001"));
+    expect(inexistente.esExito).toBe(false);
+    expect(inexistente.esExito ? undefined : inexistente.error.message).toContain("lead-no-existe");
+  });
+
+  test("ListarClientesUseCase y ObtenerClienteUseCase consultan clientes", async () => {
+    const repo = new FakeVentasRepository();
+    await repo.guardarCliente(crearCliente("cliente-001"));
+    await repo.guardarCliente(crearCliente("cliente-002"));
+
+    const listado = await new ListarClientesUseCase(repo).ejecutar();
+    const encontrado = await new ObtenerClienteUseCase(repo).ejecutar({ id: "cliente-001" });
+    const inexistente = await new ObtenerClienteUseCase(repo).ejecutar({
+      id: "cliente-no-existe",
+    });
+
+    expect(listado.esExito).toBe(true);
+    expect(listado.esExito ? listado.valor.map((cliente) => cliente.id) : []).toEqual([
+      idCliente("cliente-001"),
+      idCliente("cliente-002"),
+    ]);
+    expect(encontrado.esExito).toBe(true);
+    expect(encontrado.esExito ? encontrado.valor.nombre : undefined).toBe("Maria Cliente");
+    expect(inexistente.esExito).toBe(false);
+    expect(inexistente.esExito ? undefined : inexistente.error.message).toContain(
+      "cliente-no-existe",
+    );
   });
 });
