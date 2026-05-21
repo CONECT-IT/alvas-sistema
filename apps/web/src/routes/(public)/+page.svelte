@@ -1,6 +1,9 @@
 <script lang="ts">
 	import Button from '$lib/shared/ui/Button.svelte';
 	import { authStore } from '$lib/auth/infrastructure/authStore';
+	import { HttpError } from '$lib/shared/http/httpClient';
+	import { registrarCaptacionVendedor } from '$lib/captaciones/application/use-cases/registrarCaptacionVendedor';
+	import { captacionRepository } from '$lib/captaciones/infrastructure/captacionRepository';
 
 	const propiedades = [
 		{
@@ -37,6 +40,71 @@
 		{ nombre: 'Diego Ramos', zona: 'Calana', enfoque: 'Terrenos familiares' },
 		{ nombre: 'Lucía Vargas', zona: 'Cono Sur', enfoque: 'Inversión inmobiliaria' }
 	];
+
+	let nombreVendedor = $state('');
+	let telefonoVendedor = $state('');
+	let emailVendedor = $state('');
+	let tituloPropiedad = $state('');
+	let descripcionPropiedad = $state('');
+	let precioEstimado = $state('');
+	let enviandoCaptacion = $state(false);
+	let captacionError = $state<string | null>(null);
+	let captacionOk = $state<string | null>(null);
+
+	function limpiarCaptacion() {
+		nombreVendedor = '';
+		telefonoVendedor = '';
+		emailVendedor = '';
+		tituloPropiedad = '';
+		descripcionPropiedad = '';
+		precioEstimado = '';
+	}
+
+	async function enviarCaptacionVendedor(event: SubmitEvent) {
+		event.preventDefault();
+		captacionError = null;
+		captacionOk = null;
+
+		if (
+			!nombreVendedor.trim() ||
+			!telefonoVendedor.trim() ||
+			!tituloPropiedad.trim() ||
+			!descripcionPropiedad.trim()
+		) {
+			captacionError = 'Completa tus datos de contacto y la información base de la propiedad.';
+			return;
+		}
+
+		const precio = precioEstimado.trim() ? Number(precioEstimado) : undefined;
+
+		if (precio !== undefined && (Number.isNaN(precio) || precio < 0)) {
+			captacionError = 'Ingresa un precio estimado válido.';
+			return;
+		}
+
+		enviandoCaptacion = true;
+
+		try {
+			await registrarCaptacionVendedor(captacionRepository, {
+				nombre: nombreVendedor.trim(),
+				telefono: telefonoVendedor.trim(),
+				email: emailVendedor.trim() || undefined,
+				tituloPropiedad: tituloPropiedad.trim(),
+				descripcionPropiedad: descripcionPropiedad.trim(),
+				precioEstimado: precio
+			});
+			captacionOk =
+				'Recibimos tu propiedad. Un asesor de ALVAS la revisará antes de hacerla disponible.';
+			limpiarCaptacion();
+		} catch (err) {
+			captacionError =
+				err instanceof HttpError
+					? err.message
+					: 'No se pudo registrar la captación. Intenta nuevamente.';
+		} finally {
+			enviandoCaptacion = false;
+		}
+	}
 </script>
 
 <svelte:head>
@@ -186,23 +254,94 @@
 		<div class="mx-auto grid max-w-7xl gap-8 px-6 md:grid-cols-[1fr_0.9fr] md:items-center">
 			<div>
 				<p class="text-sm font-semibold tracking-[0.18em] text-primary uppercase">
-					Agenda una visita
+					Compra o venta asistida
 				</p>
 				<h2 class="mt-2 font-display text-3xl font-bold text-text-main">
-					Elige un proyecto y recibe orientación de un asesor.
+					¿Quieres vender una propiedad con ALVAS?
 				</h2>
 				<p class="mt-4 max-w-2xl leading-relaxed text-text-muted">
-					Deja tus datos por el canal oficial de ALVAS para revisar disponibilidad, resolver dudas y
-					coordinar una visita al terreno.
+					Registra tus datos y una descripción inicial. La propiedad entra como captación
+					preliminar, no se publica ni se ofrece a compradores hasta que el equipo la valide.
 				</p>
 			</div>
 			<div class="rounded-2xl border border-border-light bg-bg-base p-6">
-				<p class="text-sm font-semibold text-text-main">Atención comercial</p>
-				<p class="mt-2 text-sm leading-relaxed text-text-muted">
-					Pronto conectaremos este espacio al formulario de captación. Por ahora funciona como
-					bloque público para validar contenido, diseño y jerarquía.
-				</p>
-				<Button href="tel:+51000000000" class="mt-5">Llamar a ALVAS</Button>
+				<form class="grid gap-4" onsubmit={enviarCaptacionVendedor}>
+					<div class="grid gap-3 sm:grid-cols-2">
+						<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+							Nombre
+							<input
+								bind:value={nombreVendedor}
+								class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal transition outline-none focus:border-primary"
+								placeholder="Tu nombre"
+							/>
+						</label>
+						<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+							Teléfono
+							<input
+								bind:value={telefonoVendedor}
+								class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal transition outline-none focus:border-primary"
+								placeholder="Número de contacto"
+							/>
+						</label>
+					</div>
+
+					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+						Correo opcional
+						<input
+							bind:value={emailVendedor}
+							type="email"
+							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal transition outline-none focus:border-primary"
+							placeholder="correo@ejemplo.com"
+						/>
+					</label>
+
+					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+						Propiedad
+						<input
+							bind:value={tituloPropiedad}
+							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal transition outline-none focus:border-primary"
+							placeholder="Terreno, casa, local o predio"
+						/>
+					</label>
+
+					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+						Descripción inicial
+						<textarea
+							bind:value={descripcionPropiedad}
+							rows="4"
+							class="resize-none rounded-2xl border border-border-light bg-white px-4 py-3 font-normal transition outline-none focus:border-primary"
+							placeholder="Zona, metraje aproximado, referencias y condiciones conocidas."
+						></textarea>
+					</label>
+
+					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+						Precio estimado opcional
+						<input
+							bind:value={precioEstimado}
+							type="number"
+							min="0"
+							step="0.01"
+							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal transition outline-none focus:border-primary"
+							placeholder="Monto referencial"
+						/>
+					</label>
+
+					{#if captacionOk}
+						<p class="rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+							{captacionOk}
+						</p>
+					{/if}
+
+					{#if captacionError}
+						<p class="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+							{captacionError}
+						</p>
+					{/if}
+
+					<Button type="submit" disabled={enviandoCaptacion}>
+						{enviandoCaptacion ? 'Enviando...' : 'Enviar propiedad para evaluación'}
+					</Button>
+				</form>
 			</div>
 		</div>
 	</section>

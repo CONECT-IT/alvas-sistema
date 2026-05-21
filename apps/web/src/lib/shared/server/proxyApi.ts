@@ -22,6 +22,21 @@ export async function proxyApiPost(
 	return proxyApiRequest(cookies, fetch, path, 'POST', body);
 }
 
+export async function proxyPublicApiPost(
+	fetch: ServerFetch,
+	path: string,
+	body: ProxyBody
+): Promise<Response> {
+	const response = await fetch(`${getApiBaseUrl()}${path}`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(body)
+	});
+	const payload = await response.json();
+
+	return json(payload, { status: response.status });
+}
+
 async function proxyApiRequest(
 	cookies: Cookies,
 	fetch: ServerFetch,

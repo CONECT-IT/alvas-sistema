@@ -11,6 +11,9 @@
 	let propiedades = $state<Propiedad[]>([]);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
+	const propiedadesDisponibles = $derived(
+		propiedades.filter((propiedad) => propiedad.estado.toUpperCase() === 'DISPONIBLE')
+	);
 
 	async function cargarPropiedades() {
 		loading = true;
@@ -58,9 +61,9 @@
 			<Button class="mt-5" onclick={cargarPropiedades}>Intentar nuevamente</Button>
 		</Card>
 	{:else}
-		<PropiedadStats {propiedades} />
+		<PropiedadStats propiedades={propiedadesDisponibles} />
 		<Card>
-			<PropiedadAdminTable {propiedades} />
+			<PropiedadAdminTable propiedades={propiedadesDisponibles} />
 		</Card>
 	{/if}
 </div>
