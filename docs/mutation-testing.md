@@ -17,9 +17,23 @@ Usa primero `bun run test:mutation:dry-run`. Ese comando confirma que Stryker pu
 La configuracion de Stryker muta codigo de negocio bajo:
 
 - `apps/api/src/lib/*/domain/**/*.ts`
-- `apps/api/src/lib/*/application/**/*.ts`
+- `apps/api/src/lib/*/application/use-cases/**/*.ts`
 
 Excluye tests, DTOs, puertos e `index.ts`. El objetivo es evaluar aserciones sobre comportamiento de dominio y casos de uso, no codigo de pegado de frameworks.
+
+## Quality gate
+
+El umbral de quiebre configurado es 70%:
+
+```js
+thresholds: {
+  high: 80,
+  low: 70,
+  break: 70,
+}
+```
+
+Justificacion S07/S08: el 70% obliga a que las pruebas detecten defectos de negocio relevantes sin exigir un 100% artificial. La corrida ampliada sobre `domain` y `application/use-cases` registro un baseline de 59.40%; por eso el pipeline debe fallar hasta que se agreguen asserts para matar mutantes sobrevivientes en casos de uso y value objects.
 
 ## Como leer resultados
 

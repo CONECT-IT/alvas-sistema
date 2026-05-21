@@ -130,10 +130,11 @@ jobs:
         run: |
           # Umbral justificado en S07: el alcance auditado incluye entidades
           # del dominio y casos de uso de aplicacion, excluyendo controllers,
-          # adaptadores e infraestructura. El baseline medido fue 59.40%.
-          # Se fija break=59 para impedir regresiones en CI sin falsear el
-          # estado actual; los sobrevivientes quedan visibles en el artefacto.
-          # mutation_threshold: 59
+          # adaptadores e infraestructura. El 70% exige asserts suficientemente
+          # fuertes y bloquea el merge cuando sobreviven demasiados mutantes.
+          # El baseline actual fue 59.40%, por lo que este gate documenta la
+          # brecha pendiente y falla de forma explicita hasta corregirla.
+          # mutation_threshold: 70
           bun run test:mutation
       - uses: actions/upload-artifact@v4
         if: always()

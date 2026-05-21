@@ -6,9 +6,9 @@
  * adaptadores, DTOs, puertos e index.ts porque pertenecen a bordes de entrada,
  * infraestructura o cableado.
  *
- * Baseline S07 ampliado a domain + application/use-cases: 59.40%.
- * El break queda en 59 para bloquear regresiones reales en CI mientras se
- * fortalecen asserts de casos de uso que aun dejan mutantes sobrevivientes.
+ * Umbral S07/S08: 70%. Este valor fuerza a endurecer asserts cuando los
+ * mutantes sobreviven; el baseline ampliado actual fue 59.40%, por lo que
+ * el pipeline debe fallar hasta cerrar esa brecha de pruebas.
  *
  * @type {import('@stryker-mutator/api/core').PartialStrykerOptions}
  */
@@ -30,9 +30,9 @@ export default {
   concurrency: 2,
   timeoutMS: 10000,
   thresholds: {
-    high: 70,
-    low: 60,
-    break: 59,
+    high: 80,
+    low: 70,
+    break: 70,
   },
   htmlReporter: {
     fileName: "reports/mutation/index.html",

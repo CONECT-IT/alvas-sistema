@@ -1,5 +1,7 @@
 # alvas-sistema
 
+[![Test & Quality Pipeline](https://github.com/softwarelazana-ui/alvas-sistema/actions/workflows/test.yml/badge.svg?branch=develop)](https://github.com/softwarelazana-ui/alvas-sistema/actions/workflows/test.yml)
+
 Base inicial del monorepo ALVAS alineada al plan tecnico DDD + Hexagonal.
 
 ## Objetivo tecnico
@@ -61,3 +63,86 @@ bun test
 bun run lint
 bun run typecheck
 ```
+
+## Instalacion local
+
+Requisitos:
+
+- Bun.
+- Node.js 22 o superior. El proyecto ejecuta scripts con Bun, pero Wrangler valida la version de Node en build.
+
+Instalacion reproducible:
+
+```bash
+bun install --frozen-lockfile
+```
+
+## Suite de calidad local
+
+Los comandos locales replican el orden del pipeline para evitar diferencias entre la maquina local y CI:
+
+```bash
+bun run lint
+bun run build
+bun run test:unit
+bun run test:bdd
+bun run coverage:domain
+bun run test:mutation
+```
+
+Comando consolidado:
+
+```bash
+bun run test:all
+```
+
+## Pipeline CI/CD
+
+El workflow principal esta en `.github/workflows/test.yml` y se ejecuta en `push` y `pull_request`. Usa Bun para instalacion y ejecucion de scripts, con Node.js 22 configurado para satisfacer el requisito de Wrangler.
+
+Stages configurados:
+
+1. `lint`: formato, ESLint y typecheck.
+2. `build`: build de API y web.
+3. `unit-test`: pruebas unitarias.
+4. `integration-test`: escenarios BDD.
+5. `coverage-report`: cobertura con artefacto descargable.
+6. `mutation-test`: Stryker con artefacto HTML/JSON descargable.
+
+El job `quality-gate` falla si cualquier stage previo falla.
+
+## Quality gates
+
+Coverage:
+
+- Comando: `bun run coverage:domain`.
+- Umbral: 80% en codigo bajo `domain/`.
+- Reporte: `coverage/`, publicado como artefacto `coverage-report`.
+
+Mutation testing:
+
+- Comando: `bun run test:mutation`.
+- Alcance: `domain/**/*.ts` y `application/use-cases/**/*.ts`.
+- Exclusiones: tests, DTOs, puertos, `index.ts`, controllers, adaptadores e infraestructura.
+- Umbral: `break: 70`.
+- Reporte: `reports/mutation/`, publicado como artefacto `stryker-report`.
+
+Justificacion S07/S08: el 70% de mutation score representa un equilibrio entre rigor de asserts y costo de ejecucion en CI. La corrida ampliada actual registro 59.40%, por lo que el gate falla hasta reforzar pruebas en mutantes sobrevivientes.
+
+## Auditoria arquitectonica
+
+Comando de verificacion:
+
+```bash
+rg -n "import.*infrastructure" apps/api/src/lib/*/domain
+```
+
+Deuda registrada: `apps/api/src/lib/auth/domain/ports/ITokenProvider.ts` importa `SessionClaims` desde `shared/infrastructure/session`. Esta dependencia debe moverse a un contrato de dominio o shared neutral para cumplir estrictamente la arquitectura hexagonal.
+
+## Evidencias de entrega
+
+- Workflow: `.github/workflows/test.yml`.
+- Reporte de cobertura: artefacto `coverage-report`.
+- Reporte de Stryker: artefacto `stryker-report`.
+- Log de walkthrough cruzado: `docs/walkthrough-log.md`.
+- Tag esperado al cierre: `v1.1.0`.
