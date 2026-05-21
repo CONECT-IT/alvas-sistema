@@ -8,6 +8,7 @@
 		type?: 'button' | 'submit' | 'reset';
 		variant?: ButtonVariant;
 		disabled?: boolean;
+		onclick?: (event: MouseEvent) => void;
 		class?: string;
 		children: Snippet;
 	}
@@ -17,6 +18,7 @@
 		type = 'button',
 		variant = 'primary',
 		disabled = false,
+		onclick,
 		class: className = '',
 		children
 	}: Props = $props();
@@ -33,11 +35,11 @@
 </script>
 
 {#if href}
-	<a {href} class={`${baseClass} ${variants[variant]} ${className}`}>
+	<a {href} {onclick} class={`${baseClass} ${variants[variant]} ${className}`}>
 		{@render children()}
 	</a>
 {:else}
-	<button {type} {disabled} class={`${baseClass} ${variants[variant]} ${className}`}>
+	<button {type} {disabled} {onclick} class={`${baseClass} ${variants[variant]} ${className}`}>
 		{@render children()}
 	</button>
 {/if}
