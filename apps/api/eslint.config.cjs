@@ -5,14 +5,13 @@ const tsPlugin = require("@typescript-eslint/eslint-plugin");
 module.exports = [
   {
     ignores: [
-      "eslint.config.js",
-      "**/node_modules/**",
-      "**/dist/**",
-      "**/out/**",
-      "**/coverage/**",
-      "**/.wrangler/**",
-      "**/.cache/**",
-      "bun.lock",
+      "eslint.config.*",
+      "node_modules/**",
+      "dist/**",
+      "out/**",
+      "coverage/**",
+      ".wrangler/**",
+      ".cache/**",
     ],
   },
   js.configs.recommended,
