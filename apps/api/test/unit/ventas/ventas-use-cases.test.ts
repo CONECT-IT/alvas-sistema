@@ -977,14 +977,13 @@ describe("ventas / use cases", () => {
     const repo = new FakeVentasRepository();
     repo.obtenerLeadPorId = () => Promise.reject(new Error("db error"));
 
-    const resultado = new AgendarCitaUseCase(
-      repo,
-      new SecuenciaGeneradorId(["cita-001"]),
-    ).ejecutar({
-      idLead: "lead-001",
-      fechaInicio: new Date(),
-      duracionMinutos: 60,
-    });
+    const resultado = new AgendarCitaUseCase(repo, new SecuenciaGeneradorId(["cita-001"])).ejecutar(
+      {
+        idLead: "lead-001",
+        fechaInicio: new Date(),
+        duracionMinutos: 60,
+      },
+    );
 
     await expect(resultado).rejects.toThrow("db error");
   });
@@ -1081,21 +1080,30 @@ describe("ventas / use cases", () => {
     const repo = new FakeVentasRepository();
     repo.obtenerLeadPorId = () => Promise.reject(new Error("db error"));
 
-    await expect(new ObtenerLeadUseCase(repo).ejecutar({ id: "lead-001" })).rejects.toThrow("db error");
+    await expect(new ObtenerLeadUseCase(repo).ejecutar({ id: "lead-001" })).rejects.toThrow(
+      "db error",
+    );
   });
 
   test("propaga errores no dominico en ObtenerClienteUseCase", async () => {
     const repo = new FakeVentasRepository();
     repo.obtenerClientePorId = () => Promise.reject(new Error("db error"));
 
-    await expect(new ObtenerClienteUseCase(repo).ejecutar({ id: "cliente-001" })).rejects.toThrow("db error");
+    await expect(new ObtenerClienteUseCase(repo).ejecutar({ id: "cliente-001" })).rejects.toThrow(
+      "db error",
+    );
   });
 
   test("propaga errores no dominico en ListarLeadsUseCase", async () => {
     const repo = new FakeVentasRepository();
     repo.listarLeads = () => Promise.reject(new Error("db error"));
 
-    await expect(new ListarLeadsUseCase(repo, new AutorizadorVentasAdapter()).ejecutar({ idUsuarioEjecutor: "admin", rolEjecutor: "ADMIN" })).rejects.toThrow("db error");
+    await expect(
+      new ListarLeadsUseCase(repo, new AutorizadorVentasAdapter()).ejecutar({
+        idUsuarioEjecutor: "admin",
+        rolEjecutor: "ADMIN",
+      }),
+    ).rejects.toThrow("db error");
   });
 
   test("propaga errores no dominico en ListarClientesUseCase", async () => {
@@ -1109,9 +1117,14 @@ describe("ventas / use cases", () => {
     const repo = new FakeVentasRepository();
     repo.guardarCliente = () => Promise.reject(new Error("db error"));
 
-    await expect(new RegistrarClienteDirectoUseCase(repo, new SecuenciaGeneradorId(["cli-001"])).ejecutar({
-      nombre: "test", email: "test@example.com", telefono: "300000000", idAsesor: "asesor-1",
-    })).rejects.toThrow("db error");
+    await expect(
+      new RegistrarClienteDirectoUseCase(repo, new SecuenciaGeneradorId(["cli-001"])).ejecutar({
+        nombre: "test",
+        email: "test@example.com",
+        telefono: "300000000",
+        idAsesor: "asesor-1",
+      }),
+    ).rejects.toThrow("db error");
   });
 
   test("propaga errores no dominico en ListarCitasUseCase", async () => {
@@ -1125,7 +1138,9 @@ describe("ventas / use cases", () => {
     const repo = new FakeVentasRepository();
     repo.listarLeadsPorAsesor = () => Promise.reject(new Error("db error"));
 
-    await expect(new ListarLeadsPorAsesorUseCase(repo).ejecutar({ idAsesor: "asesor-1" })).rejects.toThrow("db error");
+    await expect(
+      new ListarLeadsPorAsesorUseCase(repo).ejecutar({ idAsesor: "asesor-1" }),
+    ).rejects.toThrow("db error");
   });
 
   test("propaga errores no dominico en ListarAsesoresConLeadsUseCase", async () => {
@@ -1146,6 +1161,126 @@ describe("ventas / use cases", () => {
     const repo = new FakeContratoRepository();
     repo.listarPorCliente = () => Promise.reject(new Error("db error"));
 
-    await expect(new ListarPropiedadesPorClienteUseCase(repo).ejecutar({ idCliente: "cliente-001" })).rejects.toThrow("db error");
+    await expect(
+      new ListarPropiedadesPorClienteUseCase(repo).ejecutar({ idCliente: "cliente-001" }),
+    ).rejects.toThrow("db error");
+  });
+
+  test("captura ErrorDeDominio como resultadoFallido en RegistrarLeadUseCase", async () => {
+    const repo = new FakeVentasRepository();
+    repo.guardarLead = () => Promise.reject(new ErrorDeDominio("error dominio"));
+
+    const resultado = await new RegistrarLeadUseCase(
+      repo,
+      new SecuenciaGeneradorId(["lead-001"]),
+      new FakeEvaluadorAsignacion(),
+    ).ejecutar({ nombre: "test", email: "test@example.com", telefono: "300000000", tipo: "COMPRA", idAsesor: "asesor-1" });
+
+    expect(resultado.esExito).toBe(false);
+  });
+
+  test("captura ErrorDeDominio como resultadoFallido en AgendarCitaUseCase", async () => {
+    const repo = new FakeVentasRepository();
+    repo.obtenerLeadPorId = () => Promise.reject(new ErrorDeDominio("error dominio"));
+
+    const resultado = await new AgendarCitaUseCase(repo, new SecuenciaGeneradorId(["cita-001"])).ejecutar({
+      idLead: "lead-001", fechaInicio: new Date(), duracionMinutos: 60,
+    });
+
+    expect(resultado.esExito).toBe(false);
+  });
+
+  test("captura ErrorDeDominio como resultadoFallido en ActualizarLeadUseCase", async () => {
+    const repo = new FakeVentasRepository();
+    repo.obtenerLeadPorId = () => Promise.reject(new ErrorDeDominio("error dominio"));
+
+    const resultado = await new ActualizarLeadUseCase(repo).ejecutar({ id: "lead-001", nombre: "test" });
+
+    expect(resultado.esExito).toBe(false);
+  });
+
+  test("captura ErrorDeDominio como resultadoFallido en ConvertirLeadAClienteUseCase", async () => {
+    const repo = new FakeVentasRepository();
+    repo.obtenerLeadPorId = () => Promise.reject(new ErrorDeDominio("error dominio"));
+
+    const resultado = await new ConvertirLeadAClienteUseCase(repo, new SecuenciaGeneradorId(["cli-001"])).ejecutar({ idLead: "lead-001" });
+
+    expect(resultado.esExito).toBe(false);
+  });
+
+  test("captura ErrorDeDominio como resultadoFallido en ActualizarClienteUseCase", async () => {
+    const repo = new FakeVentasRepository();
+    repo.obtenerClientePorId = () => Promise.reject(new ErrorDeDominio("error dominio"));
+
+    const resultado = await new ActualizarClienteUseCase(repo).ejecutar({ idCliente: "cliente-001", nombre: "test" });
+
+    expect(resultado.esExito).toBe(false);
+  });
+
+  test("captura ErrorDeDominio como resultadoFallido en AsignarLeadAAsesorUseCase", async () => {
+    const repo = new FakeVentasRepository();
+    repo.obtenerLeadPorId = () => Promise.reject(new ErrorDeDominio("error dominio"));
+
+    const resultado = await new AsignarLeadAAsesorUseCase(repo).ejecutar({ idLead: "lead-001", idAsesor: "asesor-2" });
+
+    expect(resultado.esExito).toBe(false);
+  });
+
+  test("captura ErrorDeDominio como resultadoFallido en FirmarContratoUseCase", async () => {
+    const repo = new FakeContratoRepository();
+    repo.buscarPorId = () => Promise.reject(new ErrorDeDominio("error dominio"));
+
+    const resultado = await new FirmarContratoUseCase(repo).ejecutar({ idContrato: "cont-001" });
+
+    expect(resultado.esExito).toBe(false);
+  });
+
+  test("captura ErrorDeDominio como resultadoFallido en CrearContratoUseCase", async () => {
+    const repo = new FakeContratoRepository();
+    repo.guardar = () => Promise.reject(new ErrorDeDominio("error dominio"));
+
+    const resultado = await new CrearContratoUseCase(repo).ejecutar({
+      id: "cont-001", idCliente: "cliente-001", idPropiedad: "prop-001", fechaInicio: new Date(), fechaFin: new Date("2027-01-01"),
+    });
+
+    expect(resultado.esExito).toBe(false);
+  });
+
+  test("captura ErrorDeDominio como resultadoFallido en ObtenerLeadUseCase", async () => {
+    const repo = new FakeVentasRepository();
+    repo.obtenerLeadPorId = () => Promise.reject(new ErrorDeDominio("error dominio"));
+
+    const resultado = await new ObtenerLeadUseCase(repo).ejecutar({ id: "lead-001" });
+
+    expect(resultado.esExito).toBe(false);
+  });
+
+  test("captura ErrorDeDominio como resultadoFallido en ObtenerClienteUseCase", async () => {
+    const repo = new FakeVentasRepository();
+    repo.obtenerClientePorId = () => Promise.reject(new ErrorDeDominio("error dominio"));
+
+    const resultado = await new ObtenerClienteUseCase(repo).ejecutar({ id: "cliente-001" });
+
+    expect(resultado.esExito).toBe(false);
+  });
+
+  test("captura ErrorDeDominio como resultadoFallido en ListarLeadsUseCase", async () => {
+    const repo = new FakeVentasRepository();
+    repo.listarLeads = () => Promise.reject(new ErrorDeDominio("error dominio"));
+
+    const resultado = await new ListarLeadsUseCase(repo, new AutorizadorVentasAdapter()).ejecutar({
+      idUsuarioEjecutor: "admin", rolEjecutor: "ADMIN",
+    });
+
+    expect(resultado.esExito).toBe(false);
+  });
+
+  test("captura ErrorDeDominio como resultadoFallido en ListarClientesUseCase", async () => {
+    const repo = new FakeVentasRepository();
+    repo.listarClientes = () => Promise.reject(new ErrorDeDominio("error dominio"));
+
+    const resultado = await new ListarClientesUseCase(repo).ejecutar();
+
+    expect(resultado.esExito).toBe(false);
   });
 });

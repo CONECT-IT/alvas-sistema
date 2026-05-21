@@ -1,5 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
 
+import { ErrorDeDominio } from "../../../src/lib/shared/domain/errors/ErrorDeDominio";
 import { ActualizarUsuarioUseCase } from "../../../src/lib/usuarios/application/use-cases/ActualizarUsuarioUseCase";
 import { CrearUsuarioUseCase } from "../../../src/lib/usuarios/application/use-cases/CrearUsuarioUseCase";
 import { ListarUsuariosUseCase } from "../../../src/lib/usuarios/application/use-cases/ListarUsuariosUseCase";
@@ -238,14 +239,24 @@ describe("usuarios / propaga errores no dominio", () => {
 
     await expect(
       new CrearUsuarioUseCase(repo, new FakePasswordHasher()).ejecutar({
-        idUsuario: "user-001", username: "test", nombre: "Test", clave: "secreto", rol: "ASESOR",
+        idUsuario: "user-001",
+        username: "test",
+        nombre: "Test",
+        clave: "secreto",
+        rol: "ASESOR",
       }),
     ).rejects.toThrow("db error");
   });
 
   test("ActualizarUsuarioUseCase propaga error de repositorio", async () => {
     const repo = new FakeUsuarioRepository();
-    const usuario = Usuario.crear({ id: "user-001", username: "test", nombre: "Test", hashClave: "hash-seguro-001", rol: "ASESOR" });
+    const usuario = Usuario.crear({
+      id: "user-001",
+      username: "test",
+      nombre: "Test",
+      hashClave: "hash-seguro-001",
+      rol: "ASESOR",
+    });
     await repo.guardar(usuario);
     repo.guardar = () => Promise.reject(new Error("db error"));
 
@@ -267,8 +278,46 @@ describe("usuarios / propaga errores no dominio", () => {
     const repo = new FakeUsuarioRepository();
     repo.listar = () => Promise.reject(new Error("db error"));
 
-    await expect(
-      new ListarUsuariosUseCase(repo).ejecutar(),
-    ).rejects.toThrow("db error");
+    await expect(new ListarUsuariosUseCase(repo).ejecutar()).rejects.toThrow("db error");
+  });
+
+  test("captura ErrorDeDominio como resultadoFallido en CrearUsuarioUseCase", async () => {
+    const repo = new FakeUsuarioRepository();
+    repo.guardar = () => Promise.reject(new ErrorDeDominio("error dominio"));
+
+    const resultado = await new CrearUsuarioUseCase(repo, new FakePasswordHasher()).ejecutar({
+      idUsuario: "user-001", username: "test", nombre: "Test", clave: "secreto", rol: "ASESOR",
+    });
+
+    expect(resultado.esExito).toBe(false);
+  });
+
+  test("captura ErrorDeDominio como resultadoFallido en ActualizarUsuarioUseCase", async () => {
+    const repo = new FakeUsuarioRepository();
+    const usuario = Usuario.crear({ id: "user-001", username: "test", nombre: "Test", hashClave: "hash-seguro-001", rol: "ASESOR" });
+    await repo.guardar(usuario);
+    repo.guardar = () => Promise.reject(new ErrorDeDominio("error dominio"));
+
+    const resultado = await new ActualizarUsuarioUseCase(repo).ejecutar({ idUsuario: "user-001", nombre: "Nuevo" });
+
+    expect(resultado.esExito).toBe(false);
+  });
+
+  test("captura ErrorDeDominio como resultadoFallido en ObtenerUsuarioUseCase", async () => {
+    const repo = new FakeUsuarioRepository();
+    repo.obtenerPorId = () => Promise.reject(new ErrorDeDominio("error dominio"));
+
+    const resultado = await new ObtenerUsuarioUseCase(repo).ejecutar({ idUsuario: "user-001" });
+
+    expect(resultado.esExito).toBe(false);
+  });
+
+  test("captura ErrorDeDominio como resultadoFallido en ListarUsuariosUseCase", async () => {
+    const repo = new FakeUsuarioRepository();
+    repo.listar = () => Promise.reject(new ErrorDeDominio("error dominio"));
+
+    const resultado = await new ListarUsuariosUseCase(repo).ejecutar();
+
+    expect(resultado.esExito).toBe(false);
   });
 });
