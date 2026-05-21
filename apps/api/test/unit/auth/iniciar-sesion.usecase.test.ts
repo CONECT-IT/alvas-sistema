@@ -10,6 +10,7 @@ import {
 } from "../../../src/lib/auth/domain/ports";
 import { AuthToken, RefreshToken } from "../../../src/lib/auth/domain/value-objects";
 import { type SessionClaims } from "../../../src/lib/shared/infrastructure/session";
+import { ErrorDeDominio } from "../../../src/lib/shared/domain/errors/ErrorDeDominio";
 
 class FakeConsultaCredenciales implements IConsultaCredencialesUsuario {
   constructor(private readonly usuario: CredencialesUsuario | null) {}
@@ -85,6 +86,44 @@ describe("auth / IniciarSesionUseCase", () => {
 
     expect(resultado.esExito).toBe(false);
   });
+
+  test("propaga errores no dominio en IniciarSesionUseCase", async () => {
+    const credenciales = new FakeConsultaCredenciales({
+      idUsuario: "user-001",
+      username: "asesor1",
+      hashClave: "hash-seguro-001",
+      rol: "ASESOR",
+      estado: "ACTIVO",
+    });
+    credenciales.buscarPorUsername = () => Promise.reject(new Error("db error"));
+
+    await expect(
+      new IniciarSesionUseCase(
+        credenciales,
+        new FakeVerificadorDeClave(true),
+        new FakeTokenProvider(),
+      ).ejecutar({ username: "asesor1", clave: "secreto" }),
+    ).rejects.toThrow("db error");
+  });
+
+  test("captura ErrorDeDominio como resultadoFallido en IniciarSesionUseCase", async () => {
+    const credenciales = new FakeConsultaCredenciales({
+      idUsuario: "user-001",
+      username: "asesor1",
+      hashClave: "hash-seguro-001",
+      rol: "ASESOR",
+      estado: "ACTIVO",
+    });
+    credenciales.buscarPorUsername = () => Promise.reject(new ErrorDeDominio("error dominio"));
+
+    const resultado = await new IniciarSesionUseCase(
+      credenciales,
+      new FakeVerificadorDeClave(true),
+      new FakeTokenProvider(),
+    ).ejecutar({ username: "asesor1", clave: "secreto" });
+
+    expect(resultado.esExito).toBe(false);
+  });
 });
 
 describe("auth / RenovarSesionUseCase", () => {
@@ -133,5 +172,42 @@ describe("auth / RenovarSesionUseCase", () => {
 
     expect(usuarioInexistente.esExito).toBe(false);
     expect(usuarioDeshabilitado.esExito).toBe(false);
+  });
+
+  test("propaga errores no dominio en RenovarSesionUseCase", async () => {
+    const credenciales = new FakeConsultaCredenciales({
+      idUsuario: "user-001",
+      username: "asesor1",
+      hashClave: "hash-seguro-001",
+      rol: "ASESOR",
+      estado: "ACTIVO",
+    });
+    credenciales.buscarPorId = () => Promise.reject(new Error("db error"));
+
+    await expect(
+      new RenovarSesionUseCase(credenciales, new FakeTokenProvider()).ejecutar({
+        refreshToken: "refresh-token",
+      }),
+    ).rejects.toThrow("db error");
+  });
+
+  test("captura ErrorDeDominio como resultadoFallido en RenovarSesionUseCase", async () => {
+    const credenciales = new FakeConsultaCredenciales({
+      idUsuario: "user-001",
+      username: "asesor1",
+      hashClave: "hash-seguro-001",
+      rol: "ASESOR",
+      estado: "ACTIVO",
+    });
+    credenciales.buscarPorId = () => Promise.reject(new ErrorDeDominio("error dominio"));
+
+    const resultado = await new RenovarSesionUseCase(
+      credenciales,
+      new FakeTokenProvider(),
+    ).ejecutar({
+      refreshToken: "refresh-token",
+    });
+
+    expect(resultado.esExito).toBe(false);
   });
 });

@@ -223,4 +223,58 @@ describe("integraciones / use cases", () => {
     expect(fallo.esExito).toBe(false);
     expect(fallo.esExito ? undefined : fallo.error.codigo).toBe("LEAD_RECHAZADO");
   });
+
+  test("propaga errores no dominio en ProcesarCaptacionEntranteUseCase", async () => {
+    const registroLead = new FakeRegistroLead();
+    registroLead.registrar = () => Promise.reject(new Error("db error"));
+
+    await expect(
+      new ProcesarCaptacionEntranteUseCase(registroLead).ejecutar({
+        canal: "formulario_web",
+        origen: "landing",
+        nombre: "Ana",
+        telefono: "999",
+        tipo: "compra",
+      }),
+    ).rejects.toThrow("db error");
+  });
+
+  test("captura ErrorDeDominio como resultadoFallido en ProcesarCaptacionEntranteUseCase", async () => {
+    const registroLead = new FakeRegistroLead();
+    registroLead.registrar = () => Promise.reject(new ErrorDeDominio("error dominio"));
+
+    const resultado = await new ProcesarCaptacionEntranteUseCase(registroLead).ejecutar({
+      canal: "formulario_web",
+      origen: "landing",
+      nombre: "Ana",
+      telefono: "999",
+      tipo: "compra",
+    });
+
+    expect(resultado.esExito).toBe(false);
+  });
+
+  test("propaga errores no dominio en ProcesarWhatsAppWebhookUseCase", async () => {
+    const registroLead = new FakeRegistroLead();
+    registroLead.registrar = () => Promise.reject(new Error("db error"));
+
+    await expect(
+      new ProcesarWhatsAppWebhookUseCase(registroLead).ejecutar({
+        wa_id: "573001112233",
+        wa_name: "Laura",
+      }),
+    ).rejects.toThrow("db error");
+  });
+
+  test("captura ErrorDeDominio como resultadoFallido en ProcesarWhatsAppWebhookUseCase", async () => {
+    const registroLead = new FakeRegistroLead();
+    registroLead.registrar = () => Promise.reject(new ErrorDeDominio("error dominio"));
+
+    const resultado = await new ProcesarWhatsAppWebhookUseCase(registroLead).ejecutar({
+      wa_id: "573001112233",
+      wa_name: "Laura",
+    });
+
+    expect(resultado.esExito).toBe(false);
+  });
 });

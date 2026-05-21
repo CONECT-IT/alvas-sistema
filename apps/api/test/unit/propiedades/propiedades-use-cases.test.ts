@@ -505,6 +505,51 @@ describe("propiedades / use cases", () => {
     expect(resultado.esExito).toBe(false);
   });
 
+  test("propaga errores no dominio en EliminarPropiedadUseCase", async () => {
+    const repo = new FakePropiedadRepository();
+    await repo.guardar(
+      Propiedad.crear({
+        id: "prop-005",
+        titulo: "Test",
+        descripcion: "Test",
+        precio: 100,
+        origen: "ALVAS",
+      }),
+    );
+    repo.eliminarPorId = () => Promise.reject(new Error("db error"));
+
+    await expect(
+      new EliminarPropiedadUseCase(repo, new AutorizadorPropiedadesAdapter()).ejecutar({
+        idPropiedad: "prop-005",
+        usuarioAutenticado: { id: "admin-1", rol: "ADMIN" },
+      }),
+    ).rejects.toThrow("db error");
+  });
+
+  test("captura PropiedadError como resultadoFallido en EliminarPropiedadUseCase", async () => {
+    const repo = new FakePropiedadRepository();
+    await repo.guardar(
+      Propiedad.crear({
+        id: "prop-005",
+        titulo: "Test",
+        descripcion: "Test",
+        precio: 100,
+        origen: "ALVAS",
+      }),
+    );
+    repo.existePorId = () => Promise.reject(new PropiedadError("error dominio", "ERROR"));
+
+    const resultado = await new EliminarPropiedadUseCase(
+      repo,
+      new AutorizadorPropiedadesAdapter(),
+    ).ejecutar({
+      idPropiedad: "prop-005",
+      usuarioAutenticado: { id: "admin-1", rol: "ADMIN" },
+    });
+
+    expect(resultado.esExito).toBe(false);
+  });
+
   test("captura ErrorDeDominio como resultadoFallido en ListarPropiedadesUseCase", async () => {
     const repo = new FakePropiedadRepository();
     repo.listarTodas = () => Promise.reject(new ErrorDeDominio("error dominio"));
