@@ -2,6 +2,8 @@ import { describe, expect, mock, test } from "bun:test";
 
 import { ActualizarUsuarioUseCase } from "../../../src/lib/usuarios/application/use-cases/ActualizarUsuarioUseCase";
 import { CrearUsuarioUseCase } from "../../../src/lib/usuarios/application/use-cases/CrearUsuarioUseCase";
+import { ListarUsuariosUseCase } from "../../../src/lib/usuarios/application/use-cases/ListarUsuariosUseCase";
+import { ObtenerUsuarioUseCase } from "../../../src/lib/usuarios/application/use-cases/ObtenerUsuarioUseCase";
 import { Usuario } from "../../../src/lib/usuarios/domain/entities";
 import {
   type IPasswordHasher,
@@ -145,5 +147,128 @@ describe("usuarios / ActualizarUsuarioUseCase", () => {
     expect(resultado.esExito).toBe(false);
     expect(resultado.esExito ? undefined : resultado.error.codigo).toBe("USER_NOT_FOUND");
     expect(repo.usuarios.size).toBe(0);
+  });
+});
+
+describe("usuarios / ObtenerUsuarioUseCase", () => {
+  test("devuelve usuario existente con todos los campos", async () => {
+    const repo = new FakeUsuarioRepository();
+    await repo.guardar(
+      Usuario.crear({
+        id: "user-001",
+        username: "jperez",
+        nombre: "Juan Perez",
+        hashClave: "hash-seguro-001",
+        rol: "ASESOR",
+      }),
+    );
+
+    const resultado = await new ObtenerUsuarioUseCase(repo).ejecutar({
+      idUsuario: "user-001",
+    });
+
+    expect(resultado.esExito).toBe(true);
+    if (resultado.esExito) {
+      expect(resultado.valor.id).toBe("user-001");
+      expect(resultado.valor.username).toBe("jperez");
+      expect(resultado.valor.nombre).toBe("Juan Perez");
+      expect(resultado.valor.rol).toBe("ASESOR");
+      expect(resultado.valor.estado).toBe("ACTIVO");
+    }
+  });
+
+  test("rechaza usuario inexistente", async () => {
+    const repo = new FakeUsuarioRepository();
+
+    const resultado = await new ObtenerUsuarioUseCase(repo).ejecutar({
+      idUsuario: "user-no-existe",
+    });
+
+    expect(resultado.esExito).toBe(false);
+    expect(resultado.esExito ? undefined : resultado.error.message).toContain("user-no-existe");
+  });
+});
+
+describe("usuarios / ListarUsuariosUseCase", () => {
+  test("devuelve lista de usuarios", async () => {
+    const repo = new FakeUsuarioRepository();
+    await repo.guardar(
+      Usuario.crear({
+        id: "user-001",
+        username: "jperez",
+        nombre: "Juan Perez",
+        hashClave: "hash-seguro-001",
+        rol: "ASESOR",
+      }),
+    );
+    await repo.guardar(
+      Usuario.crear({
+        id: "user-002",
+        username: "admin1",
+        nombre: "Admin Uno",
+        hashClave: "hash-seguro-002",
+        rol: "ADMIN",
+      }),
+    );
+
+    const resultado = await new ListarUsuariosUseCase(repo).ejecutar();
+
+    expect(resultado.esExito).toBe(true);
+    expect(resultado.esExito ? resultado.valor : []).toHaveLength(2);
+    if (resultado.esExito) {
+      expect(resultado.valor[0].username).toBe("jperez");
+      expect(resultado.valor[1].username).toBe("admin1");
+    }
+  });
+
+  test("devuelve lista vacia cuando no hay usuarios", async () => {
+    const repo = new FakeUsuarioRepository();
+
+    const resultado = await new ListarUsuariosUseCase(repo).ejecutar();
+
+    expect(resultado.esExito).toBe(true);
+    expect(resultado.esExito ? resultado.valor : []).toHaveLength(0);
+  });
+});
+
+describe("usuarios / propaga errores no dominio", () => {
+  test("CrearUsuarioUseCase propaga error de repositorio", async () => {
+    const repo = new FakeUsuarioRepository();
+    repo.guardar = () => Promise.reject(new Error("db error"));
+
+    await expect(
+      new CrearUsuarioUseCase(repo, new FakePasswordHasher()).ejecutar({
+        idUsuario: "user-001", username: "test", nombre: "Test", clave: "secreto", rol: "ASESOR",
+      }),
+    ).rejects.toThrow("db error");
+  });
+
+  test("ActualizarUsuarioUseCase propaga error de repositorio", async () => {
+    const repo = new FakeUsuarioRepository();
+    const usuario = Usuario.crear({ id: "user-001", username: "test", nombre: "Test", hashClave: "hash-seguro-001", rol: "ASESOR" });
+    await repo.guardar(usuario);
+    repo.guardar = () => Promise.reject(new Error("db error"));
+
+    await expect(
+      new ActualizarUsuarioUseCase(repo).ejecutar({ idUsuario: "user-001", nombre: "Nuevo" }),
+    ).rejects.toThrow("db error");
+  });
+
+  test("ObtenerUsuarioUseCase propaga error de repositorio", async () => {
+    const repo = new FakeUsuarioRepository();
+    repo.obtenerPorId = () => Promise.reject(new Error("db error"));
+
+    await expect(
+      new ObtenerUsuarioUseCase(repo).ejecutar({ idUsuario: "user-001" }),
+    ).rejects.toThrow("db error");
+  });
+
+  test("ListarUsuariosUseCase propaga error de repositorio", async () => {
+    const repo = new FakeUsuarioRepository();
+    repo.listar = () => Promise.reject(new Error("db error"));
+
+    await expect(
+      new ListarUsuariosUseCase(repo).ejecutar(),
+    ).rejects.toThrow("db error");
   });
 });
