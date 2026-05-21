@@ -21,14 +21,6 @@ class HttpClient {
 			...customHeaders
 		};
 
-		// Buscar token en localStorage
-		if (typeof window !== 'undefined') {
-			const token = localStorage.getItem('alvas_token');
-			if (token) {
-				headers['Authorization'] = `Bearer ${token}`;
-			}
-		}
-
 		return headers;
 	}
 
@@ -46,9 +38,6 @@ class HttpClient {
 
 			// Si es 401 y estamos en el navegador, podemos redirigir a login
 			if (response.status === 401 && typeof window !== 'undefined') {
-				localStorage.removeItem('alvas_token');
-				localStorage.removeItem('alvas_user');
-				// Redirigir solo si no estamos ya en la página de login
 				if (!window.location.pathname.startsWith('/login')) {
 					window.location.href = '/login';
 				}
@@ -68,7 +57,8 @@ class HttpClient {
 	async get<T>(url: string, options?: RequestOptions): Promise<T> {
 		const response = await fetch(url, {
 			method: 'GET',
-			headers: this.getHeaders(options?.headers)
+			headers: this.getHeaders(options?.headers),
+			credentials: 'same-origin'
 		});
 		return this.handleResponse<T>(response);
 	}
@@ -77,7 +67,8 @@ class HttpClient {
 		const response = await fetch(url, {
 			method: 'POST',
 			headers: this.getHeaders(options?.headers),
-			body: options?.body ? JSON.stringify(options.body) : undefined
+			body: options?.body ? JSON.stringify(options.body) : undefined,
+			credentials: 'same-origin'
 		});
 		return this.handleResponse<T>(response);
 	}
@@ -86,7 +77,8 @@ class HttpClient {
 		const response = await fetch(url, {
 			method: 'PUT',
 			headers: this.getHeaders(options?.headers),
-			body: options?.body ? JSON.stringify(options.body) : undefined
+			body: options?.body ? JSON.stringify(options.body) : undefined,
+			credentials: 'same-origin'
 		});
 		return this.handleResponse<T>(response);
 	}
@@ -94,7 +86,8 @@ class HttpClient {
 	async delete<T>(url: string, options?: RequestOptions): Promise<T> {
 		const response = await fetch(url, {
 			method: 'DELETE',
-			headers: this.getHeaders(options?.headers)
+			headers: this.getHeaders(options?.headers),
+			credentials: 'same-origin'
 		});
 		return this.handleResponse<T>(response);
 	}

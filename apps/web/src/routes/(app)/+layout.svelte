@@ -1,7 +1,12 @@
 <script lang="ts">
 	import AppShell from '$lib/shared/ui/AppShell.svelte';
+	import { authStore } from '$lib/auth/infrastructure/authStore';
 
-	let { children } = $props();
+	let { data, children } = $props();
+
+	$effect(() => {
+		authStore.hydrate(data.user);
+	});
 </script>
 
 <svelte:head>
