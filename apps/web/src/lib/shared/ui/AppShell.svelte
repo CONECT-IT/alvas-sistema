@@ -166,7 +166,7 @@
 			<div class="flex items-center gap-4">
 				<div class="hidden text-right sm:block">
 					<p class="text-sm leading-none font-semibold">{$authStore.user.nombre}</p>
-					<p class="text-xs text-text-muted capitalize">{$authStore.user.rol}</p>
+					<p class="text-xs text-text-muted">{$authStore.user.rol}</p>
 				</div>
 				<div
 					class="flex h-10 w-10 items-center justify-center rounded-full border border-primary/20 bg-primary-light font-display font-bold text-primary-dark"

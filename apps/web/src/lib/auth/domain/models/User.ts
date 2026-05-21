@@ -1,4 +1,4 @@
-export type UserRol = 'admin' | 'asesor';
+export type UserRol = 'ADMIN' | 'ASESOR';
 
 export class User {
 	constructor(
@@ -10,10 +10,10 @@ export class User {
 	) {}
 
 	get esAdmin(): boolean {
-		return this.rol === 'admin';
+		return this.rol === 'ADMIN';
 	}
 
 	get esAsesor(): boolean {
-		return this.rol === 'asesor';
+		return this.rol === 'ASESOR';
 	}
 }

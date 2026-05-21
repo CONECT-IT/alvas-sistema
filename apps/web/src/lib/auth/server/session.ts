@@ -39,9 +39,9 @@ function decodeCookieJson<T>(value: string | undefined): T | null {
 function normalizeRole(value: unknown): UserRol | null {
 	const role = String(value ?? '')
 		.trim()
-		.toLowerCase();
+		.toUpperCase();
 
-	if (role === 'admin' || role === 'asesor') {
+	if (role === 'ADMIN' || role === 'ASESOR') {
 		return role;
 	}
 

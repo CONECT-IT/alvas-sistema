@@ -9,11 +9,11 @@ export const load: ServerLoad = ({ cookies, url }) => {
 		redirect(303, '/login');
 	}
 
-	if (url.pathname.startsWith('/admin') && session.user.rol !== 'admin') {
+	if (url.pathname.startsWith('/admin') && session.user.rol !== 'ADMIN') {
 		redirect(303, '/asesor/dashboard');
 	}
 
-	if (url.pathname.startsWith('/asesor') && session.user.rol !== 'asesor') {
+	if (url.pathname.startsWith('/asesor') && session.user.rol !== 'ASESOR') {
 		redirect(303, '/admin/dashboard');
 	}
 

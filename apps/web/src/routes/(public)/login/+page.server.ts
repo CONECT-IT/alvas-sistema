@@ -30,11 +30,11 @@ type LoginApiResponse =
 export const load: ServerLoad = ({ cookies }) => {
 	const session = getSession(cookies);
 
-	if (session?.user.rol === 'admin') {
+	if (session?.user.rol === 'ADMIN') {
 		redirect(303, '/admin/dashboard');
 	}
 
-	if (session?.user.rol === 'asesor') {
+	if (session?.user.rol === 'ASESOR') {
 		redirect(303, '/asesor/dashboard');
 	}
 };
@@ -82,6 +82,6 @@ export const actions = {
 
 		setSessionCookies(cookies, session, url.protocol === 'https:');
 
-		redirect(303, session.user.rol === 'admin' ? '/admin/dashboard' : '/asesor/dashboard');
+		redirect(303, session.user.rol === 'ADMIN' ? '/admin/dashboard' : '/asesor/dashboard');
 	}
 };
