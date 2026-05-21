@@ -11,11 +11,8 @@ export type ObtenerClienteInput = {
   id: string;
 };
 
-export class ObtenerClienteUseCase implements CasoDeUso<
-  ObtenerClienteInput,
-  Resultado<Cliente, ErrorDeDominio>
->,
-  IObtenerCliente
+export class ObtenerClienteUseCase
+  implements CasoDeUso<ObtenerClienteInput, Resultado<Cliente, ErrorDeDominio>>, IObtenerCliente
 {
   constructor(private readonly ventasRepository: IVentasRepository) {}
 

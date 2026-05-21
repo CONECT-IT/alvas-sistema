@@ -12,11 +12,8 @@ import { UsuarioYaExisteError } from "../../domain/errors";
 import { type CrearUsuarioDTO } from "../dto/UsuarioDTOs";
 import { type ICrearUsuario } from "../ports/in";
 
-export class CrearUsuarioUseCase implements CasoDeUso<
-  CrearUsuarioDTO,
-  Resultado<Usuario, ErrorDeDominio>
->,
-  ICrearUsuario
+export class CrearUsuarioUseCase
+  implements CasoDeUso<CrearUsuarioDTO, Resultado<Usuario, ErrorDeDominio>>, ICrearUsuario
 {
   constructor(
     private readonly usuarioRepository: IUsuarioRepository,

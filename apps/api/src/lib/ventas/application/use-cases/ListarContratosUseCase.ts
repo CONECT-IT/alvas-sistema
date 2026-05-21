@@ -12,11 +12,10 @@ import { type IListarContratos } from "../ports/in";
 export type ListarContratosInput = void;
 export type ListarContratosOutput = ListarContratosOutputDTO;
 
-export class ListarContratosUseCase implements CasoDeUso<
-  ListarContratosInput,
-  Resultado<ListarContratosOutput, ErrorDeDominio>
->,
-  IListarContratos
+export class ListarContratosUseCase
+  implements
+    CasoDeUso<ListarContratosInput, Resultado<ListarContratosOutput, ErrorDeDominio>>,
+    IListarContratos
 {
   constructor(private readonly repository: IContratoRepository) {}
 

@@ -15,11 +15,10 @@ import { type ICrearContrato } from "../ports/in";
 export type CrearContratoInput = CrearContratoInputDTO;
 export type CrearContratoOutput = ContratoOutputDTO;
 
-export class CrearContratoUseCase implements CasoDeUso<
-  CrearContratoInput,
-  Resultado<CrearContratoOutput, ErrorDeDominio>
->,
-  ICrearContrato
+export class CrearContratoUseCase
+  implements
+    CasoDeUso<CrearContratoInput, Resultado<CrearContratoOutput, ErrorDeDominio>>,
+    ICrearContrato
 {
   constructor(private readonly repository: IContratoRepository) {}
 

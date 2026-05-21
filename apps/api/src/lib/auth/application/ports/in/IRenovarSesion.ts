@@ -7,7 +7,5 @@ export type RenovarSesionCommand = Readonly<{
 }>;
 
 export interface IRenovarSesion {
-  ejecutar(
-    input: RenovarSesionCommand,
-  ): Promise<Resultado<SesionAutenticadaDTO, ErrorDeDominio>>;
+  ejecutar(input: RenovarSesionCommand): Promise<Resultado<SesionAutenticadaDTO, ErrorDeDominio>>;
 }

@@ -14,11 +14,10 @@ import { type IActualizarCliente } from "../ports/in";
 export type ActualizarClienteInput = ActualizarClienteInputDTO;
 export type ActualizarClienteOutput = ClienteOutputDTO;
 
-export class ActualizarClienteUseCase implements CasoDeUso<
-  ActualizarClienteInput,
-  Resultado<ActualizarClienteOutput, ErrorDeDominio>
->,
-  IActualizarCliente
+export class ActualizarClienteUseCase
+  implements
+    CasoDeUso<ActualizarClienteInput, Resultado<ActualizarClienteOutput, ErrorDeDominio>>,
+    IActualizarCliente
 {
   constructor(private readonly ventasRepository: IVentasRepository) {}
 

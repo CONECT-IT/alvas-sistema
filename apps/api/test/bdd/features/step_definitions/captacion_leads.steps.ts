@@ -132,12 +132,15 @@ Then("el sistema no lo registra y falla por falta de asesores", function () {
   assert.strictEqual(resultado.esExito, false);
 });
 
-Then("el sistema lo registra como un nuevo lead en estado {string}", function (estadoEsperado: string) {
-  assert.strictEqual(resultado.esExito, true);
-  assert.strictEqual(repository.leads.length, 1);
-  if (resultado.esExito) {
-    assert.strictEqual(resultado.valor.estado.valor, estadoEsperado);
-  } else {
-    assert.fail("El resultado debió ser exitoso");
-  }
-});
+Then(
+  "el sistema lo registra como un nuevo lead en estado {string}",
+  function (estadoEsperado: string) {
+    assert.strictEqual(resultado.esExito, true);
+    assert.strictEqual(repository.leads.length, 1);
+    if (resultado.esExito) {
+      assert.strictEqual(resultado.valor.estado.valor, estadoEsperado);
+    } else {
+      assert.fail("El resultado debió ser exitoso");
+    }
+  },
+);

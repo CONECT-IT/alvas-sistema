@@ -4,9 +4,7 @@ import {
   ListarUsuariosUseCase,
   ObtenerUsuarioUseCase,
 } from "../lib/usuarios/application";
-import {
-  type UsuarioControllerDeps,
-} from "../lib/usuarios/infrastructure";
+import { type UsuarioControllerDeps } from "../lib/usuarios/infrastructure";
 import { D1UsuarioRepository } from "../lib/usuarios/infrastructure";
 import { Pbkdf2PasswordHasher } from "../lib/usuarios/infrastructure/security/Pbkdf2PasswordHasher";
 
@@ -19,7 +17,6 @@ export function crearUsuarioControllerDeps(): UsuarioControllerDeps {
       ),
     crearListarUsuarios: (c) => new ListarUsuariosUseCase(new D1UsuarioRepository(c.env.DB)),
     crearObtenerUsuario: (c) => new ObtenerUsuarioUseCase(new D1UsuarioRepository(c.env.DB)),
-    crearActualizarUsuario: (c) =>
-      new ActualizarUsuarioUseCase(new D1UsuarioRepository(c.env.DB)),
+    crearActualizarUsuario: (c) => new ActualizarUsuarioUseCase(new D1UsuarioRepository(c.env.DB)),
   };
 }

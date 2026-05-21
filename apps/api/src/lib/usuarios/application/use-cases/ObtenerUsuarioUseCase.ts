@@ -16,11 +16,10 @@ export type ObtenerUsuarioInput = {
 };
 export type ObtenerUsuarioOutput = UsuarioOutputDTO;
 
-export class ObtenerUsuarioUseCase implements CasoDeUso<
-  ObtenerUsuarioInput,
-  Resultado<ObtenerUsuarioOutput, ErrorDeDominio>
->,
-  IObtenerUsuario
+export class ObtenerUsuarioUseCase
+  implements
+    CasoDeUso<ObtenerUsuarioInput, Resultado<ObtenerUsuarioOutput, ErrorDeDominio>>,
+    IObtenerUsuario
 {
   constructor(private readonly usuarioRepository: IUsuarioRepository) {}
 

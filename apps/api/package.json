@@ -4,6 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "wrangler dev",
+    "lint": "eslint . --max-warnings=0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "bun test",
     "test:bdd": "cross-env NODE_OPTIONS=\"--import tsx\" cucumber-js \"test/bdd/features/**/*.feature\" --import \"test/bdd/features/**/*.ts\"",
     "build": "echo 'No build step needed for Wrangler'"

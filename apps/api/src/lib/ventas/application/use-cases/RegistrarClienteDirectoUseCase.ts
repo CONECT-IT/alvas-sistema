@@ -18,11 +18,10 @@ export type RegistrarClienteDirectoInput = {
   idAsesor: string;
 };
 
-export class RegistrarClienteDirectoUseCase implements CasoDeUso<
-  RegistrarClienteDirectoInput,
-  Resultado<Cliente, ErrorDeDominio>
->,
-  IRegistrarClienteDirecto
+export class RegistrarClienteDirectoUseCase
+  implements
+    CasoDeUso<RegistrarClienteDirectoInput, Resultado<Cliente, ErrorDeDominio>>,
+    IRegistrarClienteDirecto
 {
   constructor(
     private readonly repository: IVentasRepository,

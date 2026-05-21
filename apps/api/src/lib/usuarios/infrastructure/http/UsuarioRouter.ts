@@ -1,5 +1,9 @@
 import { Hono } from "hono";
-import { UsuarioController, type BindingsUsuarios, type UsuarioControllerDeps } from "./UsuarioController";
+import {
+  UsuarioController,
+  type BindingsUsuarios,
+  type UsuarioControllerDeps,
+} from "./UsuarioController";
 
 export const crearUsuarioRouter = (deps: UsuarioControllerDeps) => {
   const router = new Hono<{ Bindings: BindingsUsuarios }>();

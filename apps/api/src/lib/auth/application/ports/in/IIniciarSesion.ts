@@ -8,7 +8,5 @@ export type IniciarSesionCommand = Readonly<{
 }>;
 
 export interface IIniciarSesion {
-  ejecutar(
-    input: IniciarSesionCommand,
-  ): Promise<Resultado<SesionAutenticadaDTO, ErrorDeDominio>>;
+  ejecutar(input: IniciarSesionCommand): Promise<Resultado<SesionAutenticadaDTO, ErrorDeDominio>>;
 }

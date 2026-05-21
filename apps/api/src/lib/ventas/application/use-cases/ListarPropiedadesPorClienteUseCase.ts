@@ -11,11 +11,13 @@ export type ListarPropiedadesPorClienteInput = {
 
 export type ListarPropiedadesPorClienteOutput = IdPropiedad[];
 
-export class ListarPropiedadesPorClienteUseCase implements CasoDeUso<
-  ListarPropiedadesPorClienteInput,
-  Resultado<ListarPropiedadesPorClienteOutput, ErrorDeDominio>
->,
-  IListarPropiedadesPorCliente
+export class ListarPropiedadesPorClienteUseCase
+  implements
+    CasoDeUso<
+      ListarPropiedadesPorClienteInput,
+      Resultado<ListarPropiedadesPorClienteOutput, ErrorDeDominio>
+    >,
+    IListarPropiedadesPorCliente
 {
   constructor(private readonly contratoRepository: IContratoRepository) {}
 

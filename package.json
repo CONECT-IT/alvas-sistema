@@ -17,8 +17,9 @@
     "test:mutation": "stryker run",
     "test:mutation:dry-run": "stryker run --dryRunOnly",
     "typecheck": "tsc --noEmit -p apps/api/tsconfig.json && tsc --noEmit -p apps/web/tsconfig.json",
-    "format": "prettier --write .",
-    "lint": "eslint . --max-warnings=0",
+    "format": "prettier --write . && bun --cwd apps/api format && bun --cwd apps/web format",
+    "format:check": "prettier --check . && bun --cwd apps/api format:check && bun --cwd apps/web format:check",
+    "lint": "bun run format:check && bun --cwd apps/api lint && bun --cwd apps/web lint",
     "prepare": "husky",
     "commitlint": "commitlint"
   },

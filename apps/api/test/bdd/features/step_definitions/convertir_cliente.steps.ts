@@ -8,7 +8,11 @@ import { type Cita } from "../../../../src/lib/ventas/domain/entities/Cita";
 import { type Contrato } from "../../../../src/lib/ventas/domain/entities/Contrato";
 import { type IVentasRepository } from "../../../../src/lib/ventas/domain/ports/IVentasRepository";
 import { type IdUsuarioRef } from "../../../../src/lib/shared/domain/value-objects/IdUsuarioRef";
-import { idCliente, type IdCliente, type IdLead } from "../../../../src/lib/ventas/domain/value-objects/Ids";
+import {
+  idCliente,
+  type IdCliente,
+  type IdLead,
+} from "../../../../src/lib/ventas/domain/value-objects/Ids";
 
 let leadConv: Lead;
 let repository: FakeVentasRepository;

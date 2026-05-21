@@ -17,14 +17,14 @@ apps/api/test/bdd/features
 
 ## Matriz de Vinculacion Arquitectonica
 
-| Escenario | Puerto primario invocado | Componente ejercitado | Tecnica SWEBOK aplicada |
-| :--- | :--- | :--- | :--- |
-| Agendar cita exitosamente | `IAgendarCita` / `AgendarCitaUseCase` | Caso de uso + agregado `Lead` + entidad `Cita` | Caja negra sobre contrato de entrada/salida |
-| Fallo al agendar cita en lead cerrado | `IAgendarCita` / `AgendarCitaUseCase` | Caso de uso + invariante de `Lead` | Caja negra con particion de estado invalido |
-| Fallo de registro por falta de asesores | `IRegistrarLead` / `RegistrarLeadUseCase` | Caso de uso + `EvaluadorAsignacionService` | Caja negra con ruta excepcional |
-| Registro exitoso de un lead calificado | `IRegistrarLead` / `RegistrarLeadUseCase` | Caso de uso + agregado `Lead` | Caja negra con camino feliz |
-| Convertir lead a cliente exitosamente | `IConvertirLeadACliente` / `ConvertirLeadAClienteUseCase` | Caso de uso + agregado `Lead` + entidad `Cliente` | Caja negra sobre cambio de estado |
-| Evitar convertir lead ya convertido | `IConvertirLeadACliente` / `ConvertirLeadAClienteUseCase` | Caso de uso + invariante de `Lead` | Caja negra con frontera de consistencia |
+| Escenario                               | Puerto primario invocado                                  | Componente ejercitado                             | Tecnica SWEBOK aplicada                     |
+| :-------------------------------------- | :-------------------------------------------------------- | :------------------------------------------------ | :------------------------------------------ |
+| Agendar cita exitosamente               | `IAgendarCita` / `AgendarCitaUseCase`                     | Caso de uso + agregado `Lead` + entidad `Cita`    | Caja negra sobre contrato de entrada/salida |
+| Fallo al agendar cita en lead cerrado   | `IAgendarCita` / `AgendarCitaUseCase`                     | Caso de uso + invariante de `Lead`                | Caja negra con particion de estado invalido |
+| Fallo de registro por falta de asesores | `IRegistrarLead` / `RegistrarLeadUseCase`                 | Caso de uso + `EvaluadorAsignacionService`        | Caja negra con ruta excepcional             |
+| Registro exitoso de un lead calificado  | `IRegistrarLead` / `RegistrarLeadUseCase`                 | Caso de uso + agregado `Lead`                     | Caja negra con camino feliz                 |
+| Convertir lead a cliente exitosamente   | `IConvertirLeadACliente` / `ConvertirLeadAClienteUseCase` | Caso de uso + agregado `Lead` + entidad `Cliente` | Caja negra sobre cambio de estado           |
+| Evitar convertir lead ya convertido     | `IConvertirLeadACliente` / `ConvertirLeadAClienteUseCase` | Caso de uso + invariante de `Lead`                | Caja negra con frontera de consistencia     |
 
 ## Criterios Aplicados
 
@@ -39,4 +39,3 @@ apps/api/test/bdd/features
 ```bash
 bun --cwd apps/api test:bdd
 ```
-

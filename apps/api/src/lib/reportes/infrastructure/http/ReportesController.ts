@@ -1,8 +1,5 @@
 import { type Context } from "hono";
-import {
-  type IObtenerEstadisticasGlobales,
-  type IObtenerReporteGeneral,
-} from "../../application";
+import { type IObtenerEstadisticasGlobales, type IObtenerReporteGeneral } from "../../application";
 import { type D1DatabaseLike, type SessionClaims } from "../../../shared/infrastructure";
 
 export type BindingsReportes = {
