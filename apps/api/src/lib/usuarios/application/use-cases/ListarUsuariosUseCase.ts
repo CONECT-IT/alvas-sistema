@@ -12,11 +12,10 @@ import { type IListarUsuarios } from "../ports/in";
 export type ListarUsuariosInput = void;
 export type ListarUsuariosOutput = UsuarioListadoOutputDTO[];
 
-export class ListarUsuariosUseCase implements CasoDeUso<
-  ListarUsuariosInput,
-  Resultado<ListarUsuariosOutput, ErrorDeDominio>
->,
-  IListarUsuarios
+export class ListarUsuariosUseCase
+  implements
+    CasoDeUso<ListarUsuariosInput, Resultado<ListarUsuariosOutput, ErrorDeDominio>>,
+    IListarUsuarios
 {
   constructor(private readonly usuarioRepository: IUsuarioRepository) {}
 

@@ -14,11 +14,10 @@ export type RenovarSesionInput = {
   refreshToken: string;
 };
 
-export class RenovarSesionUseCase implements CasoDeUso<
-  RenovarSesionInput,
-  Resultado<SesionAutenticadaDTO, ErrorDeDominio>
->,
-  IRenovarSesion
+export class RenovarSesionUseCase
+  implements
+    CasoDeUso<RenovarSesionInput, Resultado<SesionAutenticadaDTO, ErrorDeDominio>>,
+    IRenovarSesion
 {
   constructor(
     private readonly consultaCredenciales: IConsultaCredencialesUsuario,

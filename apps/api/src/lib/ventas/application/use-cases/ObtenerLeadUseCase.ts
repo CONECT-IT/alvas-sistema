@@ -15,11 +15,8 @@ import { type IObtenerLead } from "../ports/in";
 export type ObtenerLeadInput = ObtenerLeadInputDTO;
 export type ObtenerLeadOutput = Lead;
 
-export class ObtenerLeadUseCase implements CasoDeUso<
-  ObtenerLeadInput,
-  Resultado<ObtenerLeadOutput, ErrorDeDominio>
->,
-  IObtenerLead
+export class ObtenerLeadUseCase
+  implements CasoDeUso<ObtenerLeadInput, Resultado<ObtenerLeadOutput, ErrorDeDominio>>, IObtenerLead
 {
   constructor(private readonly repository: IVentasRepository) {}
 

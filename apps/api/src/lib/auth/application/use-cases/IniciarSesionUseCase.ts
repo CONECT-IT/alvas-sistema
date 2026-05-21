@@ -19,11 +19,10 @@ export type IniciarSesionInput = {
   clave: string;
 };
 
-export class IniciarSesionUseCase implements CasoDeUso<
-  IniciarSesionInput,
-  Resultado<SesionAutenticadaDTO, ErrorDeDominio>
->,
-  IIniciarSesion
+export class IniciarSesionUseCase
+  implements
+    CasoDeUso<IniciarSesionInput, Resultado<SesionAutenticadaDTO, ErrorDeDominio>>,
+    IIniciarSesion
 {
   constructor(
     private readonly consultaCredenciales: IConsultaCredencialesUsuario,

@@ -1,8 +1,4 @@
-import {
-  CanalCaptacion,
-  DatosContactoCaptacion,
-  OrigenCaptacion,
-} from "../value-objects";
+import { CanalCaptacion, DatosContactoCaptacion, OrigenCaptacion } from "../value-objects";
 
 type CaptacionProps = Readonly<{
   canal: CanalCaptacion;

@@ -9,11 +9,10 @@ export type ListarClientesInput = void;
 
 export type ListarClientesOutput = Cliente[];
 
-export class ListarClientesUseCase implements CasoDeUso<
-  ListarClientesInput,
-  Resultado<ListarClientesOutput, ErrorDeDominio>
->,
-  IListarClientes
+export class ListarClientesUseCase
+  implements
+    CasoDeUso<ListarClientesInput, Resultado<ListarClientesOutput, ErrorDeDominio>>,
+    IListarClientes
 {
   constructor(private readonly ventasRepository: IVentasRepository) {}
 

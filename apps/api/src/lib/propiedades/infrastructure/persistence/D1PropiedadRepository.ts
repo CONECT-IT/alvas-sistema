@@ -50,5 +50,4 @@ export class D1PropiedadRepository implements IPropiedadRepository {
     const rows = await this.drizzle().select().from(propiedadesTable);
     return rows.map((row) => PropiedadMapper.aDominio(row as PropiedadRow));
   }
-
 }

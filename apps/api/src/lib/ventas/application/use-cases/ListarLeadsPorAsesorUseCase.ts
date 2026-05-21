@@ -12,11 +12,10 @@ export type ListarLeadsPorAsesorInput = {
 
 export type ListarLeadsPorAsesorOutput = Lead[];
 
-export class ListarLeadsPorAsesorUseCase implements CasoDeUso<
-  ListarLeadsPorAsesorInput,
-  Resultado<ListarLeadsPorAsesorOutput, ErrorDeDominio>
->,
-  IListarLeadsPorAsesor
+export class ListarLeadsPorAsesorUseCase
+  implements
+    CasoDeUso<ListarLeadsPorAsesorInput, Resultado<ListarLeadsPorAsesorOutput, ErrorDeDominio>>,
+    IListarLeadsPorAsesor
 {
   constructor(private readonly ventasRepository: IVentasRepository) {}
 

@@ -6,7 +6,5 @@ import {
 } from "../../dto/UsuarioActualizacionDTOs";
 
 export interface IActualizarUsuario {
-  ejecutar(
-    input: ActualizarUsuarioInputDTO,
-  ): Promise<Resultado<UsuarioOutputDTO, ErrorDeDominio>>;
+  ejecutar(input: ActualizarUsuarioInputDTO): Promise<Resultado<UsuarioOutputDTO, ErrorDeDominio>>;
 }

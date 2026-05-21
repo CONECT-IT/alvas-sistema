@@ -15,11 +15,10 @@ import { type IObtenerCitaPorId } from "../ports/in";
 export type ObtenerCitaPorIdInput = ObtenerCitaPorIdInputDTO;
 export type ObtenerCitaPorIdOutput = Cita;
 
-export class ObtenerCitaPorIdUseCase implements CasoDeUso<
-  ObtenerCitaPorIdInput,
-  Resultado<ObtenerCitaPorIdOutput, ErrorDeDominio>
->,
-  IObtenerCitaPorId
+export class ObtenerCitaPorIdUseCase
+  implements
+    CasoDeUso<ObtenerCitaPorIdInput, Resultado<ObtenerCitaPorIdOutput, ErrorDeDominio>>,
+    IObtenerCitaPorId
 {
   constructor(private readonly repository: IVentasRepository) {}
 

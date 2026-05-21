@@ -34,9 +34,7 @@ describe("ventas / Contrato", () => {
     contrato.firmar();
 
     expect(contrato.estado).toBe("VIGENTE");
-    expect(() => contrato.firmar()).toThrow(
-      "Solo se pueden firmar contratos en estado borrador.",
-    );
+    expect(() => contrato.firmar()).toThrow("Solo se pueden firmar contratos en estado borrador.");
   });
 
   test("finaliza contratos y actualiza estado", () => {

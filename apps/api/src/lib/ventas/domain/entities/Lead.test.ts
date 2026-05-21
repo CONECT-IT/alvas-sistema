@@ -113,7 +113,7 @@ describe("Agregado de Dominio: Gestión de Leads", () => {
       tipo: "COMPRA",
       idAsesor: "asesor-1",
     });
-    
+
     // Cambiamos el estado a CERRADO para la prueba
     lead.cambiarEstado("PERDIDO");
 
@@ -141,7 +141,7 @@ describe("Agregado de Dominio: Gestión de Leads", () => {
       tipo: "COMPRA",
       idAsesor: "asesor-1",
     });
-    
+
     // Act
     lead.convertirACliente(idCliente("cli-1"));
 
@@ -252,9 +252,7 @@ describe("Agregado de Dominio: Gestión de Leads", () => {
     expect(() => lead.actualizarDatos({ nombre: " " })).toThrow(
       "El nombre del lead es obligatorio.",
     );
-    expect(() => lead.actualizarDatos({ email: " " })).toThrow(
-      "El email del lead es obligatorio.",
-    );
+    expect(() => lead.actualizarDatos({ email: " " })).toThrow("El email del lead es obligatorio.");
     expect(() => lead.actualizarDatos({ telefono: " " })).toThrow(
       "El telefono del lead es obligatorio.",
     );

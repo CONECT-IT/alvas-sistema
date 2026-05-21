@@ -11,11 +11,10 @@ import { PorcentajeConversion } from "../../domain/value-objects/PorcentajeConve
 import { type ReporteGeneralOutput } from "../dto/ReportesSalidaDTOs";
 import { type IObtenerReporteGeneral } from "../ports/in";
 
-export class ObtenerReporteGeneralUseCase implements CasoDeUso<
-  void,
-  Resultado<ReporteGeneralOutput, ErrorDeDominio>
->,
-  IObtenerReporteGeneral
+export class ObtenerReporteGeneralUseCase
+  implements
+    CasoDeUso<void, Resultado<ReporteGeneralOutput, ErrorDeDominio>>,
+    IObtenerReporteGeneral
 {
   constructor(private readonly consultaVentas: IConsultaVentasParaReportes) {}
 

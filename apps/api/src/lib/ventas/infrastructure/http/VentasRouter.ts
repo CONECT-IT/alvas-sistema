@@ -1,5 +1,9 @@
 import { Hono } from "hono";
-import { VentasController, type BindingsVentas, type VentasControllerDeps } from "./VentasController";
+import {
+  VentasController,
+  type BindingsVentas,
+  type VentasControllerDeps,
+} from "./VentasController";
 import { type SessionClaims, verifySessionMiddleware } from "../../../shared/infrastructure";
 
 export function crearVentasRouter(deps: VentasControllerDeps) {

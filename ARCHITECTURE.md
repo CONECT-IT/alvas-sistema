@@ -3,6 +3,7 @@
 Este documento describe el estado actual del backend en `apps/api/src/lib`, la semantica de capas segun DDD + arquitectura hexagonal, los aggregate roots identificados, los puertos primarios/secundarios y las comunicaciones entre bounded contexts.
 
 Validacion actual:
+
 - `bun run lint`: OK
 - `bun run typecheck`: OK
 
@@ -49,21 +50,26 @@ Esto es una ACL pragmatica: cumple la proteccion de modelos y dependencias sin c
 ## Aggregate roots por bounded context
 
 ### `shared`
+
 - No tiene aggregate root. Es un modulo transversal tecnico.
 
 ### `auth`
+
 - Aggregate root: `Sesion`
 - Responsabilidad: credenciales, login, refresh, tokens y sesion autenticada.
 
 ### `usuarios`
+
 - Aggregate root: `Usuario`
 - Responsabilidad: identidad interna del sistema (`id`, `username`, `nombre`, `rol`, `estado`, `hashClave`).
 
 ### `propiedades`
+
 - Aggregate root: `Propiedad`
 - Responsabilidad: catalogo de propiedades y asignacion/visibilidad por asesor.
 
 ### `ventas`
+
 - Este bounded context tiene multiples aggregate roots. Eso es valido en DDD.
 - Aggregate roots:
   - `Lead`
@@ -73,6 +79,7 @@ Esto es una ACL pragmatica: cumple la proteccion de modelos y dependencias sin c
 - Responsabilidad: pipeline comercial, clientes, citas, conversiones y contratos.
 
 ### `reportes`
+
 - No tiene aggregate root transaccional y no debe forzarse uno artificial.
 - Es un `read context` puro.
 - Modelos de lectura/proyeccion actuales:
@@ -81,6 +88,7 @@ Esto es una ACL pragmatica: cumple la proteccion de modelos y dependencias sin c
 - Responsabilidad: metricas, dashboards y consultas derivadas.
 
 ### `integraciones`
+
 - Aggregate root: `Captacion`
 - Modelos por canal:
   - `CaptacionWhatsApp` como normalizador/canal de entrada
@@ -89,6 +97,7 @@ Esto es una ACL pragmatica: cumple la proteccion de modelos y dependencias sin c
 ## Ciclos de vida de dominio
 
 ### `auth/Sesion`
+
 - Tipo de lifecycle: tecnico y efimero.
 - Inicio: `Sesion.abrir` despues de credenciales validas.
 - Cambios: renovacion por `RenovarSesionUseCase`, que emite nuevos tokens.
@@ -96,6 +105,7 @@ Esto es una ACL pragmatica: cumple la proteccion de modelos y dependencias sin c
 - Observacion: si luego se requiere revocacion, blacklist o auditoria de sesiones, `Sesion` necesitara persistencia y estados explicitos.
 
 ### `usuarios/Usuario`
+
 - Tipo de lifecycle: transaccional simple.
 - Estados: `ACTIVO`, `DESHABILITADO`.
 - Inicio: `Usuario.crear`, por defecto en `ACTIVO`.
@@ -104,6 +114,7 @@ Esto es una ACL pragmatica: cumple la proteccion de modelos y dependencias sin c
 - Invariante: no se puede deshabilitar un usuario ya deshabilitado.
 
 ### `propiedades/Propiedad`
+
 - Tipo de lifecycle: catalogo simple.
 - Estados: no hay estados explicitos actualmente.
 - Inicio: `Propiedad.crear`.
@@ -112,6 +123,7 @@ Esto es una ACL pragmatica: cumple la proteccion de modelos y dependencias sin c
 - Observacion: si el negocio requiere publicar/despublicar propiedades, ese lifecycle debe agregarse como estado propio del agregado.
 
 ### `ventas/Lead`
+
 - Tipo de lifecycle: comercial transaccional.
 - Estados: `NUEVO`, `CONTACTO`, `AGENDADO`, `TRABAJANDO`, `CONVERTIDO`, `PERDIDO`.
 - Inicio: `Lead.registrar`, siempre en `NUEVO`.
@@ -120,6 +132,7 @@ Esto es una ACL pragmatica: cumple la proteccion de modelos y dependencias sin c
 - Invariantes: no se pueden agendar citas ni actualizar datos de contacto si el lead esta cerrado.
 
 ### `ventas/Cita`
+
 - Tipo de lifecycle: entidad interna del agregado comercial.
 - Estados: `PENDIENTE`, `REALIZADA`, `CANCELADA`, `REPROGRAMADA`.
 - Inicio: `Cita.crear`, usada desde el agregado `Lead`.
@@ -128,6 +141,7 @@ Esto es una ACL pragmatica: cumple la proteccion de modelos y dependencias sin c
 - Invariantes: fecha fin debe ser posterior a fecha inicio; no se puede reprogramar una cita realizada; no se puede marcar como realizada una cita cancelada.
 
 ### `ventas/Cliente`
+
 - Tipo de lifecycle: cartera simple.
 - Estados: no hay estados explicitos actualmente.
 - Inicio: `Cliente.crear`, normalmente desde cliente directo o conversion de lead.
@@ -136,6 +150,7 @@ Esto es una ACL pragmatica: cumple la proteccion de modelos y dependencias sin c
 - Observacion: si el CRM necesita distinguir activo, inactivo, bloqueado o archivado, debe agregarse un estado propio de `Cliente`.
 
 ### `ventas/Contrato`
+
 - Tipo de lifecycle: contractual transaccional.
 - Estados: `BORRADOR`, `VIGENTE`, `FINALIZADO`, `CANCELADO`.
 - Inicio: `Contrato.crear`, siempre en `BORRADOR`.
@@ -145,6 +160,7 @@ Esto es una ACL pragmatica: cumple la proteccion de modelos y dependencias sin c
 - Observacion: existe estado `CANCELADO`, pero aun no hay metodo de dominio para cancelar contrato.
 
 ### `integraciones/Captacion`
+
 - Tipo de lifecycle: normalizacion de entrada.
 - Estados: no hay estados persistidos actualmente.
 - Inicio: `Captacion.registrar`, desde un canal generico o desde `CaptacionWhatsApp`.
@@ -153,6 +169,7 @@ Esto es una ACL pragmatica: cumple la proteccion de modelos y dependencias sin c
 - Observacion: si se necesita reintento, rechazo, deduplicacion o auditoria de eventos externos, `Captacion` debe pasar a lifecycle persistido con estados.
 
 ### `reportes`
+
 - Tipo de lifecycle: lectura/proyeccion.
 - Estados: no hay estados transaccionales.
 - Inicio: cada consulta crea una proyeccion (`ReporteGeneral`, `EstadisticasGlobales`) a partir de fuentes de lectura.
@@ -165,57 +182,69 @@ Esto es una ACL pragmatica: cumple la proteccion de modelos y dependencias sin c
 ### `auth`
 
 Use cases:
+
 - `IniciarSesionUseCase`
 - `RenovarSesionUseCase`
 
 Puertos primarios:
+
 - `IIniciarSesion`
 - `IRenovarSesion`
 
 Puertos secundarios:
+
 - `IConsultaCredencialesUsuario`
 - `IVerificadorDeClave`
 - `ITokenProvider`
 
 DTOs:
+
 - `SesionAutenticadaDTO`
 - `RenovarSesionDTO`
 
 Entidades:
+
 - `Sesion`
 
 Value objects:
+
 - `AuthToken`
 - `RefreshToken`
 - `RolAcceso`
 
 Adaptadores secundarios:
+
 - `HmacTokenProvider`
 - `TokenProviderFactory`
 
 Adaptadores primarios:
+
 - `AuthController`
 - `crearAuthRouter`
 
 ### `usuarios`
 
 Use cases:
+
 - `CrearUsuarioUseCase`
 - `ListarUsuariosUseCase`
 - `ObtenerUsuarioUseCase`
 - `ActualizarUsuarioUseCase`
 
 Puertos primarios:
+
 - `ICrearUsuario`
 - `IListarUsuarios`
 - `IObtenerUsuario`
 - `IActualizarUsuario`
 
 Puertos secundarios:
+
 - `IUsuarioRepository`
 - `IPasswordHasher`
 
 DTOs:
+
 - `CrearUsuarioDTO`
 - `UsuarioRespuestaDTO`
 - `UsuarioOutputDTO`
@@ -224,9 +253,11 @@ DTOs:
 - `UsuarioListadoOutputDTO`
 
 Entidades:
+
 - `Usuario`
 
 Value objects:
+
 - `IdUsuario`
 - `Username`
 - `Nombre`
@@ -235,54 +266,66 @@ Value objects:
 - `EstadoUsuario`
 
 Adaptadores secundarios:
+
 - `D1UsuarioRepository`
 - `UsuarioMapper`
 - `Pbkdf2PasswordHasher`
 
 Adaptadores hacia otros contextos:
+
 - `ConsultaCredencialesUsuarioAdapter`
 - `VerificadorDeClavePbkdf2Adapter`
 
 Adaptadores primarios:
+
 - `UsuarioController`
 - `crearUsuarioRouter`
 
 ### `propiedades`
 
 Use cases:
+
 - `CrearPropiedadUseCase`
 - `ListarPropiedadesUseCase`
 
 Puertos primarios:
+
 - `ICrearPropiedad`
 - `IListarPropiedades`
 
 Puertos secundarios:
+
 - `IPropiedadRepository`
 - `IAutorizadorPropiedades`
 
 DTOs:
+
 - `CrearPropiedadDTO`
 - `PropiedadRespuestaDTO`
 
 Entidades:
+
 - `Propiedad`
 
 Value objects:
+
 - `Ids`
 
 Adaptadores secundarios:
+
 - `D1PropiedadRepository`
 - `PropiedadMapper`
 - `AutorizadorPropiedadesAdapter`
 
 Adaptadores primarios:
+
 - `PropiedadController`
 - `crearPropiedadRouter`
 
 ### `ventas`
 
 Use cases expuestos hoy por HTTP:
+
 - `RegistrarLeadUseCase`
 - `RegistrarClienteDirectoUseCase`
 - `AgendarCitaUseCase`
@@ -291,6 +334,7 @@ Use cases expuestos hoy por HTTP:
 - `ActualizarCitaUseCase`
 
 Otros use cases existentes:
+
 - `ObtenerLeadUseCase`
 - `ObtenerClienteUseCase`
 - `ObtenerCitaPorIdUseCase`
@@ -307,9 +351,11 @@ Otros use cases existentes:
 - `ActualizarClienteUseCase`
 
 Servicios de Dominio:
+
 - `EvaluadorAsignacionService`
 
 Puertos primarios implementados:
+
 - `IActualizarCliente`
 - `IAsignarLeadAAsesor`
 - `ICrearContrato`
@@ -332,111 +378,136 @@ Puertos primarios implementados:
 - `IListarPropiedadesPorCliente`
 
 Puertos secundarios:
+
 - `IVentasRepository`
 - `IContratoRepository`
 - `IAutorizadorVentas`
 
 DTOs:
+
 - `LeadDTOs`
 - `ClienteDTOs`
 - `ContratoDTOs`
 
 Entidades:
+
 - `Lead`
 - `Cliente`
 - `Cita`
 - `Contrato`
 
 Value objects:
+
 - `EstadoLead`
 - `IdPropiedad`
 - `Ids`
 - `TipoVenta`
 
 Adaptadores secundarios:
+
 - `D1VentasRepository`
 - `VentasMapper`
 - `AutorizadorVentasAdapter`
 
 Adaptadores publicados a otros contextos:
+
 - `ConsultaVentasParaReportesAdapter`
 - `RegistroLeadCaptacionVentasAdapter`
 
 Adaptadores primarios:
+
 - `VentasController`
 - `crearVentasRouter`
 
 ### `reportes`
 
 Use cases:
+
 - `ObtenerReporteGeneralUseCase`
 - `ObtenerEstadisticasGlobalesUseCase`
 
 Puertos primarios:
+
 - `IObtenerReporteGeneral`
 - `IObtenerEstadisticasGlobales`
 
 Puertos secundarios:
+
 - `IConsultaVentasParaReportes`
 
 DTOs:
+
 - `ReportesSalidaDTOs`
 
 Modelos de lectura:
+
 - `ReporteGeneral`
 - `EstadisticasGlobales`
 
 Value objects:
+
 - `PorcentajeConversion`
 
 Adaptadores primarios:
+
 - `ReportesController`
 - `crearReportesRouter`
 
 Adaptadores secundarios:
+
 - El adapter concreto se compone desde `ventas`: `ConsultaVentasParaReportesAdapter`
 
 ### `integraciones`
 
 Use cases:
+
 - `ProcesarCaptacionEntranteUseCase`
 - `ProcesarWhatsAppWebhookUseCase`
 
 Puertos primarios:
+
 - `IProcesarCaptacionEntrante`
 - `IProcesarWhatsAppWebhook`
 
 Puertos secundarios:
+
 - `IRegistroLeadCaptacion`
 
 DTOs:
+
 - `CaptacionEntranteDTO`
 - `EntradaWhatsAppWebhookDTO`
 - `CaptacionProcesadaDTO`
 
 Entidades:
+
 - `Captacion`
 - `CaptacionWhatsApp`
 
 Value objects:
+
 - `CanalCaptacion`
 - `OrigenCaptacion`
 - `DatosContactoCaptacion`
 
 Adaptadores primarios:
+
 - `IntegracionesController`
 - `crearIntegracionesRouter`
 
 Entradas HTTP actuales:
+
 - `POST /integraciones/captaciones`
 - `POST /integraciones/webhooks/whatsapp`
 
 Adaptadores secundarios:
+
 - El adapter concreto se compone desde `ventas`: `RegistroLeadCaptacionVentasAdapter`
 
 ## Comunicaciones entre modulos
 
 ### `usuarios -> auth`
+
 - Tipo de relacion: ACL.
 - `usuarios` implementa puertos secundarios definidos por `auth`.
 - Contratos:
@@ -447,6 +518,7 @@ Adaptadores secundarios:
   - `VerificadorDeClavePbkdf2Adapter`
 
 ### `ventas -> reportes`
+
 - Tipo de relacion: ACL de lectura.
 - `ventas` implementa el puerto de lectura `IConsultaVentasParaReportes`.
 - Implementacion:
@@ -454,6 +526,7 @@ Adaptadores secundarios:
 - `reportes` no importa entidades internas de `ventas`; consume solo el contrato de lectura.
 
 ### `ventas -> integraciones`
+
 - Tipo de relacion: ACL de captacion.
 - `ventas` implementa el puerto `IRegistroLeadCaptacion`.
 - Implementacion:
@@ -461,6 +534,7 @@ Adaptadores secundarios:
 - `integraciones` normaliza entradas multicanal y delega el alta comercial a `ventas`.
 
 ### `shared -> modulos protegidos`
+
 - `shared` provee la capacidad transversal de sesion tecnica:
   - `SessionClaims`
   - `verifySessionMiddleware`
