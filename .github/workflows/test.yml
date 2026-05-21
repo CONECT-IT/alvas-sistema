@@ -1,0 +1,148 @@
+name: Test & Quality Pipeline
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+      - "feature/**"
+      - "stryker-*"
+  pull_request:
+    branches:
+      - develop
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: "true"
+  NODE_ENV: test
+
+jobs:
+  lint:
+    name: "Stage 1: Lint"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun run lint
+      - run: bun run typecheck
+
+  build:
+    name: "Stage 2: Build"
+    runs-on: ubuntu-latest
+    needs: lint
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+
+  unit-test:
+    name: "Stage 3: Unit Test"
+    runs-on: ubuntu-latest
+    needs: build
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun run test:unit
+
+  integration-test:
+    name: "Stage 4: Integration Test"
+    runs-on: ubuntu-latest
+    needs: unit-test
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun run test:bdd
+
+  coverage-report:
+    name: "Stage 5: Coverage Report"
+    runs-on: ubuntu-latest
+    needs: integration-test
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - name: Domain coverage gate
+        run: |
+          # Quality gate S08: la cobertura se mide en la capa domain/.
+          # El umbral minimo aceptado es 80% para asegurar aislamiento del
+          # nucleo de negocio y suficiencia de regresion en el MVP v1.1.
+          bun run coverage:domain
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 60
+
+  mutation-test:
+    name: "Stage 6: Mutation Test"
+    runs-on: ubuntu-latest
+    needs: coverage-report
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - name: Stryker mutation gate
+        run: |
+          # Umbral justificado en S07: el 70% de mutation score representa
+          # el equilibrio entre rigor analitico de los asserts y costo
+          # computacional en CI. Por debajo, los asserts son debiles.
+          # mutation_threshold: 70
+          bun run test:mutation
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stryker-report
+          path: reports/mutation/
+          retention-days: 90
+
+  quality-gate:
+    name: "Quality Gate"
+    runs-on: ubuntu-latest
+    needs:
+      - lint
+      - build
+      - unit-test
+      - integration-test
+      - coverage-report
+      - mutation-test
+    if: always()
+    steps:
+      - name: Verify all stages
+        run: |
+          if [ "${{ needs.lint.result }}" != "success" ] ||
+             [ "${{ needs.build.result }}" != "success" ] ||
+             [ "${{ needs.unit-test.result }}" != "success" ] ||
+             [ "${{ needs.integration-test.result }}" != "success" ] ||
+             [ "${{ needs.coverage-report.result }}" != "success" ] ||
+             [ "${{ needs.mutation-test.result }}" != "success" ]; then
+            echo "Pipeline failed before satisfying all quality gates."
+            exit 1
+          fi
+          echo "All stages passed: lint -> build -> unit -> integration -> coverage -> mutation"
