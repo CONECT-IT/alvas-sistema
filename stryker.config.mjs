@@ -8,20 +8,20 @@
  * @type {import('@stryker-mutator/api/core').PartialStrykerOptions}
  */
 export default {
-  testRunner: 'command',
+  testRunner: "command",
   commandRunner: {
-    command: 'bun test',
+    command: "bun test",
   },
   mutate: [
-    'apps/api/src/lib/{auth,usuarios,ventas,integraciones,reportes,propiedades}/domain/**/*.ts',
-    'apps/api/src/lib/{auth,usuarios,ventas,integraciones,reportes,propiedades}/application/**/*.ts',
-    '!apps/api/src/**/*.test.ts',
-    '!apps/api/src/**/dto/**/*.ts',
-    '!apps/api/src/**/ports/**/*.ts',
-    '!apps/api/src/**/index.ts',
+    "apps/api/src/lib/{auth,usuarios,ventas,integraciones,reportes,propiedades}/domain/**/*.ts",
+    "apps/api/src/lib/{auth,usuarios,ventas,integraciones,reportes,propiedades}/application/**/*.ts",
+    "!apps/api/src/**/*.test.ts",
+    "!apps/api/src/**/dto/**/*.ts",
+    "!apps/api/src/**/ports/**/*.ts",
+    "!apps/api/src/**/index.ts",
   ],
-  reporters: ['progress', 'clear-text', 'html', 'json'],
-  coverageAnalysis: 'off',
+  reporters: ["progress", "clear-text", "html", "json"],
+  coverageAnalysis: "off",
   concurrency: 2,
   timeoutMS: 10000,
   thresholds: {
@@ -30,9 +30,9 @@ export default {
     break: null,
   },
   htmlReporter: {
-    fileName: 'reports/mutation/index.html',
+    fileName: "reports/mutation/index.html",
   },
   jsonReporter: {
-    fileName: 'reports/mutation/mutation.json',
+    fileName: "reports/mutation/mutation.json",
   },
 };
