@@ -1,0 +1,19 @@
+<svelte:head>
+	<title>Catálogo de Propiedades | ALVAS</title>
+</svelte:head>
+
+<div
+	class="mx-auto mt-10 flex max-w-lg flex-col gap-4 rounded-3xl border border-border-light bg-white p-8 text-center shadow-xs"
+>
+	<div
+		class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary-light text-2xl font-bold text-primary"
+	>
+		🏠
+	</div>
+	<h1 class="font-display text-2xl font-bold text-text-main">Catálogo de Propiedades</h1>
+	<p class="text-sm leading-relaxed text-text-muted">
+		Este panel centralizará la carga de fichas técnicas de inmuebles, fotografías, planos y
+		asignación de visibilidad de mercado.
+	</p>
+	<div class="mt-4 text-xs text-text-muted">En construcción • Arquitectura Hexagonal</div>
+</div>
