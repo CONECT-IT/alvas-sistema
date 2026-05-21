@@ -22,5 +22,8 @@ describe("ventas / EvaluadorAsignacionService", () => {
     const resultado = new EvaluadorAsignacionService().evaluar([]);
 
     expect(resultado.esExito).toBe(false);
+    expect(resultado.esExito ? undefined : resultado.error.message).toBe(
+      "No hay asesores disponibles para asignación.",
+    );
   });
 });

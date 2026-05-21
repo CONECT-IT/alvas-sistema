@@ -96,4 +96,130 @@ describe("propiedades / Propiedad", () => {
     expect(error.codigo).toBe("PROPIEDAD_INVALIDA");
     expect(error.detalle).toEqual({ contexto: "PROPIEDADES" });
   });
+
+  test("crear con origen por defecto ALVAS si no se especifica", () => {
+    const propiedad = Propiedad.crear({
+      id: "prop-def",
+      titulo: "Default",
+      descripcion: "Default",
+      precio: 100,
+      estado: "DISPONIBLE",
+    });
+    expect(propiedad.origen).toBe("ALVAS");
+  });
+
+  test("crear con estado por defecto si no se especifica", () => {
+    const propiedad = Propiedad.crear({
+      id: "prop-def2",
+      titulo: "Default",
+      descripcion: "Default",
+      precio: 100,
+      origen: "ALVAS",
+    });
+    expect(propiedad.estado).toBe("DISPONIBLE");
+  });
+
+  test("crear normaliza origen a mayusculas y trim", () => {
+    const propiedad = Propiedad.crear({
+      id: "prop-norm",
+      titulo: "Test",
+      descripcion: "Test",
+      precio: 100,
+      origen: " captacion ",
+    });
+    expect(propiedad.origen).toBe("CAPTACION");
+  });
+
+  test("crear lanza error con origen invalido", () => {
+    expect(() =>
+      Propiedad.crear({
+        id: "prop-bad",
+        titulo: "Test",
+        descripcion: "Test",
+        precio: 100,
+        origen: "INEXISTENTE",
+      }),
+    ).toThrow("El origen de la propiedad no es valido.");
+  });
+
+  test("crear lanza error con estado invalido", () => {
+    expect(() =>
+      Propiedad.crear({
+        id: "prop-bad2",
+        titulo: "Test",
+        descripcion: "Test",
+        precio: 100,
+        origen: "ALVAS",
+        estado: "INEXISTENTE",
+      }),
+    ).toThrow("El estado de la propiedad no es valido.");
+  });
+
+  test("actualizar lanza error con titulo vacio", () => {
+    const propiedad = Propiedad.crear({
+      id: "prop-004",
+      titulo: "Original",
+      descripcion: "Original",
+      precio: 100,
+      origen: "ALVAS",
+    });
+    expect(() => propiedad.actualizar({ titulo: "  " })).toThrow(
+      "El titulo de la propiedad es obligatorio.",
+    );
+  });
+
+  test("actualizar lanza error con precio negativo", () => {
+    const propiedad = Propiedad.crear({
+      id: "prop-005",
+      titulo: "Original",
+      descripcion: "Original",
+      precio: 100,
+      origen: "ALVAS",
+    });
+    expect(() => propiedad.actualizar({ precio: -1 })).toThrow(
+      "El precio de la propiedad no puede ser negativo.",
+    );
+  });
+
+  test("actualizar normaliza estado y actualiza fecha", () => {
+    const propiedad = Propiedad.crear({
+      id: "prop-006",
+      titulo: "Original",
+      descripcion: "Original",
+      precio: 100,
+      origen: "ALVAS",
+      estado: "PRELIMINAR",
+    });
+    const antes = Date.now();
+    propiedad.actualizar({ estado: " disponible " });
+    expect(propiedad.estado).toBe("DISPONIBLE");
+    expect(propiedad.actualizadoEn.getTime()).toBeGreaterThanOrEqual(antes);
+  });
+
+  test("actualizar con undefined no modifica campos", () => {
+    const propiedad = Propiedad.crear({
+      id: "prop-007",
+      titulo: "Fijo",
+      descripcion: "Fijo",
+      precio: 100,
+      origen: "ALVAS",
+      asesorResponsableId: "asesor-001",
+    });
+    propiedad.actualizar({});
+    expect(propiedad.titulo).toBe("Fijo");
+    expect(propiedad.asesorResponsableId as string).toBe("asesor-001");
+  });
+
+  test("actualizar con idClientePropietario undefined lo limpia", () => {
+    const propiedad = Propiedad.crear({
+      id: "prop-008",
+      titulo: "Test",
+      descripcion: "Test",
+      precio: 100,
+      origen: "ALVAS",
+      idClientePropietario: "cli-001",
+    });
+    propiedad.actualizar({ idClientePropietario: "" });
+    expect(propiedad.idClientePropietario).toBeUndefined();
+  });
 });

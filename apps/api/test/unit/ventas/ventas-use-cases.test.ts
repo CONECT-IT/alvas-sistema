@@ -25,7 +25,6 @@ import { ObtenerClienteUseCase } from "../../../src/lib/ventas/application/use-c
 import { ObtenerLeadUseCase } from "../../../src/lib/ventas/application/use-cases/ObtenerLeadUseCase";
 import { RegistrarClienteDirectoUseCase } from "../../../src/lib/ventas/application/use-cases/RegistrarClienteDirectoUseCase";
 import { RegistrarLeadUseCase } from "../../../src/lib/ventas/application/use-cases/RegistrarLeadUseCase";
-import { Cita } from "../../../src/lib/ventas/domain/entities/Cita";
 import { Cliente } from "../../../src/lib/ventas/domain/entities/Cliente";
 import { Contrato } from "../../../src/lib/ventas/domain/entities/Contrato";
 import { Lead } from "../../../src/lib/ventas/domain/entities/Lead";
@@ -121,13 +120,13 @@ class FakeEvaluadorAsignacion {
     this.resultado = resultado ?? { esExito: true as const, valor: idUsuarioRef("asesor-1") };
   }
 
-  evaluar(_stats: unknown): ResultadoEvaluacion {
+  evaluar(): ResultadoEvaluacion {
     return this.resultado;
   }
 }
 
 class FakeEvaluadorFallido {
-  evaluar(_stats: unknown) {
+  evaluar() {
     return { esExito: false as const, error: new ErrorDeDominio("No hay asesores.") };
   }
 }
@@ -235,10 +234,16 @@ describe("ventas / use cases", () => {
     });
 
     expect(propiedadNoDisponible.esExito).toBe(false);
+    expect(propiedadNoDisponible.esExito ? undefined : propiedadNoDisponible.error.message).toBe(
+      "La propiedad de interes no esta disponible para compradores.",
+    );
     expect(propiedadNoDisponible.esExito ? undefined : propiedadNoDisponible.error.codigo).toBe(
       "PROPIEDAD_INTERES_NO_DISPONIBLE",
     );
     expect(vendedorConInteres.esExito).toBe(false);
+    expect(vendedorConInteres.esExito ? undefined : vendedorConInteres.error.message).toBe(
+      "Solo los leads compradores pueden relacionarse con una propiedad.",
+    );
     expect(vendedorConInteres.esExito ? undefined : vendedorConInteres.error.codigo).toBe(
       "PROPIEDAD_INTERES_NO_APLICA",
     );
@@ -321,6 +326,9 @@ describe("ventas / use cases", () => {
     });
 
     expect(resultado.esExito).toBe(false);
+    expect(resultado.esExito ? undefined : resultado.error.message).toBe(
+      "No se pudo asignar un asesor automáticamente.",
+    );
     expect(repo.leads.size).toBe(0);
   });
 
@@ -345,7 +353,7 @@ describe("ventas / use cases", () => {
     expect(resultado.esExito).toBe(true);
     expect(lead?.citas).toHaveLength(1);
     if (resultado.esExito) {
-      expect(lead?.citas[0].estado).toBe("PENDIENTE");
+      expect(lead?.citas[0]!.estado).toBe("PENDIENTE");
     }
     expect(repo.actividades).toContain("CITA_AGENDADA");
     expect(registrarActividadSpy).toHaveBeenCalledTimes(1);
@@ -366,7 +374,7 @@ describe("ventas / use cases", () => {
     });
 
     expect(resultado.esExito).toBe(false);
-    expect(resultado.esExito ? undefined : resultado.error.message).toContain("Lead no encontrado");
+    expect(resultado.esExito ? undefined : resultado.error.message).toBe("Lead no encontrado");
   });
 
   test("AgendarCitaUseCase funciona sin usuarioAutenticado", async () => {
@@ -420,7 +428,7 @@ describe("ventas / use cases", () => {
     });
 
     expect(resultado.esExito).toBe(false);
-    expect(resultado.esExito ? undefined : resultado.error.message).toContain("Lead no encontrado");
+    expect(resultado.esExito ? undefined : resultado.error.message).toBe("Lead no encontrado");
     expect(repo.clientes.size).toBe(0);
   });
 
@@ -454,6 +462,9 @@ describe("ventas / use cases", () => {
 
     const lead = await repo.obtenerLeadPorId("lead-001" as IdLead);
     expect(resultado.esExito).toBe(false);
+    expect(resultado.esExito ? undefined : resultado.error.message).toBe(
+      "No tienes permisos para gestionar este lead.",
+    );
     expect(resultado.esExito ? undefined : resultado.error.codigo).toBe("SIN_PERMISOS_LEAD");
     expect(lead?.nombre).toBe("Maria");
   });
@@ -493,6 +504,9 @@ describe("ventas / use cases", () => {
 
     const lead = await repo.obtenerLeadPorId("lead-001" as IdLead);
     expect(resultado.esExito).toBe(false);
+    expect(resultado.esExito ? undefined : resultado.error.message).toBe(
+      "La propiedad de interes no esta disponible para compradores.",
+    );
     expect(resultado.esExito ? undefined : resultado.error.codigo).toBe(
       "PROPIEDAD_INTERES_NO_DISPONIBLE",
     );
@@ -540,6 +554,7 @@ describe("ventas / use cases", () => {
     });
 
     expect(resultado.esExito).toBe(false);
+    expect(resultado.esExito ? undefined : resultado.error.message).toBe("Lead no encontrado");
     expect(resultado.esExito ? undefined : resultado.error.codigo).toBe("LEAD_NOT_FOUND");
   });
 
@@ -614,12 +629,21 @@ describe("ventas / use cases", () => {
     });
 
     expect(leadInexistente.esExito).toBe(false);
+    expect(leadInexistente.esExito ? undefined : leadInexistente.error.message).toBe(
+      "Lead no encontrado",
+    );
     expect(leadInexistente.esExito ? undefined : leadInexistente.error.codigo).toBe(
       "LEAD_NOT_FOUND",
     );
     expect(sinPermisos.esExito).toBe(false);
+    expect(sinPermisos.esExito ? undefined : sinPermisos.error.message).toBe(
+      "No tienes permisos para gestionar este lead.",
+    );
     expect(sinPermisos.esExito ? undefined : sinPermisos.error.codigo).toBe("SIN_PERMISOS_LEAD");
     expect(citaInexistente.esExito).toBe(false);
+    expect(citaInexistente.esExito ? undefined : citaInexistente.error.message).toBe(
+      "Cita no encontrada",
+    );
     expect(citaInexistente.esExito ? undefined : citaInexistente.error.codigo).toBe(
       "CITA_NOT_FOUND",
     );
@@ -818,7 +842,7 @@ describe("ventas / use cases", () => {
 
     expect(resultado.esExito).toBe(true);
     expect(resultado.esExito ? resultado.valor : []).toHaveLength(1);
-    expect(resultado.esExito ? resultado.valor[0].fechaInicio.toISOString() : "").toBe(
+    expect(resultado.esExito ? resultado.valor[0]!.fechaInicio.toISOString() : "").toBe(
       "2026-06-01T10:00:00.000Z",
     );
   });
@@ -843,7 +867,7 @@ describe("ventas / use cases", () => {
 
     expect(resultado.esExito).toBe(true);
     expect(resultado.esExito ? resultado.valor : []).toHaveLength(1);
-    expect(resultado.esExito ? resultado.valor[0].id : "").toBe(idLead("lead-001"));
+    expect(resultado.esExito ? resultado.valor[0]!.id : "").toBe(idLead("lead-001"));
   });
 
   test("ListarAsesoresConLeadsUseCase devuelve stats", async () => {
@@ -854,7 +878,7 @@ describe("ventas / use cases", () => {
 
     expect(resultado.esExito).toBe(true);
     expect(resultado.esExito ? resultado.valor : []).toHaveLength(1);
-    expect(resultado.esExito ? resultado.valor[0].totalLeads : 0).toBe(1);
+    expect(resultado.esExito ? resultado.valor[0]!.totalLeads : 0).toBe(1);
   });
 
   test("CrearContratoUseCase guarda contrato en repositorio", async () => {

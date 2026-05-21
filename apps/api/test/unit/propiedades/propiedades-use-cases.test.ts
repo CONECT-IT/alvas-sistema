@@ -13,6 +13,8 @@ import {
   type RelacionPropiedad,
 } from "../../../src/lib/propiedades/domain/ports";
 import { type IdPropiedad } from "../../../src/lib/propiedades/domain/value-objects";
+import { PropiedadError } from "../../../src/lib/propiedades/domain/errors/PropiedadError";
+import { ErrorDeDominio } from "../../../src/lib/shared/domain/errors/ErrorDeDominio";
 import { type IGeneradorId } from "../../../src/lib/shared/domain/ports/IGeneradorId";
 import { AutorizadorPropiedadesAdapter } from "../../../src/lib/propiedades/infrastructure/security/AutorizadorPropiedadesAdapter";
 
@@ -97,6 +99,10 @@ describe("propiedades / use cases", () => {
     });
 
     expect(asesor.esExito).toBe(false);
+    expect(asesor.esExito ? undefined : asesor.error.message).toBe(
+      "No tienes permisos para crear esta propiedad.",
+    );
+    expect(asesor.esExito ? undefined : asesor.error.codigo).toBe("SIN_PERMISOS");
     expect(admin.esExito).toBe(true);
     expect(repo.propiedades.get("prop-001")?.asesorResponsableId as string).toBe("asesor-1");
   });
@@ -174,7 +180,15 @@ describe("propiedades / use cases", () => {
     });
 
     expect(sinRelacion.esExito).toBe(false);
+    expect(sinRelacion.esExito ? undefined : sinRelacion.error.message).toBe(
+      "No tienes permisos para crear esta propiedad.",
+    );
+    expect(sinRelacion.esExito ? undefined : sinRelacion.error.codigo).toBe("SIN_PERMISOS");
     expect(relacionAjena.esExito).toBe(false);
+    expect(relacionAjena.esExito ? undefined : relacionAjena.error.message).toBe(
+      "No tienes permisos para crear esta propiedad.",
+    );
+    expect(relacionAjena.esExito ? undefined : relacionAjena.error.codigo).toBe("SIN_PERMISOS");
     expect(repo.propiedades.size).toBe(0);
   });
 
@@ -285,6 +299,10 @@ describe("propiedades / use cases", () => {
     });
 
     expect(resultado.esExito).toBe(false);
+    expect(resultado.esExito ? undefined : resultado.error.message).toBe(
+      "No tienes permisos para editar esta propiedad.",
+    );
+    expect(resultado.esExito ? undefined : resultado.error.codigo).toBe("SIN_PERMISOS");
     expect(repo.propiedades.get("prop-003")?.precio).toBe(300000);
   });
 
@@ -334,6 +352,9 @@ describe("propiedades / use cases", () => {
       usuarioAutenticado: { id: "asesor-1", rol: "ASESOR" },
     });
     expect(asesor.esExito).toBe(false);
+    expect(asesor.esExito ? undefined : asesor.error.message).toBe(
+      "No tienes permisos para gestionar propiedades.",
+    );
     expect(asesor.esExito ? undefined : asesor.error.codigo).toBe("SIN_PERMISOS");
     expect(repo.propiedades.has("prop-005")).toBe(true);
 
@@ -358,6 +379,143 @@ describe("propiedades / use cases", () => {
     });
 
     expect(resultado.esExito).toBe(false);
+    expect(resultado.esExito ? undefined : resultado.error.message).toBe(
+      "Propiedad no encontrada.",
+    );
     expect(resultado.esExito ? undefined : resultado.error.codigo).toBe("NO_ENCONTRADA");
+  });
+
+  test("ListarPropiedadesUseCase rechaza rol sin permisos", async () => {
+    const repo = new FakePropiedadRepository();
+
+    const resultado = await new ListarPropiedadesUseCase(
+      repo,
+      new AutorizadorPropiedadesAdapter(),
+    ).ejecutar({
+      usuarioAutenticado: { id: "invitado-1", rol: "INVITADO" },
+    });
+
+    expect(resultado.esExito).toBe(false);
+    expect(resultado.esExito ? undefined : resultado.error.message).toBe(
+      "No tienes permisos para ver propiedades.",
+    );
+    expect(resultado.esExito ? undefined : resultado.error.codigo).toBe("ROL_NO_PERMITIDO");
+  });
+
+  test("propaga errores no dominio en CrearPropiedadUseCase", async () => {
+    const repo = new FakePropiedadRepository();
+    repo.guardar = () => Promise.reject(new Error("db error"));
+
+    await expect(
+      new CrearPropiedadUseCase(
+        repo,
+        new GeneradorIdFijo("new-001"),
+        new AutorizadorPropiedadesAdapter(),
+        new FakeConsultaRelacionPropiedad(),
+      ).ejecutar({
+        titulo: "Test",
+        descripcion: "Test",
+        precio: 100,
+        origen: "ALVAS",
+        usuarioAutenticado: { id: "admin-1", rol: "ADMIN" },
+      }),
+    ).rejects.toThrow("db error");
+  });
+
+  test("propaga errores no dominio en ActualizarPropiedadUseCase", async () => {
+    const repo = new FakePropiedadRepository();
+    await repo.guardar(
+      Propiedad.crear({
+        id: "prop-001",
+        titulo: "Test",
+        descripcion: "Test",
+        precio: 100,
+        origen: "ALVAS",
+      }),
+    );
+    repo.guardar = () => Promise.reject(new Error("db error"));
+
+    await expect(
+      new ActualizarPropiedadUseCase(
+        repo,
+        new AutorizadorPropiedadesAdapter(),
+        new FakeConsultaRelacionPropiedad(),
+      ).ejecutar({
+        idPropiedad: "prop-001",
+        titulo: "Nuevo",
+        usuarioAutenticado: { id: "admin-1", rol: "ADMIN" },
+      }),
+    ).rejects.toThrow("db error");
+  });
+
+  test("propaga errores no dominio en ListarPropiedadesUseCase", async () => {
+    const repo = new FakePropiedadRepository();
+    repo.listarTodas = () => Promise.reject(new Error("db error"));
+
+    await expect(
+      new ListarPropiedadesUseCase(repo, new AutorizadorPropiedadesAdapter()).ejecutar({
+        usuarioAutenticado: { id: "admin-1", rol: "ADMIN" },
+      }),
+    ).rejects.toThrow("db error");
+  });
+
+  test("captura PropiedadError como resultadoFallido en CrearPropiedadUseCase", async () => {
+    const repo = new FakePropiedadRepository();
+    repo.guardar = () => Promise.reject(new PropiedadError("error dominio", "ERROR"));
+
+    const resultado = await new CrearPropiedadUseCase(
+      repo,
+      new GeneradorIdFijo("new-001"),
+      new AutorizadorPropiedadesAdapter(),
+      new FakeConsultaRelacionPropiedad(),
+    ).ejecutar({
+      titulo: "Test",
+      descripcion: "Test",
+      precio: 100,
+      origen: "ALVAS",
+      usuarioAutenticado: { id: "admin-1", rol: "ADMIN" },
+    });
+
+    expect(resultado.esExito).toBe(false);
+  });
+
+  test("captura PropiedadError como resultadoFallido en ActualizarPropiedadUseCase", async () => {
+    const repo = new FakePropiedadRepository();
+    await repo.guardar(
+      Propiedad.crear({
+        id: "prop-001",
+        titulo: "Test",
+        descripcion: "Test",
+        precio: 100,
+        origen: "ALVAS",
+      }),
+    );
+    repo.guardar = () => Promise.reject(new PropiedadError("error dominio", "ERROR"));
+
+    const resultado = await new ActualizarPropiedadUseCase(
+      repo,
+      new AutorizadorPropiedadesAdapter(),
+      new FakeConsultaRelacionPropiedad(),
+    ).ejecutar({
+      idPropiedad: "prop-001",
+      titulo: "Nuevo",
+      usuarioAutenticado: { id: "admin-1", rol: "ADMIN" },
+    });
+
+    expect(resultado.esExito).toBe(false);
+  });
+
+  test("captura ErrorDeDominio como resultadoFallido en ListarPropiedadesUseCase", async () => {
+    const repo = new FakePropiedadRepository();
+    repo.listarTodas = () => Promise.reject(new ErrorDeDominio("error dominio"));
+
+    const resultado = await new ListarPropiedadesUseCase(
+      repo,
+      new AutorizadorPropiedadesAdapter(),
+    ).ejecutar({
+      usuarioAutenticado: { id: "admin-1", rol: "ADMIN" },
+    });
+
+    expect(resultado.esExito).toBe(false);
   });
 });

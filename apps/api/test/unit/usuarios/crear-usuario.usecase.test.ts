@@ -146,6 +146,7 @@ describe("usuarios / ActualizarUsuarioUseCase", () => {
     });
 
     expect(resultado.esExito).toBe(false);
+    expect(resultado.esExito ? undefined : resultado.error.message).toBe("Usuario no encontrado");
     expect(resultado.esExito ? undefined : resultado.error.codigo).toBe("USER_NOT_FOUND");
     expect(repo.usuarios.size).toBe(0);
   });
@@ -217,8 +218,8 @@ describe("usuarios / ListarUsuariosUseCase", () => {
     expect(resultado.esExito).toBe(true);
     expect(resultado.esExito ? resultado.valor : []).toHaveLength(2);
     if (resultado.esExito) {
-      expect(resultado.valor[0].username).toBe("jperez");
-      expect(resultado.valor[1].username).toBe("admin1");
+      expect(resultado.valor[0]!.username).toBe("jperez");
+      expect(resultado.valor[1]!.username).toBe("admin1");
     }
   });
 
