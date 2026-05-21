@@ -3,28 +3,25 @@
 @plugin '@tailwindcss/typography';
 
 @theme {
-	/* Fuentes */
 	--font-sans: 'Inter', sans-serif;
 	--font-display: 'Outfit', sans-serif;
 
-	/* Paleta Warm & Golden Orange */
-	--color-primary: #d97706; /* amber-600 */
-	--color-primary-dark: #b45309; /* amber-700 */
-	--color-primary-light: #fef3c7; /* amber-100 */
-	--color-accent: #f97316; /* orange-500 */
+	--color-primary: #d97706;
+	--color-primary-dark: #b45309;
+	--color-primary-light: #fef3c7;
+	--color-accent: #f97316;
 
-	--color-bg-base: #fafaf7; /* crema claro */
+	--color-bg-base: #fafaf7;
 	--color-bg-card: #ffffff;
 	--color-surface: #ffffff;
 	--color-surface-warm: #fff7ed;
 	--color-surface-muted: #f5f5f4;
 
-	--color-text-main: #292524; /* stone-800 */
-	--color-text-muted: #78716c; /* stone-500 */
+	--color-text-main: #292524;
+	--color-text-muted: #78716c;
 
-	--color-border-light: #e7e5e4; /* stone-200 */
+	--color-border-light: #e7e5e4;
 
-	/* Tokens derivados */
 	--radius-control: 0.75rem;
 	--radius-panel: 1.5rem;
 	--radius-shell: 2rem;

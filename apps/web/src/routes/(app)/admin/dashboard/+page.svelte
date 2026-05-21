@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { authStore } from '$lib/auth/infrastructure/authStore';
+	import Badge from '$lib/shared/ui/Badge.svelte';
+	import Card from '$lib/shared/ui/Card.svelte';
 </script>
 
 <svelte:head>
@@ -19,7 +21,7 @@
 
 	<!-- Tarjetas de métricas -->
 	<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-		<div class="rounded-3xl border border-border-light bg-white p-6 shadow-xs">
+		<Card>
 			<span class="text-xs font-semibold tracking-wider text-text-muted uppercase">Propiedades</span
 			>
 			<h2 class="mt-1 font-display text-3xl font-bold text-text-main">148</h2>
@@ -34,9 +36,9 @@
 				>
 				<span>+12% este mes</span>
 			</div>
-		</div>
+		</Card>
 
-		<div class="rounded-3xl border border-border-light bg-white p-6 shadow-xs">
+		<Card>
 			<span class="text-xs font-semibold tracking-wider text-text-muted uppercase"
 				>Leads Totales</span
 			>
@@ -52,9 +54,9 @@
 				>
 				<span>+18% esta semana</span>
 			</div>
-		</div>
+		</Card>
 
-		<div class="rounded-3xl border border-border-light bg-white p-6 shadow-xs">
+		<Card>
 			<span class="text-xs font-semibold tracking-wider text-text-muted uppercase"
 				>Ventas del Mes</span
 			>
@@ -70,9 +72,9 @@
 				>
 				<span>+5.4% vs mes anterior</span>
 			</div>
-		</div>
+		</Card>
 
-		<div class="rounded-3xl border border-border-light bg-white p-6 shadow-xs">
+		<Card>
 			<span class="text-xs font-semibold tracking-wider text-text-muted uppercase"
 				>Asesores Activos</span
 			>
@@ -81,13 +83,13 @@
 				<span class="h-2 w-2 rounded-full bg-emerald-500"></span>
 				<span>En línea ahora</span>
 			</div>
-		</div>
+		</Card>
 	</div>
 
 	<!-- Grilla principal de reportes y actividad -->
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
 		<!-- Panel de propiedades recientes -->
-		<div class="rounded-3xl border border-border-light bg-white p-6 shadow-xs lg:col-span-2">
+		<Card class="lg:col-span-2">
 			<div class="mb-6 flex items-center justify-between">
 				<h3 class="font-display text-lg font-bold text-text-main">
 					Últimas Propiedades Registradas
@@ -113,10 +115,7 @@
 							<td class="py-3.5 text-text-muted">Lima, Perú</td>
 							<td class="py-3.5 font-semibold text-primary">$350,000</td>
 							<td class="py-3.5">
-								<span
-									class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700"
-									>Disponible</span
-								>
+								<Badge tone="success">Disponible</Badge>
 							</td>
 						</tr>
 						<tr>
@@ -124,10 +123,7 @@
 							<td class="py-3.5 text-text-muted">Lima, Perú</td>
 							<td class="py-3.5 font-semibold text-primary">$180,000</td>
 							<td class="py-3.5">
-								<span
-									class="bg-amber-55 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700"
-									>Reservada</span
-								>
+								<Badge>Reservada</Badge>
 							</td>
 						</tr>
 						<tr>
@@ -135,19 +131,16 @@
 							<td class="py-3.5 text-text-muted">Lima, Perú</td>
 							<td class="py-3.5 font-semibold text-primary">$210,000</td>
 							<td class="py-3.5">
-								<span
-									class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700"
-									>Disponible</span
-								>
+								<Badge tone="success">Disponible</Badge>
 							</td>
 						</tr>
 					</tbody>
 				</table>
 			</div>
-		</div>
+		</Card>
 
 		<!-- Panel lateral de actividad o leads -->
-		<div class="flex flex-col gap-6 rounded-3xl border border-border-light bg-white p-6 shadow-xs">
+		<Card class="flex flex-col gap-6">
 			<h3 class="font-display text-lg font-bold text-text-main">Leads en Captación (Recientes)</h3>
 
 			<div class="flex flex-col gap-4">
@@ -203,6 +196,6 @@
 			>
 				Ir al CRM de Leads
 			</a>
-		</div>
+		</Card>
 	</div>
 </div>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Button from '$lib/shared/ui/Button.svelte';
 	import { authStore } from '$lib/auth/infrastructure/authStore';
 
 	const propiedades = [
@@ -70,19 +71,15 @@
 			Contacto
 		</a>
 		{#if $authStore.isAuthenticated}
-			<a
+			<Button
 				href={$authStore.user?.esAdmin ? '/admin/dashboard' : '/asesor/dashboard'}
-				class="rounded-xl border border-border-light bg-white px-5 py-2.5 font-display font-semibold text-text-main transition hover:border-primary/30 hover:text-primary"
+				variant="secondary"
+				class="px-5 py-2.5"
 			>
 				Panel interno
-			</a>
+			</Button>
 		{:else}
-			<a
-				href="/login"
-				class="rounded-xl border border-border-light bg-white px-5 py-2.5 font-display font-semibold text-text-main transition hover:border-primary/30 hover:text-primary"
-			>
-				Acceso equipo
-			</a>
+			<Button href="/login" variant="secondary" class="px-5 py-2.5">Acceso equipo</Button>
 		{/if}
 	</nav>
 </header>
@@ -101,18 +98,8 @@
 				para ayudarte a tomar una mejor decisión.
 			</p>
 			<div class="mt-8 flex flex-col gap-3 sm:flex-row">
-				<a
-					href="#contacto"
-					class="rounded-xl bg-primary px-6 py-3 text-center font-display font-semibold text-white shadow-sm transition hover:bg-primary-dark"
-				>
-					Quiero que me contacten
-				</a>
-				<a
-					href="#propiedades"
-					class="rounded-xl border border-border-light bg-white px-6 py-3 text-center font-display font-semibold text-text-main transition hover:border-primary/30 hover:text-primary"
-				>
-					Ver proyectos
-				</a>
+				<Button href="#contacto" class="px-6">Quiero que me contacten</Button>
+				<Button href="#propiedades" variant="secondary" class="px-6">Ver proyectos</Button>
 			</div>
 		</div>
 	</section>
@@ -215,12 +202,7 @@
 					Pronto conectaremos este espacio al formulario de captación. Por ahora funciona como
 					bloque público para validar contenido, diseño y jerarquía.
 				</p>
-				<a
-					href="tel:+51000000000"
-					class="mt-5 inline-flex rounded-xl bg-primary px-5 py-3 font-display font-semibold text-white transition hover:bg-primary-dark"
-				>
-					Llamar a ALVAS
-				</a>
+				<Button href="tel:+51000000000" class="mt-5">Llamar a ALVAS</Button>
 			</div>
 		</div>
 	</section>

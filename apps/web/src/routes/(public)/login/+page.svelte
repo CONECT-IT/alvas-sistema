@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import Button from '$lib/shared/ui/Button.svelte';
 	import { authStore } from '$lib/auth/infrastructure/authStore';
 
 	let username = $state('');
@@ -15,12 +17,18 @@
 		}
 
 		try {
-			await authStore.login(username, clave);
-			// La redirección es controlada automáticamente por el layout raíz ($effect)
+			const user = await authStore.login(username, clave);
+			await goto(user.esAdmin ? '/admin/dashboard' : '/asesor/dashboard');
 		} catch (err) {
 			console.error('Error de inicio de sesión:', err);
 		}
 	}
+
+	$effect(() => {
+		if ($authStore.isAuthenticated && !$authStore.loading) {
+			goto($authStore.user?.esAdmin ? '/admin/dashboard' : '/asesor/dashboard');
+		}
+	});
 </script>
 
 <svelte:head>
@@ -114,9 +122,9 @@
 			</div>
 
 			<!-- Botón de Envío -->
-			<button
+			<Button
 				type="submit"
-				class="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 font-display font-bold text-white shadow-md transition hover:bg-primary-dark hover:shadow-lg disabled:opacity-50"
+				class="mt-2 w-full gap-2 rounded-2xl py-3.5 font-bold shadow-md hover:shadow-lg disabled:opacity-50"
 				disabled={$authStore.loading}
 			>
 				{#if $authStore.loading}
@@ -131,9 +139,9 @@
 					</svg>
 					Iniciando sesión...
 				{:else}
-					Entrar al Sistema
+					Entrar al sistema
 				{/if}
-			</button>
+			</Button>
 		</form>
 
 		<div class="mt-8 border-t border-border-light pt-4 text-center">
