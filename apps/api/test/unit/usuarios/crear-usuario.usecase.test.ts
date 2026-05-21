@@ -286,7 +286,11 @@ describe("usuarios / propaga errores no dominio", () => {
     repo.guardar = () => Promise.reject(new ErrorDeDominio("error dominio"));
 
     const resultado = await new CrearUsuarioUseCase(repo, new FakePasswordHasher()).ejecutar({
-      idUsuario: "user-001", username: "test", nombre: "Test", clave: "secreto", rol: "ASESOR",
+      idUsuario: "user-001",
+      username: "test",
+      nombre: "Test",
+      clave: "secreto",
+      rol: "ASESOR",
     });
 
     expect(resultado.esExito).toBe(false);
@@ -294,11 +298,20 @@ describe("usuarios / propaga errores no dominio", () => {
 
   test("captura ErrorDeDominio como resultadoFallido en ActualizarUsuarioUseCase", async () => {
     const repo = new FakeUsuarioRepository();
-    const usuario = Usuario.crear({ id: "user-001", username: "test", nombre: "Test", hashClave: "hash-seguro-001", rol: "ASESOR" });
+    const usuario = Usuario.crear({
+      id: "user-001",
+      username: "test",
+      nombre: "Test",
+      hashClave: "hash-seguro-001",
+      rol: "ASESOR",
+    });
     await repo.guardar(usuario);
     repo.guardar = () => Promise.reject(new ErrorDeDominio("error dominio"));
 
-    const resultado = await new ActualizarUsuarioUseCase(repo).ejecutar({ idUsuario: "user-001", nombre: "Nuevo" });
+    const resultado = await new ActualizarUsuarioUseCase(repo).ejecutar({
+      idUsuario: "user-001",
+      nombre: "Nuevo",
+    });
 
     expect(resultado.esExito).toBe(false);
   });
