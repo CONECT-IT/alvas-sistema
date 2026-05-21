@@ -1,6 +1,7 @@
 # alvas-sistema
 
 [![Test & Quality Pipeline](https://github.com/softwarelazana-ui/alvas-sistema/actions/workflows/test.yml/badge.svg?branch=develop)](https://github.com/softwarelazana-ui/alvas-sistema/actions/workflows/test.yml)
+[![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fsoftwarelazana-ui%2Falvas-sistema%2Fdevelop)](https://dashboard.stryker-mutator.io/reports/github.com/softwarelazana-ui/alvas-sistema/develop)
 
 Base inicial del monorepo ALVAS alineada al plan tecnico DDD + Hexagonal.
 
@@ -126,8 +127,15 @@ Mutation testing:
 - Exclusiones: tests, DTOs, puertos, `index.ts`, controllers, adaptadores e infraestructura.
 - Umbral: `break: 70`.
 - Reporte: `reports/mutation/`, publicado como artefacto `stryker-report`.
+- Dashboard: si GitHub Secrets define `STRYKER_DASHBOARD_API_KEY`, Stryker publica el reporte completo en Stryker Dashboard.
 
 Justificacion S07/S08: el 70% de mutation score representa un equilibrio entre rigor de asserts y costo de ejecucion en CI. La corrida ampliada actual registro 59.40%, por lo que el gate falla hasta reforzar pruebas en mutantes sobrevivientes.
+
+Para activar el badge de mutation score:
+
+1. Habilitar el repositorio en https://dashboard.stryker-mutator.io.
+2. Crear el secret `STRYKER_DASHBOARD_API_KEY` en GitHub Actions.
+3. Ejecutar el pipeline en `develop` para publicar el primer reporte.
 
 ## Auditoria arquitectonica
 

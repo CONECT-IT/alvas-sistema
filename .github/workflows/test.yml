@@ -127,6 +127,8 @@ jobs:
           bun-version: latest
       - run: bun install --frozen-lockfile
       - name: Stryker mutation gate
+        env:
+          STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
         run: |
           # Umbral justificado en S07: el alcance auditado incluye entidades
           # del dominio y casos de uso de aplicacion, excluyendo controllers,
@@ -134,6 +136,8 @@ jobs:
           # fuertes y bloquea el merge cuando sobreviven demasiados mutantes.
           # El baseline actual fue 59.40%, por lo que este gate documenta la
           # brecha pendiente y falla de forma explicita hasta corregirla.
+          # Si existe el secret STRYKER_DASHBOARD_API_KEY, Stryker publica el
+          # reporte completo en dashboard.stryker-mutator.io para badge historico.
           # mutation_threshold: 70
           bun run test:mutation
       - uses: actions/upload-artifact@v4

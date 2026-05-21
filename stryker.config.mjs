@@ -1,5 +1,8 @@
 // @ts-check
 
+const dashboardEnabled = Boolean(process.env.STRYKER_DASHBOARD_API_KEY);
+const dashboardVersion = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME || "local";
+
 /**
  * El mutation testing queda acotado a la logica de negocio exigida por S07/S08:
  * entidades del dominio y casos de uso de aplicacion. Se excluyen controllers,
@@ -25,7 +28,7 @@ export default {
     "!apps/api/src/**/ports/**/*.ts",
     "!apps/api/src/**/index.ts",
   ],
-  reporters: ["progress", "clear-text", "html", "json"],
+  reporters: ["progress", "clear-text", "html", "json", ...(dashboardEnabled ? ["dashboard"] : [])],
   coverageAnalysis: "off",
   concurrency: 2,
   timeoutMS: 10000,
@@ -39,5 +42,10 @@ export default {
   },
   jsonReporter: {
     fileName: "reports/mutation/mutation.json",
+  },
+  dashboard: {
+    project: "github.com/softwarelazana-ui/alvas-sistema",
+    version: dashboardVersion,
+    reportType: "full",
   },
 };

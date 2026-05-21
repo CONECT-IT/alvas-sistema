@@ -35,6 +35,25 @@ thresholds: {
 
 Justificacion S07/S08: el 70% obliga a que las pruebas detecten defectos de negocio relevantes sin exigir un 100% artificial. La corrida ampliada sobre `domain` y `application/use-cases` registro un baseline de 59.40%; por eso el pipeline debe fallar hasta que se agreguen asserts para matar mutantes sobrevivientes en casos de uso y value objects.
 
+## Stryker Dashboard
+
+El proyecto esta preparado para publicar en Stryker Dashboard cuando exista el secret `STRYKER_DASHBOARD_API_KEY` en GitHub Actions.
+
+Configuracion aplicada:
+
+- Reporter `dashboard` habilitado solo cuando `STRYKER_DASHBOARD_API_KEY` existe.
+- Proyecto: `github.com/softwarelazana-ui/alvas-sistema`.
+- Version: rama o tag detectado por GitHub Actions.
+- Tipo de reporte: `full`.
+
+Pasos para activar el badge:
+
+1. Entrar a https://dashboard.stryker-mutator.io con GitHub.
+2. Habilitar el repositorio `softwarelazana-ui/alvas-sistema`.
+3. Copiar la API key generada.
+4. Crear el secret `STRYKER_DASHBOARD_API_KEY` en GitHub.
+5. Ejecutar el workflow en `develop`.
+
 ## Como leer resultados
 
 - `Killed`: al menos un test fallo despues de que Stryker inyecto el defecto. Es el resultado deseado.
