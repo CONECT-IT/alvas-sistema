@@ -3,6 +3,7 @@
 	import Card from '$lib/shared/ui/Card.svelte';
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import type { Propiedad } from '$lib/propiedades/domain/models/Propiedad';
+	import { crearPropiedad } from '$lib/propiedades/application/use-cases/crearPropiedad';
 	import { listarPropiedades } from '$lib/propiedades/application/use-cases/listarPropiedades';
 	import { propiedadRepository } from '$lib/propiedades/infrastructure/propiedadRepository';
 	import PropiedadAdminTable from '$lib/propiedades/presentation/PropiedadAdminTable.svelte';
@@ -10,8 +11,18 @@
 
 	let propiedades = $state<Propiedad[]>([]);
 	let loading = $state(true);
+	let creating = $state(false);
 	let error = $state<string | null>(null);
+	let createError = $state<string | null>(null);
+	let createSuccess = $state<string | null>(null);
+	let mostrarFormulario = $state(false);
+	let titulo = $state('');
+	let descripcion = $state('');
+	let precio = $state('');
+	let estado = $state('DISPONIBLE');
+	let asesorResponsableId = $state('');
 	const skeletonCards = [1, 2, 3];
+	const estados = ['PRELIMINAR', 'EN_VALIDACION', 'DISPONIBLE', 'RESERVADA'];
 
 	async function cargarPropiedades() {
 		loading = true;
@@ -27,6 +38,53 @@
 			}
 		} finally {
 			loading = false;
+		}
+	}
+
+	function limpiarFormulario() {
+		titulo = '';
+		descripcion = '';
+		precio = '';
+		estado = 'DISPONIBLE';
+		asesorResponsableId = '';
+	}
+
+	async function registrarPropiedad(event: SubmitEvent) {
+		event.preventDefault();
+		createError = null;
+		createSuccess = null;
+
+		const precioNumerico = Number(precio);
+
+		if (!titulo.trim() || !descripcion.trim() || Number.isNaN(precioNumerico)) {
+			createError = 'Completa título, descripción y precio válido.';
+			return;
+		}
+
+		if (precioNumerico < 0) {
+			createError = 'El precio no puede ser negativo.';
+			return;
+		}
+
+		creating = true;
+
+		try {
+			await crearPropiedad(propiedadRepository, {
+				titulo: titulo.trim(),
+				descripcion: descripcion.trim(),
+				precio: precioNumerico,
+				estado,
+				asesorResponsableId: asesorResponsableId.trim() || undefined
+			});
+			createSuccess = 'Propiedad ALVAS registrada correctamente.';
+			limpiarFormulario();
+			mostrarFormulario = false;
+			await cargarPropiedades();
+		} catch (err) {
+			createError =
+				err instanceof HttpError ? err.message : 'No se pudo registrar la propiedad ALVAS.';
+		} finally {
+			creating = false;
 		}
 	}
 
@@ -54,6 +112,99 @@
 			Actualizar listado
 		</Button>
 	</div>
+
+	<Card>
+		<div class="flex flex-col justify-between gap-4 md:flex-row md:items-start">
+			<div>
+				<h2 class="font-display text-xl font-bold text-text-main">Registrar propiedad ALVAS</h2>
+				<p class="mt-1 max-w-2xl text-sm leading-relaxed text-text-muted">
+					Alta directa de propiedades que pertenecen al inventario de la empresa, sin asociarlas a
+					un cliente propietario.
+				</p>
+			</div>
+			<Button
+				variant={mostrarFormulario ? 'ghost' : 'primary'}
+				onclick={() => (mostrarFormulario = !mostrarFormulario)}
+			>
+				{mostrarFormulario ? 'Cerrar formulario' : 'Nueva propiedad'}
+			</Button>
+		</div>
+
+		{#if createSuccess}
+			<p class="mt-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+				{createSuccess}
+			</p>
+		{/if}
+
+		{#if createError}
+			<p class="mt-4 rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+				{createError}
+			</p>
+		{/if}
+
+		{#if mostrarFormulario}
+			<form class="mt-6 grid gap-4 md:grid-cols-2" onsubmit={registrarPropiedad}>
+				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+					Título
+					<input
+						bind:value={titulo}
+						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+						placeholder="Terreno en zona residencial"
+					/>
+				</label>
+
+				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+					Precio
+					<input
+						bind:value={precio}
+						type="number"
+						min="0"
+						step="0.01"
+						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+						placeholder="150000"
+					/>
+				</label>
+
+				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main md:col-span-2">
+					Descripción
+					<textarea
+						bind:value={descripcion}
+						rows="4"
+						class="resize-none rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+						placeholder="Ubicación, metraje, accesos y observaciones comerciales."
+					></textarea>
+				</label>
+
+				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+					Estado inicial
+					<select
+						bind:value={estado}
+						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+					>
+						{#each estados as item (item)}
+							<option value={item}>{item}</option>
+						{/each}
+					</select>
+				</label>
+
+				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+					Asesor responsable
+					<input
+						bind:value={asesorResponsableId}
+						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+						placeholder="ID del asesor, opcional"
+					/>
+				</label>
+
+				<div class="flex flex-col gap-3 md:col-span-2 md:flex-row md:justify-end">
+					<Button type="button" variant="ghost" onclick={limpiarFormulario}>Limpiar</Button>
+					<Button type="submit" disabled={creating}>
+						{creating ? 'Registrando...' : 'Registrar propiedad'}
+					</Button>
+				</div>
+			</form>
+		{/if}
+	</Card>
 
 	{#if loading}
 		<div class="grid gap-4 md:grid-cols-3">

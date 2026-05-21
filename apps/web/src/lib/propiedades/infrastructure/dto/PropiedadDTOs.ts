@@ -3,6 +3,19 @@ export type ApiSuccessResponse<T> = Readonly<{
 	data: T;
 }>;
 
+export type CrearPropiedadRequestDTO = Readonly<{
+	titulo: string;
+	descripcion: string;
+	precio: number;
+	origen: 'ALVAS';
+	estado: string;
+	asesorResponsableId?: string;
+}>;
+
+export type CrearPropiedadResponseDTO = Readonly<{
+	id: string;
+}>;
+
 export type PropiedadRespuestaDTO = Readonly<{
 	id: string;
 	titulo: string;
