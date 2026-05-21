@@ -1,6 +1,11 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { getApiBaseUrl } from '$lib/shared/server/api';
-import { getSession, setSessionCookies, type SessionData } from '$lib/auth/server/session';
+import {
+	getSession,
+	setSessionCookies,
+	toSessionUser,
+	type SessionData
+} from '$lib/auth/server/session';
 import type { RequestEvent, ServerLoad } from '@sveltejs/kit';
 
 type LoginApiResponse =
@@ -12,7 +17,7 @@ type LoginApiResponse =
 				usuario: {
 					id: string;
 					username: string;
-					rol: 'admin' | 'asesor';
+					rol: string;
 				};
 			};
 	  }
@@ -57,16 +62,22 @@ export const actions = {
 			});
 		}
 
+		const user = toSessionUser({
+			id: payload.data.usuario.id,
+			username: payload.data.usuario.username,
+			rol: payload.data.usuario.rol
+		});
+
+		if (!user) {
+			return fail(500, {
+				message: 'La API devolvió un rol de usuario no reconocido.'
+			});
+		}
+
 		const session: SessionData = {
 			authToken: payload.data.authToken,
 			refreshToken: payload.data.refreshToken,
-			user: {
-				id: payload.data.usuario.id,
-				username: payload.data.usuario.username,
-				nombre: payload.data.usuario.username,
-				rol: payload.data.usuario.rol,
-				estado: 'ACTIVO'
-			}
+			user
 		};
 
 		setSessionCookies(cookies, session, url.protocol === 'https:');

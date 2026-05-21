@@ -36,6 +36,40 @@ function decodeCookieJson<T>(value: string | undefined): T | null {
 	}
 }
 
+function normalizeRole(value: unknown): UserRol | null {
+	const role = String(value ?? '')
+		.trim()
+		.toLowerCase();
+
+	if (role === 'admin' || role === 'asesor') {
+		return role;
+	}
+
+	return null;
+}
+
+export function toSessionUser(value: {
+	id: string;
+	username: string;
+	nombre?: string;
+	rol: unknown;
+	estado?: string;
+}): SessionUser | null {
+	const role = normalizeRole(value.rol);
+
+	if (!role) {
+		return null;
+	}
+
+	return {
+		id: value.id,
+		username: value.username,
+		nombre: value.nombre ?? value.username,
+		rol: role,
+		estado: value.estado ?? 'ACTIVO'
+	};
+}
+
 export function setSessionCookies(cookies: Cookies, session: SessionData, secure: boolean): void {
 	const baseOptions = {
 		path: '/',
@@ -61,9 +95,15 @@ export function setSessionCookies(cookies: Cookies, session: SessionData, secure
 export function getSession(cookies: Cookies): SessionData | null {
 	const authToken = cookies.get(AUTH_COOKIE);
 	const refreshToken = cookies.get(REFRESH_COOKIE);
-	const user = decodeCookieJson<SessionUser>(cookies.get(USER_COOKIE));
+	const userCookie = decodeCookieJson<SessionUser>(cookies.get(USER_COOKIE));
 
-	if (!authToken || !refreshToken || !user) {
+	if (!authToken || !refreshToken || !userCookie) {
+		return null;
+	}
+
+	const user = toSessionUser(userCookie);
+
+	if (!user) {
 		return null;
 	}
 
