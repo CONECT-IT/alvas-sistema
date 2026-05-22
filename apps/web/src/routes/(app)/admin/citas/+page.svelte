@@ -6,6 +6,7 @@
 	type CitaAgenda = {
 		idLead: string;
 		idPropiedad?: string;
+		idAsesor: string;
 		fechaInicio: string;
 		fechaFin: string;
 		estado: string;
@@ -101,11 +102,15 @@
 			<div class="grid gap-3">
 				{#each citas as cita (cita.idLead + cita.fechaInicio)}
 					<div
-						class="grid gap-3 rounded-2xl border border-border-light bg-white px-4 py-3 md:grid-cols-[1.2fr_0.9fr_auto]"
+						class="grid gap-3 rounded-2xl border border-border-light bg-white px-4 py-3 md:grid-cols-[1fr_0.8fr_0.8fr_auto]"
 					>
 						<div>
 							<p class="font-semibold text-text-main">{cita.leadNombre}</p>
 							<p class="mt-1 text-xs font-medium text-text-muted">Lead: {cita.idLead}</p>
+						</div>
+						<div>
+							<p class="text-sm font-semibold text-text-main">Asesor</p>
+							<p class="mt-1 text-xs text-text-muted">{cita.idAsesor}</p>
 						</div>
 						<div>
 							<p class="text-sm font-semibold text-text-main">{formatearFecha(cita.fechaInicio)}</p>

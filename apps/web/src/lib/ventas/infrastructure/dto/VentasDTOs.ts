@@ -18,6 +18,7 @@ export type LeadPipelineDTO = Readonly<{
 	nombre: string;
 	estado: string;
 	tipo: string;
+	idAsesor?: string;
 	citasCount: number;
 	citas?: CitaPipelineDTO[];
 }>;
@@ -28,6 +29,11 @@ export type RegistrarLeadRequestDTO = Readonly<{
 	telefono: string;
 	tipo: 'COMPRA' | 'VENTA';
 	idPropiedadInteres?: string;
+	datosPropiedad?: {
+		titulo: string;
+		descripcion: string;
+		precio: number;
+	};
 }>;
 
 export type RegistrarLeadResponseDTO = Readonly<{
@@ -77,6 +83,7 @@ export type ContratoDTO = Readonly<{
 	idLead?: string;
 	idCliente?: string;
 	idPropiedad: string;
+	idAsesor?: string;
 	fechaInicio: string;
 	fechaFin: string;
 	estado: string;

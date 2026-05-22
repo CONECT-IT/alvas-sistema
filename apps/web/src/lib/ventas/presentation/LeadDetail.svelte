@@ -5,8 +5,10 @@
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import type { LeadDetalle } from '../domain/models/LeadDetalle';
 	import { obtenerLead } from '../application/use-cases/obtenerLead';
+	import { listarPropiedadesPorCliente } from '../application/use-cases/listarPropiedadesPorCliente';
 	import { ventasRepository } from '../infrastructure/ventasRepository';
 	import ActividadLeadTimeline from './ActividadLeadTimeline.svelte';
+	import { goto } from '$app/navigation';
 
 	interface Props {
 		leadId: string;
@@ -15,6 +17,7 @@
 	let { leadId }: Props = $props();
 
 	let lead = $state<LeadDetalle | null>(null);
+	let propiedadesRelacionadas = $state<string[]>([]);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 
@@ -28,6 +31,9 @@
 		error = null;
 		try {
 			lead = await obtenerLead(ventasRepository, leadId.trim());
+			if (lead) {
+				propiedadesRelacionadas = await listarPropiedadesPorCliente(ventasRepository, lead.id);
+			}
 		} catch (err) {
 			error = err instanceof HttpError ? err.message : 'No se pudo cargar el lead.';
 		} finally {
@@ -87,7 +93,9 @@
 					{/if}
 				</p>
 			</div>
-			<Button variant="secondary" onclick={() => window.history.back()}>Volver</Button>
+			<div class="flex gap-2">
+				<Button variant="ghost" onclick={() => window.history.back()}>Volver</Button>
+			</div>
 		</div>
 
 		<div class="grid gap-6 xl:grid-cols-2">
@@ -125,6 +133,30 @@
 				</dl>
 			</Card>
 		</div>
+
+		{#if propiedadesRelacionadas.length > 0}
+			<Card>
+				<h2 class="mb-4 font-display text-xl font-bold text-text-main">Propiedades asociadas</h2>
+				<div class="grid gap-3">
+					{#each propiedadesRelacionadas as idProp (idProp)}
+						<div
+							class="flex items-center justify-between rounded-xl border border-border-light p-4"
+						>
+							<div>
+								<p class="font-mono text-sm font-semibold text-text-main">{idProp}</p>
+								<p class="text-xs text-text-muted">Propiedad vinculada a este prospecto</p>
+							</div>
+							<Button
+								variant="ghost"
+								onclick={() => goto(`/asesor/propiedades/${encodeURIComponent(idProp)}`)}
+							>
+								Ver/Editar propiedad
+							</Button>
+						</div>
+					{/each}
+				</div>
+			</Card>
+		{/if}
 
 		{#if lead.citas.length > 0}
 			<Card>

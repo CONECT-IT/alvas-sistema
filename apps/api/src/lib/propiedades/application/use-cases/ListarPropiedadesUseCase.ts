@@ -39,7 +39,26 @@ export class ListarPropiedadesUseCase
         );
       }
 
-      return resultadoExitoso(await this.propiedadRepository.listarTodas());
+      const todas = await this.propiedadRepository.listarTodas();
+
+      if (usuarioAutenticado.rol === "ADMIN") {
+        return resultadoExitoso(todas);
+      }
+
+      // ASESOR: ve todas las DISPONIBLES/RESERVADAS/VENDIDAS
+      // + las PRELIMINARES/EN_VALIDACION donde él sea el captador o responsable
+      const filtradas = todas.filter((p) => {
+        const esPublica = ["DISPONIBLE", "RESERVADA", "VENDIDA"].includes(p.estado);
+        if (esPublica) return true;
+
+        const esAsociado =
+          (p.captadaPorAsesorId as string | undefined) === usuarioAutenticado.id ||
+          (p.asesorResponsableId as string | undefined) === usuarioAutenticado.id;
+
+        return esAsociado;
+      });
+
+      return resultadoExitoso(filtradas);
     } catch (error) {
       if (error instanceof ErrorDeDominio) {
         return resultadoFallido(error);

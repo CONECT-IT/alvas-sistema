@@ -61,6 +61,7 @@ export class PropiedadController {
   async listar(c: ContextoPropiedades): Promise<Response> {
     try {
       const authPayload = c.get("authPayload");
+      const leadId = c.req.query("leadId");
       const useCase = this.deps.crearListarPropiedades(c);
 
       const resultado = await useCase.ejecutar({
@@ -72,7 +73,13 @@ export class PropiedadController {
         return c.json({ success: false, message: err.message, code: err.codigo }, 403);
       }
 
-      const propiedades: PropiedadRespuestaDTO[] = resultado.valor.map((p) => ({
+      let propiedades = resultado.valor;
+
+      if (leadId) {
+        propiedades = propiedades.filter((p) => p.idLeadOrigen === leadId);
+      }
+
+      const respuesta: PropiedadRespuestaDTO[] = propiedades.map((p) => ({
         id: p.id as string,
         titulo: p.titulo,
         descripcion: p.descripcion,
@@ -87,7 +94,7 @@ export class PropiedadController {
 
       return c.json({
         success: true,
-        data: propiedades,
+        data: respuesta,
       });
     } catch (error) {
       console.error("PropiedadController.listar:", error);

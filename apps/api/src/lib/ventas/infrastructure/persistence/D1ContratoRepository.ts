@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { type D1DatabaseLike } from "../../../shared/infrastructure";
 import { obtenerDb } from "../../../shared/infrastructure/persistence/drizzle";
 import { Contrato } from "../../domain/entities/Contrato";
@@ -61,11 +61,13 @@ export class D1ContratoRepository implements IContratoRepository {
   async listarPorIdsLead(ids: IdLead[]): Promise<Contrato[]> {
     if (ids.length === 0) return [];
     const idsStr = ids.map((id) => id as string);
-    const placeholders = idsStr.map(() => "?").join(",");
-    const rawRows = await this.db
-      .prepare(`SELECT * FROM ventas_contratos WHERE id_lead IN (${placeholders})`)
-      .bind(...idsStr)
-      .all<ContratoRow>();
-    return (rawRows.results ?? []).map((row) => VentasMapper.contratoADominio(row));
+
+    const rows = await this.drizzle()
+      .select()
+      .from(contratosTable)
+      .where(inArray(contratosTable.idLead, idsStr))
+      .all();
+
+    return rows.map((row) => VentasMapper.contratoADominio(row as ContratoRow));
   }
 }

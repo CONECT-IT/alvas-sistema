@@ -24,6 +24,7 @@
 				<th class="pb-3">Lead</th>
 				<th class="pb-3">Tipo</th>
 				<th class="pb-3">Estado</th>
+				<th class="pb-3">Asesor</th>
 				<th class="pb-3">Citas</th>
 			</tr>
 		</thead>
@@ -43,6 +44,7 @@
 					<td class="py-4 pr-6">
 						<Badge tone={getEstadoTone(lead.estado)}>{lead.estado}</Badge>
 					</td>
+					<td class="py-4 pr-6 text-text-muted">{lead.idAsesor || '-'}</td>
 					<td class="py-4 text-text-muted">{lead.citasCount}</td>
 				</tr>
 			{/each}

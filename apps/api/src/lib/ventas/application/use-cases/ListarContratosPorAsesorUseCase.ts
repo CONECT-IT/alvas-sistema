@@ -35,6 +35,7 @@ export class ListarContratosPorAsesorUseCase
           idLead: contrato.idLead as string | undefined,
           idCliente: contrato.idCliente as string | undefined,
           idPropiedad: contrato.idPropiedad,
+          idAsesor: input.idAsesor,
           fechaInicio: contrato.fechaInicio.toISOString(),
           fechaFin: contrato.fechaFin.toISOString(),
           estado: contrato.estado,

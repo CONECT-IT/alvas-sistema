@@ -36,6 +36,7 @@ export class PipelineController {
           nombre: lead.nombre,
           estado: lead.estado.valor,
           tipo: lead.tipo.valor,
+          idAsesor: lead.idAsesor as string,
           citasCount: lead.citas.length,
           citas: lead.citas.map((cita) => ({
             id: cita.id as string,

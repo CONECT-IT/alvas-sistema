@@ -70,9 +70,10 @@ export class CitasController {
       }
 
       const data = resultado.valor.map((cita) => ({
-        id: cita.id as string,
-        idLead: cita.idLead as string,
+        id: cita.id,
+        idLead: cita.idLead,
         idPropiedad: cita.idPropiedad,
+        idAsesor: cita.idAsesor,
         fechaInicio: cita.fechaInicio.toISOString(),
         fechaFin: cita.fechaFin.toISOString(),
         estado: cita.estado,

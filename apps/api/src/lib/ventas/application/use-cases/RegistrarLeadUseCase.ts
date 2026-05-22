@@ -13,6 +13,7 @@ import { type RegistrarLeadInputDTO } from "../dto/LeadDTOs";
 import { type IEvaluadorAsignacion } from "../../domain/services/EvaluadorAsignacion";
 import { type IAutorizadorVentas } from "../../domain/ports/IAutorizadorVentas";
 import { type IConsultaPropiedadInteres } from "../../domain/ports/IConsultaPropiedadInteres";
+import { type IRegistroPropiedadVendedor } from "../../domain/ports/IRegistroPropiedadVendedor";
 
 export type UsuarioAutenticadoVentas = {
   id: string;
@@ -32,6 +33,7 @@ export class RegistrarLeadUseCase
     private readonly evaluarAsignacion: IEvaluadorAsignacion,
     private readonly autorizador?: IAutorizadorVentas,
     private readonly consultaPropiedadInteres?: IConsultaPropiedadInteres,
+    private readonly registroPropiedadVendedor?: IRegistroPropiedadVendedor,
   ) {}
 
   async ejecutar(input: RegistrarLeadInput): Promise<Resultado<Lead, ErrorDeDominio>> {
@@ -50,8 +52,6 @@ export class RegistrarLeadUseCase
         if (resultadoAsignacion.esExito) {
           idAsesorFinal = resultadoAsignacion.valor;
         } else {
-          // Si falla la asignación automática, podemos registrarlo sin asesor o fallar
-          // Para este sistema, usaremos un asesor por defecto o lanzaremos error
           return resultadoFallido(
             new ErrorDeDominio("No se pudo asignar un asesor automáticamente."),
           );
@@ -90,6 +90,30 @@ export class RegistrarLeadUseCase
       });
 
       await this.repository.guardarLead(lead);
+
+      // Si es VENDEDOR y trae datos de propiedad, registrarla
+      if (
+        input.tipo.toUpperCase() === "VENTA" &&
+        input.datosPropiedad &&
+        this.registroPropiedadVendedor
+      ) {
+        const resultadoProp = await this.registroPropiedadVendedor.registrar({
+          idLeadOrigen: lead.id as string,
+          idAsesor: idAsesorFinal,
+          titulo: input.datosPropiedad.titulo,
+          descripcion: input.datosPropiedad.descripcion,
+          precio: input.datosPropiedad.precio,
+        });
+
+        if (resultadoProp.esExito) {
+          await this.repository.registrarActividad(
+            lead.id,
+            "PROPIEDAD_REGISTRADA",
+            `Propiedad preliminar registrada para el vendedor: ${input.datosPropiedad.titulo}`,
+          );
+        }
+      }
+
       await this.repository.registrarActividad(
         lead.id,
         "LEAD_REGISTRADO",

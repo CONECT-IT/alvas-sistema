@@ -9,6 +9,11 @@ export interface RegistrarLeadInputDTO {
   tipo: string;
   idPropiedadInteres?: string;
   idAsesor?: string;
+  datosPropiedad?: {
+    titulo: string;
+    descripcion: string;
+    precio: number;
+  };
 }
 
 export interface ActualizarLeadInputDTO {

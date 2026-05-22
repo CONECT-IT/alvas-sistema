@@ -33,6 +33,9 @@
 	let telefono = $state('');
 	let tipo = $state<'COMPRA' | 'VENTA'>('COMPRA');
 	let idPropiedadInteres = $state('');
+	let tituloPropiedad = $state('');
+	let descripcionPropiedad = $state('');
+	let precioPropiedad = $state(0);
 	let editIdLead = $state('');
 	let editNombre = $state('');
 	let editEmail = $state('');
@@ -94,6 +97,9 @@
 		telefono = '';
 		tipo = 'COMPRA';
 		idPropiedadInteres = '';
+		tituloPropiedad = '';
+		descripcionPropiedad = '';
+		precioPropiedad = 0;
 	}
 
 	function limpiarFormularioEdicion() {
@@ -220,7 +226,15 @@
 				email: email.trim(),
 				telefono: telefono.trim(),
 				tipo,
-				idPropiedadInteres: tipo === 'COMPRA' ? idPropiedadInteres.trim() || undefined : undefined
+				idPropiedadInteres: tipo === 'COMPRA' ? idPropiedadInteres.trim() || undefined : undefined,
+				datosPropiedad:
+					tipo === 'VENTA' && tituloPropiedad.trim()
+						? {
+								titulo: tituloPropiedad.trim(),
+								descripcion: descripcionPropiedad.trim(),
+								precio: precioPropiedad
+							}
+						: undefined
 			});
 			createSuccess = 'Lead registrado y asignado a tu cartera.';
 			limpiarFormularioLead();
@@ -234,6 +248,7 @@
 
 	$effect(() => {
 		cargarLeads();
+		cargarPropiedades();
 	});
 </script>
 
@@ -315,15 +330,57 @@
 				</select>
 			</label>
 
-			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main md:col-span-2">
-				Propiedad de interés
-				<input
-					bind:value={idPropiedadInteres}
-					disabled={tipo === 'VENTA'}
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary disabled:bg-surface-muted disabled:text-text-muted"
-					placeholder="ID de propiedad disponible, solo para comprador"
-				/>
-			</label>
+			{#if tipo === 'COMPRA'}
+				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main md:col-span-2">
+					Propiedad de interés
+					<select
+						bind:value={idPropiedadInteres}
+						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+					>
+						<option value="">Selecciona una propiedad (opcional)</option>
+						{#each propiedades as prop (prop.id)}
+							<option value={prop.id}>{prop.titulo || prop.id}</option>
+						{/each}
+					</select>
+				</label>
+			{:else}
+				<div class="grid gap-4 rounded-2xl bg-surface-muted p-5 md:col-span-2 md:grid-cols-2">
+					<div class="md:col-span-2">
+						<h3 class="text-sm font-bold text-text-main">Datos de la propiedad a vender</h3>
+						<p class="text-xs text-text-muted">
+							Se creará una propiedad preliminar asociada a este lead.
+						</p>
+					</div>
+
+					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+						Título de la propiedad
+						<input
+							bind:value={tituloPropiedad}
+							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+							placeholder="Ej: Departamento en Miraflores"
+						/>
+					</label>
+
+					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+						Precio estimado (USD)
+						<input
+							bind:value={precioPropiedad}
+							type="number"
+							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+							placeholder="0.00"
+						/>
+					</label>
+
+					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main md:col-span-2">
+						Descripción breve
+						<textarea
+							bind:value={descripcionPropiedad}
+							class="min-h-[80px] rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+							placeholder="Detalles sobre la propiedad..."
+						></textarea>
+					</label>
+				</div>
+			{/if}
 
 			<div class="flex flex-col gap-3 md:col-span-2 md:flex-row md:justify-end">
 				<Button type="button" variant="ghost" onclick={limpiarFormularioLead}>Limpiar</Button>

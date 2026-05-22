@@ -13,6 +13,7 @@ export type LeadPipeline = Readonly<{
 	nombre: string;
 	estado: string;
 	tipo: string;
+	idAsesor?: string;
 	citasCount: number;
 	citas: CitaPipeline[];
 }>;

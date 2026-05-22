@@ -4,3 +4,4 @@ export * from "./security/AutorizadorPropiedadesAdapter";
 export * from "./adapters/RegistroPropiedadCaptacionAdapter";
 export * from "./adapters/ConsultaRelacionPropiedadVentasAdapter";
 export * from "./adapters/ConsultaPropiedadInteresVentasAdapter";
+export * from "./adapters/RegistroPropiedadVendedorAdapter";

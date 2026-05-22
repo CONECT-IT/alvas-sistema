@@ -137,6 +137,10 @@
 								<span class="ml-1 text-text-muted">{contrato.idLead ?? '—'}</span>
 							</div>
 							<div>
+								<span class="font-semibold text-text-main">Asesor:</span>
+								<span class="ml-1 text-text-muted">{contrato.idAsesor ?? '—'}</span>
+							</div>
+							<div>
 								<span class="font-semibold text-text-main">Cliente:</span>
 								<span class="ml-1 text-text-muted">{contrato.idCliente ?? '—'}</span>
 							</div>

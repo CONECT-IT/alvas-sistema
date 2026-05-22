@@ -7,13 +7,11 @@
 	import { propiedadRepository } from '$lib/propiedades/infrastructure/propiedadRepository';
 	import PropiedadAdminTable from '$lib/propiedades/presentation/PropiedadAdminTable.svelte';
 	import PropiedadStats from '$lib/propiedades/presentation/PropiedadStats.svelte';
+	import { goto } from '$app/navigation';
 
 	let propiedades = $state<Propiedad[]>([]);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
-	const propiedadesDisponibles = $derived(
-		propiedades.filter((propiedad) => propiedad.estado.toUpperCase() === 'DISPONIBLE')
-	);
 
 	async function cargarPropiedades() {
 		loading = true;
@@ -28,26 +26,30 @@
 		}
 	}
 
+	function irAPropiedad(p: Propiedad) {
+		goto(`/asesor/propiedades/${encodeURIComponent(p.id)}`);
+	}
+
 	$effect(() => {
 		cargarPropiedades();
 	});
 </script>
 
 <svelte:head>
-	<title>Propiedades Disponibles | ALVAS</title>
+	<title>Inventario de Propiedades | ALVAS</title>
 </svelte:head>
 
 <div class="flex flex-col gap-6">
 	<div class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
 		<div>
-			<p class="text-sm font-semibold tracking-[0.18em] text-primary uppercase">Catálogo</p>
-			<h1 class="mt-2 font-display text-3xl font-bold text-text-main">Propiedades disponibles</h1>
+			<p class="text-sm font-semibold tracking-[0.18em] text-primary uppercase">Inventario</p>
+			<h1 class="mt-2 font-display text-3xl font-bold text-text-main">Gestión de propiedades</h1>
 			<p class="mt-2 max-w-2xl text-sm leading-relaxed text-text-muted">
-				Inventario para asesorar clientes y cruzar oportunidades con la cartera de leads.
+				Inventario disponible y propiedades preliminares captadas para seguimiento.
 			</p>
 		</div>
 
-		<Button variant="secondary" onclick={cargarPropiedades}>Actualizar catálogo</Button>
+		<Button variant="secondary" onclick={cargarPropiedades}>Actualizar inventario</Button>
 	</div>
 
 	{#if loading}
@@ -61,9 +63,9 @@
 			<Button class="mt-5" onclick={cargarPropiedades}>Intentar nuevamente</Button>
 		</Card>
 	{:else}
-		<PropiedadStats propiedades={propiedadesDisponibles} />
+		<PropiedadStats {propiedades} />
 		<Card>
-			<PropiedadAdminTable propiedades={propiedadesDisponibles} />
+			<PropiedadAdminTable {propiedades} onPropiedadClick={irAPropiedad} />
 		</Card>
 	{/if}
 </div>

@@ -36,10 +36,15 @@ import { AutorizadorVentasAdapter } from "../lib/ventas/infrastructure/security/
 import {
   ConsultaPropiedadInteresVentasAdapter,
   D1PropiedadRepository,
+  RegistroPropiedadVendedorAdapter,
 } from "../lib/propiedades/infrastructure";
 
 function crearConsultaPropiedadInteres(db: D1DatabaseLike) {
   return new ConsultaPropiedadInteresVentasAdapter(new D1PropiedadRepository(db));
+}
+
+function crearRegistroPropiedadVendedor(db: D1DatabaseLike) {
+  return new RegistroPropiedadVendedorAdapter(new D1PropiedadRepository(db), new UuidGeneradorId());
 }
 
 export function crearRegistrarLeadUseCase(db: D1DatabaseLike): IRegistrarLead {
@@ -50,6 +55,7 @@ export function crearRegistrarLeadUseCase(db: D1DatabaseLike): IRegistrarLead {
     new EvaluadorAsignacionService(),
     new AutorizadorVentasAdapter(),
     crearConsultaPropiedadInteres(db),
+    crearRegistroPropiedadVendedor(db),
   );
 }
 
@@ -80,7 +86,11 @@ export function crearVentasControllerDeps(): VentasControllerDeps {
       new ListarLeadsPorAsesorUseCase(new D1VentasRepository(c.env.DB)),
     crearListarClientes: (c) => new ListarClientesUseCase(new D1VentasRepository(c.env.DB)),
     crearCrearContrato: (c) => new CrearContratoUseCase(new D1ContratoRepository(c.env.DB)),
-    crearListarContratos: (c) => new ListarContratosUseCase(new D1ContratoRepository(c.env.DB)),
+    crearListarContratos: (c) =>
+      new ListarContratosUseCase(
+        new D1ContratoRepository(c.env.DB),
+        new D1VentasRepository(c.env.DB),
+      ),
     crearListarContratosPorAsesor: (c) =>
       new ListarContratosPorAsesorUseCase(
         new D1ContratoRepository(c.env.DB),

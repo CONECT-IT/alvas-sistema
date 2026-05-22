@@ -42,6 +42,7 @@ import {
 } from "../../../src/lib/ventas/domain/value-objects/Ids";
 import { ErrorDeDominio } from "../../../src/lib/shared/domain/errors/ErrorDeDominio";
 import { AutorizadorVentasAdapter } from "../../../src/lib/ventas/infrastructure/security/AutorizadorVentasAdapter";
+import { type IRegistroPropiedadVendedor } from "../../../src/lib/ventas/domain/ports/IRegistroPropiedadVendedor";
 
 class SecuenciaGeneradorId implements IGeneradorId {
   private indice = 0;
@@ -305,6 +306,58 @@ describe("ventas / use cases", () => {
     const lead = await repo.obtenerLeadPorId("lead-001" as IdLead);
     expect(resultado.esExito).toBe(true);
     expect(lead?.idAsesor).toBe(idUsuarioRef("asesor-2"));
+  });
+
+  test("RegistrarLeadUseCase crea propiedad para lead vendedor", async () => {
+    const repo = new FakeVentasRepository();
+    const gen = new SecuenciaGeneradorId(["lead-1", "prop-1"]);
+    const evalAsig = new FakeEvaluadorAsignacion();
+
+    let propiedadCreada: { titulo: string; idLeadOrigen: string } | null = null;
+    const registroProp: IRegistroPropiedadVendedor = {
+      registrar: async (input: {
+        titulo: string;
+        idLeadOrigen: string;
+        descripcion: string;
+        precio: number;
+        idAsesor: string;
+      }) => {
+        propiedadCreada = { titulo: input.titulo, idLeadOrigen: input.idLeadOrigen };
+        return { esExito: true, valor: { id: "prop-1" } };
+      },
+    };
+
+    const useCase = new RegistrarLeadUseCase(
+      repo,
+      gen,
+      evalAsig,
+      undefined,
+      undefined,
+      registroProp,
+    );
+
+    const input = {
+      nombre: "Vendedor",
+      email: "vendedor@test.com",
+      telefono: "123",
+      tipo: "VENTA",
+      idAsesor: "asesor-1",
+      datosPropiedad: {
+        titulo: "Mi Casa",
+        descripcion: "Bonita casa",
+        precio: 100000,
+      },
+    };
+
+    const resultado = await useCase.ejecutar(input);
+
+    expect(resultado.esExito).toBe(true);
+    expect(propiedadCreada).not.toBeNull();
+
+    const p = propiedadCreada as unknown as { titulo: string; idLeadOrigen: string };
+    expect(p.titulo).toBe("Mi Casa");
+    expect(p.idLeadOrigen).toBe("lead-1");
+    expect(repo.actividades).toContain("PROPIEDAD_REGISTRADA");
   });
 
   test("RegistrarLeadUseCase funciona sin consultaPropiedadInteres", async () => {
@@ -1038,7 +1091,7 @@ describe("ventas / use cases", () => {
       }),
     );
 
-    const resultado = await new ListarContratosUseCase(repo).ejecutar();
+    const resultado = await new ListarContratosUseCase(repo, new FakeVentasRepository()).ejecutar();
 
     expect(resultado.esExito).toBe(true);
     expect(resultado.esExito ? resultado.valor.contratos : []).toHaveLength(2);
@@ -1277,7 +1330,9 @@ describe("ventas / use cases", () => {
     const repo = new FakeContratoRepository();
     repo.listar = () => Promise.reject(new Error("db error"));
 
-    await expect(new ListarContratosUseCase(repo).ejecutar()).rejects.toThrow("db error");
+    await expect(
+      new ListarContratosUseCase(repo, new FakeVentasRepository()).ejecutar(),
+    ).rejects.toThrow("db error");
   });
 
   test("propaga errores no dominico en ListarPropiedadesPorClienteUseCase", async () => {
@@ -1472,7 +1527,7 @@ describe("ventas / use cases", () => {
     const repo = new FakeContratoRepository();
     repo.listar = () => Promise.reject(new ErrorDeDominio("error dominio"));
 
-    const resultado = await new ListarContratosUseCase(repo).ejecutar();
+    const resultado = await new ListarContratosUseCase(repo, new FakeVentasRepository()).ejecutar();
 
     expect(resultado.esExito).toBe(false);
   });

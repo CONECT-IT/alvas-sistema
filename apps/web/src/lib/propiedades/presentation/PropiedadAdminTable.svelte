@@ -4,9 +4,10 @@
 
 	interface Props {
 		propiedades: Propiedad[];
+		onPropiedadClick?: (propiedad: Propiedad) => void;
 	}
 
-	let { propiedades }: Props = $props();
+	let { propiedades, onPropiedadClick }: Props = $props();
 
 	const currencyFormatter = new Intl.NumberFormat('es-PE', {
 		style: 'currency',
@@ -35,7 +36,15 @@
 		</thead>
 		<tbody class="divide-y divide-border-light text-sm">
 			{#each propiedades as propiedad (propiedad.id)}
-				<tr>
+				<tr
+					class={onPropiedadClick ? 'cursor-pointer transition hover:bg-bg-base' : ''}
+					onclick={() => onPropiedadClick?.(propiedad)}
+					role={onPropiedadClick ? 'button' : undefined}
+					tabindex={onPropiedadClick ? 0 : undefined}
+					onkeydown={(e) => {
+						if (e.key === 'Enter' && onPropiedadClick) onPropiedadClick(propiedad);
+					}}
+				>
 					<td class="max-w-sm py-4 pr-6">
 						<p class="font-semibold text-text-main">{propiedad.titulo}</p>
 						<p class="mt-1 line-clamp-2 text-xs leading-relaxed text-text-muted">

@@ -11,6 +11,7 @@ export interface ContratoOutputDTO {
   idLead?: string;
   idCliente?: string;
   idPropiedad: string;
+  idAsesor?: string;
   fechaInicio: string;
   fechaFin: string;
   estado: string;
