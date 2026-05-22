@@ -35,6 +35,17 @@ export const citasVentasTable = sqliteTable("ventas_citas", {
   observacion: text("observacion"),
 });
 
+export const contratosTable = sqliteTable("ventas_contratos", {
+  id: text("id").primaryKey(),
+  idCliente: text("id_cliente").notNull(),
+  idPropiedad: text("id_propiedad").notNull(),
+  fechaInicio: text("fecha_inicio").notNull(),
+  fechaFin: text("fecha_fin").notNull(),
+  estado: text("estado").notNull(),
+  creadoEn: text("creado_en").notNull(),
+  actualizadoEn: text("actualizado_en").notNull(),
+});
+
 export const actividadVentasTable = sqliteTable("ventas_actividad", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   idLead: text("id_lead").notNull(),
@@ -46,4 +57,5 @@ export const actividadVentasTable = sqliteTable("ventas_actividad", {
 export type LeadRow = typeof leadsTable.$inferSelect;
 export type ClienteRow = typeof clientesTable.$inferSelect;
 export type CitaVentaRow = typeof citasVentasTable.$inferSelect;
+export type ContratoRow = typeof contratosTable.$inferSelect;
 export type ActividadVentaRow = typeof actividadVentasTable.$inferSelect;

@@ -1,12 +1,14 @@
 import { Lead } from "../../domain/entities/Lead";
 import { Cita } from "../../domain/entities/Cita";
 import { Cliente } from "../../domain/entities/Cliente";
+import { Contrato } from "../../domain/entities/Contrato";
 import { type ValorEstadoCita } from "../../domain/entities/Cita";
+import { type ValorEstadoContrato } from "../../domain/entities/Contrato";
 import { EstadoLead } from "../../domain/value-objects/EstadoLead";
 import { TipoVenta } from "../../domain/value-objects/TipoVenta";
 import { idUsuarioRef } from "../../../shared/domain/value-objects/IdUsuarioRef";
-import { type LeadRow, type ClienteRow, type CitaVentaRow } from "./schema";
-import { idLead, idCita, idCliente, idPropiedad } from "../../domain/value-objects/Ids";
+import { type LeadRow, type ClienteRow, type CitaVentaRow, type ContratoRow } from "./schema";
+import { idLead, idCita, idCliente, idContrato, idPropiedad } from "../../domain/value-objects/Ids";
 
 export class VentasMapper {
   static leadADominio(row: LeadRow, citasRows: CitaVentaRow[]): Lead {
@@ -89,6 +91,32 @@ export class VentasMapper {
       idLeadOrigen: cliente.idLeadOrigen,
       creadoEn: cliente.creadoEn.toISOString(),
       actualizadoEn: cliente.actualizadoEn.toISOString(),
+    };
+  }
+
+  static contratoADominio(row: ContratoRow): Contrato {
+    return Contrato.reconstituir({
+      id: idContrato(row.id),
+      idCliente: idCliente(row.idCliente),
+      idPropiedad: idPropiedad(row.idPropiedad),
+      fechaInicio: new Date(row.fechaInicio),
+      fechaFin: new Date(row.fechaFin),
+      estado: row.estado as ValorEstadoContrato,
+      creadoEn: new Date(row.creadoEn),
+      actualizadoEn: new Date(row.actualizadoEn),
+    });
+  }
+
+  static contratoAPersistencia(contrato: Contrato) {
+    return {
+      id: contrato.id as string,
+      idCliente: contrato.idCliente as string,
+      idPropiedad: contrato.idPropiedad as string,
+      fechaInicio: contrato.fechaInicio.toISOString(),
+      fechaFin: contrato.fechaFin.toISOString(),
+      estado: contrato.estado,
+      creadoEn: contrato.creadoEn.toISOString(),
+      actualizadoEn: contrato.actualizadoEn.toISOString(),
     };
   }
 }
