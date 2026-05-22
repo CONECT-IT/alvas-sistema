@@ -13,6 +13,7 @@ export * from "./ObtenerLeadUseCase";
 export * from "./ObtenerCitaPorIdUseCase";
 export * from "./CrearContratoUseCase";
 export * from "./ListarContratosUseCase";
+export * from "./ListarContratosPorAsesorUseCase";
 export * from "./AsignarLeadAAsesorUseCase";
 export * from "./ListarPropiedadesPorClienteUseCase";
 export * from "./ListarLeadsPorAsesorUseCase";

@@ -8,6 +8,7 @@ import {
   ListarActividadLeadUseCase,
   ListarClientesUseCase,
   ListarContratosUseCase,
+  ListarContratosPorAsesorUseCase,
   ListarLeadsPorAsesorUseCase,
   RegistrarClienteDirectoUseCase,
   RegistrarLeadUseCase,
@@ -70,6 +71,8 @@ export function crearVentasControllerDeps(): VentasControllerDeps {
     crearListarClientes: (c) => new ListarClientesUseCase(new D1VentasRepository(c.env.DB)),
     crearCrearContrato: (c) => new CrearContratoUseCase(new D1ContratoRepository(c.env.DB)),
     crearListarContratos: (c) => new ListarContratosUseCase(new D1ContratoRepository(c.env.DB)),
+    crearListarContratosPorAsesor: (c) =>
+      new ListarContratosPorAsesorUseCase(new D1ContratoRepository(c.env.DB), new D1VentasRepository(c.env.DB)),
     crearFirmarContrato: (c) =>
       new FirmarContratoUseCase(
         new D1ContratoRepository(c.env.DB),

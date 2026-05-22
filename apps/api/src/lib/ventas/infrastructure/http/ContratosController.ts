@@ -46,6 +46,23 @@ export class ContratosController {
     }
   }
 
+  async listarPorAsesor(c: ContextoVentas): Promise<Response> {
+    try {
+      const authPayload = c.get("authPayload");
+      const idAsesor = authPayload?.id ?? "";
+      const useCase = this.deps.crearListarContratosPorAsesor(c);
+      const resultado = await useCase.ejecutar({ idAsesor });
+
+      if (!resultado.esExito) {
+        return responderErrorDeDominio(c, resultado.error);
+      }
+
+      return c.json({ success: true, data: resultado.valor.contratos });
+    } catch (error) {
+      return responderErrorInterno(c, "ContratosController.listarPorAsesor:", error);
+    }
+  }
+
   async firmar(c: ContextoVentas): Promise<Response> {
     try {
       const useCase = this.deps.crearFirmarContrato(c);

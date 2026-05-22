@@ -12,6 +12,7 @@ import {
   type IListarActividadLead,
   type IListarClientes,
   type IListarContratos,
+  type IListarContratosPorAsesor,
   type IListarLeadsPorAsesor,
   type IRegistrarClienteDirecto,
   type IRegistrarLead,
@@ -39,6 +40,7 @@ export type VentasControllerDeps = Readonly<{
   crearActualizarCliente?: (c: ContextoVentas) => IActualizarCliente;
   crearCrearContrato: (c: ContextoVentas) => ICrearContrato;
   crearListarContratos: (c: ContextoVentas) => IListarContratos;
+  crearListarContratosPorAsesor: (c: ContextoVentas) => IListarContratosPorAsesor;
   crearFirmarContrato: (c: ContextoVentas) => IFirmarContrato;
   crearListarActividadLead: (c: ContextoVentas) => IListarActividadLead;
 }>;

@@ -26,7 +26,8 @@ export class ListarContratosUseCase
       const output: ListarContratosOutputDTO = {
         contratos: contratos.map((contrato) => ({
           id: contrato.id as string,
-          idCliente: contrato.idCliente as string,
+          idLead: contrato.idLead as string | undefined,
+          idCliente: contrato.idCliente as string | undefined,
           idPropiedad: contrato.idPropiedad,
           fechaInicio: contrato.fechaInicio.toISOString(),
           fechaFin: contrato.fechaFin.toISOString(),

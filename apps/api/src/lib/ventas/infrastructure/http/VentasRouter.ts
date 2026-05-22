@@ -32,6 +32,7 @@ export function crearVentasRouter(deps: VentasControllerDeps) {
   ventasRouter.post("/cliente", (c) => clientes.registrarDirecto(c));
 
   ventasRouter.get("/contratos", (c) => contratos.listar(c));
+  ventasRouter.get("/contratos/mios", (c) => contratos.listarPorAsesor(c));
   ventasRouter.post("/contratos", (c) => contratos.crear(c));
   ventasRouter.post("/contratos/:idContrato/firmar", (c) => contratos.firmar(c));
 

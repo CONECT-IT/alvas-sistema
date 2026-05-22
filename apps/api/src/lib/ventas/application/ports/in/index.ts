@@ -10,6 +10,7 @@ export * from "./IListarAsesoresConLeads";
 export * from "./IListarCitas";
 export * from "./IListarClientes";
 export * from "./IListarContratos";
+export * from "./IListarContratosPorAsesor";
 export * from "./IListarLeads";
 export * from "./IListarLeadsPorAsesor";
 export * from "./IListarPropiedadesPorCliente";

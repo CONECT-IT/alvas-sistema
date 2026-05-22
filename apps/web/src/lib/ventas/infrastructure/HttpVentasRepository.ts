@@ -136,4 +136,12 @@ export class HttpVentasRepository implements VentasRepository {
 			{}
 		);
 	}
+
+	async listarContratos(): Promise<ContratoDTO[]> {
+		const response = await httpClient.get<ApiSuccessResponse<ContratoDTO[]>>(
+			`${this.apiBaseUrl}/ventas/contratos/mios`
+		);
+
+		return response.data;
+	}
 }
