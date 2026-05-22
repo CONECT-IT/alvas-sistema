@@ -23,3 +23,11 @@ export type RegistrarClienteRequestDTO = Readonly<{
 export type RegistrarClienteResponseDTO = Readonly<{
 	id: string;
 }>;
+
+export type ActualizarClienteRequestDTO = Readonly<{
+	nombre?: string;
+	email?: string;
+	telefono?: string;
+}>;
+
+export type ClienteOutputDTO = ClienteDTO;
