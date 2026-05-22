@@ -22,6 +22,15 @@ export async function proxyApiPost(
 	return proxyApiRequest(cookies, fetch, path, 'POST', body);
 }
 
+export async function proxyApiPut(
+	cookies: Cookies,
+	fetch: ServerFetch,
+	path: string,
+	body: ProxyBody
+): Promise<Response> {
+	return proxyApiRequest(cookies, fetch, path, 'PUT', body);
+}
+
 export async function proxyPublicApiPost(
 	fetch: ServerFetch,
 	path: string,
@@ -41,7 +50,7 @@ async function proxyApiRequest(
 	cookies: Cookies,
 	fetch: ServerFetch,
 	path: string,
-	method: 'GET' | 'POST',
+	method: 'GET' | 'POST' | 'PUT',
 	body?: ProxyBody
 ): Promise<Response> {
 	const session = getSession(cookies);

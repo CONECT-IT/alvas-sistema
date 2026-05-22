@@ -3,6 +3,7 @@
 	import Card from '$lib/shared/ui/Card.svelte';
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import type { Propiedad } from '$lib/propiedades/domain/models/Propiedad';
+	import { actualizarPropiedad } from '$lib/propiedades/application/use-cases/actualizarPropiedad';
 	import { crearPropiedad } from '$lib/propiedades/application/use-cases/crearPropiedad';
 	import { listarPropiedades } from '$lib/propiedades/application/use-cases/listarPropiedades';
 	import { propiedadRepository } from '$lib/propiedades/infrastructure/propiedadRepository';
@@ -12,9 +13,12 @@
 	let propiedades = $state<Propiedad[]>([]);
 	let loading = $state(true);
 	let creating = $state(false);
+	let updatingId = $state<string | null>(null);
 	let error = $state<string | null>(null);
 	let createError = $state<string | null>(null);
 	let createSuccess = $state<string | null>(null);
+	let reviewError = $state<string | null>(null);
+	let reviewSuccess = $state<string | null>(null);
 	let mostrarFormulario = $state(false);
 	let titulo = $state('');
 	let descripcion = $state('');
@@ -23,6 +27,11 @@
 	let asesorResponsableId = $state('');
 	const skeletonCards = [1, 2, 3];
 	const estados = ['PRELIMINAR', 'EN_VALIDACION', 'DISPONIBLE', 'RESERVADA'];
+	const propiedadesEnRevision = $derived(
+		propiedades.filter((propiedad) =>
+			['PRELIMINAR', 'EN_VALIDACION'].includes(propiedad.estado.toUpperCase())
+		)
+	);
 
 	async function cargarPropiedades() {
 		loading = true;
@@ -38,6 +47,26 @@
 			}
 		} finally {
 			loading = false;
+		}
+	}
+
+	async function cambiarEstadoPropiedad(propiedad: Propiedad, nuevoEstado: string) {
+		reviewError = null;
+		reviewSuccess = null;
+		updatingId = propiedad.id;
+
+		try {
+			await actualizarPropiedad(propiedadRepository, {
+				id: propiedad.id,
+				estado: nuevoEstado
+			});
+			reviewSuccess = `${propiedad.titulo} pasó a ${nuevoEstado}.`;
+			await cargarPropiedades();
+		} catch (err) {
+			reviewError =
+				err instanceof HttpError ? err.message : 'No se pudo actualizar el estado de la propiedad.';
+		} finally {
+			updatingId = null;
 		}
 	}
 
@@ -237,6 +266,95 @@
 		</Card>
 	{:else}
 		<PropiedadStats {propiedades} />
+		<Card>
+			<div class="mb-5 flex flex-col justify-between gap-3 md:flex-row md:items-center">
+				<div>
+					<h2 class="font-display text-xl font-bold text-text-main">Revisión de captaciones</h2>
+					<p class="mt-1 text-sm text-text-muted">
+						Propiedades que todavía no deben mostrarse al equipo comercial ni al público.
+					</p>
+				</div>
+				<p class="text-sm font-semibold text-primary">
+					{propiedadesEnRevision.length} pendientes
+				</p>
+			</div>
+
+			{#if reviewSuccess}
+				<p class="mb-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+					{reviewSuccess}
+				</p>
+			{/if}
+
+			{#if reviewError}
+				<p class="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+					{reviewError}
+				</p>
+			{/if}
+
+			{#if propiedadesEnRevision.length === 0}
+				<p class="rounded-2xl bg-surface-muted px-4 py-5 text-sm text-text-muted">
+					No hay propiedades preliminares o en validación.
+				</p>
+			{:else}
+				<div class="grid gap-4">
+					{#each propiedadesEnRevision as propiedad (propiedad.id)}
+						<article class="rounded-2xl border border-border-light bg-bg-base p-5">
+							<div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+								<div>
+									<div class="flex flex-wrap items-center gap-2">
+										<p class="font-display text-lg font-bold text-text-main">
+											{propiedad.titulo}
+										</p>
+										<span
+											class="rounded-full bg-primary-light px-3 py-1 text-xs font-semibold text-primary-dark"
+										>
+											{propiedad.estado}
+										</span>
+										<span
+											class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-text-muted"
+										>
+											{propiedad.origen}
+										</span>
+									</div>
+									<p class="mt-2 max-w-3xl text-sm leading-relaxed text-text-muted">
+										{propiedad.descripcion}
+									</p>
+									<div class="mt-3 grid gap-2 text-xs text-text-muted sm:grid-cols-3">
+										<p>Lead origen: {propiedad.idLeadOrigen ?? 'Sin lead'}</p>
+										<p>Captada por: {propiedad.captadaPorAsesorId ?? 'Sin asesor'}</p>
+										<p>Responsable: {propiedad.asesorResponsableId ?? 'Sin asignar'}</p>
+									</div>
+								</div>
+
+								<div class="flex flex-col gap-2 sm:flex-row lg:flex-col">
+									<Button
+										variant="secondary"
+										disabled={updatingId === propiedad.id}
+										onclick={() => cambiarEstadoPropiedad(propiedad, 'EN_VALIDACION')}
+									>
+										Validar datos
+									</Button>
+									<Button
+										disabled={updatingId === propiedad.id}
+										onclick={() => cambiarEstadoPropiedad(propiedad, 'DISPONIBLE')}
+									>
+										Publicar
+									</Button>
+									<Button
+										variant="ghost"
+										disabled={updatingId === propiedad.id}
+										onclick={() => cambiarEstadoPropiedad(propiedad, 'DESCARTADA')}
+									>
+										Descartar
+									</Button>
+								</div>
+							</div>
+						</article>
+					{/each}
+				</div>
+			{/if}
+		</Card>
+
 		<Card>
 			<div class="mb-5 flex flex-col justify-between gap-3 md:flex-row md:items-center">
 				<div>

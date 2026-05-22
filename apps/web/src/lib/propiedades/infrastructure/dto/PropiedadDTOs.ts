@@ -16,6 +16,14 @@ export type CrearPropiedadResponseDTO = Readonly<{
 	id: string;
 }>;
 
+export type ActualizarPropiedadRequestDTO = Readonly<{
+	titulo?: string;
+	descripcion?: string;
+	precio?: number;
+	estado?: string;
+	asesorResponsableId?: string;
+}>;
+
 export type PropiedadRespuestaDTO = Readonly<{
 	id: string;
 	titulo: string;
