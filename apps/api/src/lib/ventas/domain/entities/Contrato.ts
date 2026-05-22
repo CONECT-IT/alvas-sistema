@@ -94,6 +94,17 @@ export class Contrato {
     this.props.actualizadoEn = new Date();
   }
 
+  cancelar(): void {
+    if (this.props.estado === "FINALIZADO") {
+      throw new ErrorDeValidacion("No se puede cancelar un contrato finalizado.");
+    }
+    if (this.props.estado === "CANCELADO") {
+      throw new ErrorDeValidacion("El contrato ya está cancelado.");
+    }
+    this.props.estado = "CANCELADO";
+    this.props.actualizadoEn = new Date();
+  }
+
   private validarFechas(): void {
     if (this.props.fechaFin <= this.props.fechaInicio) {
       throw new ErrorDeValidacion("La fecha de fin debe ser posterior a la fecha de inicio.");

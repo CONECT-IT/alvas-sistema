@@ -5,12 +5,14 @@
 	import type { ContratoDTO } from '$lib/ventas/infrastructure/dto/VentasDTOs';
 	import { listarContratos } from '$lib/ventas/application/use-cases/listarContratos';
 	import { firmarContrato } from '$lib/ventas/application/use-cases/firmarContrato';
+	import { cancelarContrato } from '$lib/ventas/application/use-cases/cancelarContrato';
 	import { ventasRepository } from '$lib/ventas/infrastructure/ventasRepository';
 
 	let contratos = $state<ContratoDTO[]>([]);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 	let firmando = $state<string | null>(null);
+	let cancelando = $state<string | null>(null);
 
 	async function cargar() {
 		loading = true;
@@ -33,6 +35,18 @@
 			error = err instanceof HttpError ? err.message : 'No se pudo firmar el contrato.';
 		} finally {
 			firmando = null;
+		}
+	}
+
+	async function cancelar(idContrato: string) {
+		cancelando = idContrato;
+		try {
+			await cancelarContrato(ventasRepository, idContrato);
+			await cargar();
+		} catch (err) {
+			error = err instanceof HttpError ? err.message : 'No se pudo cancelar el contrato.';
+		} finally {
+			cancelando = null;
 		}
 	}
 
@@ -132,6 +146,23 @@
 							<div class="flex gap-3">
 								<Button onclick={() => firmar(contrato.id)} disabled={firmando === contrato.id}>
 									{firmando === contrato.id ? 'Firmando...' : 'Firmar contrato'}
+								</Button>
+								<Button
+									variant="ghost"
+									onclick={() => cancelar(contrato.id)}
+									disabled={cancelando === contrato.id}
+								>
+									{cancelando === contrato.id ? 'Cancelando...' : 'Cancelar'}
+								</Button>
+							</div>
+						{:else if contrato.estado === 'VIGENTE'}
+							<div class="flex gap-3">
+								<Button
+									variant="ghost"
+									onclick={() => cancelar(contrato.id)}
+									disabled={cancelando === contrato.id}
+								>
+									{cancelando === contrato.id ? 'Cancelando...' : 'Cancelar contrato'}
 								</Button>
 							</div>
 						{/if}

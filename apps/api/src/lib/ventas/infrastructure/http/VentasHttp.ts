@@ -6,6 +6,7 @@ import {
   type IActualizarCliente,
   type IActualizarLead,
   type IAgendarCita,
+  type ICancelarContrato,
   type ICrearContrato,
   type IConvertirLeadACliente,
   type IFirmarContrato,
@@ -42,6 +43,7 @@ export type VentasControllerDeps = Readonly<{
   crearListarContratos: (c: ContextoVentas) => IListarContratos;
   crearListarContratosPorAsesor: (c: ContextoVentas) => IListarContratosPorAsesor;
   crearFirmarContrato: (c: ContextoVentas) => IFirmarContrato;
+  crearCancelarContrato: (c: ContextoVentas) => ICancelarContrato;
   crearListarActividadLead: (c: ContextoVentas) => IListarActividadLead;
 }>;
 

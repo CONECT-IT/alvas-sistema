@@ -9,6 +9,7 @@ export * from "./IFirmarContrato";
 export * from "./IListarAsesoresConLeads";
 export * from "./IListarCitas";
 export * from "./IListarClientes";
+export * from "./ICancelarContrato";
 export * from "./IListarContratos";
 export * from "./IListarContratosPorAsesor";
 export * from "./IListarLeads";

@@ -63,6 +63,21 @@ export class ContratosController {
     }
   }
 
+  async cancelar(c: ContextoVentas): Promise<Response> {
+    try {
+      const useCase = this.deps.crearCancelarContrato(c);
+      const resultado = await useCase.ejecutar({ idContrato: c.req.param("idContrato") ?? "" });
+
+      if (!resultado.esExito) {
+        return responderErrorDeDominio(c, resultado.error);
+      }
+
+      return c.json({ success: true, message: "Contrato cancelado" });
+    } catch (error) {
+      return responderErrorInterno(c, "ContratosController.cancelar:", error);
+    }
+  }
+
   async firmar(c: ContextoVentas): Promise<Response> {
     try {
       const useCase = this.deps.crearFirmarContrato(c);

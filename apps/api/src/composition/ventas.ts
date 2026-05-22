@@ -2,6 +2,7 @@ import {
   ActualizarCitaUseCase,
   ActualizarLeadUseCase,
   AgendarCitaUseCase,
+  CancelarContratoUseCase,
   ConvertirLeadAClienteUseCase,
   CrearContratoUseCase,
   FirmarContratoUseCase,
@@ -73,6 +74,7 @@ export function crearVentasControllerDeps(): VentasControllerDeps {
     crearListarContratos: (c) => new ListarContratosUseCase(new D1ContratoRepository(c.env.DB)),
     crearListarContratosPorAsesor: (c) =>
       new ListarContratosPorAsesorUseCase(new D1ContratoRepository(c.env.DB), new D1VentasRepository(c.env.DB)),
+    crearCancelarContrato: (c) => new CancelarContratoUseCase(new D1ContratoRepository(c.env.DB)),
     crearFirmarContrato: (c) =>
       new FirmarContratoUseCase(
         new D1ContratoRepository(c.env.DB),

@@ -130,6 +130,13 @@ export class HttpVentasRepository implements VentasRepository {
 		return response.data;
 	}
 
+	async cancelarContrato(idContrato: string): Promise<void> {
+		await httpClient.post<ApiSuccessResponse<{ message?: string }>>(
+			`${this.apiBaseUrl}/ventas/contratos/${encodeURIComponent(idContrato)}/cancelar`,
+			{}
+		);
+	}
+
 	async firmarContrato(idContrato: string): Promise<void> {
 		await httpClient.post<ApiSuccessResponse<{ message?: string }>>(
 			`${this.apiBaseUrl}/ventas/contratos/${encodeURIComponent(idContrato)}/firmar`,
