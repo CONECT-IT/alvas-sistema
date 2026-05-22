@@ -57,6 +57,7 @@ class FakeVentasRepository implements IVentasRepository {
   readonly leads = new Map<string, Lead>();
   readonly clientes = new Map<string, Cliente>();
   readonly actividades: string[] = [];
+  readonly descripcionesActividad: string[] = [];
 
   async obtenerLeadPorId(id: IdLead): Promise<Lead | null> {
     return this.leads.get(id) ?? null;
@@ -94,8 +95,9 @@ class FakeVentasRepository implements IVentasRepository {
     return [...this.clientes.values()].filter((cliente) => cliente.idAsesor === idAsesor);
   }
 
-  async registrarActividad(_idLead: IdLead, evento: string): Promise<void> {
+  async registrarActividad(_idLead: IdLead, evento: string, descripcion: string): Promise<void> {
     this.actividades.push(evento);
+    this.descripcionesActividad.push(descripcion);
   }
 
   async obtenerActividadReciente(): Promise<
@@ -266,6 +268,7 @@ describe("ventas / use cases", () => {
 
     expect(resultado.esExito).toBe(true);
     expect(repo.actividades).toContain("LEAD_REGISTRADO");
+    expect(repo.descripcionesActividad).toContain("Lead registrado y asignado a asesor asesor-1");
   });
 
   test("RegistrarLeadUseCase admin asigna a otro asesor", async () => {
@@ -356,6 +359,7 @@ describe("ventas / use cases", () => {
       expect(lead?.citas[0]!.estado).toBe("PENDIENTE");
     }
     expect(repo.actividades).toContain("CITA_AGENDADA");
+    expect(repo.descripcionesActividad[0]).toBeTruthy();
     expect(registrarActividadSpy).toHaveBeenCalledTimes(1);
   });
 
@@ -375,6 +379,29 @@ describe("ventas / use cases", () => {
 
     expect(resultado.esExito).toBe(false);
     expect(resultado.esExito ? undefined : resultado.error.message).toBe("Lead no encontrado");
+    expect(resultado.esExito ? undefined : resultado.error.codigo).toBe("LEAD_NO_ENCONTRADO");
+  });
+
+  test("AgendarCitaUseCase rechaza asesor no autorizado", async () => {
+    const repo = new FakeVentasRepository();
+    await repo.guardarLead(crearLead());
+
+    const resultado = await new AgendarCitaUseCase(
+      repo,
+      new SecuenciaGeneradorId(["cita-001"]),
+      new AutorizadorVentasAdapter(),
+    ).ejecutar({
+      idLead: "lead-001",
+      fechaInicio: new Date("2026-06-01T10:00:00.000Z"),
+      duracionMinutos: 60,
+      usuarioAutenticado: { id: "asesor-2", rol: "ASESOR" },
+    });
+
+    expect(resultado.esExito).toBe(false);
+    expect(resultado.esExito ? undefined : resultado.error.message).toBe(
+      "No tienes permisos para gestionar este lead.",
+    );
+    expect(resultado.esExito ? undefined : resultado.error.codigo).toBe("SIN_PERMISOS_LEAD");
   });
 
   test("AgendarCitaUseCase funciona sin usuarioAutenticado", async () => {
@@ -411,8 +438,14 @@ describe("ventas / use cases", () => {
     const lead = await repo.obtenerLeadPorId("lead-001" as IdLead);
     expect(resultado.esExito).toBe(true);
     expect(repo.clientes.size).toBe(1);
+    if (resultado.esExito) {
+      expect(resultado.valor.nombre).toBe("Maria");
+      expect(resultado.valor.email).toBe("maria@example.com");
+      expect(resultado.valor.idAsesor).toBe(idUsuarioRef("asesor-1"));
+    }
     expect(lead?.estado.valor).toBe("CONVERTIDO");
     expect(repo.actividades).toContain("CONVERTIDO_A_CLIENTE");
+    expect(repo.descripcionesActividad).toContain("Lead convertido a cliente con ID cliente-001");
   });
 
   test("ConvertirLeadAClienteUseCase rechaza lead inexistente", async () => {
@@ -429,6 +462,28 @@ describe("ventas / use cases", () => {
 
     expect(resultado.esExito).toBe(false);
     expect(resultado.esExito ? undefined : resultado.error.message).toBe("Lead no encontrado");
+    expect(resultado.esExito ? undefined : resultado.error.codigo).toBe("LEAD_NO_ENCONTRADO");
+    expect(repo.clientes.size).toBe(0);
+  });
+
+  test("ConvertirLeadAClienteUseCase rechaza asesor no autorizado", async () => {
+    const repo = new FakeVentasRepository();
+    await repo.guardarLead(crearLead());
+
+    const resultado = await new ConvertirLeadAClienteUseCase(
+      repo,
+      new SecuenciaGeneradorId(["cliente-001"]),
+      new AutorizadorVentasAdapter(),
+    ).ejecutar({
+      idLead: "lead-001",
+      usuarioAutenticado: { id: "asesor-2", rol: "ASESOR" },
+    });
+
+    expect(resultado.esExito).toBe(false);
+    expect(resultado.esExito ? undefined : resultado.error.message).toBe(
+      "No tienes permisos para gestionar este lead.",
+    );
+    expect(resultado.esExito ? undefined : resultado.error.codigo).toBe("SIN_PERMISOS_LEAD");
     expect(repo.clientes.size).toBe(0);
   });
 
@@ -593,6 +648,7 @@ describe("ventas / use cases", () => {
     expect(cita?.estado).toBe("REPROGRAMADA");
     expect(cita?.observacion).toBe("Reprogramada por cliente");
     expect(repo.actividades).toContain("CITA_ACTUALIZADA");
+    expect(repo.descripcionesActividad).toContain("Cita cita-001 actualizada desde el agregado.");
   });
 
   test("ActualizarCitaUseCase rechaza lead, cita o asesor no autorizado", async () => {
@@ -763,6 +819,7 @@ describe("ventas / use cases", () => {
     expect(resultado.esExito).toBe(true);
     expect(lead?.idAsesor).toBe(idUsuarioRef("asesor-2"));
     expect(repo.actividades).toContain("LEAD_ASIGNADO_A_ASESOR");
+    expect(repo.descripcionesActividad).toContain("Lead asignado al asesor asesor-2");
   });
 
   test("AsignarLeadAAsesorUseCase rechaza lead inexistente", async () => {
@@ -956,6 +1013,12 @@ describe("ventas / use cases", () => {
 
     expect(resultado.esExito).toBe(true);
     expect(resultado.esExito ? resultado.valor.contratos : []).toHaveLength(2);
+    if (resultado.esExito) {
+      const contratos = resultado.valor.contratos;
+      expect(contratos[0]!.estado).toBe("BORRADOR");
+      expect(contratos[0]!.idPropiedad).toBe("prop-001");
+      expect(contratos[1]!.idPropiedad).toBe("prop-002");
+    }
   });
 
   test("ListarPropiedadesPorClienteUseCase devuelve ids unicos", async () => {
@@ -976,6 +1039,9 @@ describe("ventas / use cases", () => {
 
     expect(resultado.esExito).toBe(true);
     expect(resultado.esExito ? resultado.valor : []).toHaveLength(1);
+    if (resultado.esExito) {
+      expect(resultado.valor[0]).toBeDefined();
+    }
   });
 
   test("propaga errores no dominico en RegistrarLeadUseCase", async () => {
@@ -1332,6 +1398,98 @@ describe("ventas / use cases", () => {
     repo.listarClientes = () => Promise.reject(new ErrorDeDominio("error dominio"));
 
     const resultado = await new ListarClientesUseCase(repo).ejecutar();
+
+    expect(resultado.esExito).toBe(false);
+  });
+
+  test("captura ErrorDeDominio como resultadoFallido en ListarCitasUseCase", async () => {
+    const repo = new FakeVentasRepository();
+    repo.listarLeads = () => Promise.reject(new ErrorDeDominio("error dominio"));
+
+    const resultado = await new ListarCitasUseCase(repo).ejecutar();
+
+    expect(resultado.esExito).toBe(false);
+  });
+
+  test("captura ErrorDeDominio como resultadoFallido en ListarLeadsPorAsesorUseCase", async () => {
+    const repo = new FakeVentasRepository();
+    repo.listarLeadsPorAsesor = () => Promise.reject(new ErrorDeDominio("error dominio"));
+
+    const resultado = await new ListarLeadsPorAsesorUseCase(repo).ejecutar({
+      idAsesor: "asesor-1",
+    });
+
+    expect(resultado.esExito).toBe(false);
+  });
+
+  test("captura ErrorDeDominio como resultadoFallido en ListarAsesoresConLeadsUseCase", async () => {
+    const repo = new FakeVentasRepository();
+    repo.listarAsesoresConLeads = () => Promise.reject(new ErrorDeDominio("error dominio"));
+
+    const resultado = await new ListarAsesoresConLeadsUseCase(repo).ejecutar();
+
+    expect(resultado.esExito).toBe(false);
+  });
+
+  test("captura ErrorDeDominio como resultadoFallido en ListarContratosUseCase", async () => {
+    const repo = new FakeContratoRepository();
+    repo.listar = () => Promise.reject(new ErrorDeDominio("error dominio"));
+
+    const resultado = await new ListarContratosUseCase(repo).ejecutar();
+
+    expect(resultado.esExito).toBe(false);
+  });
+
+  test("captura ErrorDeDominio como resultadoFallido en ListarPropiedadesPorClienteUseCase", async () => {
+    const repo = new FakeContratoRepository();
+    repo.listarPorCliente = () => Promise.reject(new ErrorDeDominio("error dominio"));
+
+    const resultado = await new ListarPropiedadesPorClienteUseCase(repo).ejecutar({
+      idCliente: "cliente-001",
+    });
+
+    expect(resultado.esExito).toBe(false);
+  });
+
+  test("captura ErrorDeDominio como resultadoFallido en RegistrarClienteDirectoUseCase", async () => {
+    const repo = new FakeVentasRepository();
+    repo.guardarCliente = () => Promise.reject(new ErrorDeDominio("error dominio"));
+
+    const resultado = await new RegistrarClienteDirectoUseCase(
+      repo,
+      new SecuenciaGeneradorId(["cli-001"]),
+    ).ejecutar({
+      nombre: "test",
+      email: "test@example.com",
+      telefono: "300000000",
+      idAsesor: "asesor-1",
+    });
+
+    expect(resultado.esExito).toBe(false);
+  });
+
+  test("propaga errores no dominico en ActualizarCitaUseCase", async () => {
+    const repo = new FakeVentasRepository();
+    repo.obtenerLeadPorId = () => Promise.reject(new Error("db error"));
+
+    await expect(
+      new ActualizarCitaUseCase(repo).ejecutar({
+        idLead: "lead-001",
+        idCita: "cita-001",
+        observacion: "test",
+      }),
+    ).rejects.toThrow("db error");
+  });
+
+  test("captura ErrorDeDominio como resultadoFallido en ActualizarCitaUseCase", async () => {
+    const repo = new FakeVentasRepository();
+    repo.obtenerLeadPorId = () => Promise.reject(new ErrorDeDominio("error dominio"));
+
+    const resultado = await new ActualizarCitaUseCase(repo).ejecutar({
+      idLead: "lead-001",
+      idCita: "cita-001",
+      observacion: "test",
+    });
 
     expect(resultado.esExito).toBe(false);
   });
