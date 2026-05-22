@@ -7,6 +7,15 @@ export function mapLeadPipelineFromDto(dto: LeadPipelineDTO): LeadPipeline {
 		nombre: dto.nombre,
 		estado: dto.estado,
 		tipo: dto.tipo,
-		citasCount: dto.citasCount
+		citasCount: dto.citasCount,
+		citas: (dto.citas ?? []).map((cita) => ({
+			id: cita.id,
+			idLead: cita.idLead,
+			idPropiedad: cita.idPropiedad,
+			fechaInicio: cita.fechaInicio,
+			fechaFin: cita.fechaFin,
+			estado: cita.estado,
+			observacion: cita.observacion
+		}))
 	};
 }

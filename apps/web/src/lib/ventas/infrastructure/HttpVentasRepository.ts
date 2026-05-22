@@ -1,12 +1,19 @@
 import { httpClient } from '$lib/shared/http/httpClient';
 import type { VentasRepository } from '../application/ports/VentasRepository';
+import type { ActualizarCitaInput } from '../application/use-cases/actualizarCita';
+import type { ActualizarLeadInput } from '../application/use-cases/actualizarLead';
 import type { AgendarCitaInput } from '../application/use-cases/agendarCita';
+import type { ConvertirLeadInput } from '../application/use-cases/convertirLead';
 import type { RegistrarLeadInput } from '../application/use-cases/registrarLead';
 import type { LeadPipeline } from '../domain/models/LeadPipeline';
 import { mapLeadPipelineFromDto } from './VentasMapper';
 import type {
+	ActualizarCitaRequestDTO,
+	ActualizarLeadRequestDTO,
 	AgendarCitaRequestDTO,
 	ApiSuccessResponse,
+	ConvertirLeadRequestDTO,
+	ConvertirLeadResponseDTO,
 	LeadPipelineDTO,
 	RegistrarLeadRequestDTO,
 	RegistrarLeadResponseDTO
@@ -39,6 +46,33 @@ export class HttpVentasRepository implements VentasRepository {
 		return response.data.id;
 	}
 
+	async actualizarLead(input: ActualizarLeadInput): Promise<void> {
+		const body: ActualizarLeadRequestDTO = {
+			nombre: input.nombre || undefined,
+			email: input.email || undefined,
+			telefono: input.telefono || undefined,
+			tipo: input.tipo,
+			idPropiedadInteres: input.idPropiedadInteres || undefined
+		};
+
+		await httpClient.put<ApiSuccessResponse<{ message?: string }>>(
+			`${this.apiBaseUrl}/ventas/lead/${encodeURIComponent(input.idLead)}`,
+			{ body }
+		);
+	}
+
+	async convertirLead(input: ConvertirLeadInput): Promise<string> {
+		const body: ConvertirLeadRequestDTO = {
+			idLead: input.idLead
+		};
+		const response = await httpClient.post<ApiSuccessResponse<ConvertirLeadResponseDTO>>(
+			`${this.apiBaseUrl}/ventas/convertir`,
+			{ body }
+		);
+
+		return response.data.idCliente;
+	}
+
 	async agendarCita(input: AgendarCitaInput): Promise<void> {
 		const body: AgendarCitaRequestDTO = {
 			idLead: input.idLead,
@@ -50,6 +84,20 @@ export class HttpVentasRepository implements VentasRepository {
 
 		await httpClient.post<ApiSuccessResponse<{ message?: string }>>(
 			`${this.apiBaseUrl}/ventas/cita`,
+			{ body }
+		);
+	}
+
+	async actualizarCita(input: ActualizarCitaInput): Promise<void> {
+		const body: ActualizarCitaRequestDTO = {
+			fechaInicio: input.fechaInicio,
+			duracionMinutos: input.duracionMinutos,
+			observacion: input.observacion,
+			estado: input.estado
+		};
+
+		await httpClient.put<ApiSuccessResponse<{ message?: string }>>(
+			`${this.apiBaseUrl}/ventas/lead/${encodeURIComponent(input.idLead)}/cita/${encodeURIComponent(input.idCita)}`,
 			{ body }
 		);
 	}
