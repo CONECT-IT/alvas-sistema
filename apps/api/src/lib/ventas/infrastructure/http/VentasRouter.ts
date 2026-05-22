@@ -1,27 +1,39 @@
 import { Hono } from "hono";
-import {
-  VentasController,
-  type BindingsVentas,
-  type VentasControllerDeps,
-} from "./VentasController";
 import { type SessionClaims, verifySessionMiddleware } from "../../../shared/infrastructure";
+import { CitasController } from "./CitasController";
+import { ClientesController } from "./ClientesController";
+import { ContratosController } from "./ContratosController";
+import { LeadsController } from "./LeadsController";
+import { PipelineController } from "./PipelineController";
+import { type BindingsVentas, type VentasControllerDeps } from "./VentasHttp";
 
 export function crearVentasRouter(deps: VentasControllerDeps) {
   const ventasRouter = new Hono<{
     Bindings: BindingsVentas;
     Variables: { authPayload: SessionClaims };
   }>();
-  const controller = new VentasController(deps);
+  const leads = new LeadsController(deps);
+  const citas = new CitasController(deps);
+  const clientes = new ClientesController(deps);
+  const contratos = new ContratosController(deps);
+  const pipeline = new PipelineController(deps);
 
   ventasRouter.use("*", verifySessionMiddleware());
 
-  ventasRouter.get("/pipeline", (c) => controller.listarPipeline(c));
-  ventasRouter.post("/lead", (c) => controller.registrarLead(c));
-  ventasRouter.put("/lead/:id", (c) => controller.editarLead(c));
-  ventasRouter.post("/cliente", (c) => controller.registrarClienteDirecto(c));
-  ventasRouter.post("/cita", (c) => controller.agendarCita(c));
-  ventasRouter.put("/lead/:idLead/cita/:idCita", (c) => controller.editarCita(c));
-  ventasRouter.post("/convertir", (c) => controller.convertirACliente(c));
+  ventasRouter.get("/pipeline", (c) => pipeline.listar(c));
+  ventasRouter.post("/lead", (c) => leads.registrar(c));
+  ventasRouter.put("/lead/:id", (c) => leads.actualizar(c));
+  ventasRouter.post("/convertir", (c) => leads.convertirACliente(c));
+
+  ventasRouter.post("/cita", (c) => citas.agendar(c));
+  ventasRouter.put("/lead/:idLead/cita/:idCita", (c) => citas.actualizar(c));
+
+  ventasRouter.get("/clientes", (c) => clientes.listar(c));
+  ventasRouter.post("/cliente", (c) => clientes.registrarDirecto(c));
+
+  ventasRouter.get("/contratos", (c) => contratos.listar(c));
+  ventasRouter.post("/contratos", (c) => contratos.crear(c));
+  ventasRouter.post("/contratos/:idContrato/firmar", (c) => contratos.firmar(c));
 
   return ventasRouter;
 }

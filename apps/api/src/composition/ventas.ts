@@ -3,12 +3,20 @@ import {
   ActualizarLeadUseCase,
   AgendarCitaUseCase,
   ConvertirLeadAClienteUseCase,
+  CrearContratoUseCase,
+  FirmarContratoUseCase,
+  ListarClientesUseCase,
+  ListarContratosUseCase,
   ListarLeadsPorAsesorUseCase,
   RegistrarClienteDirectoUseCase,
   RegistrarLeadUseCase,
   type IRegistrarLead,
 } from "../lib/ventas/application";
-import { D1VentasRepository, type VentasControllerDeps } from "../lib/ventas/infrastructure";
+import {
+  D1ContratoRepository,
+  D1VentasRepository,
+  type VentasControllerDeps,
+} from "../lib/ventas/infrastructure";
 import { type D1DatabaseLike } from "../lib/shared/infrastructure";
 import { UuidGeneradorId } from "../lib/shared/infrastructure/security/UuidGeneradorId";
 import { EvaluadorAsignacionService } from "../lib/ventas/domain/services/EvaluadorAsignacion";
@@ -58,5 +66,9 @@ export function crearVentasControllerDeps(): VentasControllerDeps {
       new ActualizarCitaUseCase(new D1VentasRepository(c.env.DB), autorizador),
     crearListarLeadsPorAsesor: (c) =>
       new ListarLeadsPorAsesorUseCase(new D1VentasRepository(c.env.DB)),
+    crearListarClientes: (c) => new ListarClientesUseCase(new D1VentasRepository(c.env.DB)),
+    crearCrearContrato: (c) => new CrearContratoUseCase(new D1ContratoRepository(c.env.DB)),
+    crearListarContratos: (c) => new ListarContratosUseCase(new D1ContratoRepository(c.env.DB)),
+    crearFirmarContrato: (c) => new FirmarContratoUseCase(new D1ContratoRepository(c.env.DB)),
   };
 }

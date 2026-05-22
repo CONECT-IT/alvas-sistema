@@ -1,0 +1,65 @@
+import { type RegistrarClienteDirectoInputDTO } from "../../application/dto/ClienteDTOs";
+import {
+  type ContextoVentas,
+  responderErrorDeDominio,
+  responderErrorInterno,
+  type VentasControllerDeps,
+} from "./VentasHttp";
+
+export class ClientesController {
+  constructor(private readonly deps: VentasControllerDeps) {}
+
+  async registrarDirecto(c: ContextoVentas): Promise<Response> {
+    try {
+      const body = await c.req.json<RegistrarClienteDirectoInputDTO>();
+      const authPayload = c.get("authPayload");
+      const useCase = this.deps.crearRegistrarClienteDirecto(c);
+
+      const resultado = await useCase.ejecutar({
+        ...body,
+        idAsesor: authPayload.idUsuario,
+      });
+
+      if (!resultado.esExito) {
+        return responderErrorDeDominio(c, resultado.error);
+      }
+
+      return c.json({ success: true, data: { id: resultado.valor.id as string } }, 201);
+    } catch (error) {
+      return responderErrorInterno(c, "ClientesController.registrarDirecto:", error);
+    }
+  }
+
+  async listar(c: ContextoVentas): Promise<Response> {
+    try {
+      const authPayload = c.get("authPayload");
+      const useCase = this.deps.crearListarClientes(c);
+      const resultado = await useCase.ejecutar();
+
+      if (!resultado.esExito) {
+        return responderErrorDeDominio(c, resultado.error);
+      }
+
+      const clientes =
+        authPayload.rol === "ADMIN"
+          ? resultado.valor
+          : resultado.valor.filter((cliente) => cliente.idAsesor === authPayload.idUsuario);
+
+      return c.json({
+        success: true,
+        data: clientes.map((cliente) => ({
+          id: cliente.id as string,
+          nombre: cliente.nombre,
+          email: cliente.email,
+          telefono: cliente.telefono,
+          idAsesor: cliente.idAsesor as string,
+          idLeadOrigen: cliente.idLeadOrigen as string | undefined,
+          creadoEn: cliente.creadoEn.toISOString(),
+          actualizadoEn: cliente.actualizadoEn.toISOString(),
+        })),
+      });
+    } catch (error) {
+      return responderErrorInterno(c, "ClientesController.listar:", error);
+    }
+  }
+}
