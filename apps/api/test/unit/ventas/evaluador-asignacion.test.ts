@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 
 import { idUsuarioRef } from "../../../src/lib/shared/domain/value-objects/IdUsuarioRef";
 import { EvaluadorAsignacionService } from "../../../src/lib/ventas/domain/services/EvaluadorAsignacion";
+import { ErrorDeDominio } from "../../../src/lib/shared/domain/errors/ErrorDeDominio";
 
 describe("ventas / EvaluadorAsignacionService", () => {
   test("elige el asesor con menor carga de leads", () => {
@@ -25,5 +26,37 @@ describe("ventas / EvaluadorAsignacionService", () => {
     expect(resultado.esExito ? undefined : resultado.error.message).toBe(
       "No hay asesores disponibles para asignación.",
     );
+  });
+
+  test("propaga errores no dominico durante evaluacion", () => {
+    const evaluador = new EvaluadorAsignacionService();
+    const stats = [
+      { idAsesor: "asesor-1", totalLeads: 5 },
+      {
+        idAsesor: "throw-1",
+        get totalLeads() {
+          throw new Error("db error");
+        },
+      },
+    ];
+
+    expect(() => evaluador.evaluar(stats)).toThrow("db error");
+  });
+
+  test("captura ErrorDeDominio durante evaluacion", () => {
+    const evaluador = new EvaluadorAsignacionService();
+    const stats = [
+      { idAsesor: "asesor-1", totalLeads: 5 },
+      {
+        idAsesor: "throw-1",
+        get totalLeads() {
+          throw new ErrorDeDominio("error dominio");
+        },
+      },
+    ];
+
+    const resultado = evaluador.evaluar(stats);
+
+    expect(resultado.esExito).toBe(false);
   });
 });

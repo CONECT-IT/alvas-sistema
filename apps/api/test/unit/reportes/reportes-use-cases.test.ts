@@ -134,4 +134,34 @@ describe("reportes / use cases", () => {
       "REPORTE_NO_DISPONIBLE",
     );
   });
+
+  test("propaga errores no dominico en ObtenerReporteGeneralUseCase", async () => {
+    const consulta = new FakeConsultaVentasParaReportes();
+    consulta.listarLeadsParaReporte = () => Promise.reject(new Error("db error"));
+
+    await expect(new ObtenerReporteGeneralUseCase(consulta).ejecutar()).rejects.toThrow("db error");
+  });
+
+  test("propaga errores no dominico en ObtenerEstadisticasGlobalesUseCase", async () => {
+    const consulta = new FakeConsultaVentasParaReportes();
+    consulta.listarLeadsParaReporte = () => Promise.reject(new Error("db error"));
+
+    await expect(new ObtenerEstadisticasGlobalesUseCase(consulta).ejecutar()).rejects.toThrow(
+      "db error",
+    );
+  });
+
+  test("PorcentajeConversion con 0 clientes produce 0%", async () => {
+    const consulta = new FakeConsultaVentasParaReportes(
+      [{ id: "lead-001", estado: "NUEVO", creadoEn: new Date(), citas: [] }],
+      [],
+    );
+
+    const resultado = await new ObtenerReporteGeneralUseCase(consulta).ejecutar();
+
+    expect(resultado.esExito).toBe(true);
+    if (resultado.esExito) {
+      expect(resultado.valor.metricas.conversionRate).toBe(0);
+    }
+  });
 });
