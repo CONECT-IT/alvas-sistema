@@ -6,6 +6,7 @@ import type { AgendarCitaInput } from '../application/use-cases/agendarCita';
 import type { ConvertirLeadInput } from '../application/use-cases/convertirLead';
 import type { CrearContratoInput } from '../application/use-cases/crearContrato';
 import type { RegistrarLeadInput } from '../application/use-cases/registrarLead';
+import type { LeadDetalle } from '../domain/models/LeadDetalle';
 import type { LeadPipeline } from '../domain/models/LeadPipeline';
 import { mapLeadPipelineFromDto } from './VentasMapper';
 import type {
@@ -18,6 +19,7 @@ import type {
 	ConvertirLeadRequestDTO,
 	ConvertirLeadResponseDTO,
 	CrearContratoRequestDTO,
+	LeadDetalleDTO,
 	LeadPipelineDTO,
 	RegistrarLeadRequestDTO,
 	RegistrarLeadResponseDTO
@@ -32,6 +34,13 @@ export class HttpVentasRepository implements VentasRepository {
 		);
 
 		return response.data.map(mapLeadPipelineFromDto);
+	}
+
+	async obtenerLead(id: string): Promise<LeadDetalle> {
+		const response = await httpClient.get<ApiSuccessResponse<LeadDetalleDTO>>(
+			`${this.apiBaseUrl}/ventas/lead/${encodeURIComponent(id)}`
+		);
+		return response.data;
 	}
 
 	async registrarLead(input: RegistrarLeadInput): Promise<string> {

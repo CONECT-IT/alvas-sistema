@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
 	import { HttpError } from '$lib/shared/http/httpClient';
@@ -23,6 +24,10 @@
 		} finally {
 			loading = false;
 		}
+	}
+
+	function irALead(lead: LeadPipeline) {
+		goto(`/admin/leads/${encodeURIComponent(lead.id)}`);
 	}
 
 	$effect(() => {
@@ -68,7 +73,7 @@
 				<p class="text-sm font-semibold text-primary">{leads.length} leads</p>
 			</div>
 
-			<LeadPipelineTable {leads} />
+			<LeadPipelineTable {leads} onLeadClick={irALead} />
 		</Card>
 	{/if}
 </div>

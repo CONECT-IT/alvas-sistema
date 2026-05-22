@@ -4,9 +4,10 @@
 
 	interface Props {
 		leads: LeadPipeline[];
+		onLeadClick?: (lead: LeadPipeline) => void;
 	}
 
-	let { leads }: Props = $props();
+	let { leads, onLeadClick }: Props = $props();
 
 	function getEstadoTone(estado: string): 'brand' | 'success' | 'neutral' {
 		const normalized = estado.toUpperCase();
@@ -28,7 +29,15 @@
 		</thead>
 		<tbody class="divide-y divide-border-light text-sm">
 			{#each leads as lead (lead.id)}
-				<tr>
+				<tr
+					class="cursor-pointer transition hover:bg-bg-base"
+					onclick={() => onLeadClick?.(lead)}
+					role={onLeadClick ? 'button' : undefined}
+					tabindex={onLeadClick ? 0 : undefined}
+					onkeydown={(e) => {
+						if (e.key === 'Enter' && onLeadClick) onLeadClick(lead);
+					}}
+				>
 					<td class="py-4 pr-6 font-semibold text-text-main">{lead.nombre}</td>
 					<td class="py-4 pr-6 text-text-muted">{lead.tipo}</td>
 					<td class="py-4 pr-6">

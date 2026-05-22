@@ -1,4 +1,5 @@
 import type { LeadPipeline } from '../../domain/models/LeadPipeline';
+import type { LeadDetalle } from '../../domain/models/LeadDetalle';
 import type { ActualizarCitaInput } from '../use-cases/actualizarCita';
 import type { ActualizarLeadInput } from '../use-cases/actualizarLead';
 import type { AgendarCitaInput } from '../use-cases/agendarCita';
@@ -10,6 +11,7 @@ import type { CrearContratoInput } from '../use-cases/crearContrato';
 
 export interface VentasRepository {
 	listarPipeline(): Promise<LeadPipeline[]>;
+	obtenerLead(id: string): Promise<LeadDetalle>;
 	registrarLead(input: RegistrarLeadInput): Promise<string>;
 	actualizarLead(input: ActualizarLeadInput): Promise<void>;
 	convertirLead(input: ConvertirLeadInput): Promise<string>;

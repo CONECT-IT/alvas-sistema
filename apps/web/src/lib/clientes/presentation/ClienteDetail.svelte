@@ -1,0 +1,211 @@
+<script lang="ts">
+	import Badge from '$lib/shared/ui/Badge.svelte';
+	import Button from '$lib/shared/ui/Button.svelte';
+	import Card from '$lib/shared/ui/Card.svelte';
+	import { HttpError } from '$lib/shared/http/httpClient';
+	import type { Cliente } from '../domain/models/Cliente';
+	import { obtenerCliente } from '../application/use-cases/obtenerCliente';
+	import { actualizarCliente } from '../application/use-cases/actualizarCliente';
+	import { clienteRepository } from '../infrastructure/clienteRepository';
+
+	interface Props {
+		clienteId: string;
+	}
+
+	let { clienteId }: Props = $props();
+
+	let cliente = $state<Cliente | null>(null);
+	let loading = $state(true);
+	let error = $state<string | null>(null);
+	let editando = $state(false);
+	let editNombre = $state('');
+	let editEmail = $state('');
+	let editTelefono = $state('');
+	let saving = $state(false);
+	let saveError = $state<string | null>(null);
+	let saveSuccess = $state<string | null>(null);
+
+	async function cargar() {
+		if (!clienteId.trim()) {
+			cliente = null;
+			loading = false;
+			return;
+		}
+		loading = true;
+		error = null;
+		try {
+			cliente = await obtenerCliente(clienteRepository, clienteId.trim());
+		} catch (err) {
+			error = err instanceof HttpError ? err.message : 'No se pudo cargar el cliente.';
+		} finally {
+			loading = false;
+		}
+	}
+
+	function iniciarEdicion() {
+		if (!cliente) return;
+		editNombre = cliente.nombre;
+		editEmail = cliente.email;
+		editTelefono = cliente.telefono;
+		editando = true;
+		saveError = null;
+		saveSuccess = null;
+	}
+
+	async function guardarCambios() {
+		if (!cliente) return;
+		saving = true;
+		saveError = null;
+		saveSuccess = null;
+
+		try {
+			const actualizado = await actualizarCliente(clienteRepository, {
+				idCliente: cliente.id,
+				nombre: editNombre.trim() || undefined,
+				email: editEmail.trim() || undefined,
+				telefono: editTelefono.trim() || undefined
+			});
+			cliente = actualizado;
+			editando = false;
+			saveSuccess = 'Cliente actualizado correctamente.';
+		} catch (err) {
+			saveError = err instanceof HttpError ? err.message : 'No se pudo actualizar el cliente.';
+		} finally {
+			saving = false;
+		}
+	}
+
+	function formatearFecha(iso: string): string {
+		return new Date(iso).toLocaleDateString('es-PE', {
+			day: '2-digit',
+			month: 'long',
+			year: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit'
+		});
+	}
+
+	$effect(() => {
+		cargar();
+	});
+</script>
+
+{#if loading}
+	<Card>
+		<div class="h-64 animate-pulse rounded-2xl bg-surface-muted"></div>
+	</Card>
+{:else if error}
+	<Card class="text-center">
+		<p class="font-display text-xl font-bold text-text-main">No se pudo cargar el cliente</p>
+		<p class="mx-auto mt-2 max-w-xl text-sm text-text-muted">{error}</p>
+		<Button onclick={cargar}>Intentar nuevamente</Button>
+	</Card>
+{:else if cliente}
+	<div class="flex flex-col gap-6">
+		<div class="flex flex-wrap items-start justify-between gap-4">
+			<div>
+				<div class="flex flex-wrap items-center gap-3">
+					<h1 class="font-display text-3xl font-bold text-text-main">{cliente.nombre}</h1>
+					<Badge tone="success">Cliente</Badge>
+				</div>
+				<p class="mt-2 text-sm text-text-muted">
+					ID: {cliente.id} &middot; Asesor: {cliente.idAsesor}
+					{#if cliente.idLeadOrigen}
+						&middot; Lead origen: {cliente.idLeadOrigen}
+					{/if}
+				</p>
+			</div>
+			<div class="flex gap-3">
+				{#if !editando}
+					<Button variant="secondary" onclick={iniciarEdicion}>Editar</Button>
+				{/if}
+				<Button variant="ghost" onclick={() => window.history.back()}>Volver</Button>
+			</div>
+		</div>
+
+		{#if saveSuccess}
+			<p class="rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+				{saveSuccess}
+			</p>
+		{/if}
+		{#if saveError}
+			<p class="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{saveError}</p>
+		{/if}
+
+		{#if editando}
+			<Card>
+				<h2 class="mb-4 font-display text-xl font-bold text-text-main">Editar cliente</h2>
+				<form
+					onsubmit={(e) => {
+						e.preventDefault();
+						guardarCambios();
+					}}
+					class="grid gap-4 md:grid-cols-2"
+				>
+					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+						Nombre
+						<input
+							bind:value={editNombre}
+							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+						/>
+					</label>
+					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+						Email
+						<input
+							bind:value={editEmail}
+							type="email"
+							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+						/>
+					</label>
+					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+						Teléfono
+						<input
+							bind:value={editTelefono}
+							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+						/>
+					</label>
+					<div class="flex items-end gap-3 md:col-span-2 md:justify-end">
+						<Button
+							type="button"
+							variant="ghost"
+							onclick={() => {
+								editando = false;
+							}}>Cancelar</Button
+						>
+						<Button type="submit" disabled={saving}>
+							{saving ? 'Guardando...' : 'Guardar cambios'}
+						</Button>
+					</div>
+				</form>
+			</Card>
+		{/if}
+
+		<div class="grid gap-6 xl:grid-cols-2">
+			<Card>
+				<h2 class="mb-4 font-display text-xl font-bold text-text-main">Información de contacto</h2>
+				<dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 text-sm">
+					<dt class="font-semibold text-text-muted">Email</dt>
+					<dd class="text-text-main">{cliente.email}</dd>
+					<dt class="font-semibold text-text-muted">Teléfono</dt>
+					<dd class="text-text-main">{cliente.telefono}</dd>
+					<dt class="font-semibold text-text-muted">Asesor asignado</dt>
+					<dd class="text-text-main">{cliente.idAsesor}</dd>
+					{#if cliente.idLeadOrigen}
+						<dt class="font-semibold text-text-muted">Lead de origen</dt>
+						<dd class="text-text-main">{cliente.idLeadOrigen}</dd>
+					{/if}
+				</dl>
+			</Card>
+
+			<Card>
+				<h2 class="mb-4 font-display text-xl font-bold text-text-main">Fechas</h2>
+				<dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 text-sm">
+					<dt class="font-semibold text-text-muted">Creado</dt>
+					<dd class="text-text-main">{formatearFecha(cliente.creadoEn)}</dd>
+					<dt class="font-semibold text-text-muted">Actualizado</dt>
+					<dd class="text-text-main">{formatearFecha(cliente.actualizadoEn)}</dd>
+				</dl>
+			</Card>
+		</div>
+	</div>
+{/if}

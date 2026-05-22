@@ -90,3 +90,18 @@ export type CrearContratoRequestDTO = Readonly<{
 	fechaInicio: string;
 	fechaFin: string;
 }>;
+
+export type LeadDetalleDTO = Readonly<{
+	id: string;
+	nombre: string;
+	email: string;
+	telefono: string;
+	tipo: string;
+	estado: string;
+	idAsesor: string;
+	idCliente: string | null;
+	idPropiedadInteres: string | null;
+	citas: CitaPipelineDTO[];
+	creadoEn: string;
+	actualizadoEn: string;
+}>;

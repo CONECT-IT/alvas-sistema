@@ -6,4 +6,5 @@ export interface UsuarioRepository {
 	listar(): Promise<Usuario[]>;
 	crear(input: CrearUsuarioInput): Promise<Usuario>;
 	actualizar(input: ActualizarUsuarioInput): Promise<Usuario>;
+	obtener(id: string): Promise<Usuario>;
 }

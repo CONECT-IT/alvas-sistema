@@ -51,4 +51,12 @@ export class HttpUsuarioRepository implements UsuarioRepository {
 
 		return mapUsuarioFromDto(response.data);
 	}
+
+	async obtener(id: string): Promise<Usuario> {
+		const response = await httpClient.get<ApiSuccessResponse<UsuarioRespuestaDTO>>(
+			`${this.apiBaseUrl}/usuarios/${encodeURIComponent(id)}`
+		);
+
+		return mapUsuarioFromDto(response.data);
+	}
 }
