@@ -32,9 +32,11 @@
 			return [
 				{ label: 'Dashboard', href: '/admin/dashboard', icon: 'grid' },
 				{ label: 'Usuarios', href: '/admin/usuarios', icon: 'users' },
-				{ label: 'Propiedades', href: '/admin/propiedades', icon: 'home' },
-				{ label: 'Ventas y CRM', href: '/admin/ventas', icon: 'trending-up' },
+				{ label: 'Leads', href: '/admin/leads', icon: 'trending-up' },
+				{ label: 'Clientes', href: '/admin/clientes', icon: 'briefcase' },
+				{ label: 'Citas', href: '/admin/citas', icon: 'calendar' },
 				{ label: 'Contratos', href: '/admin/contratos', icon: 'file-text' },
+				{ label: 'Propiedades', href: '/admin/propiedades', icon: 'home' },
 				{ label: 'Reportes', href: '/admin/reportes', icon: 'bar-chart' }
 			];
 		}

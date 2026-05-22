@@ -69,7 +69,17 @@ export class CitasController {
         return responderErrorDeDominio(c, resultado.error);
       }
 
-      return c.json({ success: true, data: resultado.valor });
+      const data = resultado.valor.map((cita) => ({
+        id: cita.id as string,
+        idLead: cita.idLead as string,
+        idPropiedad: cita.idPropiedad,
+        fechaInicio: cita.fechaInicio.toISOString(),
+        fechaFin: cita.fechaFin.toISOString(),
+        estado: cita.estado,
+        observacion: cita.observacion,
+      }));
+
+      return c.json({ success: true, data });
     } catch (error) {
       return responderErrorInterno(c, "CitasController.listar:", error);
     }
@@ -86,7 +96,18 @@ export class CitasController {
         return responderErrorDeDominio(c, resultado.error);
       }
 
-      return c.json({ success: true, data: resultado.valor });
+      const cita = resultado.valor;
+      const data = {
+        id: cita.id as string,
+        idLead: cita.idLead as string,
+        idPropiedad: cita.idPropiedad,
+        fechaInicio: cita.fechaInicio.toISOString(),
+        fechaFin: cita.fechaFin.toISOString(),
+        estado: cita.estado,
+        observacion: cita.observacion,
+      };
+
+      return c.json({ success: true, data });
     } catch (error) {
       return responderErrorInterno(c, "CitasController.obtener:", error);
     }

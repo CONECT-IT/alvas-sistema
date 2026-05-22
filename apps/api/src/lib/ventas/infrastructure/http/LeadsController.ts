@@ -105,7 +105,31 @@ export class LeadsController {
         return responderErrorDeDominio(c, resultado.error);
       }
 
-      return c.json({ success: true, data: resultado.valor });
+      const lead = resultado.valor;
+      const data = {
+        id: lead.id as string,
+        nombre: lead.nombre,
+        email: lead.email,
+        telefono: lead.telefono,
+        tipo: lead.tipo.valor as string,
+        estado: lead.estado.valor as string,
+        idAsesor: lead.idAsesor as string,
+        idCliente: (lead.idCliente as string | undefined) ?? null,
+        idPropiedadInteres: (lead.idPropiedadInteres as string | undefined) ?? null,
+        citas: lead.citas.map((cita) => ({
+          id: cita.id as string,
+          idLead: cita.idLead as string,
+          idPropiedad: cita.idPropiedad,
+          fechaInicio: cita.fechaInicio.toISOString(),
+          fechaFin: cita.fechaFin.toISOString(),
+          estado: cita.estado,
+          observacion: cita.observacion,
+        })),
+        creadoEn: lead.creadoEn.toISOString(),
+        actualizadoEn: lead.actualizadoEn.toISOString(),
+      };
+
+      return c.json({ success: true, data });
     } catch (error) {
       return responderErrorInterno(c, "LeadsController.obtener:", error);
     }
@@ -124,7 +148,30 @@ export class LeadsController {
         return responderErrorDeDominio(c, resultado.error);
       }
 
-      return c.json({ success: true, data: resultado.valor });
+      const data = resultado.valor.map((lead) => ({
+        id: lead.id as string,
+        nombre: lead.nombre,
+        email: lead.email,
+        telefono: lead.telefono,
+        tipo: lead.tipo.valor as string,
+        estado: lead.estado.valor as string,
+        idAsesor: lead.idAsesor as string,
+        idCliente: (lead.idCliente as string | undefined) ?? null,
+        idPropiedadInteres: (lead.idPropiedadInteres as string | undefined) ?? null,
+        citas: lead.citas.map((cita) => ({
+          id: cita.id as string,
+          idLead: cita.idLead as string,
+          idPropiedad: cita.idPropiedad,
+          fechaInicio: cita.fechaInicio.toISOString(),
+          fechaFin: cita.fechaFin.toISOString(),
+          estado: cita.estado,
+          observacion: cita.observacion,
+        })),
+        creadoEn: lead.creadoEn.toISOString(),
+        actualizadoEn: lead.actualizadoEn.toISOString(),
+      }));
+
+      return c.json({ success: true, data });
     } catch (error) {
       return responderErrorInterno(c, "LeadsController.listarTodos:", error);
     }

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import Card from '$lib/shared/ui/Card.svelte';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import { HttpError } from '$lib/shared/http/httpClient';
@@ -105,9 +106,16 @@
 					<div class="flex flex-col gap-4">
 						<div class="flex items-start justify-between gap-4">
 							<div>
-								<h3 class="font-display text-lg font-bold text-text-main">
-									Contrato {contrato.id.slice(0, 8)}...
-								</h3>
+								<button
+									onclick={() => goto(`/admin/contratos/${contrato.id}`)}
+									class="cursor-pointer text-left"
+								>
+									<h3
+										class="font-display text-lg font-bold text-text-main transition-colors hover:text-primary"
+									>
+										Contrato {contrato.id.slice(0, 8)}...
+									</h3>
+								</button>
 								<p class="mt-1 text-sm text-text-muted">
 									Propiedad: {contrato.idPropiedad}
 								</p>

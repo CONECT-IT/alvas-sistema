@@ -11,14 +11,23 @@ export class PipelineController {
   async listar(c: ContextoVentas): Promise<Response> {
     try {
       const authPayload = c.get("authPayload");
-      const useCase = this.deps.crearListarLeadsPorAsesor(c);
-      const resultado = await useCase.ejecutar({ idAsesor: authPayload.idUsuario });
 
-      if (!resultado.esExito) {
-        return responderErrorDeDominio(c, resultado.error);
+      let leads;
+
+      if (authPayload.rol === "ADMIN") {
+        const useCase = this.deps.crearListarLeads(c);
+        const resultado = await useCase.ejecutar({
+          idUsuarioEjecutor: authPayload.idUsuario,
+          rolEjecutor: authPayload.rol,
+        });
+        if (!resultado.esExito) return responderErrorDeDominio(c, resultado.error);
+        leads = resultado.valor;
+      } else {
+        const useCase = this.deps.crearListarLeadsPorAsesor(c);
+        const resultado = await useCase.ejecutar({ idAsesor: authPayload.idUsuario });
+        if (!resultado.esExito) return responderErrorDeDominio(c, resultado.error);
+        leads = resultado.valor;
       }
-
-      const leads = resultado.valor;
 
       return c.json({
         success: true,

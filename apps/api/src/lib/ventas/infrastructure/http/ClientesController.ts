@@ -76,7 +76,19 @@ export class ClientesController {
         return responderErrorDeDominio(c, resultado.error);
       }
 
-      return c.json({ success: true, data: resultado.valor });
+      const cliente = resultado.valor;
+      const data = {
+        id: cliente.id as string,
+        nombre: cliente.nombre,
+        email: cliente.email,
+        telefono: cliente.telefono,
+        idAsesor: cliente.idAsesor as string,
+        idLeadOrigen: cliente.idLeadOrigen as string | undefined,
+        creadoEn: cliente.creadoEn.toISOString(),
+        actualizadoEn: cliente.actualizadoEn.toISOString(),
+      };
+
+      return c.json({ success: true, data });
     } catch (error) {
       return responderErrorInterno(c, "ClientesController.obtener:", error);
     }
@@ -86,7 +98,7 @@ export class ClientesController {
     try {
       const id = c.req.param("id") ?? "";
       const body = await c.req.json<ActualizarClienteInputDTO>();
-      const useCase = this.deps.crearActualizarCliente!(c);
+      const useCase = this.deps.crearActualizarCliente(c);
       const resultado = await useCase.ejecutar({ ...body, idCliente: id });
 
       if (!resultado.esExito) {
