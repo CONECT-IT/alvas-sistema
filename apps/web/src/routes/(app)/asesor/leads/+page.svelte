@@ -4,7 +4,6 @@
 	import { httpClient, HttpError } from '$lib/shared/http/httpClient';
 	import type { LeadPipeline } from '$lib/ventas/domain/models/LeadPipeline';
 	import { actualizarLead } from '$lib/ventas/application/use-cases/actualizarLead';
-	import { convertirLead } from '$lib/ventas/application/use-cases/convertirLead';
 	import { crearContrato } from '$lib/ventas/application/use-cases/crearContrato';
 	import { firmarContrato } from '$lib/ventas/application/use-cases/firmarContrato';
 	import { listarPipeline } from '$lib/ventas/application/use-cases/listarPipeline';
@@ -29,7 +28,6 @@
 	let updateError = $state<string | null>(null);
 	let updateSuccess = $state<string | null>(null);
 	let updating = $state(false);
-	let converting = $state(false);
 	let nombre = $state('');
 	let email = $state('');
 	let telefono = $state('');
@@ -41,10 +39,9 @@
 	let editTelefono = $state('');
 	let editTipo = $state<'COMPRA' | 'VENTA' | ''>('');
 	let editIdPropiedadInteres = $state('');
-	let convertIdLead = $state('');
 
-	// Estado del flujo lead -> cliente -> contrato
-	let nuevoClienteId = $state<string | null>(null);
+	// Estado del flujo lead -> contrato -> firma (cliente se crea al firmar)
+	let contratoLeadId = $state('');
 	let propiedades = $state<PropiedadItem[]>([]);
 	let contratoPropiedadId = $state('');
 	let contratoFechaInicio = $state('');
@@ -81,7 +78,7 @@
 	}
 
 	function reiniciarFlujoContrato() {
-		nuevoClienteId = null;
+		contratoLeadId = '';
 		propiedades = [];
 		contratoPropiedadId = '';
 		contratoFechaInicio = '';
@@ -150,38 +147,11 @@
 		}
 	}
 
-	async function convertirLeadACliente(event: SubmitEvent) {
-		event.preventDefault();
-		updateError = null;
-		updateSuccess = null;
-		reiniciarFlujoContrato();
-
-		if (!convertIdLead.trim()) {
-			updateError = 'Selecciona el lead que se convertirá a cliente.';
-			return;
-		}
-
-		converting = true;
-
-		try {
-			const idCliente = await convertirLead(ventasRepository, { idLead: convertIdLead.trim() });
-			nuevoClienteId = idCliente;
-			updateSuccess = `Lead convertido a cliente. ID: ${idCliente}`;
-			convertIdLead = '';
-			await cargarLeads();
-			await cargarPropiedades();
-		} catch (err) {
-			updateError = err instanceof HttpError ? err.message : 'No se pudo convertir el lead.';
-		} finally {
-			converting = false;
-		}
-	}
-
-	async function crearContratoParaCliente(event: SubmitEvent) {
+	async function crearContratoParaLead(event: SubmitEvent) {
 		event.preventDefault();
 		contratoError = null;
 
-		if (!nuevoClienteId || !contratoPropiedadId || !contratoFechaInicio || !contratoFechaFin) {
+		if (!contratoLeadId.trim() || !contratoPropiedadId || !contratoFechaInicio || !contratoFechaFin) {
 			contratoError = 'Completa todos los campos del contrato.';
 			return;
 		}
@@ -195,7 +165,7 @@
 
 		try {
 			const contrato = await crearContrato(ventasRepository, {
-				idCliente: nuevoClienteId,
+				idLead: contratoLeadId.trim(),
 				idPropiedad: contratoPropiedadId,
 				fechaInicio: new Date(contratoFechaInicio).toISOString(),
 				fechaFin: new Date(contratoFechaFin).toISOString()
@@ -359,131 +329,130 @@
 		</form>
 	</Card>
 
-	<Card>
-		<div class="mb-5">
-			<h2 class="font-display text-xl font-bold text-text-main">Gestionar lead</h2>
-			<p class="mt-1 text-sm leading-relaxed text-text-muted">
-				Ajusta datos del prospecto o conviértelo a cliente cuando la oportunidad ya esté validada.
-				La trazabilidad se registra en ventas desde la API.
-			</p>
-		</div>
+		<Card>
+			<div class="mb-5">
+				<h2 class="font-display text-xl font-bold text-text-main">Gestionar lead</h2>
+				<p class="mt-1 text-sm leading-relaxed text-text-muted">
+					Ajusta datos del prospecto o crea un contrato directamente. Al firmar el contrato, el
+					lead se convierte automáticamente en cliente.
+				</p>
+			</div>
 
-		{#if updateSuccess}
-			<p class="mb-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
-				{updateSuccess}
-			</p>
-		{/if}
+			{#if updateSuccess}
+				<p class="mb-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+					{updateSuccess}
+				</p>
+			{/if}
 
-		{#if updateError}
-			<p class="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-				{updateError}
-			</p>
-		{/if}
+			{#if updateError}
+				<p class="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+					{updateError}
+				</p>
+			{/if}
 
-		<datalist id="leads-cartera">
-			{#each leads as lead (lead.id)}
-				<option value={lead.id}>{lead.nombre}</option>
-			{/each}
-		</datalist>
+			<datalist id="leads-cartera">
+				{#each leads as lead (lead.id)}
+					<option value={lead.id}>{lead.nombre}</option>
+				{/each}
+			</datalist>
 
-		<div class="grid gap-6 xl:grid-cols-[1.4fr_0.8fr]">
-			<form class="grid gap-4 md:grid-cols-2" onsubmit={editarLead}>
-				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main md:col-span-2">
-					Lead
-					<input
-						bind:value={editIdLead}
-						list="leads-cartera"
-						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
-						placeholder="ID del lead"
-					/>
-				</label>
+			<div class="grid gap-6 xl:grid-cols-[1.4fr_0.8fr]">
+				<form class="grid gap-4 md:grid-cols-2" onsubmit={editarLead}>
+					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main md:col-span-2">
+						Lead
+						<input
+							bind:value={editIdLead}
+							list="leads-cartera"
+							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+							placeholder="ID del lead"
+						/>
+					</label>
 
-				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
-					Nombre
-					<input
-						bind:value={editNombre}
-						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
-						placeholder="Nuevo nombre"
-					/>
-				</label>
+					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+						Nombre
+						<input
+							bind:value={editNombre}
+							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+							placeholder="Nuevo nombre"
+						/>
+					</label>
 
-				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
-					Teléfono
-					<input
-						bind:value={editTelefono}
-						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
-						placeholder="Nuevo teléfono"
-					/>
-				</label>
+					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+						Teléfono
+						<input
+							bind:value={editTelefono}
+							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+							placeholder="Nuevo teléfono"
+						/>
+					</label>
 
-				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
-					Correo
-					<input
-						bind:value={editEmail}
-						type="email"
-						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
-						placeholder="Nuevo correo"
-					/>
-				</label>
+					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+						Correo
+						<input
+							bind:value={editEmail}
+							type="email"
+							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+							placeholder="Nuevo correo"
+						/>
+					</label>
 
-				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
-					Tipo
-					<select
-						bind:value={editTipo}
-						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
-					>
-						<option value="">Sin cambio</option>
-						<option value="COMPRA">Compra</option>
-						<option value="VENTA">Venta</option>
-					</select>
-				</label>
+					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+						Tipo
+						<select
+							bind:value={editTipo}
+							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+						>
+							<option value="">Sin cambio</option>
+							<option value="COMPRA">Compra</option>
+							<option value="VENTA">Venta</option>
+						</select>
+					</label>
 
-				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main md:col-span-2">
-					Propiedad de interés
-					<input
-						bind:value={editIdPropiedadInteres}
-						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
-						placeholder="ID de propiedad, si aplica"
-					/>
-				</label>
+					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main md:col-span-2">
+						Propiedad de interés
+						<input
+							bind:value={editIdPropiedadInteres}
+							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+							placeholder="ID de propiedad, si aplica"
+						/>
+					</label>
 
-				<div class="flex flex-col gap-3 md:col-span-2 md:flex-row md:justify-end">
-					<Button type="button" variant="ghost" onclick={limpiarFormularioEdicion}>Limpiar</Button>
-					<Button type="submit" disabled={updating}>
-						{updating ? 'Actualizando...' : 'Actualizar lead'}
-					</Button>
-				</div>
-			</form>
+					<div class="flex flex-col gap-3 md:col-span-2 md:flex-row md:justify-end">
+						<Button type="button" variant="ghost" onclick={limpiarFormularioEdicion}>Limpiar</Button>
+						<Button type="submit" disabled={updating}>
+							{updating ? 'Actualizando...' : 'Actualizar lead'}
+						</Button>
+					</div>
+				</form>
 
-			<form
-				class="flex flex-col justify-between gap-4 rounded-3xl border border-primary/15 bg-primary-light/45 p-5"
-				onsubmit={convertirLeadACliente}
-			>
-				<div>
-					<h3 class="font-display text-lg font-bold text-text-main">Convertir a cliente</h3>
-					<p class="mt-1 text-sm leading-relaxed text-text-muted">
-						Usa esta acción cuando el prospecto ya aceptó avanzar como cliente formal.
-					</p>
-				</div>
+				<form
+					class="flex flex-col justify-between gap-4 rounded-3xl border border-primary/15 bg-primary-light/45 p-5"
+					onsubmit={crearContratoParaLead}
+				>
+					<div>
+						<h3 class="font-display text-lg font-bold text-text-main">Crear contrato</h3>
+						<p class="mt-1 text-sm leading-relaxed text-text-muted">
+							Crea un contrato en borrador para el lead. Al firmarlo se convertirá
+							automáticamente en cliente.
+						</p>
+					</div>
 
-				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
-					Lead
-					<input
-						bind:value={convertIdLead}
-						list="leads-cartera"
-						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
-						placeholder="ID del lead"
-					/>
-				</label>
+					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+						Lead
+						<input
+							bind:value={contratoLeadId}
+							list="leads-cartera"
+							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+							placeholder="ID del lead"
+						/>
+					</label>
 
-				<Button type="submit" disabled={converting}>
-					{converting ? 'Convirtiendo...' : 'Convertir lead'}
-				</Button>
-			</form>
-		</div>
-	</Card>
+					<Button type="button" variant="ghost" onclick={cargarPropiedades}>Cargar propiedades</Button>
+				</form>
+			</div>
+		</Card>
 
-	{#if nuevoClienteId}
+	{#if contratoLeadId.trim()}
 		<Card>
 			{#if contratoCreado}
 				<div class="flex flex-col gap-4">
@@ -498,8 +467,8 @@
 							</h3>
 							<p class="text-sm text-text-muted">
 								{contratoFirmado
-									? 'El contrato ya está vigente.'
-									: `Contrato en estado ${contratoCreado.estado} para el cliente.`}
+									? 'El contrato ya está vigente. El lead se convirtió en cliente automáticamente.'
+									: `Contrato en estado ${contratoCreado.estado} para el lead.`}
 							</p>
 						</div>
 					</div>
@@ -507,9 +476,15 @@
 					<div class="rounded-2xl border border-border-light bg-bg-base p-4 text-sm">
 						<div class="grid gap-2 sm:grid-cols-2">
 							<div>
-								<span class="font-semibold text-text-main">Cliente:</span>
-								<span class="ml-1 text-text-muted">{contratoCreado.idCliente}</span>
+								<span class="font-semibold text-text-main">Lead:</span>
+								<span class="ml-1 text-text-muted">{contratoCreado.idLead}</span>
 							</div>
+							{#if contratoCreado.idCliente}
+								<div>
+									<span class="font-semibold text-text-main">Cliente generado:</span>
+									<span class="ml-1 text-text-muted">{contratoCreado.idCliente}</span>
+								</div>
+							{/if}
 							<div>
 								<span class="font-semibold text-text-main">Propiedad:</span>
 								<span class="ml-1 text-text-muted">{contratoCreado.idPropiedad}</span>
@@ -553,7 +528,7 @@
 						<div>
 							<h3 class="font-display text-lg font-bold text-text-main">Crear contrato</h3>
 							<p class="text-sm text-text-muted">
-								Registra un contrato para el cliente recién creado (ID: {nuevoClienteId}).
+								Registra un contrato en borrador para el lead.
 							</p>
 						</div>
 					</div>
@@ -564,7 +539,7 @@
 						</p>
 					{/if}
 
-					<form class="grid gap-4 md:grid-cols-2" onsubmit={crearContratoParaCliente}>
+					<form class="grid gap-4 md:grid-cols-2" onsubmit={crearContratoParaLead}>
 						<label class="flex flex-col gap-2 text-sm font-semibold text-text-main md:col-span-2">
 							Propiedad
 							<select

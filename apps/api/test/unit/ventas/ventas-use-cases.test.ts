@@ -949,7 +949,7 @@ describe("ventas / use cases", () => {
 
     const resultado = await new CrearContratoUseCase(repo).ejecutar({
       id: "cont-001",
-      idCliente: "cliente-001",
+      idLead: "lead-001",
       idPropiedad: "prop-001",
       fechaInicio: new Date("2026-07-01"),
       fechaFin: new Date("2027-07-01"),
@@ -959,35 +959,48 @@ describe("ventas / use cases", () => {
     expect(repo.contratos.size).toBe(1);
     if (resultado.esExito) {
       expect(resultado.valor.estado).toBe("BORRADOR");
-      expect(resultado.valor.idCliente).toBe(idCliente("cliente-001"));
+      expect(resultado.valor.idLead).toBe(idLead("lead-001"));
+      expect(resultado.valor.idCliente).toBeUndefined();
     }
   });
 
   test("FirmarContratoUseCase cambia estado a VIGENTE", async () => {
-    const repo = new FakeContratoRepository();
-    await repo.guardar(
-      Contrato.crear({
-        id: idContrato("cont-001"),
-        idCliente: idCliente("cliente-001"),
-        idPropiedad: idPropiedad("prop-001"),
-        fechaInicio: new Date("2026-07-01"),
-        fechaFin: new Date("2027-07-01"),
-      }),
-    );
+    const leadRepo = new FakeVentasRepository();
+    const contratoRepo = new FakeContratoRepository();
+    const lead = crearLead();
+    await leadRepo.guardarLead(lead);
 
-    const resultado = await new FirmarContratoUseCase(repo).ejecutar({
+    const contrato = Contrato.crear({
+      id: idContrato("cont-001"),
+      idLead: idLead("lead-001"),
+      idPropiedad: idPropiedad("prop-001"),
+      fechaInicio: new Date("2026-07-01"),
+      fechaFin: new Date("2027-07-01"),
+    });
+    await contratoRepo.guardar(contrato);
+
+    const generadorId = { generar: () => "cliente-001" };
+
+    const resultado = await new FirmarContratoUseCase(contratoRepo, leadRepo, generadorId).ejecutar({
       idContrato: "cont-001",
     });
 
-    const contrato = await repo.buscarPorId(idContrato("cont-001"));
+    const contratoActualizado = await contratoRepo.buscarPorId(idContrato("cont-001"));
+    const clienteCreado = await leadRepo.obtenerClientePorId(idCliente("cliente-001"));
     expect(resultado.esExito).toBe(true);
-    expect(contrato?.estado).toBe("VIGENTE");
+    expect(contratoActualizado?.estado).toBe("VIGENTE");
+    expect(contratoActualizado?.idCliente).toEqual(idCliente("cliente-001"));
+    expect(clienteCreado).not.toBeNull();
+    expect(clienteCreado?.nombre).toBe(lead.nombre);
   });
 
   test("FirmarContratoUseCase rechaza contrato inexistente", async () => {
-    const repo = new FakeContratoRepository();
+    const contratoRepo = new FakeContratoRepository();
+    const leadRepo = new FakeVentasRepository();
 
-    const resultado = await new FirmarContratoUseCase(repo).ejecutar({
+    const resultado = await new FirmarContratoUseCase(contratoRepo, leadRepo, {
+      generar: () => "cliente-001",
+    }).ejecutar({
       idContrato: "cont-no-existe",
     });
 
@@ -999,7 +1012,7 @@ describe("ventas / use cases", () => {
     await repo.guardar(
       Contrato.crear({
         id: idContrato("cont-001"),
-        idCliente: idCliente("cliente-001"),
+        idLead: idLead("lead-001"),
         idPropiedad: idPropiedad("prop-001"),
         fechaInicio: new Date("2026-07-01"),
         fechaFin: new Date("2027-07-01"),
@@ -1008,7 +1021,7 @@ describe("ventas / use cases", () => {
     await repo.guardar(
       Contrato.crear({
         id: idContrato("cont-002"),
-        idCliente: idCliente("cliente-002"),
+        idLead: idLead("lead-002"),
         idPropiedad: idPropiedad("prop-002"),
         fechaInicio: new Date("2026-08-01"),
         fechaFin: new Date("2027-08-01"),
@@ -1029,15 +1042,15 @@ describe("ventas / use cases", () => {
 
   test("ListarPropiedadesPorClienteUseCase devuelve ids unicos", async () => {
     const repo = new FakeContratoRepository();
-    await repo.guardar(
-      Contrato.crear({
-        id: idContrato("cont-001"),
-        idCliente: idCliente("cliente-001"),
-        idPropiedad: idPropiedad("prop-001"),
-        fechaInicio: new Date("2026-07-01"),
-        fechaFin: new Date("2027-07-01"),
-      }),
-    );
+    const contrato = Contrato.crear({
+      id: idContrato("cont-001"),
+      idLead: idLead("lead-001"),
+      idPropiedad: idPropiedad("prop-001"),
+      fechaInicio: new Date("2026-07-01"),
+      fechaFin: new Date("2027-07-01"),
+    });
+    contrato.asignarCliente(idCliente("cliente-001"));
+    await repo.guardar(contrato);
 
     const resultado = await new ListarPropiedadesPorClienteUseCase(repo).ejecutar({
       idCliente: "cliente-001",

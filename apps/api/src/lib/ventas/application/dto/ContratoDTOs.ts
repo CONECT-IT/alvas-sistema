@@ -1,15 +1,15 @@
 export interface CrearContratoInputDTO {
   id: string;
-  idCliente: string;
+  idLead: string;
   idPropiedad: string;
   fechaInicio: Date;
   fechaFin: Date;
-  idAsesor?: string;
 }
 
 export interface ContratoOutputDTO {
   id: string;
-  idCliente: string;
+  idLead?: string;
+  idCliente?: string;
   idPropiedad: string;
   fechaInicio: string;
   fechaFin: string;

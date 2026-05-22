@@ -37,7 +37,8 @@ export const citasVentasTable = sqliteTable("ventas_citas", {
 
 export const contratosTable = sqliteTable("ventas_contratos", {
   id: text("id").primaryKey(),
-  idCliente: text("id_cliente").notNull(),
+  idLead: text("id_lead"),
+  idCliente: text("id_cliente"),
   idPropiedad: text("id_propiedad").notNull(),
   fechaInicio: text("fecha_inicio").notNull(),
   fechaFin: text("fecha_fin").notNull(),

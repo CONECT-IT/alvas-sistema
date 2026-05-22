@@ -1,4 +1,4 @@
-import { type IdContrato, type IdCliente, type IdPropiedad } from "../value-objects/Ids";
+import { type IdContrato, type IdCliente, type IdLead, type IdPropiedad } from "../value-objects/Ids";
 import { ErrorDeValidacion } from "../../../shared/domain";
 
 export const ESTADOS_CONTRATO = ["BORRADOR", "VIGENTE", "FINALIZADO", "CANCELADO"] as const;
@@ -6,7 +6,8 @@ export type ValorEstadoContrato = (typeof ESTADOS_CONTRATO)[number];
 
 export type PropsContrato = {
   id: IdContrato;
-  idCliente: IdCliente;
+  idLead?: IdLead;
+  idCliente?: IdCliente;
   idPropiedad: IdPropiedad;
   fechaInicio: Date;
   fechaFin: Date;
@@ -22,7 +23,7 @@ export class Contrato {
 
   static crear(params: {
     id: IdContrato;
-    idCliente: IdCliente;
+    idLead: IdLead;
     idPropiedad: IdPropiedad;
     fechaInicio: Date;
     fechaFin: Date;
@@ -30,7 +31,7 @@ export class Contrato {
     const ahora = new Date();
     return new Contrato({
       id: params.id,
-      idCliente: params.idCliente,
+      idLead: params.idLead,
       idPropiedad: params.idPropiedad,
       fechaInicio: params.fechaInicio,
       fechaFin: params.fechaFin,
@@ -47,7 +48,10 @@ export class Contrato {
   get id(): IdContrato {
     return this.props.id;
   }
-  get idCliente(): IdCliente {
+  get idLead(): IdLead | undefined {
+    return this.props.idLead;
+  }
+  get idCliente(): IdCliente | undefined {
     return this.props.idCliente;
   }
   get idPropiedad(): IdPropiedad {
@@ -67,6 +71,14 @@ export class Contrato {
   }
   get actualizadoEn(): Date {
     return this.props.actualizadoEn;
+  }
+
+  asignarCliente(idCliente: IdCliente): void {
+    if (this.props.idCliente) {
+      throw new ErrorDeValidacion("El contrato ya tiene un cliente asignado.");
+    }
+    this.props.idCliente = idCliente;
+    this.props.actualizadoEn = new Date();
   }
 
   firmar(): void {

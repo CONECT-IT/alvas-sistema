@@ -1,7 +1,7 @@
 import type { VentasRepository } from '../ports/VentasRepository';
 
 export type CrearContratoInput = {
-	idCliente: string;
+	idLead: string;
 	idPropiedad: string;
 	fechaInicio: string;
 	fechaFin: string;

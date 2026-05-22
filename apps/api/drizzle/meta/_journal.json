@@ -15,6 +15,13 @@
       "when": 1779373730113,
       "tag": "0001_ventas_contratos",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1779373730114,
+      "tag": "0002_add_id_lead_to_contratos",
+      "breakpoints": true
     }
   ]
 }

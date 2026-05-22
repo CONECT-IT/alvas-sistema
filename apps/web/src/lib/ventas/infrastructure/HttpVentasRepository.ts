@@ -116,7 +116,7 @@ export class HttpVentasRepository implements VentasRepository {
 
 	async crearContrato(input: CrearContratoInput): Promise<ContratoDTO> {
 		const body: CrearContratoRequestDTO = {
-			idCliente: input.idCliente,
+			idLead: input.idLead,
 			idPropiedad: input.idPropiedad,
 			fechaInicio: input.fechaInicio,
 			fechaFin: input.fechaFin

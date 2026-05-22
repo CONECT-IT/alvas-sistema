@@ -30,11 +30,10 @@ export interface ActualizarLeadBodyDTO {
 
 export interface CrearContratoInputDTO {
   id: string;
-  idCliente: string;
+  idLead: string;
   idPropiedad: string;
   fechaInicio: Date;
   fechaFin: Date;
-  idAsesor?: string;
 }
 
 export interface AsignarLeadAAsesorInputDTO {

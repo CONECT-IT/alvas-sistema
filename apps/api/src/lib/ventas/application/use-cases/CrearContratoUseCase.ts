@@ -9,7 +9,7 @@ import { type IContratoRepository } from "../../domain/ports/IContratoRepository
 import { Contrato } from "../../domain/entities/Contrato";
 import { type CrearContratoInputDTO } from "../dto/ContratoDTOs";
 import { type ContratoOutputDTO } from "../dto/ContratoDTOs";
-import { idContrato, idCliente, idPropiedad } from "../../domain/value-objects/Ids";
+import { idContrato, idLead, idPropiedad } from "../../domain/value-objects/Ids";
 import { type ICrearContrato } from "../ports/in";
 
 export type CrearContratoInput = CrearContratoInputDTO;
@@ -28,7 +28,7 @@ export class CrearContratoUseCase
     try {
       const contrato = Contrato.crear({
         id: idContrato(input.id),
-        idCliente: idCliente(input.idCliente),
+        idLead: idLead(input.idLead),
         idPropiedad: idPropiedad(input.idPropiedad),
         fechaInicio: input.fechaInicio,
         fechaFin: input.fechaFin,
@@ -38,7 +38,7 @@ export class CrearContratoUseCase
 
       const output: ContratoOutputDTO = {
         id: contrato.id as string,
-        idCliente: contrato.idCliente as string,
+        idLead: contrato.idLead as string | undefined,
         idPropiedad: contrato.idPropiedad,
         fechaInicio: contrato.fechaInicio.toISOString(),
         fechaFin: contrato.fechaFin.toISOString(),

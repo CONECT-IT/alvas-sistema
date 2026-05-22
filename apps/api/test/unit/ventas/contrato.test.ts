@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 
 import { Contrato } from "../../../src/lib/ventas/domain/entities/Contrato";
 import {
+  idLead,
   idCliente,
   idContrato,
   idPropiedad,
@@ -13,7 +14,7 @@ describe("ventas / Contrato", () => {
   const crearContrato = () =>
     Contrato.crear({
       id: idContrato("contrato-001"),
-      idCliente: idCliente("cliente-001"),
+      idLead: idLead("lead-001"),
       idPropiedad: idPropiedad("propiedad-001"),
       fechaInicio,
       fechaFin,
@@ -23,7 +24,7 @@ describe("ventas / Contrato", () => {
     const contrato = crearContrato();
 
     expect(contrato.id).toBe(idContrato("contrato-001"));
-    expect(contrato.idCliente).toBe(idCliente("cliente-001"));
+    expect(contrato.idLead).toBe(idLead("lead-001"));
     expect(contrato.idPropiedad).toBe(idPropiedad("propiedad-001"));
     expect(contrato.fechaInicio).toEqual(fechaInicio);
     expect(contrato.fechaFin).toEqual(fechaFin);
@@ -51,7 +52,7 @@ describe("ventas / Contrato", () => {
     const actualizadoEn = new Date("2026-05-02T00:00:00.000Z");
     const contrato = Contrato.reconstituir({
       id: idContrato("contrato-002"),
-      idCliente: idCliente("cliente-002"),
+      idLead: idLead("lead-002"),
       idPropiedad: idPropiedad("propiedad-002"),
       fechaInicio,
       fechaFin,
@@ -61,18 +62,34 @@ describe("ventas / Contrato", () => {
     });
 
     expect(contrato.id).toBe(idContrato("contrato-002"));
-    expect(contrato.idCliente).toBe(idCliente("cliente-002"));
+    expect(contrato.idLead).toBe(idLead("lead-002"));
     expect(contrato.idPropiedad).toBe(idPropiedad("propiedad-002"));
     expect(contrato.estado).toBe("VIGENTE");
     expect(contrato.creadoEn).toEqual(creadoEn);
     expect(contrato.actualizadoEn).toEqual(actualizadoEn);
   });
 
+  test("asigna cliente al contrato", () => {
+    const contrato = crearContrato();
+    expect(contrato.idCliente).toBeUndefined();
+
+    contrato.asignarCliente(idCliente("cliente-001"));
+    expect(contrato.idCliente).toBe(idCliente("cliente-001"));
+  });
+
+  test("no permite asignar cliente si ya tiene uno", () => {
+    const contrato = crearContrato();
+    contrato.asignarCliente(idCliente("cliente-001"));
+    expect(() => contrato.asignarCliente(idCliente("cliente-002"))).toThrow(
+      "El contrato ya tiene un cliente asignado.",
+    );
+  });
+
   test("rechaza contratos con fechas invalidas", () => {
     expect(() =>
       Contrato.crear({
         id: idContrato("contrato-003"),
-        idCliente: idCliente("cliente-001"),
+        idLead: idLead("lead-003"),
         idPropiedad: idPropiedad("propiedad-001"),
         fechaInicio,
         fechaFin: fechaInicio,

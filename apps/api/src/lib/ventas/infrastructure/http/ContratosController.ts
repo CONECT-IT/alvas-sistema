@@ -15,11 +15,10 @@ export class ContratosController {
       const useCase = this.deps.crearCrearContrato(c);
       const resultado = await useCase.ejecutar({
         id: body.id ?? crypto.randomUUID(),
-        idCliente: body.idCliente ?? "",
+        idLead: body.idLead ?? "",
         idPropiedad: body.idPropiedad ?? "",
         fechaInicio: body.fechaInicio ? new Date(body.fechaInicio) : new Date(),
         fechaFin: body.fechaFin ? new Date(body.fechaFin) : new Date(),
-        idAsesor: body.idAsesor,
       });
 
       if (!resultado.esExito) {

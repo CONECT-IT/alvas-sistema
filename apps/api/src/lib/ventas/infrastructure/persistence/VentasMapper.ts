@@ -97,7 +97,8 @@ export class VentasMapper {
   static contratoADominio(row: ContratoRow): Contrato {
     return Contrato.reconstituir({
       id: idContrato(row.id),
-      idCliente: idCliente(row.idCliente),
+      idLead: row.idLead ? idLead(row.idLead) : undefined,
+      idCliente: row.idCliente ? idCliente(row.idCliente) : undefined,
       idPropiedad: idPropiedad(row.idPropiedad),
       fechaInicio: new Date(row.fechaInicio),
       fechaFin: new Date(row.fechaFin),
@@ -110,7 +111,8 @@ export class VentasMapper {
   static contratoAPersistencia(contrato: Contrato) {
     return {
       id: contrato.id as string,
-      idCliente: contrato.idCliente as string,
+      idLead: contrato.idLead ? (contrato.idLead as string) : undefined,
+      idCliente: contrato.idCliente ? (contrato.idCliente as string) : undefined,
       idPropiedad: contrato.idPropiedad as string,
       fechaInicio: contrato.fechaInicio.toISOString(),
       fechaFin: contrato.fechaFin.toISOString(),
