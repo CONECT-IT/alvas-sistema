@@ -11,15 +11,16 @@
 	type SidebarItem = {
 		label: string;
 		href: string;
-		icon: 'grid' | 'users' | 'home' | 'trending-up' | 'bar-chart' | 'calendar';
+		icon: 'grid' | 'users' | 'home' | 'trending-up' | 'bar-chart' | 'calendar' | 'briefcase';
 	};
 
 	let { children }: Props = $props();
 	let showMobileSidebar = $state(false);
+	const shellUser = $derived($authStore.user);
 
 	const sidebarItems = $derived.by<SidebarItem[]>(() => {
-		if (!$authStore.user) return [];
-		if ($authStore.user.esAdmin) {
+		if (!shellUser) return [];
+		if (shellUser.esAdmin) {
 			return [
 				{ label: 'Dashboard', href: '/admin/dashboard', icon: 'grid' },
 				{ label: 'Usuarios', href: '/admin/usuarios', icon: 'users' },
@@ -33,6 +34,7 @@
 			{ label: 'Dashboard', href: '/asesor/dashboard', icon: 'grid' },
 			{ label: 'Mis Leads', href: '/asesor/leads', icon: 'users' },
 			{ label: 'Agenda Citas', href: '/asesor/citas', icon: 'calendar' },
+			{ label: 'Clientes', href: '/asesor/clientes', icon: 'briefcase' },
 			{ label: 'Propiedades', href: '/asesor/propiedades', icon: 'home' }
 		];
 	});
@@ -105,6 +107,15 @@
 				d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
 			/>
 		</svg>
+	{:else if icon === 'briefcase'}
+		<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M10 6h4a2 2 0 012 2v1h3a1 1 0 011 1v9a1 1 0 01-1 1H5a1 1 0 01-1-1v-9a1 1 0 011-1h3V8a2 2 0 012-2zm0 3h4V8h-4v1zm-6 4h16"
+			/>
+		</svg>
 	{:else}
 		<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 			<path
@@ -135,7 +146,7 @@
 	</nav>
 {/snippet}
 
-{#if $authStore.isAuthenticated}
+{#if shellUser}
 	<div class="flex min-h-screen flex-col bg-bg-base font-sans text-text-main">
 		<header
 			class="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-border-light bg-white px-6"
@@ -165,13 +176,13 @@
 
 			<div class="flex items-center gap-4">
 				<div class="hidden text-right sm:block">
-					<p class="text-sm leading-none font-semibold">{$authStore.user.nombre}</p>
-					<p class="text-xs text-text-muted">{$authStore.user.rol}</p>
+					<p class="text-sm leading-none font-semibold">{shellUser.nombre}</p>
+					<p class="text-xs text-text-muted">{shellUser.rol}</p>
 				</div>
 				<div
 					class="flex h-10 w-10 items-center justify-center rounded-full border border-primary/20 bg-primary-light font-display font-bold text-primary-dark"
 				>
-					{$authStore.user.username.substring(0, 2).toUpperCase()}
+					{shellUser.username.substring(0, 2).toUpperCase()}
 				</div>
 				<button
 					onclick={() => authStore.logout()}

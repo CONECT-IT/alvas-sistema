@@ -3,6 +3,8 @@
 	import Card from '$lib/shared/ui/Card.svelte';
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import type { LeadPipeline } from '$lib/ventas/domain/models/LeadPipeline';
+	import { actualizarLead } from '$lib/ventas/application/use-cases/actualizarLead';
+	import { convertirLead } from '$lib/ventas/application/use-cases/convertirLead';
 	import { listarPipeline } from '$lib/ventas/application/use-cases/listarPipeline';
 	import { registrarLead } from '$lib/ventas/application/use-cases/registrarLead';
 	import { ventasRepository } from '$lib/ventas/infrastructure/ventasRepository';
@@ -15,11 +17,22 @@
 	let error = $state<string | null>(null);
 	let createError = $state<string | null>(null);
 	let createSuccess = $state<string | null>(null);
+	let updateError = $state<string | null>(null);
+	let updateSuccess = $state<string | null>(null);
+	let updating = $state(false);
+	let converting = $state(false);
 	let nombre = $state('');
 	let email = $state('');
 	let telefono = $state('');
 	let tipo = $state<'COMPRA' | 'VENTA'>('COMPRA');
 	let idPropiedadInteres = $state('');
+	let editIdLead = $state('');
+	let editNombre = $state('');
+	let editEmail = $state('');
+	let editTelefono = $state('');
+	let editTipo = $state<'COMPRA' | 'VENTA' | ''>('');
+	let editIdPropiedadInteres = $state('');
+	let convertIdLead = $state('');
 
 	async function cargarLeads() {
 		loading = true;
@@ -40,6 +53,81 @@
 		telefono = '';
 		tipo = 'COMPRA';
 		idPropiedadInteres = '';
+	}
+
+	function limpiarFormularioEdicion() {
+		editIdLead = '';
+		editNombre = '';
+		editEmail = '';
+		editTelefono = '';
+		editTipo = '';
+		editIdPropiedadInteres = '';
+	}
+
+	async function editarLead(event: SubmitEvent) {
+		event.preventDefault();
+		updateError = null;
+		updateSuccess = null;
+
+		if (!editIdLead.trim()) {
+			updateError = 'Selecciona el lead que vas a actualizar.';
+			return;
+		}
+
+		if (
+			!editNombre.trim() &&
+			!editEmail.trim() &&
+			!editTelefono.trim() &&
+			!editTipo &&
+			!editIdPropiedadInteres.trim()
+		) {
+			updateError = 'Indica al menos un dato para actualizar.';
+			return;
+		}
+
+		updating = true;
+
+		try {
+			await actualizarLead(ventasRepository, {
+				idLead: editIdLead.trim(),
+				nombre: editNombre.trim() || undefined,
+				email: editEmail.trim() || undefined,
+				telefono: editTelefono.trim() || undefined,
+				tipo: editTipo || undefined,
+				idPropiedadInteres: editIdPropiedadInteres.trim() || undefined
+			});
+			updateSuccess = 'Lead actualizado. La API registró la actividad correspondiente.';
+			limpiarFormularioEdicion();
+			await cargarLeads();
+		} catch (err) {
+			updateError = err instanceof HttpError ? err.message : 'No se pudo actualizar el lead.';
+		} finally {
+			updating = false;
+		}
+	}
+
+	async function convertirLeadACliente(event: SubmitEvent) {
+		event.preventDefault();
+		updateError = null;
+		updateSuccess = null;
+
+		if (!convertIdLead.trim()) {
+			updateError = 'Selecciona el lead que se convertirá a cliente.';
+			return;
+		}
+
+		converting = true;
+
+		try {
+			const idCliente = await convertirLead(ventasRepository, { idLead: convertIdLead.trim() });
+			updateSuccess = `Lead convertido a cliente. Cliente generado: ${idCliente}`;
+			convertIdLead = '';
+			await cargarLeads();
+		} catch (err) {
+			updateError = err instanceof HttpError ? err.message : 'No se pudo convertir el lead.';
+		} finally {
+			converting = false;
+		}
 	}
 
 	async function crearLead(event: SubmitEvent) {
@@ -177,6 +265,130 @@
 				</Button>
 			</div>
 		</form>
+	</Card>
+
+	<Card>
+		<div class="mb-5">
+			<h2 class="font-display text-xl font-bold text-text-main">Gestionar lead</h2>
+			<p class="mt-1 text-sm leading-relaxed text-text-muted">
+				Ajusta datos del prospecto o conviértelo a cliente cuando la oportunidad ya esté validada.
+				La trazabilidad se registra en ventas desde la API.
+			</p>
+		</div>
+
+		{#if updateSuccess}
+			<p class="mb-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+				{updateSuccess}
+			</p>
+		{/if}
+
+		{#if updateError}
+			<p class="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+				{updateError}
+			</p>
+		{/if}
+
+		<datalist id="leads-cartera">
+			{#each leads as lead (lead.id)}
+				<option value={lead.id}>{lead.nombre}</option>
+			{/each}
+		</datalist>
+
+		<div class="grid gap-6 xl:grid-cols-[1.4fr_0.8fr]">
+			<form class="grid gap-4 md:grid-cols-2" onsubmit={editarLead}>
+				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main md:col-span-2">
+					Lead
+					<input
+						bind:value={editIdLead}
+						list="leads-cartera"
+						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+						placeholder="ID del lead"
+					/>
+				</label>
+
+				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+					Nombre
+					<input
+						bind:value={editNombre}
+						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+						placeholder="Nuevo nombre"
+					/>
+				</label>
+
+				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+					Teléfono
+					<input
+						bind:value={editTelefono}
+						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+						placeholder="Nuevo teléfono"
+					/>
+				</label>
+
+				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+					Correo
+					<input
+						bind:value={editEmail}
+						type="email"
+						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+						placeholder="Nuevo correo"
+					/>
+				</label>
+
+				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+					Tipo
+					<select
+						bind:value={editTipo}
+						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+					>
+						<option value="">Sin cambio</option>
+						<option value="COMPRA">Compra</option>
+						<option value="VENTA">Venta</option>
+					</select>
+				</label>
+
+				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main md:col-span-2">
+					Propiedad de interés
+					<input
+						bind:value={editIdPropiedadInteres}
+						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+						placeholder="ID de propiedad, si aplica"
+					/>
+				</label>
+
+				<div class="flex flex-col gap-3 md:col-span-2 md:flex-row md:justify-end">
+					<Button type="button" variant="ghost" onclick={limpiarFormularioEdicion}>Limpiar</Button>
+					<Button type="submit" disabled={updating}>
+						{updating ? 'Actualizando...' : 'Actualizar lead'}
+					</Button>
+				</div>
+			</form>
+
+			<form
+				class="flex flex-col justify-between gap-4 rounded-3xl border border-primary/15 bg-primary-light/45 p-5"
+				onsubmit={convertirLeadACliente}
+			>
+				<div>
+					<h3 class="font-display text-lg font-bold text-text-main">Convertir a cliente</h3>
+					<p class="mt-1 text-sm leading-relaxed text-text-muted">
+						Usa esta acción cuando el prospecto ya aceptó avanzar como cliente formal.
+					</p>
+				</div>
+
+				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+					Lead
+					<input
+						bind:value={convertIdLead}
+						list="leads-cartera"
+						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+						placeholder="ID del lead"
+					/>
+				</label>
+
+				<Button type="submit" disabled={converting}>
+					{converting ? 'Convirtiendo...' : 'Convertir lead'}
+				</Button>
+			</form>
+		</div>
 	</Card>
 
 	{#if loading}
