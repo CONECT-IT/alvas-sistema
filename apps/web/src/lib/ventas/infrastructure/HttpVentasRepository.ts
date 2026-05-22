@@ -4,6 +4,7 @@ import type { ActualizarCitaInput } from '../application/use-cases/actualizarCit
 import type { ActualizarLeadInput } from '../application/use-cases/actualizarLead';
 import type { AgendarCitaInput } from '../application/use-cases/agendarCita';
 import type { ConvertirLeadInput } from '../application/use-cases/convertirLead';
+import type { CrearContratoInput } from '../application/use-cases/crearContrato';
 import type { RegistrarLeadInput } from '../application/use-cases/registrarLead';
 import type { LeadPipeline } from '../domain/models/LeadPipeline';
 import { mapLeadPipelineFromDto } from './VentasMapper';
@@ -13,8 +14,10 @@ import type {
 	ActualizarLeadRequestDTO,
 	AgendarCitaRequestDTO,
 	ApiSuccessResponse,
+	ContratoDTO,
 	ConvertirLeadRequestDTO,
 	ConvertirLeadResponseDTO,
+	CrearContratoRequestDTO,
 	LeadPipelineDTO,
 	RegistrarLeadRequestDTO,
 	RegistrarLeadResponseDTO
@@ -109,5 +112,28 @@ export class HttpVentasRepository implements VentasRepository {
 		);
 
 		return response.data;
+	}
+
+	async crearContrato(input: CrearContratoInput): Promise<ContratoDTO> {
+		const body: CrearContratoRequestDTO = {
+			idCliente: input.idCliente,
+			idPropiedad: input.idPropiedad,
+			fechaInicio: input.fechaInicio,
+			fechaFin: input.fechaFin
+		};
+
+		const response = await httpClient.post<ApiSuccessResponse<ContratoDTO>>(
+			`${this.apiBaseUrl}/ventas/contratos`,
+			{ body }
+		);
+
+		return response.data;
+	}
+
+	async firmarContrato(idContrato: string): Promise<void> {
+		await httpClient.post<ApiSuccessResponse<{ message?: string }>>(
+			`${this.apiBaseUrl}/ventas/contratos/${encodeURIComponent(idContrato)}/firmar`,
+			{}
+		);
 	}
 }

@@ -71,3 +71,21 @@ export type ActividadLeadDTO = Readonly<{
 	descripcion: string;
 	fecha: string;
 }>;
+
+export type ContratoDTO = Readonly<{
+	id: string;
+	idCliente: string;
+	idPropiedad: string;
+	fechaInicio: string;
+	fechaFin: string;
+	estado: string;
+	creadoEn: string;
+	actualizadoEn: string;
+}>;
+
+export type CrearContratoRequestDTO = Readonly<{
+	idCliente: string;
+	idPropiedad: string;
+	fechaInicio: string;
+	fechaFin: string;
+}>;

@@ -5,7 +5,8 @@ import type { AgendarCitaInput } from '../use-cases/agendarCita';
 import type { ConvertirLeadInput } from '../use-cases/convertirLead';
 import type { RegistrarLeadInput } from '../use-cases/registrarLead';
 
-import type { ActividadLeadDTO } from '../../infrastructure/dto/VentasDTOs';
+import type { ActividadLeadDTO, ContratoDTO } from '../../infrastructure/dto/VentasDTOs';
+import type { CrearContratoInput } from '../use-cases/crearContrato';
 
 export interface VentasRepository {
 	listarPipeline(): Promise<LeadPipeline[]>;
@@ -15,4 +16,6 @@ export interface VentasRepository {
 	agendarCita(input: AgendarCitaInput): Promise<void>;
 	actualizarCita(input: ActualizarCitaInput): Promise<void>;
 	listarActividadLead(idLead: string): Promise<ActividadLeadDTO[]>;
+	crearContrato(input: CrearContratoInput): Promise<ContratoDTO>;
+	firmarContrato(idContrato: string): Promise<void>;
 }

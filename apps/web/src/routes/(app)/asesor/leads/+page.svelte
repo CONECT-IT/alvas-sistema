@@ -1,16 +1,24 @@
 <script lang="ts">
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
-	import { HttpError } from '$lib/shared/http/httpClient';
+	import { httpClient, HttpError } from '$lib/shared/http/httpClient';
 	import type { LeadPipeline } from '$lib/ventas/domain/models/LeadPipeline';
 	import { actualizarLead } from '$lib/ventas/application/use-cases/actualizarLead';
 	import { convertirLead } from '$lib/ventas/application/use-cases/convertirLead';
+	import { crearContrato } from '$lib/ventas/application/use-cases/crearContrato';
+	import { firmarContrato } from '$lib/ventas/application/use-cases/firmarContrato';
 	import { listarPipeline } from '$lib/ventas/application/use-cases/listarPipeline';
 	import { registrarLead } from '$lib/ventas/application/use-cases/registrarLead';
 	import { ventasRepository } from '$lib/ventas/infrastructure/ventasRepository';
 	import ActividadLeadTimeline from '$lib/ventas/presentation/ActividadLeadTimeline.svelte';
 	import LeadPipelineTable from '$lib/ventas/presentation/LeadPipelineTable.svelte';
 	import PipelineStats from '$lib/ventas/presentation/PipelineStats.svelte';
+	import type { ContratoDTO } from '$lib/ventas/infrastructure/dto/VentasDTOs';
+
+	type PropiedadItem = {
+		id: string;
+		titulo: string;
+	};
 
 	let leads = $state<LeadPipeline[]>([]);
 	let loading = $state(true);
@@ -35,6 +43,18 @@
 	let editIdPropiedadInteres = $state('');
 	let convertIdLead = $state('');
 
+	// Estado del flujo lead -> cliente -> contrato
+	let nuevoClienteId = $state<string | null>(null);
+	let propiedades = $state<PropiedadItem[]>([]);
+	let contratoPropiedadId = $state('');
+	let contratoFechaInicio = $state('');
+	let contratoFechaFin = $state('');
+	let contratoCreado = $state<ContratoDTO | null>(null);
+	let creandoContrato = $state(false);
+	let contratoError = $state<string | null>(null);
+	let firmandoContrato = $state(false);
+	let contratoFirmado = $state(false);
+
 	async function cargarLeads() {
 		loading = true;
 		error = null;
@@ -46,6 +66,29 @@
 		} finally {
 			loading = false;
 		}
+	}
+
+	async function cargarPropiedades() {
+		if (propiedades.length > 0) return;
+		try {
+			const res = await httpClient.get<{ success: boolean; data: PropiedadItem[] }>(
+				'/api/propiedades'
+			);
+			propiedades = (res.data ?? []).filter((p) => p.titulo || p.id);
+		} catch {
+			// silencioso
+		}
+	}
+
+	function reiniciarFlujoContrato() {
+		nuevoClienteId = null;
+		propiedades = [];
+		contratoPropiedadId = '';
+		contratoFechaInicio = '';
+		contratoFechaFin = '';
+		contratoCreado = null;
+		contratoError = null;
+		contratoFirmado = false;
 	}
 
 	function limpiarFormularioLead() {
@@ -111,6 +154,7 @@
 		event.preventDefault();
 		updateError = null;
 		updateSuccess = null;
+		reiniciarFlujoContrato();
 
 		if (!convertIdLead.trim()) {
 			updateError = 'Selecciona el lead que se convertirá a cliente.';
@@ -121,13 +165,60 @@
 
 		try {
 			const idCliente = await convertirLead(ventasRepository, { idLead: convertIdLead.trim() });
-			updateSuccess = `Lead convertido a cliente. Cliente generado: ${idCliente}`;
+			nuevoClienteId = idCliente;
+			updateSuccess = `Lead convertido a cliente. ID: ${idCliente}`;
 			convertIdLead = '';
 			await cargarLeads();
+			await cargarPropiedades();
 		} catch (err) {
 			updateError = err instanceof HttpError ? err.message : 'No se pudo convertir el lead.';
 		} finally {
 			converting = false;
+		}
+	}
+
+	async function crearContratoParaCliente(event: SubmitEvent) {
+		event.preventDefault();
+		contratoError = null;
+
+		if (!nuevoClienteId || !contratoPropiedadId || !contratoFechaInicio || !contratoFechaFin) {
+			contratoError = 'Completa todos los campos del contrato.';
+			return;
+		}
+
+		if (new Date(contratoFechaFin) <= new Date(contratoFechaInicio)) {
+			contratoError = 'La fecha de fin debe ser posterior a la fecha de inicio.';
+			return;
+		}
+
+		creandoContrato = true;
+
+		try {
+			const contrato = await crearContrato(ventasRepository, {
+				idCliente: nuevoClienteId,
+				idPropiedad: contratoPropiedadId,
+				fechaInicio: new Date(contratoFechaInicio).toISOString(),
+				fechaFin: new Date(contratoFechaFin).toISOString()
+			});
+			contratoCreado = contrato;
+		} catch (err) {
+			contratoError = err instanceof HttpError ? err.message : 'No se pudo crear el contrato.';
+		} finally {
+			creandoContrato = false;
+		}
+	}
+
+	async function firmarContratoCreado() {
+		if (!contratoCreado) return;
+		firmandoContrato = true;
+
+		try {
+			await firmarContrato(ventasRepository, contratoCreado.id);
+			contratoFirmado = true;
+		} catch (err) {
+			contratoError = err instanceof HttpError ? err.message : 'No se pudo firmar el contrato.';
+		} finally {
+			firmandoContrato = false;
 		}
 	}
 
@@ -391,6 +482,133 @@
 			</form>
 		</div>
 	</Card>
+
+	{#if nuevoClienteId}
+		<Card>
+			{#if contratoCreado}
+				<div class="flex flex-col gap-4">
+					<div class="flex items-center gap-3">
+						<span
+							class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-lg font-bold text-emerald-700"
+							>✓</span
+						>
+						<div>
+							<h3 class="font-display text-lg font-bold text-text-main">
+								{contratoFirmado ? 'Contrato firmado' : 'Contrato creado'}
+							</h3>
+							<p class="text-sm text-text-muted">
+								{contratoFirmado
+									? 'El contrato ya está vigente.'
+									: `Contrato en estado ${contratoCreado.estado} para el cliente.`}
+							</p>
+						</div>
+					</div>
+
+					<div class="rounded-2xl border border-border-light bg-bg-base p-4 text-sm">
+						<div class="grid gap-2 sm:grid-cols-2">
+							<div>
+								<span class="font-semibold text-text-main">Cliente:</span>
+								<span class="ml-1 text-text-muted">{contratoCreado.idCliente}</span>
+							</div>
+							<div>
+								<span class="font-semibold text-text-main">Propiedad:</span>
+								<span class="ml-1 text-text-muted">{contratoCreado.idPropiedad}</span>
+							</div>
+							<div>
+								<span class="font-semibold text-text-main">Inicio:</span>
+								<span class="ml-1 text-text-muted"
+									>{new Date(contratoCreado.fechaInicio).toLocaleDateString('es-PE')}</span
+								>
+							</div>
+							<div>
+								<span class="font-semibold text-text-main">Fin:</span>
+								<span class="ml-1 text-text-muted"
+									>{new Date(contratoCreado.fechaFin).toLocaleDateString('es-PE')}</span
+								>
+							</div>
+						</div>
+					</div>
+
+					{#if contratoFirmado}
+						<p class="text-sm font-semibold text-emerald-700">
+							Contrato vigente. Puedes verlo en la sección de contratos.
+						</p>
+						<Button variant="secondary" onclick={reiniciarFlujoContrato}>Cerrar</Button>
+					{:else}
+						<div class="flex gap-3">
+							<Button onclick={firmarContratoCreado} disabled={firmandoContrato}>
+								{firmandoContrato ? 'Firmando...' : 'Firmar contrato'}
+							</Button>
+							<Button variant="ghost" onclick={reiniciarFlujoContrato}>Descartar</Button>
+						</div>
+					{/if}
+				</div>
+			{:else}
+				<div class="flex flex-col gap-4">
+					<div class="flex items-center gap-3">
+						<span
+							class="flex h-10 w-10 items-center justify-center rounded-full bg-primary-light text-lg font-bold text-primary"
+							>+</span
+						>
+						<div>
+							<h3 class="font-display text-lg font-bold text-text-main">Crear contrato</h3>
+							<p class="text-sm text-text-muted">
+								Registra un contrato para el cliente recién creado (ID: {nuevoClienteId}).
+							</p>
+						</div>
+					</div>
+
+					{#if contratoError}
+						<p class="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+							{contratoError}
+						</p>
+					{/if}
+
+					<form class="grid gap-4 md:grid-cols-2" onsubmit={crearContratoParaCliente}>
+						<label class="flex flex-col gap-2 text-sm font-semibold text-text-main md:col-span-2">
+							Propiedad
+							<select
+								bind:value={contratoPropiedadId}
+								class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+							>
+								<option value="">Seleccionar propiedad</option>
+								{#each propiedades as p (p.id)}
+									<option value={p.id}>{p.titulo || p.id}</option>
+								{/each}
+							</select>
+						</label>
+
+						<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+							Fecha de inicio
+							<input
+								type="date"
+								bind:value={contratoFechaInicio}
+								class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+							/>
+						</label>
+
+						<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+							Fecha de fin
+							<input
+								type="date"
+								bind:value={contratoFechaFin}
+								class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+							/>
+						</label>
+
+						<div class="flex gap-3 md:col-span-2 md:justify-end">
+							<Button type="button" variant="ghost" onclick={reiniciarFlujoContrato}
+								>Cancelar</Button
+							>
+							<Button type="submit" disabled={creandoContrato}>
+								{creandoContrato ? 'Creando...' : 'Crear contrato'}
+							</Button>
+						</div>
+					</form>
+				</div>
+			{/if}
+		</Card>
+	{/if}
 
 	{#if editIdLead.trim()}
 		<Card>
