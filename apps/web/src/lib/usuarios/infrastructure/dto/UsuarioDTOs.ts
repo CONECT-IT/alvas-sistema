@@ -12,3 +12,17 @@ export type UsuarioRespuestaDTO = Readonly<{
 	rol: UserRol | string;
 	estado: string;
 }>;
+
+export type CrearUsuarioRequestDTO = Readonly<{
+	idUsuario: string;
+	username: string;
+	nombre: string;
+	clave: string;
+	rol: UserRol;
+}>;
+
+export type ActualizarUsuarioRequestDTO = Readonly<{
+	username?: string;
+	nombre?: string;
+	rol?: UserRol;
+}>;
