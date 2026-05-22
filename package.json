@@ -12,6 +12,7 @@
     "db:generate": "bunx drizzle-kit generate",
     "db:migrate:local": "bun --cwd apps/api wrangler d1 migrations apply alvas-dev --local",
     "db:migrate:remote": "bun --cwd apps/api wrangler d1 migrations apply alvas-main --remote",
+    "db:seed": "bun --cwd apps/api -e \"fetch('http://localhost:8787/dev/seed',{method:'POST'}).then(r=>r.json()).then(d=>d.log?.forEach(l=>console.log(l)))\"",
     "build": "bun --cwd apps/api build && bun --cwd apps/web build",
     "test": "bun test",
     "test:unit": "bun test",
