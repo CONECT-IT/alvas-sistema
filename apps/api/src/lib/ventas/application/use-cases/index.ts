@@ -18,3 +18,4 @@ export * from "./ListarPropiedadesPorClienteUseCase";
 export * from "./ListarLeadsPorAsesorUseCase";
 export * from "./ListarAsesoresConLeadsUseCase";
 export * from "./ActualizarClienteUseCase";
+export * from "./ListarActividadLeadUseCase";

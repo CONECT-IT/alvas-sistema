@@ -5,6 +5,7 @@ import {
   ConvertirLeadAClienteUseCase,
   CrearContratoUseCase,
   FirmarContratoUseCase,
+  ListarActividadLeadUseCase,
   ListarClientesUseCase,
   ListarContratosUseCase,
   ListarLeadsPorAsesorUseCase,
@@ -70,5 +71,7 @@ export function crearVentasControllerDeps(): VentasControllerDeps {
     crearCrearContrato: (c) => new CrearContratoUseCase(new D1ContratoRepository(c.env.DB)),
     crearListarContratos: (c) => new ListarContratosUseCase(new D1ContratoRepository(c.env.DB)),
     crearFirmarContrato: (c) => new FirmarContratoUseCase(new D1ContratoRepository(c.env.DB)),
+    crearListarActividadLead: (c) =>
+      new ListarActividadLeadUseCase(new D1VentasRepository(c.env.DB)),
   };
 }

@@ -64,3 +64,10 @@ export type ActualizarCitaRequestDTO = Readonly<{
 	observacion?: string;
 	estado?: 'PENDIENTE' | 'REALIZADA' | 'CANCELADA' | 'REPROGRAMADA';
 }>;
+
+export type ActividadLeadDTO = Readonly<{
+	id: number;
+	evento: string;
+	descripcion: string;
+	fecha: string;
+}>;

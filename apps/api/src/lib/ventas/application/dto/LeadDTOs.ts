@@ -74,3 +74,10 @@ export interface ActualizarCitaBodyDTO {
 export interface ConvertirLeadInputDTO {
   idLead: string;
 }
+
+export interface ActividadLeadDTO {
+  id: number;
+  evento: string;
+  descripcion: string;
+  fecha: string;
+}

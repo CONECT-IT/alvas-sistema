@@ -9,6 +9,7 @@ import {
   type ICrearContrato,
   type IConvertirLeadACliente,
   type IFirmarContrato,
+  type IListarActividadLead,
   type IListarClientes,
   type IListarContratos,
   type IListarLeadsPorAsesor,
@@ -39,6 +40,7 @@ export type VentasControllerDeps = Readonly<{
   crearCrearContrato: (c: ContextoVentas) => ICrearContrato;
   crearListarContratos: (c: ContextoVentas) => IListarContratos;
   crearFirmarContrato: (c: ContextoVentas) => IFirmarContrato;
+  crearListarActividadLead: (c: ContextoVentas) => IListarActividadLead;
 }>;
 
 export function responderErrorDeDominio(

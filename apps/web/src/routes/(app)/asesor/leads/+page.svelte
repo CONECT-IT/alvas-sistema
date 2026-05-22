@@ -8,6 +8,7 @@
 	import { listarPipeline } from '$lib/ventas/application/use-cases/listarPipeline';
 	import { registrarLead } from '$lib/ventas/application/use-cases/registrarLead';
 	import { ventasRepository } from '$lib/ventas/infrastructure/ventasRepository';
+	import ActividadLeadTimeline from '$lib/ventas/presentation/ActividadLeadTimeline.svelte';
 	import LeadPipelineTable from '$lib/ventas/presentation/LeadPipelineTable.svelte';
 	import PipelineStats from '$lib/ventas/presentation/PipelineStats.svelte';
 
@@ -390,6 +391,12 @@
 			</form>
 		</div>
 	</Card>
+
+	{#if editIdLead.trim()}
+		<Card>
+			<ActividadLeadTimeline leadId={editIdLead.trim()} />
+		</Card>
+	{/if}
 
 	{#if loading}
 		<Card>

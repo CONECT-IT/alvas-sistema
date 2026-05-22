@@ -77,4 +77,20 @@ export class LeadsController {
       return responderErrorInterno(c, "LeadsController.convertirACliente:", error);
     }
   }
+
+  async listarActividad(c: ContextoVentas): Promise<Response> {
+    try {
+      const id = c.req.param("idLead") ?? "";
+      const useCase = this.deps.crearListarActividadLead(c);
+      const resultado = await useCase.ejecutar({ idLead: id });
+
+      if (!resultado.esExito) {
+        return responderErrorDeDominio(c, resultado.error);
+      }
+
+      return c.json({ success: true, data: resultado.valor });
+    } catch (error) {
+      return responderErrorInterno(c, "LeadsController.listarActividad:", error);
+    }
+  }
 }

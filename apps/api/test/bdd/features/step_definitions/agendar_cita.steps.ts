@@ -99,6 +99,12 @@ class FakeVentasRepository implements IVentasRepository {
   > {
     return [];
   }
+
+  async obtenerActividadPorLead(
+    _idLead: IdLead,
+  ): Promise<{ id: number; idLead: string; evento: string; descripcion: string; fecha: string }[]> {
+    return [];
+  }
 }
 
 Given("un lead registrado en estado {string}", function (estadoStr: string) {

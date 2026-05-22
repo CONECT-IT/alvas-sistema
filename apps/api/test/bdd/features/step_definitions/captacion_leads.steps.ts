@@ -65,6 +65,12 @@ class MockVentasRepository implements IVentasRepository {
     return [];
   }
 
+  async obtenerActividadPorLead(
+    _idLead: IdLead,
+  ): Promise<{ id: number; idLead: string; evento: string; descripcion: string; fecha: string }[]> {
+    return [];
+  }
+
   public leads: Lead[] = [];
   async guardarLead(lead: Lead): Promise<void> {
     this.leads.push(lead);

@@ -179,6 +179,25 @@ export class D1VentasRepository implements IVentasRepository {
     }));
   }
 
+  async obtenerActividadPorLead(
+    idLead: IdLead,
+  ): Promise<{ id: number; idLead: string; evento: string; descripcion: string; fecha: string }[]> {
+    const rows = await this.drizzle()
+      .select()
+      .from(actividadVentasTable)
+      .where(eq(actividadVentasTable.idLead, idLead as string))
+      .orderBy(actividadVentasTable.fecha)
+      .all();
+
+    return rows.reverse().map((r) => ({
+      id: r.id,
+      idLead: r.idLead,
+      evento: r.evento,
+      descripcion: r.descripcion,
+      fecha: r.fecha,
+    }));
+  }
+
   // --- ESTADÍSTICAS ---
 
   async listarAsesoresConLeads(): Promise<{ idAsesor: IdUsuarioRef; totalLeads: number }[]> {

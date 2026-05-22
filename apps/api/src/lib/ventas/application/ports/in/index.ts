@@ -18,3 +18,4 @@ export * from "./IObtenerCliente";
 export * from "./IObtenerLead";
 export * from "./IRegistrarClienteDirecto";
 export * from "./IRegistrarLead";
+export * from "./IListarActividadLead";

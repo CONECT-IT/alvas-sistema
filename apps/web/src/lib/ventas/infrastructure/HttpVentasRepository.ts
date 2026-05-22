@@ -8,6 +8,7 @@ import type { RegistrarLeadInput } from '../application/use-cases/registrarLead'
 import type { LeadPipeline } from '../domain/models/LeadPipeline';
 import { mapLeadPipelineFromDto } from './VentasMapper';
 import type {
+	ActividadLeadDTO,
 	ActualizarCitaRequestDTO,
 	ActualizarLeadRequestDTO,
 	AgendarCitaRequestDTO,
@@ -100,5 +101,13 @@ export class HttpVentasRepository implements VentasRepository {
 			`${this.apiBaseUrl}/ventas/lead/${encodeURIComponent(input.idLead)}/cita/${encodeURIComponent(input.idCita)}`,
 			{ body }
 		);
+	}
+
+	async listarActividadLead(idLead: string): Promise<ActividadLeadDTO[]> {
+		const response = await httpClient.get<ApiSuccessResponse<ActividadLeadDTO[]>>(
+			`${this.apiBaseUrl}/ventas/lead/${encodeURIComponent(idLead)}/actividad`
+		);
+
+		return response.data;
 	}
 }

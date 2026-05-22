@@ -106,6 +106,12 @@ class FakeVentasRepository implements IVentasRepository {
     return [];
   }
 
+  async obtenerActividadPorLead(
+    _idLead: IdLead,
+  ): Promise<{ id: number; idLead: string; evento: string; descripcion: string; fecha: string }[]> {
+    return [];
+  }
+
   async listarAsesoresConLeads(): Promise<{ idAsesor: IdUsuarioRef; totalLeads: number }[]> {
     return [{ idAsesor: idUsuarioRef("asesor-1"), totalLeads: this.leads.size }];
   }

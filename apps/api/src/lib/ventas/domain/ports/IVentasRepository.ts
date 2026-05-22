@@ -22,6 +22,9 @@ export interface IVentasRepository {
   obtenerActividadReciente(
     limite: number,
   ): Promise<{ idLead: string; evento: string; descripcion: string; fecha: string }[]>;
+  obtenerActividadPorLead(
+    idLead: IdLead,
+  ): Promise<{ id: number; idLead: string; evento: string; descripcion: string; fecha: string }[]>;
 
   // Estadísticas y Reportes
   listarAsesoresConLeads(): Promise<{ idAsesor: IdUsuarioRef; totalLeads: number }[]>;
