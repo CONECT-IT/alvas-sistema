@@ -1,5 +1,21 @@
 <script lang="ts">
 	import { authStore } from '$lib/auth/infrastructure/authStore';
+	import Card from '$lib/shared/ui/Card.svelte';
+	import type { PageData } from './$types';
+
+	let { data }: { data: PageData } = $props();
+
+	const { leadsActivos, citasPendientes, citasHoy, portafolio } = data;
+
+	function formatearHora(iso: string): string {
+		return new Date(iso).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+	}
+
+	function badgeEstado(estado: string): string {
+		if (estado === 'CONFIRMADO' || estado === 'REALIZADA') return 'bg-emerald-50 text-emerald-700';
+		if (estado === 'PENDIENTE') return 'bg-amber-50 text-amber-700';
+		return 'bg-red-50 text-red-700';
+	}
 </script>
 
 <svelte:head>
@@ -7,7 +23,6 @@
 </svelte:head>
 
 <div class="flex flex-col gap-6">
-	<!-- Encabezado de la página -->
 	<div class="flex flex-col gap-1">
 		<h1 class="font-display text-3xl font-bold text-text-main">
 			Hola, {$authStore.user?.username}
@@ -17,52 +32,50 @@
 		</p>
 	</div>
 
-	<!-- Tarjetas de métricas personales -->
 	<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-		<div class="rounded-3xl border border-border-light bg-white p-6 shadow-xs">
+		<Card>
 			<span class="text-xs font-semibold tracking-wider text-text-muted uppercase"
 				>Mis Leads Activos</span
 			>
-			<h2 class="mt-1 font-display text-3xl font-bold text-text-main">18</h2>
-			<div class="mt-2 flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
-				<span>+3 asignados hoy</span>
-			</div>
-		</div>
+			<h2 class="mt-1 font-display text-3xl font-bold text-text-main">{leadsActivos}</h2>
+			{#if leadsActivos > 0}
+				<div class="mt-2 flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
+					<span>En tu cartera comercial</span>
+				</div>
+			{/if}
+		</Card>
 
-		<div class="rounded-3xl border border-border-light bg-white p-6 shadow-xs">
+		<Card>
 			<span class="text-xs font-semibold tracking-wider text-text-muted uppercase"
 				>Citas Pendientes</span
 			>
-			<h2 class="mt-1 font-display text-3xl font-bold text-text-main">4</h2>
-			<div class="mt-2 flex items-center gap-1.5 text-xs font-semibold text-primary">
-				<span>Siguiente cita: 3:00 PM</span>
-			</div>
-		</div>
+			<h2 class="mt-1 font-display text-3xl font-bold text-text-main">{citasPendientes}</h2>
+			{#if citasHoy.length > 0}
+				<div class="mt-2 flex items-center gap-1.5 text-xs font-semibold text-primary">
+					<span>{citasHoy.length} para hoy</span>
+				</div>
+			{/if}
+		</Card>
 
-		<div class="rounded-3xl border border-border-light bg-white p-6 shadow-xs">
-			<span class="text-xs font-semibold tracking-wider text-text-muted uppercase"
-				>Cierres del Mes</span
-			>
-			<h2 class="mt-1 font-display text-3xl font-bold text-text-main">2</h2>
-			<div class="mt-2 flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
-				<span>Meta: 3 cierres</span>
-			</div>
-		</div>
+		<Card>
+			<span class="text-xs font-semibold tracking-wider text-text-muted uppercase">Citas Hoy</span>
+			<h2 class="mt-1 font-display text-3xl font-bold text-text-main">{citasHoy.length}</h2>
+		</Card>
 
-		<div class="rounded-3xl border border-border-light bg-white p-6 shadow-xs">
+		<Card>
 			<span class="text-xs font-semibold tracking-wider text-text-muted uppercase"
 				>Propiedades en Cartera</span
 			>
-			<h2 class="mt-1 font-display text-3xl font-bold text-text-main">15</h2>
-			<div class="mt-2 flex items-center gap-1.5 text-xs text-text-muted">
-				<span>3 de alta visibilidad</span>
-			</div>
-		</div>
+			<h2 class="mt-1 font-display text-3xl font-bold text-text-main">{portafolio}</h2>
+			{#if portafolio > 0}
+				<div class="mt-2 flex items-center gap-1.5 text-xs text-text-muted">
+					<span>Disponibles y reservadas</span>
+				</div>
+			{/if}
+		</Card>
 	</div>
 
-	<!-- Grilla de Actividad e Itinerario -->
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-		<!-- Agenda de Citas del Día -->
 		<div class="rounded-3xl border border-border-light bg-white p-6 shadow-xs lg:col-span-2">
 			<div class="mb-6 flex items-center justify-between">
 				<h3 class="font-display text-lg font-bold text-text-main">Agenda de Citas (Hoy)</h3>
@@ -71,74 +84,58 @@
 				>
 			</div>
 
-			<div class="flex flex-col gap-4">
-				<div class="flex items-start gap-4 rounded-2xl border border-border-light bg-bg-base p-4">
-					<span
-						class="shrink-0 rounded-xl bg-primary-light px-3 py-1.5 text-sm font-bold text-primary"
-						>11:00 AM</span
-					>
-					<div class="min-w-0 flex-1">
-						<h4 class="font-display text-sm font-bold text-text-main">
-							Visita Física - Penthouse Miraflores
-						</h4>
-						<p class="mt-0.5 text-xs text-text-muted">
-							Cliente: Jorge Silva • Tel: +51 987 654 321
-						</p>
-					</div>
-					<span
-						class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700"
-						>Confirmado</span
-					>
+			{#if citasHoy.length === 0}
+				<p class="py-6 text-center text-sm text-text-muted">
+					No tienes citas programadas para hoy.
+				</p>
+			{:else}
+				<div class="flex flex-col gap-4">
+					{#each citasHoy as cita (cita.id)}
+						<div
+							class="flex items-start gap-4 rounded-2xl border border-border-light bg-bg-base p-4"
+						>
+							<span
+								class="shrink-0 rounded-xl bg-primary-light px-3 py-1.5 text-sm font-bold text-primary"
+							>
+								{formatearHora(cita.fechaInicio)}
+							</span>
+							<div class="min-w-0 flex-1">
+								<h4 class="font-display text-sm font-bold text-text-main">
+									{cita.observacion || `Cita con ${cita.leadNombre}`}
+								</h4>
+								<p class="mt-0.5 text-xs text-text-muted">
+									Lead: {cita.leadNombre}
+								</p>
+							</div>
+							<span
+								class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold {badgeEstado(
+									cita.estado
+								)}"
+							>
+								{cita.estado}
+							</span>
+						</div>
+					{/each}
 				</div>
-
-				<div class="flex items-start gap-4 rounded-2xl border border-border-light bg-bg-base p-4">
-					<span
-						class="shrink-0 rounded-xl bg-primary-light px-3 py-1.5 text-sm font-bold text-primary"
-						>03:00 PM</span
-					>
-					<div class="min-w-0 flex-1">
-						<h4 class="font-display text-sm font-bold text-text-main">Llamada de Calificación</h4>
-						<p class="mt-0.5 text-xs text-text-muted">
-							Cliente: Carlos Rivas • Interés: Casa en Cieneguilla
-						</p>
-					</div>
-					<span class="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700"
-						>Pendiente</span
-					>
-				</div>
-
-				<div class="flex items-start gap-4 rounded-2xl border border-border-light bg-bg-base p-4">
-					<span
-						class="shrink-0 rounded-xl bg-primary-light px-3 py-1.5 text-sm font-bold text-primary"
-						>05:30 PM</span
-					>
-					<div class="min-w-0 flex-1">
-						<h4 class="font-display text-sm font-bold text-text-main">Firma de Reserva</h4>
-						<p class="mt-0.5 text-xs text-text-muted">Cliente: María Fe • Oficina San Isidro</p>
-					</div>
-					<span
-						class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700"
-						>Confirmado</span
-					>
-				</div>
-			</div>
+			{/if}
 		</div>
 
-		<!-- Panel lateral de Mis Leads -->
 		<div class="flex flex-col gap-6 rounded-3xl border border-border-light bg-white p-6 shadow-xs">
 			<h3 class="font-display text-lg font-bold text-text-main">Acciones Rápidas</h3>
 
 			<div class="flex flex-col gap-3">
-				<button
-					class="w-full cursor-pointer rounded-2xl bg-primary py-3 font-display text-sm font-semibold text-white shadow-xs transition hover:bg-primary-dark"
+				<a
+					href="/asesor/leads"
+					class="w-full rounded-2xl bg-primary py-3 text-center font-display text-sm font-semibold text-white shadow-xs transition hover:bg-primary-dark"
 				>
 					+ Registrar Nuevo Lead
-				</button>
-				<button
-					class="w-full cursor-pointer rounded-2xl border border-border-light bg-white py-3 font-display text-sm font-semibold text-text-main transition hover:bg-bg-base"
+				</a>
+				<a
+					href="/asesor/citas"
+					class="w-full rounded-2xl border border-border-light bg-white py-3 text-center font-display text-sm font-semibold text-text-main transition hover:bg-bg-base"
 				>
 					Crear Cita de Visita
-				</button>
+				</a>
 				<a
 					href="/asesor/leads"
 					class="w-full rounded-2xl bg-bg-base py-3 text-center font-display text-sm font-semibold text-text-main transition hover:bg-primary hover:text-white"
