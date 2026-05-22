@@ -23,7 +23,6 @@ class MockVentasRepository implements IVentasRepository {
   async obtenerCitaPorId(): Promise<Cita | undefined> {
     return undefined;
   }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async obtenerClientePorId(_id: IdCliente): Promise<Cliente | null> {
     return null;
   }
@@ -63,7 +62,6 @@ class MockVentasRepository implements IVentasRepository {
   async obtenerActividadReciente(
     _limite: number,
   ): Promise<{ idLead: string; evento: string; descripcion: string; fecha: string }[]> {
-    void _limite;
     return [];
   }
 
@@ -91,7 +89,6 @@ class MockEvaluadorAsignacion implements IEvaluadorAsignacion {
   constructor(debeFallar: boolean = false) {
     this.debeFallar = debeFallar;
   }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   evaluar(_stats: AsesorStat[]): Resultado<IdUsuarioRef, ErrorDeDominio> {
     if (this.debeFallar) {
       return resultadoFallido(new ErrorDeDominio("No hay asesores disponibles"));
