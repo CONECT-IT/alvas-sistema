@@ -26,6 +26,7 @@
 				{ label: 'Usuarios', href: '/admin/usuarios', icon: 'users' },
 				{ label: 'Propiedades', href: '/admin/propiedades', icon: 'home' },
 				{ label: 'Ventas y CRM', href: '/admin/ventas', icon: 'trending-up' },
+				{ label: 'Contratos', href: '/admin/contratos', icon: 'file-text' },
 				{ label: 'Reportes', href: '/admin/reportes', icon: 'bar-chart' }
 			];
 		}
