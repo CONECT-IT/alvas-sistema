@@ -1,16 +1,25 @@
 import {
   ActualizarCitaUseCase,
+  ActualizarClienteUseCase,
   ActualizarLeadUseCase,
   AgendarCitaUseCase,
+  AsignarLeadAAsesorUseCase,
   CancelarContratoUseCase,
   ConvertirLeadAClienteUseCase,
   CrearContratoUseCase,
   FirmarContratoUseCase,
   ListarActividadLeadUseCase,
+  ListarAsesoresConLeadsUseCase,
+  ListarCitasUseCase,
   ListarClientesUseCase,
   ListarContratosUseCase,
   ListarContratosPorAsesorUseCase,
   ListarLeadsPorAsesorUseCase,
+  ListarLeadsUseCase,
+  ListarPropiedadesPorClienteUseCase,
+  ObtenerCitaPorIdUseCase,
+  ObtenerClienteUseCase,
+  ObtenerLeadUseCase,
   RegistrarClienteDirectoUseCase,
   RegistrarLeadUseCase,
   type IRegistrarLead,
@@ -73,7 +82,10 @@ export function crearVentasControllerDeps(): VentasControllerDeps {
     crearCrearContrato: (c) => new CrearContratoUseCase(new D1ContratoRepository(c.env.DB)),
     crearListarContratos: (c) => new ListarContratosUseCase(new D1ContratoRepository(c.env.DB)),
     crearListarContratosPorAsesor: (c) =>
-      new ListarContratosPorAsesorUseCase(new D1ContratoRepository(c.env.DB), new D1VentasRepository(c.env.DB)),
+      new ListarContratosPorAsesorUseCase(
+        new D1ContratoRepository(c.env.DB),
+        new D1VentasRepository(c.env.DB),
+      ),
     crearCancelarContrato: (c) => new CancelarContratoUseCase(new D1ContratoRepository(c.env.DB)),
     crearFirmarContrato: (c) =>
       new FirmarContratoUseCase(
@@ -81,6 +93,17 @@ export function crearVentasControllerDeps(): VentasControllerDeps {
         new D1VentasRepository(c.env.DB),
         new UuidGeneradorId(),
       ),
+    crearObtenerLead: (c) => new ObtenerLeadUseCase(new D1VentasRepository(c.env.DB)),
+    crearListarLeads: (c) => new ListarLeadsUseCase(new D1VentasRepository(c.env.DB), autorizador),
+    crearAsignarLeadAAsesor: (c) => new AsignarLeadAAsesorUseCase(new D1VentasRepository(c.env.DB)),
+    crearListarAsesoresConLeads: (c) =>
+      new ListarAsesoresConLeadsUseCase(new D1VentasRepository(c.env.DB)),
+    crearListarCitas: (c) => new ListarCitasUseCase(new D1VentasRepository(c.env.DB)),
+    crearObtenerCitaPorId: (c) => new ObtenerCitaPorIdUseCase(new D1VentasRepository(c.env.DB)),
+    crearObtenerCliente: (c) => new ObtenerClienteUseCase(new D1VentasRepository(c.env.DB)),
+    crearActualizarCliente: (c) => new ActualizarClienteUseCase(new D1VentasRepository(c.env.DB)),
+    crearListarPropiedadesPorCliente: (c) =>
+      new ListarPropiedadesPorClienteUseCase(new D1ContratoRepository(c.env.DB)),
     crearListarActividadLead: (c) =>
       new ListarActividadLeadUseCase(new D1VentasRepository(c.env.DB)),
   };

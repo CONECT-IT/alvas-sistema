@@ -6,15 +6,23 @@ import {
   type IActualizarCliente,
   type IActualizarLead,
   type IAgendarCita,
+  type IAsignarLeadAAsesor,
   type ICancelarContrato,
   type ICrearContrato,
   type IConvertirLeadACliente,
   type IFirmarContrato,
   type IListarActividadLead,
+  type IListarAsesoresConLeads,
+  type IListarCitas,
   type IListarClientes,
   type IListarContratos,
   type IListarContratosPorAsesor,
+  type IListarLeads,
   type IListarLeadsPorAsesor,
+  type IListarPropiedadesPorCliente,
+  type IObtenerCitaPorId,
+  type IObtenerCliente,
+  type IObtenerLead,
   type IRegistrarClienteDirecto,
   type IRegistrarLead,
 } from "../../application";
@@ -38,7 +46,15 @@ export type VentasControllerDeps = Readonly<{
   crearActualizarCita: (c: ContextoVentas) => IActualizarCita;
   crearListarLeadsPorAsesor: (c: ContextoVentas) => IListarLeadsPorAsesor;
   crearListarClientes: (c: ContextoVentas) => IListarClientes;
-  crearActualizarCliente?: (c: ContextoVentas) => IActualizarCliente;
+  crearObtenerLead: (c: ContextoVentas) => IObtenerLead;
+  crearListarLeads: (c: ContextoVentas) => IListarLeads;
+  crearAsignarLeadAAsesor: (c: ContextoVentas) => IAsignarLeadAAsesor;
+  crearListarAsesoresConLeads: (c: ContextoVentas) => IListarAsesoresConLeads;
+  crearListarCitas: (c: ContextoVentas) => IListarCitas;
+  crearObtenerCitaPorId: (c: ContextoVentas) => IObtenerCitaPorId;
+  crearObtenerCliente: (c: ContextoVentas) => IObtenerCliente;
+  crearActualizarCliente: (c: ContextoVentas) => IActualizarCliente;
+  crearListarPropiedadesPorCliente: (c: ContextoVentas) => IListarPropiedadesPorCliente;
   crearCrearContrato: (c: ContextoVentas) => ICrearContrato;
   crearListarContratos: (c: ContextoVentas) => IListarContratos;
   crearListarContratosPorAsesor: (c: ContextoVentas) => IListarContratosPorAsesor;

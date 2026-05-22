@@ -113,7 +113,9 @@
 								</p>
 							</div>
 							<span
-								class="shrink-0 rounded-full border px-3 py-1 text-xs font-semibold uppercase {estadoBadge(contrato.estado)}"
+								class="shrink-0 rounded-full border px-3 py-1 text-xs font-semibold uppercase {estadoBadge(
+									contrato.estado
+								)}"
 							>
 								{contrato.estado}
 							</span>

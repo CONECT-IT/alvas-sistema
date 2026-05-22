@@ -2,6 +2,7 @@ import {
   type ActualizarLeadBodyDTO,
   type ConvertirLeadInputDTO,
   type RegistrarLeadInputDTO,
+  type AsignarLeadAAsesorInputDTO,
 } from "../../application/dto/LeadDTOs";
 import {
   type ContextoVentas,
@@ -91,6 +92,73 @@ export class LeadsController {
       return c.json({ success: true, data: resultado.valor });
     } catch (error) {
       return responderErrorInterno(c, "LeadsController.listarActividad:", error);
+    }
+  }
+
+  async obtener(c: ContextoVentas): Promise<Response> {
+    try {
+      const id = c.req.param("id") ?? "";
+      const useCase = this.deps.crearObtenerLead(c);
+      const resultado = await useCase.ejecutar({ id });
+
+      if (!resultado.esExito) {
+        return responderErrorDeDominio(c, resultado.error);
+      }
+
+      return c.json({ success: true, data: resultado.valor });
+    } catch (error) {
+      return responderErrorInterno(c, "LeadsController.obtener:", error);
+    }
+  }
+
+  async listarTodos(c: ContextoVentas): Promise<Response> {
+    try {
+      const authPayload = c.get("authPayload");
+      const useCase = this.deps.crearListarLeads(c);
+      const resultado = await useCase.ejecutar({
+        idUsuarioEjecutor: authPayload.idUsuario,
+        rolEjecutor: authPayload.rol,
+      });
+
+      if (!resultado.esExito) {
+        return responderErrorDeDominio(c, resultado.error);
+      }
+
+      return c.json({ success: true, data: resultado.valor });
+    } catch (error) {
+      return responderErrorInterno(c, "LeadsController.listarTodos:", error);
+    }
+  }
+
+  async asignarAsesor(c: ContextoVentas): Promise<Response> {
+    try {
+      const id = c.req.param("id") ?? "";
+      const body = await c.req.json<AsignarLeadAAsesorInputDTO>();
+      const useCase = this.deps.crearAsignarLeadAAsesor(c);
+      const resultado = await useCase.ejecutar({ idLead: id, idAsesor: body.idAsesor });
+
+      if (!resultado.esExito) {
+        return responderErrorDeDominio(c, resultado.error);
+      }
+
+      return c.json({ success: true, message: "Lead reasignado" });
+    } catch (error) {
+      return responderErrorInterno(c, "LeadsController.asignarAsesor:", error);
+    }
+  }
+
+  async listarAsesores(c: ContextoVentas): Promise<Response> {
+    try {
+      const useCase = this.deps.crearListarAsesoresConLeads(c);
+      const resultado = await useCase.ejecutar();
+
+      if (!resultado.esExito) {
+        return responderErrorDeDominio(c, resultado.error);
+      }
+
+      return c.json({ success: true, data: resultado.valor });
+    } catch (error) {
+      return responderErrorInterno(c, "LeadsController.listarAsesores:", error);
     }
   }
 }

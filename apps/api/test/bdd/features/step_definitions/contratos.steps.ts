@@ -123,20 +123,23 @@ let resultadoCrear: Awaited<ReturnType<CrearContratoUseCase["ejecutar"]>>;
 let resultadoFirmar: Awaited<ReturnType<FirmarContratoUseCase["ejecutar"]>>;
 let resultadoCancelar: Awaited<ReturnType<CancelarContratoUseCase["ejecutar"]>>;
 
-Given("un lead {string} y una propiedad {string}", function (_idLead: string, _idPropiedad: string) {
-  contratoRepository = new FakeContratoRepository();
-  ventasRepository = new FakeVentasRepository();
-  const lead = Lead.registrar({
-    id: _idLead,
-    nombre: "Maria",
-    email: "maria@example.com",
-    telefono: "999888777",
-    tipo: "COMPRA",
-    idAsesor: "asesor-1",
-  });
-  ventasRepository.leads.set(lead.id, lead);
-  void _idPropiedad;
-});
+Given(
+  "un lead {string} y una propiedad {string}",
+  function (_idLead: string, _idPropiedad: string) {
+    contratoRepository = new FakeContratoRepository();
+    ventasRepository = new FakeVentasRepository();
+    const lead = Lead.registrar({
+      id: _idLead,
+      nombre: "Maria",
+      email: "maria@example.com",
+      telefono: "999888777",
+      tipo: "COMPRA",
+      idAsesor: "asesor-1",
+    });
+    ventasRepository.leads.set(lead.id, lead);
+    void _idPropiedad;
+  },
+);
 
 Given("un contrato en estado {string}", async function (_estado: string) {
   contratoRepository = new FakeContratoRepository();

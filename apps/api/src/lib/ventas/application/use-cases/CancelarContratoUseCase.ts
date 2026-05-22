@@ -11,9 +11,7 @@ export type CancelarContratoInput = {
 };
 
 export class CancelarContratoUseCase
-  implements
-    CasoDeUso<CancelarContratoInput, Resultado<void, ErrorDeDominio>>,
-    ICancelarContrato
+  implements CasoDeUso<CancelarContratoInput, Resultado<void, ErrorDeDominio>>, ICancelarContrato
 {
   constructor(private readonly contratoRepository: IContratoRepository) {}
 

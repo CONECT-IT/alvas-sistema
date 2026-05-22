@@ -1,4 +1,7 @@
-import { type RegistrarClienteDirectoInputDTO } from "../../application/dto/ClienteDTOs";
+import {
+  type RegistrarClienteDirectoInputDTO,
+  type ActualizarClienteInputDTO,
+} from "../../application/dto/ClienteDTOs";
 import {
   type ContextoVentas,
   responderErrorDeDominio,
@@ -60,6 +63,55 @@ export class ClientesController {
       });
     } catch (error) {
       return responderErrorInterno(c, "ClientesController.listar:", error);
+    }
+  }
+
+  async obtener(c: ContextoVentas): Promise<Response> {
+    try {
+      const id = c.req.param("id") ?? "";
+      const useCase = this.deps.crearObtenerCliente(c);
+      const resultado = await useCase.ejecutar({ id });
+
+      if (!resultado.esExito) {
+        return responderErrorDeDominio(c, resultado.error);
+      }
+
+      return c.json({ success: true, data: resultado.valor });
+    } catch (error) {
+      return responderErrorInterno(c, "ClientesController.obtener:", error);
+    }
+  }
+
+  async actualizar(c: ContextoVentas): Promise<Response> {
+    try {
+      const id = c.req.param("id") ?? "";
+      const body = await c.req.json<ActualizarClienteInputDTO>();
+      const useCase = this.deps.crearActualizarCliente!(c);
+      const resultado = await useCase.ejecutar({ ...body, idCliente: id });
+
+      if (!resultado.esExito) {
+        return responderErrorDeDominio(c, resultado.error);
+      }
+
+      return c.json({ success: true, data: resultado.valor });
+    } catch (error) {
+      return responderErrorInterno(c, "ClientesController.actualizar:", error);
+    }
+  }
+
+  async listarPropiedades(c: ContextoVentas): Promise<Response> {
+    try {
+      const id = c.req.param("id") ?? "";
+      const useCase = this.deps.crearListarPropiedadesPorCliente(c);
+      const resultado = await useCase.ejecutar({ idCliente: id });
+
+      if (!resultado.esExito) {
+        return responderErrorDeDominio(c, resultado.error);
+      }
+
+      return c.json({ success: true, data: resultado.valor });
+    } catch (error) {
+      return responderErrorInterno(c, "ClientesController.listarPropiedades:", error);
     }
   }
 }

@@ -13,10 +13,7 @@ export type ListarContratosPorAsesorInput = {
 
 export class ListarContratosPorAsesorUseCase
   implements
-    CasoDeUso<
-      ListarContratosPorAsesorInput,
-      Resultado<ListarContratosOutputDTO, ErrorDeDominio>
-    >,
+    CasoDeUso<ListarContratosPorAsesorInput, Resultado<ListarContratosOutputDTO, ErrorDeDominio>>,
     IListarContratosPorAsesor
 {
   constructor(
@@ -28,9 +25,7 @@ export class ListarContratosPorAsesorUseCase
     input: ListarContratosPorAsesorInput,
   ): Promise<Resultado<ListarContratosOutputDTO, ErrorDeDominio>> {
     try {
-      const leads = await this.ventasRepository.listarLeadsPorAsesor(
-        idUsuarioRef(input.idAsesor),
-      );
+      const leads = await this.ventasRepository.listarLeadsPorAsesor(idUsuarioRef(input.idAsesor));
       const idsLead = leads.map((lead) => lead.id);
       const contratos = await this.contratoRepository.listarPorIdsLead(idsLead);
 

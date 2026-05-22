@@ -22,13 +22,22 @@ export function crearVentasRouter(deps: VentasControllerDeps) {
 
   ventasRouter.get("/pipeline", (c) => pipeline.listar(c));
   ventasRouter.post("/lead", (c) => leads.registrar(c));
+  ventasRouter.get("/lead/:id", (c) => leads.obtener(c));
   ventasRouter.put("/lead/:id", (c) => leads.actualizar(c));
+  ventasRouter.put("/lead/:id/asesor", (c) => leads.asignarAsesor(c));
   ventasRouter.post("/convertir", (c) => leads.convertirACliente(c));
+  ventasRouter.get("/leads", (c) => leads.listarTodos(c));
+  ventasRouter.get("/asesores", (c) => leads.listarAsesores(c));
 
   ventasRouter.post("/cita", (c) => citas.agendar(c));
+  ventasRouter.get("/citas", (c) => citas.listar(c));
   ventasRouter.put("/lead/:idLead/cita/:idCita", (c) => citas.actualizar(c));
+  ventasRouter.get("/lead/:idLead/cita/:idCita", (c) => citas.obtener(c));
 
   ventasRouter.get("/clientes", (c) => clientes.listar(c));
+  ventasRouter.get("/cliente/:id", (c) => clientes.obtener(c));
+  ventasRouter.put("/cliente/:id", (c) => clientes.actualizar(c));
+  ventasRouter.get("/cliente/:id/propiedades", (c) => clientes.listarPropiedades(c));
   ventasRouter.post("/cliente", (c) => clientes.registrarDirecto(c));
 
   ventasRouter.get("/contratos", (c) => contratos.listar(c));

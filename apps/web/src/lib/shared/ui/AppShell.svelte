@@ -11,7 +11,15 @@
 	type SidebarItem = {
 		label: string;
 		href: string;
-		icon: 'grid' | 'users' | 'home' | 'trending-up' | 'bar-chart' | 'calendar' | 'briefcase' | 'file-text';
+		icon:
+			| 'grid'
+			| 'users'
+			| 'home'
+			| 'trending-up'
+			| 'bar-chart'
+			| 'calendar'
+			| 'briefcase'
+			| 'file-text';
 	};
 
 	let { children }: Props = $props();

@@ -151,7 +151,12 @@
 		event.preventDefault();
 		contratoError = null;
 
-		if (!contratoLeadId.trim() || !contratoPropiedadId || !contratoFechaInicio || !contratoFechaFin) {
+		if (
+			!contratoLeadId.trim() ||
+			!contratoPropiedadId ||
+			!contratoFechaInicio ||
+			!contratoFechaFin
+		) {
 			contratoError = 'Completa todos los campos del contrato.';
 			return;
 		}
@@ -329,128 +334,129 @@
 		</form>
 	</Card>
 
-		<Card>
-			<div class="mb-5">
-				<h2 class="font-display text-xl font-bold text-text-main">Gestionar lead</h2>
-				<p class="mt-1 text-sm leading-relaxed text-text-muted">
-					Ajusta datos del prospecto o crea un contrato directamente. Al firmar el contrato, el
-					lead se convierte automáticamente en cliente.
-				</p>
-			</div>
+	<Card>
+		<div class="mb-5">
+			<h2 class="font-display text-xl font-bold text-text-main">Gestionar lead</h2>
+			<p class="mt-1 text-sm leading-relaxed text-text-muted">
+				Ajusta datos del prospecto o crea un contrato directamente. Al firmar el contrato, el lead
+				se convierte automáticamente en cliente.
+			</p>
+		</div>
 
-			{#if updateSuccess}
-				<p class="mb-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
-					{updateSuccess}
-				</p>
-			{/if}
+		{#if updateSuccess}
+			<p class="mb-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+				{updateSuccess}
+			</p>
+		{/if}
 
-			{#if updateError}
-				<p class="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-					{updateError}
-				</p>
-			{/if}
+		{#if updateError}
+			<p class="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+				{updateError}
+			</p>
+		{/if}
 
-			<datalist id="leads-cartera">
-				{#each leads as lead (lead.id)}
-					<option value={lead.id}>{lead.nombre}</option>
-				{/each}
-			</datalist>
+		<datalist id="leads-cartera">
+			{#each leads as lead (lead.id)}
+				<option value={lead.id}>{lead.nombre}</option>
+			{/each}
+		</datalist>
 
-			<div class="grid gap-6 xl:grid-cols-[1.4fr_0.8fr]">
-				<form class="grid gap-4 md:grid-cols-2" onsubmit={editarLead}>
-					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main md:col-span-2">
-						Lead
-						<input
-							bind:value={editIdLead}
-							list="leads-cartera"
-							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
-							placeholder="ID del lead"
-						/>
-					</label>
+		<div class="grid gap-6 xl:grid-cols-[1.4fr_0.8fr]">
+			<form class="grid gap-4 md:grid-cols-2" onsubmit={editarLead}>
+				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main md:col-span-2">
+					Lead
+					<input
+						bind:value={editIdLead}
+						list="leads-cartera"
+						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+						placeholder="ID del lead"
+					/>
+				</label>
 
-					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
-						Nombre
-						<input
-							bind:value={editNombre}
-							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
-							placeholder="Nuevo nombre"
-						/>
-					</label>
+				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+					Nombre
+					<input
+						bind:value={editNombre}
+						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+						placeholder="Nuevo nombre"
+					/>
+				</label>
 
-					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
-						Teléfono
-						<input
-							bind:value={editTelefono}
-							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
-							placeholder="Nuevo teléfono"
-						/>
-					</label>
+				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+					Teléfono
+					<input
+						bind:value={editTelefono}
+						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+						placeholder="Nuevo teléfono"
+					/>
+				</label>
 
-					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
-						Correo
-						<input
-							bind:value={editEmail}
-							type="email"
-							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
-							placeholder="Nuevo correo"
-						/>
-					</label>
+				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+					Correo
+					<input
+						bind:value={editEmail}
+						type="email"
+						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+						placeholder="Nuevo correo"
+					/>
+				</label>
 
-					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
-						Tipo
-						<select
-							bind:value={editTipo}
-							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
-						>
-							<option value="">Sin cambio</option>
-							<option value="COMPRA">Compra</option>
-							<option value="VENTA">Venta</option>
-						</select>
-					</label>
+				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+					Tipo
+					<select
+						bind:value={editTipo}
+						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+					>
+						<option value="">Sin cambio</option>
+						<option value="COMPRA">Compra</option>
+						<option value="VENTA">Venta</option>
+					</select>
+				</label>
 
-					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main md:col-span-2">
-						Propiedad de interés
-						<input
-							bind:value={editIdPropiedadInteres}
-							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
-							placeholder="ID de propiedad, si aplica"
-						/>
-					</label>
+				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main md:col-span-2">
+					Propiedad de interés
+					<input
+						bind:value={editIdPropiedadInteres}
+						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+						placeholder="ID de propiedad, si aplica"
+					/>
+				</label>
 
-					<div class="flex flex-col gap-3 md:col-span-2 md:flex-row md:justify-end">
-						<Button type="button" variant="ghost" onclick={limpiarFormularioEdicion}>Limpiar</Button>
-						<Button type="submit" disabled={updating}>
-							{updating ? 'Actualizando...' : 'Actualizar lead'}
-						</Button>
-					</div>
-				</form>
+				<div class="flex flex-col gap-3 md:col-span-2 md:flex-row md:justify-end">
+					<Button type="button" variant="ghost" onclick={limpiarFormularioEdicion}>Limpiar</Button>
+					<Button type="submit" disabled={updating}>
+						{updating ? 'Actualizando...' : 'Actualizar lead'}
+					</Button>
+				</div>
+			</form>
 
-				<form
-					class="flex flex-col justify-between gap-4 rounded-3xl border border-primary/15 bg-primary-light/45 p-5"
-					onsubmit={crearContratoParaLead}
+			<form
+				class="flex flex-col justify-between gap-4 rounded-3xl border border-primary/15 bg-primary-light/45 p-5"
+				onsubmit={crearContratoParaLead}
+			>
+				<div>
+					<h3 class="font-display text-lg font-bold text-text-main">Crear contrato</h3>
+					<p class="mt-1 text-sm leading-relaxed text-text-muted">
+						Crea un contrato en borrador para el lead. Al firmarlo se convertirá automáticamente en
+						cliente.
+					</p>
+				</div>
+
+				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+					Lead
+					<input
+						bind:value={contratoLeadId}
+						list="leads-cartera"
+						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+						placeholder="ID del lead"
+					/>
+				</label>
+
+				<Button type="button" variant="ghost" onclick={cargarPropiedades}>Cargar propiedades</Button
 				>
-					<div>
-						<h3 class="font-display text-lg font-bold text-text-main">Crear contrato</h3>
-						<p class="mt-1 text-sm leading-relaxed text-text-muted">
-							Crea un contrato en borrador para el lead. Al firmarlo se convertirá
-							automáticamente en cliente.
-						</p>
-					</div>
-
-					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
-						Lead
-						<input
-							bind:value={contratoLeadId}
-							list="leads-cartera"
-							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
-							placeholder="ID del lead"
-						/>
-					</label>
-
-					<Button type="button" variant="ghost" onclick={cargarPropiedades}>Cargar propiedades</Button>
-				</form>
-			</div>
-		</Card>
+			</form>
+		</div>
+	</Card>
 
 	{#if contratoLeadId.trim()}
 		<Card>
@@ -527,9 +533,7 @@
 						>
 						<div>
 							<h3 class="font-display text-lg font-bold text-text-main">Crear contrato</h3>
-							<p class="text-sm text-text-muted">
-								Registra un contrato en borrador para el lead.
-							</p>
+							<p class="text-sm text-text-muted">Registra un contrato en borrador para el lead.</p>
 						</div>
 					</div>
 

@@ -186,6 +186,14 @@ class FakeContratoRepository implements IContratoRepository {
   async listarPorCliente(idCliente: IdCliente): Promise<Contrato[]> {
     return [...this.contratos.values()].filter((c) => c.idCliente === idCliente);
   }
+
+  async listarPorLead(idLead: IdLead): Promise<Contrato[]> {
+    return [...this.contratos.values()].filter((c) => c.idLead === idLead);
+  }
+
+  async listarPorIdsLead(ids: IdLead[]): Promise<Contrato[]> {
+    return [...this.contratos.values()].filter((c) => c.idLead && ids.includes(c.idLead));
+  }
 }
 
 describe("ventas / use cases", () => {
@@ -981,9 +989,11 @@ describe("ventas / use cases", () => {
 
     const generadorId = { generar: () => "cliente-001" };
 
-    const resultado = await new FirmarContratoUseCase(contratoRepo, leadRepo, generadorId).ejecutar({
-      idContrato: "cont-001",
-    });
+    const resultado = await new FirmarContratoUseCase(contratoRepo, leadRepo, generadorId).ejecutar(
+      {
+        idContrato: "cont-001",
+      },
+    );
 
     const contratoActualizado = await contratoRepo.buscarPorId(idContrato("cont-001"));
     const clienteCreado = await leadRepo.obtenerClientePorId(idCliente("cliente-001"));
@@ -1163,7 +1173,11 @@ describe("ventas / use cases", () => {
     const repo = new FakeContratoRepository();
     repo.buscarPorId = () => Promise.reject(new Error("db error"));
 
-    const resultado = new FirmarContratoUseCase(repo).ejecutar({
+    const resultado = new FirmarContratoUseCase(
+      repo,
+      new FakeVentasRepository(),
+      new SecuenciaGeneradorId(["cli-1"]),
+    ).ejecutar({
       idContrato: "cont-001",
     });
 
@@ -1176,7 +1190,7 @@ describe("ventas / use cases", () => {
 
     const resultado = new CrearContratoUseCase(repo).ejecutar({
       id: "cont-001",
-      idCliente: "cliente-001",
+      idLead: "lead-001",
       idPropiedad: "prop-001",
       fechaInicio: new Date(),
       fechaFin: new Date("2027-01-01"),
@@ -1362,7 +1376,11 @@ describe("ventas / use cases", () => {
     const repo = new FakeContratoRepository();
     repo.buscarPorId = () => Promise.reject(new ErrorDeDominio("error dominio"));
 
-    const resultado = await new FirmarContratoUseCase(repo).ejecutar({ idContrato: "cont-001" });
+    const resultado = await new FirmarContratoUseCase(
+      repo,
+      new FakeVentasRepository(),
+      new SecuenciaGeneradorId(["cli-1"]),
+    ).ejecutar({ idContrato: "cont-001" });
 
     expect(resultado.esExito).toBe(false);
   });
@@ -1373,7 +1391,7 @@ describe("ventas / use cases", () => {
 
     const resultado = await new CrearContratoUseCase(repo).ejecutar({
       id: "cont-001",
-      idCliente: "cliente-001",
+      idLead: "lead-001",
       idPropiedad: "prop-001",
       fechaInicio: new Date(),
       fechaFin: new Date("2027-01-01"),

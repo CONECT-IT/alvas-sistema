@@ -1,4 +1,9 @@
-import { type IdContrato, type IdCliente, type IdLead, type IdPropiedad } from "../value-objects/Ids";
+import {
+  type IdContrato,
+  type IdCliente,
+  type IdLead,
+  type IdPropiedad,
+} from "../value-objects/Ids";
 import { ErrorDeValidacion } from "../../../shared/domain";
 
 export const ESTADOS_CONTRATO = ["BORRADOR", "VIGENTE", "FINALIZADO", "CANCELADO"] as const;

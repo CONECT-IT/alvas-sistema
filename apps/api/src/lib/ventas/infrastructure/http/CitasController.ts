@@ -59,4 +59,36 @@ export class CitasController {
       return responderErrorInterno(c, "CitasController.actualizar:", error);
     }
   }
+
+  async listar(c: ContextoVentas): Promise<Response> {
+    try {
+      const useCase = this.deps.crearListarCitas(c);
+      const resultado = await useCase.ejecutar();
+
+      if (!resultado.esExito) {
+        return responderErrorDeDominio(c, resultado.error);
+      }
+
+      return c.json({ success: true, data: resultado.valor });
+    } catch (error) {
+      return responderErrorInterno(c, "CitasController.listar:", error);
+    }
+  }
+
+  async obtener(c: ContextoVentas): Promise<Response> {
+    try {
+      const idLead = c.req.param("idLead") ?? "";
+      const idCita = c.req.param("idCita") ?? "";
+      const useCase = this.deps.crearObtenerCitaPorId(c);
+      const resultado = await useCase.ejecutar({ idLead, idCita });
+
+      if (!resultado.esExito) {
+        return responderErrorDeDominio(c, resultado.error);
+      }
+
+      return c.json({ success: true, data: resultado.valor });
+    } catch (error) {
+      return responderErrorInterno(c, "CitasController.obtener:", error);
+    }
+  }
 }
