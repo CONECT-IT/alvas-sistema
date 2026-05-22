@@ -10,3 +10,23 @@ export type LeadPipelineDTO = Readonly<{
 	tipo: string;
 	citasCount: number;
 }>;
+
+export type RegistrarLeadRequestDTO = Readonly<{
+	nombre: string;
+	email: string;
+	telefono: string;
+	tipo: 'COMPRA' | 'VENTA';
+	idPropiedadInteres?: string;
+}>;
+
+export type RegistrarLeadResponseDTO = Readonly<{
+	id: string;
+}>;
+
+export type AgendarCitaRequestDTO = Readonly<{
+	idLead: string;
+	idPropiedad?: string;
+	fechaInicio: string;
+	duracionMinutos: number;
+	observacion?: string;
+}>;
