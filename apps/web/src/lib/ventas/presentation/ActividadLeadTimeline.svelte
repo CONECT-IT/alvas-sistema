@@ -63,7 +63,7 @@
 	});
 </script>
 
-<div class="rounded-2xl border border-border-light bg-white p-5">
+<div class="rounded-2xl border border-border-light bg-bg-card p-5">
 	<h3 class="font-display text-lg font-bold text-text-main">Historial</h3>
 	<p class="mt-1 text-sm text-text-muted">
 		{actividades.length} evento{actividades.length === 1 ? '' : 's'} registrado{actividades.length ===

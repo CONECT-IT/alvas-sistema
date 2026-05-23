@@ -9,6 +9,10 @@
 	import { ventasRepository } from '../infrastructure/ventasRepository';
 	import ActividadLeadTimeline from './ActividadLeadTimeline.svelte';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import type { Propiedad } from '$lib/propiedades/domain/models/Propiedad';
+	import { obtenerPropiedad } from '$lib/propiedades/application/use-cases/obtenerPropiedad';
+	import { propiedadRepository } from '$lib/propiedades/infrastructure/propiedadRepository';
 
 	interface Props {
 		leadId: string;
@@ -18,8 +22,12 @@
 
 	let lead = $state<LeadDetalle | null>(null);
 	let propiedadesRelacionadas = $state<string[]>([]);
+	let propiedadesDetalle = $state<Propiedad[]>([]);
+	let propiedadInteres = $state<Propiedad | null>(null);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
+	let basePath = $derived($page.url.pathname.startsWith('/admin') ? '/admin' : '/asesor');
+	let propiedadesPorId = $derived(new Map(propiedadesDetalle.map((p) => [p.id, p])));
 
 	async function cargar() {
 		if (!leadId.trim()) {
@@ -33,6 +41,30 @@
 			lead = await obtenerLead(ventasRepository, leadId.trim());
 			if (lead) {
 				propiedadesRelacionadas = await listarPropiedadesPorCliente(ventasRepository, lead.id);
+				if (lead.idPropiedadInteres) {
+					try {
+						propiedadInteres = await obtenerPropiedad(propiedadRepository, lead.idPropiedadInteres);
+					} catch {
+						propiedadInteres = null;
+					}
+				} else {
+					propiedadInteres = null;
+				}
+
+				if (propiedadesRelacionadas.length > 0) {
+					const props = await Promise.all(
+						propiedadesRelacionadas.map(async (id) => {
+							try {
+								return await obtenerPropiedad(propiedadRepository, id);
+							} catch {
+								return null;
+							}
+						})
+					);
+					propiedadesDetalle = props.filter((p): p is Propiedad => p !== null);
+				} else {
+					propiedadesDetalle = [];
+				}
 			}
 		} catch (err) {
 			error = err instanceof HttpError ? err.message : 'No se pudo cargar el lead.';
@@ -50,6 +82,14 @@
 
 	function badgeTipo(tipo: string): 'brand' | 'success' | 'neutral' {
 		return tipo === 'COMPRA' ? 'brand' : 'success';
+	}
+
+	function tonePropiedad(estado: string): 'brand' | 'success' | 'warning' | 'neutral' {
+		const normalized = estado.toUpperCase();
+		if (normalized === 'DISPONIBLE') return 'success';
+		if (normalized === 'PRELIMINAR') return 'warning';
+		if (normalized === 'RESERVADA') return 'brand';
+		return 'neutral';
 	}
 
 	function formatearFecha(iso: string): string {
@@ -114,11 +154,34 @@
 					<dd class="text-text-main">{lead.nombreAsesor || lead.idAsesor}</dd>
 					{#if lead.idPropiedadInteres}
 						<dt class="font-semibold text-text-muted">Propiedad de interés</dt>
-						<dd class="text-text-main">{lead.idPropiedadInteres}</dd>
+						<dd class="flex flex-wrap items-center gap-2">
+							<span class="font-mono text-sm font-semibold text-text-main">
+								{propiedadInteres?.titulo ?? lead.idPropiedadInteres}
+							</span>
+							<span class="text-xs text-text-muted">{lead.idPropiedadInteres}</span>
+							<Button
+								variant="ghost"
+								onclick={() =>
+									goto(
+										`${basePath}/propiedades/${encodeURIComponent(lead.idPropiedadInteres ?? '')}`
+									)}
+							>
+								Ver propiedad
+							</Button>
+						</dd>
 					{/if}
 					{#if lead.idCliente}
 						<dt class="font-semibold text-text-muted">Cliente vinculado</dt>
-						<dd class="text-text-main">{lead.idCliente}</dd>
+						<dd class="flex flex-wrap items-center gap-2">
+							<span class="font-mono text-sm font-semibold text-text-main">{lead.idCliente}</span>
+							<Button
+								variant="ghost"
+								onclick={() =>
+									goto(`${basePath}/clientes/${encodeURIComponent(lead.idCliente ?? '')}`)}
+							>
+								Ver cliente
+							</Button>
+						</dd>
 					{/if}
 				</dl>
 			</Card>
@@ -143,12 +206,21 @@
 							class="flex items-center justify-between rounded-xl border border-border-light p-4"
 						>
 							<div>
-								<p class="font-mono text-sm font-semibold text-text-main">{idProp}</p>
-								<p class="text-xs text-text-muted">Propiedad vinculada a este prospecto</p>
+								<p class="font-semibold text-text-main">
+									{propiedadesPorId.get(idProp)?.titulo ?? idProp}
+								</p>
+								<div class="mt-1 flex flex-wrap items-center gap-2">
+									<p class="font-mono text-xs text-text-muted">{idProp}</p>
+									{#if propiedadesPorId.get(idProp)?.estado}
+										<Badge tone={tonePropiedad(propiedadesPorId.get(idProp)?.estado ?? '')}>
+											{propiedadesPorId.get(idProp)?.estado}
+										</Badge>
+									{/if}
+								</div>
 							</div>
 							<Button
 								variant="ghost"
-								onclick={() => goto(`/asesor/propiedades/${encodeURIComponent(idProp)}`)}
+								onclick={() => goto(`${basePath}/propiedades/${encodeURIComponent(idProp)}`)}
 							>
 								Ver/Editar propiedad
 							</Button>

@@ -7,13 +7,15 @@ interface AuthState {
 	isAuthenticated: boolean;
 	loading: boolean;
 	error: string | null;
+	layout: 'sidebar' | 'navbar';
 }
 
 const defaultState: AuthState = {
 	user: null,
 	isAuthenticated: false,
 	loading: false,
-	error: null
+	error: null,
+	layout: 'sidebar'
 };
 
 function createAuthStore() {
@@ -22,8 +24,14 @@ function createAuthStore() {
 	return {
 		subscribe,
 		hydrate: (sessionUser: SessionUser | null) => {
+			let layout: 'sidebar' | 'navbar' = 'sidebar';
+			if (typeof localStorage !== 'undefined') {
+				const saved = localStorage.getItem('alvas-layout');
+				if (saved === 'navbar') layout = 'navbar';
+			}
+
 			if (!sessionUser) {
-				set(defaultState);
+				set({ ...defaultState, layout });
 				return;
 			}
 
@@ -39,7 +47,16 @@ function createAuthStore() {
 				user,
 				isAuthenticated: true,
 				loading: false,
-				error: null
+				error: null,
+				layout
+			});
+		},
+		setLayout: (layout: 'sidebar' | 'navbar') => {
+			update((state) => {
+				if (typeof localStorage !== 'undefined') {
+					localStorage.setItem('alvas-layout', layout);
+				}
+				return { ...state, layout };
 			});
 		},
 		logout: async () => {

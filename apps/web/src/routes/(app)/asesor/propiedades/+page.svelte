@@ -13,10 +13,11 @@
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 	let mostrarSoloPublicadas = $state(false);
-	const propiedadesFiltradas = $derived(
-		mostrarSoloPublicadas
-			? propiedades.filter((p) => p.estado.toUpperCase() !== 'PRELIMINAR')
-			: propiedades
+
+	const captaciones = $derived(propiedades.filter((p) => p.estado.toUpperCase() === 'PRELIMINAR'));
+	const disponibles = $derived(propiedades.filter((p) => p.estado.toUpperCase() === 'DISPONIBLE'));
+	const otras = $derived(
+		propiedades.filter((p) => !['PRELIMINAR', 'DISPONIBLE'].includes(p.estado.toUpperCase()))
 	);
 
 	async function cargarPropiedades() {
@@ -80,8 +81,44 @@
 		</Card>
 	{:else}
 		<PropiedadStats {propiedades} />
-		<Card>
-			<PropiedadAdminTable propiedades={propiedadesFiltradas} onPropiedadClick={irAPropiedad} />
-		</Card>
+
+		{#if !mostrarSoloPublicadas && captaciones.length > 0}
+			<Card>
+				<div class="mb-5 flex flex-col justify-between gap-3 md:flex-row md:items-center">
+					<div>
+						<h2 class="font-display text-xl font-bold text-text-main">Captaciones</h2>
+						<p class="mt-1 text-sm text-text-muted">
+							Tus propiedades preliminares captadas que requieren validación.
+						</p>
+					</div>
+					<p class="text-sm font-semibold text-amber-600">{captaciones.length} registros</p>
+				</div>
+				<PropiedadAdminTable propiedades={captaciones} onPropiedadClick={irAPropiedad} />
+			</Card>
+		{/if}
+
+		{#if disponibles.length > 0}
+			<Card>
+				<div class="mb-5">
+					<h2 class="font-display text-xl font-bold text-text-main">Disponibles</h2>
+					<p class="mt-1 text-sm text-text-muted">
+						Propiedades listas para comercialización en el sistema.
+					</p>
+				</div>
+				<PropiedadAdminTable propiedades={disponibles} onPropiedadClick={irAPropiedad} />
+			</Card>
+		{/if}
+
+		{#if !mostrarSoloPublicadas && otras.length > 0}
+			<Card>
+				<div class="mb-5">
+					<h2 class="font-display text-xl font-bold text-text-main">Otras propiedades</h2>
+					<p class="mt-1 text-sm text-text-muted">
+						Propiedades en validación, reservadas o ya vendidas.
+					</p>
+				</div>
+				<PropiedadAdminTable propiedades={otras} onPropiedadClick={irAPropiedad} />
+			</Card>
+		{/if}
 	{/if}
 </div>
