@@ -19,7 +19,12 @@
 				</div>
 				<p class="mt-2 text-sm leading-relaxed text-text-main">{actividad.descripcion}</p>
 			</div>
-			<p class="text-xs font-semibold text-primary">{actividad.idLead}</p>
+			<button
+				onclick={() => (window.location.href = `/admin/leads/${actividad.idLead}`)}
+				class="rounded-lg bg-primary/10 px-3 py-1 text-[10px] font-bold text-primary uppercase transition hover:bg-primary/20"
+			>
+				Ver prospecto
+			</button>
 		</div>
 	{/each}
 </div>
