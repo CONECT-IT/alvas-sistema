@@ -4,7 +4,6 @@ import {
   responderErrorInterno,
   type VentasControllerDeps,
 } from "./VentasHttp";
-import { D1UsuarioRepository } from "../../../usuarios/infrastructure/persistence/D1UsuarioRepository";
 import { IdUsuario } from "../../../usuarios/domain/value-objects/IdUsuario";
 
 export class PipelineController {
@@ -13,7 +12,7 @@ export class PipelineController {
   async listar(c: ContextoVentas): Promise<Response> {
     try {
       const authPayload = c.get("authPayload");
-      const usuarioRepo = new D1UsuarioRepository(c.env.DB);
+      const usuarioRepo = this.deps.crearUsuarioRepo(c);
 
       let leads;
 

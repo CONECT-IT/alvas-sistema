@@ -26,6 +26,9 @@ import {
   type IRegistrarClienteDirecto,
   type IRegistrarLead,
 } from "../../application";
+import { type IVentasRepository } from "../../domain/ports/IVentasRepository";
+import { type IPropiedadRepository } from "../../../propiedades/domain/ports/IPropiedadRepository";
+import { type IUsuarioRepository } from "../../../usuarios/domain/ports/IUsuarioRepository";
 
 export type BindingsVentas = {
   DB: D1DatabaseLike;
@@ -61,6 +64,9 @@ export type VentasControllerDeps = Readonly<{
   crearFirmarContrato: (c: ContextoVentas) => IFirmarContrato;
   crearCancelarContrato: (c: ContextoVentas) => ICancelarContrato;
   crearListarActividadLead: (c: ContextoVentas) => IListarActividadLead;
+  crearVentasRepo: (c: ContextoVentas) => IVentasRepository;
+  crearPropiedadRepo: (c: ContextoVentas) => IPropiedadRepository;
+  crearUsuarioRepo: (c: ContextoVentas) => IUsuarioRepository;
 }>;
 
 export function responderErrorDeDominio(

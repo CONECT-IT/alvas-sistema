@@ -25,4 +25,5 @@ export type ActualizarUsuarioRequestDTO = Readonly<{
 	username?: string;
 	nombre?: string;
 	rol?: UserRol;
+	estado?: string;
 }>;

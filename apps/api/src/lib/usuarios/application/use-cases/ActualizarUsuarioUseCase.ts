@@ -44,6 +44,15 @@ export class ActualizarUsuarioUseCase
         usuario.cambiarRol(input.rol);
       }
 
+      if (input.estado) {
+        const estado = input.estado.toUpperCase();
+        if (estado === "ACTIVO") {
+          usuario.activar();
+        } else if (estado === "DESHABILITADO" || estado === "INACTIVO") {
+          usuario.deshabilitar();
+        }
+      }
+
       await this.usuarioRepository.guardar(usuario);
 
       const output: UsuarioOutputDTO = {

@@ -149,4 +149,9 @@ export class Usuario {
     this.estadoInterno = EstadoUsuario.deshabilitado();
     this.actualizadoEnInterno = new Date();
   }
+
+  activar(): void {
+    this.estadoInterno = EstadoUsuario.activo();
+    this.actualizadoEnInterno = new Date();
+  }
 }

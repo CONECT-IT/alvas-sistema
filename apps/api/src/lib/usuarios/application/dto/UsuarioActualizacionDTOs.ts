@@ -13,4 +13,5 @@ export interface ActualizarUsuarioInputDTO {
   username?: string;
   nombre?: string;
   rol?: string;
+  estado?: string;
 }

@@ -36,12 +36,30 @@ export async function proxyPublicApiPost(
 	path: string,
 	body: ProxyBody
 ): Promise<Response> {
-	const response = await fetch(`${getApiBaseUrl()}${path}`, {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify(body)
-	});
-	const payload = await response.json();
+	let response: Response;
+	try {
+		response = await fetch(`${getApiBaseUrl()}${path}`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(body)
+		});
+	} catch {
+		return json(
+			{ success: false, message: 'No se pudo conectar con el API.', code: 'API_UNREACHABLE' },
+			{ status: 502 }
+		);
+	}
+
+	let payload: unknown;
+	try {
+		payload = await response.json();
+	} catch {
+		payload = {
+			success: false,
+			message: 'Respuesta inválida del API.',
+			code: 'API_INVALID_RESPONSE'
+		};
+	}
 
 	return json(payload, { status: response.status });
 }
@@ -59,15 +77,33 @@ async function proxyApiRequest(
 		return json({ success: false, message: 'Sesión no iniciada.' }, { status: 401 });
 	}
 
-	const response = await fetch(`${getApiBaseUrl()}${path}`, {
-		method,
-		headers: {
-			Authorization: `Bearer ${session.authToken}`,
-			...(body ? { 'Content-Type': 'application/json' } : {})
-		},
-		body: body ? JSON.stringify(body) : undefined
-	});
-	const payload = await response.json();
+	let response: Response;
+	try {
+		response = await fetch(`${getApiBaseUrl()}${path}`, {
+			method,
+			headers: {
+				Authorization: `Bearer ${session.authToken}`,
+				...(body ? { 'Content-Type': 'application/json' } : {})
+			},
+			body: body ? JSON.stringify(body) : undefined
+		});
+	} catch {
+		return json(
+			{ success: false, message: 'No se pudo conectar con el API.', code: 'API_UNREACHABLE' },
+			{ status: 502 }
+		);
+	}
+
+	let payload: unknown;
+	try {
+		payload = await response.json();
+	} catch {
+		payload = {
+			success: false,
+			message: 'Respuesta inválida del API.',
+			code: 'API_INVALID_RESPONSE'
+		};
+	}
 
 	return json(payload, { status: response.status });
 }

@@ -29,6 +29,7 @@ import {
   D1VentasRepository,
   type VentasControllerDeps,
 } from "../lib/ventas/infrastructure";
+import { D1UsuarioRepository } from "../lib/usuarios/infrastructure";
 import { type D1DatabaseLike } from "../lib/shared/infrastructure";
 import { UuidGeneradorId } from "../lib/shared/infrastructure/security/UuidGeneradorId";
 import { EvaluadorAsignacionService } from "../lib/ventas/domain/services/EvaluadorAsignacion";
@@ -116,5 +117,8 @@ export function crearVentasControllerDeps(): VentasControllerDeps {
       new ListarPropiedadesPorClienteUseCase(new D1ContratoRepository(c.env.DB)),
     crearListarActividadLead: (c) =>
       new ListarActividadLeadUseCase(new D1VentasRepository(c.env.DB)),
+    crearVentasRepo: (c) => new D1VentasRepository(c.env.DB),
+    crearPropiedadRepo: (c) => new D1PropiedadRepository(c.env.DB),
+    crearUsuarioRepo: (c) => new D1UsuarioRepository(c.env.DB),
   };
 }

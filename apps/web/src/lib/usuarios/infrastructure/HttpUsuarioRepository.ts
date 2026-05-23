@@ -42,7 +42,8 @@ export class HttpUsuarioRepository implements UsuarioRepository {
 		const body: ActualizarUsuarioRequestDTO = {
 			username: input.username,
 			nombre: input.nombre,
-			rol: input.rol
+			rol: input.rol,
+			estado: input.estado
 		};
 		const response = await httpClient.put<ApiSuccessResponse<UsuarioRespuestaDTO>>(
 			`${this.apiBaseUrl}/usuarios/${encodeURIComponent(input.idUsuario)}`,

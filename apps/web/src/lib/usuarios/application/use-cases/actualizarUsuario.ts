@@ -6,6 +6,7 @@ export type ActualizarUsuarioInput = Readonly<{
 	username?: string;
 	nombre?: string;
 	rol?: UserRol;
+	estado?: string;
 }>;
 
 export function actualizarUsuario(repository: UsuarioRepository, input: ActualizarUsuarioInput) {

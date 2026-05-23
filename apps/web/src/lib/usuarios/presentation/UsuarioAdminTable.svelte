@@ -6,9 +6,10 @@
 	interface Props {
 		usuarios: Usuario[];
 		onEditClick?: (usuario: Usuario) => void;
+		onRowClick?: (usuario: Usuario) => void;
 	}
 
-	let { usuarios, onEditClick }: Props = $props();
+	let { usuarios, onEditClick, onRowClick }: Props = $props();
 </script>
 
 <div class="overflow-x-auto">
@@ -24,7 +25,16 @@
 		</thead>
 		<tbody class="divide-y divide-border-light text-sm">
 			{#each usuarios as usuario (usuario.id)}
-				<tr>
+				<tr
+					class={onRowClick ? 'cursor-pointer transition hover:bg-surface-muted/40' : undefined}
+					onclick={() => onRowClick?.(usuario)}
+					onkeydown={(e) => {
+						if (!onRowClick) return;
+						if (e.key === 'Enter' || e.key === ' ') onRowClick(usuario);
+					}}
+					role={onRowClick ? 'button' : undefined}
+					tabindex={onRowClick ? 0 : undefined}
+				>
 					<td class="py-4 pr-6 font-semibold text-text-main">{usuario.username}</td>
 					<td class="py-4 pr-6 text-text-muted">{usuario.nombre}</td>
 					<td class="py-4 pr-6">
@@ -36,7 +46,15 @@
 						</Badge>
 					</td>
 					<td class="py-4">
-						<Button variant="ghost" onclick={() => onEditClick?.(usuario)}>Editar</Button>
+						<Button
+							variant="ghost"
+							onclick={(e) => {
+								e.stopPropagation();
+								onEditClick?.(usuario);
+							}}
+						>
+							Editar
+						</Button>
 					</td>
 				</tr>
 			{/each}

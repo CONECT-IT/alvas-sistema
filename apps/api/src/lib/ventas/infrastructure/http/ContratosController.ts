@@ -5,8 +5,6 @@ import {
   responderErrorInterno,
   type VentasControllerDeps,
 } from "./VentasHttp";
-import { D1VentasRepository } from "../persistence/D1VentasRepository";
-import { D1PropiedadRepository } from "../../../propiedades/infrastructure/persistence/D1PropiedadRepository";
 import { idLead, idPropiedad } from "../../domain/value-objects/Ids";
 
 export class ContratosController {
@@ -43,8 +41,8 @@ export class ContratosController {
         return responderErrorDeDominio(c, resultado.error);
       }
 
-      const ventasRepo = new D1VentasRepository(c.env.DB);
-      const propRepo = new D1PropiedadRepository(c.env.DB);
+      const ventasRepo = this.deps.crearVentasRepo(c);
+      const propRepo = this.deps.crearPropiedadRepo(c);
 
       const data = await Promise.all(
         (resultado.valor.contratos ?? []).map(async (ctr) => {
@@ -85,8 +83,8 @@ export class ContratosController {
         return responderErrorDeDominio(c, resultado.error);
       }
 
-      const ventasRepo = new D1VentasRepository(c.env.DB);
-      const propRepo = new D1PropiedadRepository(c.env.DB);
+      const ventasRepo = this.deps.crearVentasRepo(c);
+      const propRepo = this.deps.crearPropiedadRepo(c);
 
       const data = await Promise.all(
         (resultado.valor.contratos ?? []).map(async (ctr) => {
