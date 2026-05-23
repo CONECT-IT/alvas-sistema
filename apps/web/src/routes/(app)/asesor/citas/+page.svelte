@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
 	import SidePanel from '$lib/shared/ui/SidePanel.svelte';
@@ -103,6 +104,16 @@
 		}).format(new Date(fechaIso));
 	}
 
+	function estadoBadge(estado: string): string {
+		const map: Record<string, string> = {
+			PENDIENTE: 'bg-amber-500/10 text-amber-500',
+			REALIZADA: 'bg-emerald-500/10 text-emerald-500',
+			CANCELADA: 'bg-red-500/10 text-red-500',
+			REPROGRAMADA: 'bg-blue-500/10 text-blue-500'
+		};
+		return map[estado] ?? 'bg-surface-muted text-text-muted';
+	}
+
 	async function crearCita(event: SubmitEvent) {
 		event.preventDefault();
 		createError = null;
@@ -179,6 +190,10 @@
 		}
 	}
 
+	function verDetalle(lead: LeadPipeline) {
+		goto(`/asesor/leads/${lead.id}`);
+	}
+
 	$effect(() => {
 		cargarCitas();
 	});
@@ -210,7 +225,7 @@
 				Lead
 				<select
 					bind:value={idLead}
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 				>
 					<option value="">Selecciona un lead</option>
 					{#each leads as lead (lead.id)}
@@ -223,7 +238,7 @@
 				Propiedad (opcional)
 				<input
 					bind:value={idPropiedad}
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 					placeholder="ID de propiedad"
 				/>
 			</label>
@@ -233,7 +248,7 @@
 				<input
 					bind:value={fechaInicio}
 					type="datetime-local"
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 				/>
 			</label>
 
@@ -244,7 +259,7 @@
 					type="number"
 					min="15"
 					step="15"
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 				/>
 			</label>
 
@@ -253,7 +268,7 @@
 				<textarea
 					bind:value={observacion}
 					rows="3"
-					class="resize-none rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="resize-none rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 				></textarea>
 			</label>
 
@@ -280,7 +295,7 @@
 				<input
 					bind:value={editFechaInicio}
 					type="datetime-local"
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 				/>
 			</label>
 
@@ -291,7 +306,7 @@
 					type="number"
 					min="15"
 					step="15"
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 					placeholder="Sin cambio"
 				/>
 			</label>
@@ -300,7 +315,7 @@
 				Estado
 				<select
 					bind:value={editEstado}
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 				>
 					<option value="">Sin cambio</option>
 					<option value="PENDIENTE">Pendiente</option>
@@ -315,7 +330,7 @@
 				<textarea
 					bind:value={editObservacion}
 					rows="3"
-					class="resize-none rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="resize-none rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 					placeholder="Motivo de reprogramación, cierre de visita o cancelación."
 				></textarea>
 			</label>
@@ -364,11 +379,11 @@
 			<div class="grid gap-3">
 				{#each citasAgenda as cita (cita.key)}
 					<div
-						class="grid items-center gap-3 rounded-2xl border border-border-light bg-white px-4 py-3 md:grid-cols-[1.2fr_0.9fr_auto_auto]"
+						class="grid items-center gap-3 rounded-2xl border border-border-light bg-bg-card px-4 py-3 md:grid-cols-[1.2fr_0.9fr_auto_auto]"
 					>
 						<div>
 							<p class="font-semibold text-text-main">{cita.leadNombre}</p>
-							<p class="mt-1 text-xs font-medium text-text-muted">{cita.leadTipo}</p>
+							<p class="mt-1 text-xs font-medium text-text-muted">Interés: {cita.leadTipo}</p>
 						</div>
 						<div>
 							<p class="text-sm font-semibold text-text-main">{formatearFecha(cita.fechaInicio)}</p>
@@ -376,11 +391,15 @@
 								{cita.observacion ?? 'Sin observación registrada'}
 							</p>
 						</div>
-						<p
-							class="rounded-full bg-primary-light px-3 py-1 text-center text-xs font-bold text-primary-dark"
-						>
-							{cita.estado}
-						</p>
+						<div class="flex items-center">
+							<p
+								class="w-full rounded-full px-3 py-1 text-center text-xs font-bold {estadoBadge(
+									cita.estado
+								)}"
+							>
+								{cita.estado}
+							</p>
+						</div>
 						<Button variant="ghost" onclick={() => abrirEditarCita(cita)}>Editar</Button>
 					</div>
 				{/each}
@@ -388,7 +407,7 @@
 		</Card>
 
 		<Card>
-			<LeadPipelineTable leads={leadsConCitas} />
+			<LeadPipelineTable leads={leadsConCitas} onLeadClick={verDetalle} />
 		</Card>
 	{/if}
 </div>

@@ -13,8 +13,8 @@
 
 	const tones: Record<BadgeTone, string> = {
 		brand: 'bg-primary-light text-primary-dark',
-		success: 'bg-emerald-50 text-emerald-700',
-		warning: 'bg-amber-50 text-amber-700',
+		success: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+		warning: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
 		neutral: 'bg-surface-muted text-text-muted'
 	};
 </script>

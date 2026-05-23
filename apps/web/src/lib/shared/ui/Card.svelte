@@ -9,6 +9,6 @@
 	let { class: className = '', children }: Props = $props();
 </script>
 
-<section class={`rounded-3xl border border-border-light bg-white p-6 shadow-xs ${className}`}>
+<section class={`rounded-3xl border border-border-light bg-bg-card p-6 shadow-xs ${className}`}>
 	{@render children()}
 </section>

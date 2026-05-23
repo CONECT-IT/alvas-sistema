@@ -12,14 +12,14 @@
 	/>
 </svelte:head>
 
-<div class="relative flex flex-1 items-center justify-center p-6">
+<div class="relative flex flex-1 items-center justify-center bg-bg-base p-6">
 	<!-- Decoración en gradiente de fondo -->
 	<div
 		class="pointer-events-none absolute -top-40 left-1/2 -z-10 h-[400px] w-[400px] -translate-x-1/2 bg-radial from-primary/10 via-transparent to-transparent blur-3xl"
 	></div>
 
 	<div
-		class="relative w-full max-w-md overflow-hidden rounded-3xl border border-border-light bg-white p-8 shadow-xl"
+		class="relative w-full max-w-md overflow-hidden rounded-3xl border border-border-light bg-bg-card p-8 shadow-xl"
 	>
 		<!-- Decoración superior (Línea naranja sutil) -->
 		<div class="absolute top-0 right-0 left-0 h-1.5 bg-gradient-to-r from-primary to-accent"></div>
@@ -60,7 +60,7 @@
 					name="username"
 					required
 					placeholder="Ej. admin, asesor1"
-					class="w-full rounded-2xl border border-border-light px-4 py-3 transition focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
+					class="w-full rounded-2xl border border-border-light bg-bg-card px-4 py-3 text-text-main transition focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 				/>
 			</div>
 
@@ -73,7 +73,7 @@
 					name="clave"
 					required
 					placeholder="••••••••"
-					class="w-full rounded-2xl border border-border-light px-4 py-3 transition focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
+					class="w-full rounded-2xl border border-border-light bg-bg-card px-4 py-3 text-text-main transition focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 				/>
 			</div>
 

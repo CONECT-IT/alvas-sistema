@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
 	import { httpClient, HttpError } from '$lib/shared/http/httpClient';
@@ -43,12 +44,16 @@
 
 	function estadoBadge(estado: string): string {
 		const map: Record<string, string> = {
-			PENDIENTE: 'bg-amber-50 text-amber-700',
-			REALIZADA: 'bg-emerald-50 text-emerald-700',
-			CANCELADA: 'bg-red-50 text-red-700',
-			REPROGRAMADA: 'bg-blue-50 text-blue-700'
+			PENDIENTE: 'bg-amber-500/10 text-amber-500',
+			REALIZADA: 'bg-emerald-500/10 text-emerald-500',
+			CANCELADA: 'bg-red-500/10 text-red-500',
+			REPROGRAMADA: 'bg-blue-500/10 text-blue-500'
 		};
-		return map[estado] ?? 'bg-gray-50 text-gray-700';
+		return map[estado] ?? 'bg-surface-muted text-text-muted';
+	}
+
+	function verLead(idLead: string) {
+		goto(`/admin/leads/${encodeURIComponent(idLead)}`);
 	}
 
 	$effect(() => {
@@ -101,12 +106,13 @@
 
 			<div class="grid gap-3">
 				{#each citas as cita (cita.idLead + cita.fechaInicio)}
-					<div
-						class="grid gap-3 rounded-2xl border border-border-light bg-white px-4 py-3 md:grid-cols-[1fr_0.8fr_0.8fr_auto]"
+					<button
+						onclick={() => verLead(cita.idLead)}
+						class="grid w-full gap-3 rounded-2xl border border-border-light bg-bg-card px-4 py-3 text-left transition hover:border-primary/30 hover:shadow-md md:grid-cols-[1fr_0.8fr_0.8fr_auto]"
 					>
 						<div>
 							<p class="font-semibold text-text-main">{cita.leadNombre}</p>
-							<p class="mt-1 text-xs font-medium text-text-muted">Lead: {cita.idLead}</p>
+							<p class="mt-1 text-xs font-medium text-text-muted">Prospecto en agenda</p>
 						</div>
 						<div>
 							<p class="text-sm font-semibold text-text-main">Asesor</p>
@@ -118,14 +124,16 @@
 								{cita.observacion ?? 'Sin observación'}
 							</p>
 						</div>
-						<p
-							class="rounded-full px-3 py-1 text-center text-xs font-bold {estadoBadge(
-								cita.estado
-							)}"
-						>
-							{cita.estado}
-						</p>
-					</div>
+						<div class="flex items-center">
+							<p
+								class="w-full rounded-full px-3 py-1 text-center text-xs font-bold {estadoBadge(
+									cita.estado
+								)}"
+							>
+								{cita.estado}
+							</p>
+						</div>
+					</button>
 				{/each}
 			</div>
 		</Card>

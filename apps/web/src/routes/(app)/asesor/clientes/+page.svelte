@@ -99,7 +99,7 @@
 				Nombre
 				<input
 					bind:value={nombre}
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 					placeholder="Nombre del cliente"
 				/>
 			</label>
@@ -108,7 +108,7 @@
 				Teléfono
 				<input
 					bind:value={telefono}
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 					placeholder="Número de contacto"
 				/>
 			</label>
@@ -118,7 +118,7 @@
 				<input
 					bind:value={email}
 					type="email"
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 					placeholder="correo@ejemplo.com"
 				/>
 			</label>

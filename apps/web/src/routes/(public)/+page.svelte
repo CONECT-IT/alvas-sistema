@@ -152,7 +152,7 @@
 	</nav>
 </header>
 
-<main class="flex-1">
+<main class="flex-1 bg-bg-base">
 	<section class="mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-7xl items-center px-6 py-10">
 		<div class="max-w-3xl">
 			<p class="mb-4 text-sm font-semibold tracking-[0.18em] text-primary uppercase">
@@ -172,7 +172,7 @@
 		</div>
 	</section>
 
-	<section id="propiedades" class="border-y border-border-light bg-white py-16">
+	<section id="propiedades" class="border-y border-border-light bg-bg-card py-16">
 		<div class="mx-auto max-w-7xl px-6">
 			<div class="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
 				<div>
@@ -191,21 +191,23 @@
 						<div class="mb-5 h-36 rounded-xl bg-[linear-gradient(135deg,#ffedd5,#fef3c7)]"></div>
 						<div class="flex items-start justify-between gap-3">
 							<div>
-								<h3 class="font-display text-xl font-semibold">{propiedad.titulo}</h3>
+								<h3 class="font-display text-xl font-semibold text-text-main">
+									{propiedad.titulo}
+								</h3>
 								<p class="mt-1 text-sm text-text-muted">{propiedad.zona}</p>
 							</div>
-							<span class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-primary">
+							<span class="rounded-full bg-bg-card px-3 py-1 text-xs font-semibold text-primary">
 								{propiedad.estado}
 							</span>
 						</div>
 						<dl class="mt-5 grid grid-cols-2 gap-3 text-sm">
 							<div>
 								<dt class="text-text-muted">Tipo</dt>
-								<dd class="font-semibold">{propiedad.tipo}</dd>
+								<dd class="font-semibold text-text-main">{propiedad.tipo}</dd>
 							</div>
 							<div>
 								<dt class="text-text-muted">Precio</dt>
-								<dd class="font-semibold">{propiedad.precio}</dd>
+								<dd class="font-semibold text-text-main">{propiedad.precio}</dd>
 							</div>
 						</dl>
 						<p class="mt-4 text-sm leading-relaxed text-text-muted">{propiedad.detalle}</p>
@@ -232,10 +234,10 @@
 			</div>
 			<div class="grid gap-4">
 				{#each asesores as asesor (asesor.nombre)}
-					<article class="rounded-2xl border border-border-light bg-white p-5">
+					<article class="rounded-2xl border border-border-light bg-bg-card p-5">
 						<div class="flex items-center justify-between gap-4">
 							<div>
-								<h3 class="font-display text-lg font-semibold">{asesor.nombre}</h3>
+								<h3 class="font-display text-lg font-semibold text-text-main">{asesor.nombre}</h3>
 								<p class="text-sm text-text-muted">Zona: {asesor.zona}</p>
 							</div>
 							<span
@@ -250,7 +252,7 @@
 		</div>
 	</section>
 
-	<section id="contacto" class="border-t border-border-light bg-white py-16">
+	<section id="contacto" class="border-t border-border-light bg-bg-card py-16">
 		<div class="mx-auto grid max-w-7xl gap-8 px-6 md:grid-cols-[1fr_0.9fr] md:items-center">
 			<div>
 				<p class="text-sm font-semibold tracking-[0.18em] text-primary uppercase">
@@ -264,14 +266,14 @@
 					preliminar, no se publica ni se ofrece a compradores hasta que el equipo la valide.
 				</p>
 			</div>
-			<div class="rounded-2xl border border-border-light bg-bg-base p-6">
+			<div class="rounded-2xl border border-border-light bg-bg-base p-6 shadow-sm">
 				<form class="grid gap-4" onsubmit={enviarCaptacionVendedor}>
 					<div class="grid gap-3 sm:grid-cols-2">
 						<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
 							Nombre
 							<input
 								bind:value={nombreVendedor}
-								class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal transition outline-none focus:border-primary"
+								class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
 								placeholder="Tu nombre"
 							/>
 						</label>
@@ -279,7 +281,7 @@
 							Teléfono
 							<input
 								bind:value={telefonoVendedor}
-								class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal transition outline-none focus:border-primary"
+								class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
 								placeholder="Número de contacto"
 							/>
 						</label>
@@ -290,7 +292,7 @@
 						<input
 							bind:value={emailVendedor}
 							type="email"
-							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal transition outline-none focus:border-primary"
+							class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
 							placeholder="correo@ejemplo.com"
 						/>
 					</label>
@@ -299,7 +301,7 @@
 						Propiedad
 						<input
 							bind:value={tituloPropiedad}
-							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal transition outline-none focus:border-primary"
+							class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
 							placeholder="Terreno, casa, local o predio"
 						/>
 					</label>
@@ -309,7 +311,7 @@
 						<textarea
 							bind:value={descripcionPropiedad}
 							rows="4"
-							class="resize-none rounded-2xl border border-border-light bg-white px-4 py-3 font-normal transition outline-none focus:border-primary"
+							class="resize-none rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
 							placeholder="Zona, metraje aproximado, referencias y condiciones conocidas."
 						></textarea>
 					</label>
@@ -321,7 +323,7 @@
 							type="number"
 							min="0"
 							step="0.01"
-							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal transition outline-none focus:border-primary"
+							class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
 							placeholder="Monto referencial"
 						/>
 					</label>

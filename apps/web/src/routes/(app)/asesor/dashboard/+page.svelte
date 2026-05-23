@@ -79,7 +79,7 @@
 	</div>
 
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-		<div class="rounded-3xl border border-border-light bg-white p-6 shadow-xs lg:col-span-2">
+		<div class="rounded-3xl border border-border-light bg-bg-card p-6 shadow-xs lg:col-span-2">
 			<div class="mb-6 flex items-center justify-between">
 				<h3 class="font-display text-lg font-bold text-text-main">Agenda de Citas (Hoy)</h3>
 				<a href="/asesor/citas" class="text-sm font-semibold text-primary hover:underline"
@@ -123,7 +123,9 @@
 			{/if}
 		</div>
 
-		<div class="flex flex-col gap-6 rounded-3xl border border-border-light bg-white p-6 shadow-xs">
+		<div
+			class="flex flex-col gap-6 rounded-3xl border border-border-light bg-bg-card p-6 shadow-xs"
+		>
 			<h3 class="font-display text-lg font-bold text-text-main">Acciones Rápidas</h3>
 
 			<div class="flex flex-col gap-3">
@@ -135,7 +137,7 @@
 				</a>
 				<a
 					href="/asesor/citas"
-					class="w-full rounded-2xl border border-border-light bg-white py-3 text-center font-display text-sm font-semibold text-text-main transition hover:bg-bg-base"
+					class="w-full rounded-2xl border border-border-light bg-bg-card py-3 text-center font-display text-sm font-semibold text-text-main transition hover:bg-bg-base"
 				>
 					Crear Cita de Visita
 				</a>

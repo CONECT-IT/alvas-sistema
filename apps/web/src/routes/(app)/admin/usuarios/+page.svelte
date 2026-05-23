@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
 	import SidePanel from '$lib/shared/ui/SidePanel.svelte';
@@ -65,6 +66,10 @@
 		editRol = usuario.rol;
 		formError = null;
 		mostrarPanelEditar = true;
+	}
+
+	function verDetalle(usuario: Usuario) {
+		goto(`/admin/usuarios/${usuario.id}`);
 	}
 
 	async function registrarUsuario(event: SubmitEvent) {
@@ -162,7 +167,7 @@
 				Usuario de acceso
 				<input
 					bind:value={username}
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 					placeholder="asesor.surco"
 				/>
 			</label>
@@ -171,7 +176,7 @@
 				Nombre
 				<input
 					bind:value={nombre}
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 					placeholder="Nombre completo"
 				/>
 			</label>
@@ -180,7 +185,7 @@
 				Rol
 				<select
 					bind:value={rol}
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 				>
 					<option value="ASESOR">Asesor</option>
 					<option value="ADMIN">Administrador</option>
@@ -192,7 +197,7 @@
 				<input
 					bind:value={clave}
 					type="password"
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 					placeholder="Se entrega al asesor para su primer ingreso"
 				/>
 			</label>
@@ -219,7 +224,7 @@
 				Usuario de acceso
 				<input
 					bind:value={editUsername}
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 					placeholder="Usuario de acceso"
 				/>
 			</label>
@@ -228,7 +233,7 @@
 				Nombre visible
 				<input
 					bind:value={editNombre}
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 					placeholder="Nombre completo"
 				/>
 			</label>
@@ -237,7 +242,7 @@
 				Rol
 				<select
 					bind:value={editRol}
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 				>
 					<option value="">Sin cambio</option>
 					<option value="ASESOR">Asesor</option>
@@ -270,7 +275,7 @@
 	{:else}
 		<UsuarioStats {usuarios} />
 		<Card>
-			<UsuarioAdminTable {usuarios} onEditClick={abrirEditar} />
+			<UsuarioAdminTable {usuarios} onEditClick={abrirEditar} onRowClick={verDetalle} />
 		</Card>
 	{/if}
 </div>

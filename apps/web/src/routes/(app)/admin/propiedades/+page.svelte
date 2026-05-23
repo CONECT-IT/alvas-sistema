@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
 	import SidePanel from '$lib/shared/ui/SidePanel.svelte';
@@ -115,6 +116,10 @@
 		}
 	}
 
+	function verDetalle(propiedad: Propiedad) {
+		goto(`/admin/propiedades/${propiedad.id}`);
+	}
+
 	$effect(() => {
 		cargarPropiedades();
 	});
@@ -147,7 +152,7 @@
 				Título
 				<input
 					bind:value={titulo}
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 					placeholder="Terreno en zona residencial"
 				/>
 			</label>
@@ -159,7 +164,7 @@
 					type="number"
 					min="0"
 					step="0.01"
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 					placeholder="150000"
 				/>
 			</label>
@@ -169,7 +174,7 @@
 				<textarea
 					bind:value={descripcion}
 					rows="4"
-					class="resize-none rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="resize-none rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 					placeholder="Ubicación, metraje, accesos y observaciones comerciales."
 				></textarea>
 			</label>
@@ -178,7 +183,7 @@
 				Estado inicial
 				<select
 					bind:value={estado}
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 				>
 					{#each estados as item (item)}
 						<option value={item}>{item}</option>
@@ -190,7 +195,7 @@
 				Asesor responsable
 				<input
 					bind:value={asesorResponsableId}
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 					placeholder="ID del asesor, opcional"
 				/>
 			</label>
@@ -278,7 +283,7 @@
 											{propiedad.estado}
 										</span>
 										<span
-											class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-text-muted"
+											class="rounded-full bg-bg-card px-3 py-1 text-xs font-semibold text-text-muted"
 										>
 											{propiedad.origen}
 										</span>
@@ -330,7 +335,7 @@
 						Propiedades listas para comercialización, visibles para el equipo de ventas.
 					</p>
 				</div>
-				<PropiedadAdminTable propiedades={disponibles} />
+				<PropiedadAdminTable propiedades={disponibles} onPropiedadClick={verDetalle} />
 			</Card>
 		{/if}
 
@@ -345,7 +350,7 @@
 					</div>
 					<p class="text-sm font-semibold text-primary">{otras.length} registros</p>
 				</div>
-				<PropiedadAdminTable propiedades={otras} />
+				<PropiedadAdminTable propiedades={otras} onPropiedadClick={verDetalle} />
 			</Card>
 		{/if}
 	{/if}

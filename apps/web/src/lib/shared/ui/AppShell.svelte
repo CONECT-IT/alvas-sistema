@@ -212,108 +212,182 @@
 {/snippet}
 
 {#if shellUser}
-	<div class="flex min-h-screen bg-bg-base font-sans text-text-main">
-		<!-- Sidebar - Transparent type, Arc inspired -->
-		<aside
-			class="fixed top-0 left-0 z-50 hidden h-screen w-28 flex-col items-center gap-2 py-6 md:flex"
-		>
-			<!-- Logo -->
-			<a
-				href={shellUser.esAdmin ? '/admin/dashboard' : '/asesor/dashboard'}
-				class="mb-6 flex h-10 w-10 items-center justify-center"
+	<div
+		class="flex min-h-screen bg-bg-base font-sans text-text-main {$authStore.layout === 'navbar'
+			? 'flex-col'
+			: ''}"
+	>
+		<!-- Sidebar - Desktop (Only if layout is 'sidebar') -->
+		{#if $authStore.layout === 'sidebar'}
+			<aside
+				class="fixed top-0 left-0 z-50 hidden h-screen w-28 flex-col items-center gap-2 border-r border-border-light/50 bg-bg-base/80 py-6 backdrop-blur-xl md:flex"
 			>
-				<span
-					class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-sm font-bold text-white shadow-lg shadow-amber-500/20"
-					>A</span
-				>
-			</a>
-
-			<!-- Navigation items with blur balls -->
-			<nav class="flex flex-1 flex-col items-center gap-1">
-				{#each sidebarItems as item (item.href)}
-					<a
-						href={item.href}
-						class="group relative flex h-16 w-24 flex-col items-center justify-center gap-0.5 rounded-xl transition-all duration-300"
-						title={item.label}
-					>
-						<!-- Blur ball background on hover/active -->
-						<div
-							class="absolute inset-0 rounded-xl bg-gradient-to-br opacity-0 blur-lg transition-all duration-300 group-hover:opacity-40 {isActive(
-								item.href
-							)
-								? 'opacity-50'
-								: ''} {item.color}"
-						></div>
-						<!-- Subtle background -->
-						<div
-							class="absolute inset-0 rounded-xl bg-black/5 opacity-0 transition-all duration-300 group-hover:opacity-100 {isActive(
-								item.href
-							)
-								? 'bg-black/5 opacity-100'
-								: ''}"
-						></div>
-						<!-- Icon + Label -->
-						<span
-							class="relative z-10 flex flex-col items-center gap-0.5 transition-all duration-300 {isActive(
-								item.href
-							)
-								? 'text-amber-600'
-								: 'text-text-muted group-hover:text-text-main'}"
-						>
-							{@render NavIcon(item.icon)}
-							<span class="text-[10px] leading-tight font-semibold tracking-tight">
-								{item.label}
-							</span>
-						</span>
-					</a>
-				{/each}
-			</nav>
-
-			<!-- User section at bottom -->
-			<div class="flex flex-col items-center gap-3">
+				<!-- Logo -->
 				<a
-					href={shellUser.esAdmin ? '/admin/perfil' : '/asesor/perfil'}
-					class="group relative flex h-12 w-12 items-center justify-center rounded-xl transition-all duration-300"
-					title={shellUser.nombre}
+					href={shellUser.esAdmin ? '/admin/dashboard' : '/asesor/dashboard'}
+					class="mb-6 flex h-10 w-10 items-center justify-center"
 				>
-					<div
-						class="absolute inset-0 rounded-xl bg-gradient-to-br from-amber-400/20 to-orange-500/20 opacity-0 blur-lg transition-all duration-300 group-hover:opacity-60"
-					></div>
-					<div
-						class="relative z-10 flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-xs font-bold text-white shadow-md"
+					<span
+						class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-sm font-bold text-white shadow-lg shadow-amber-500/20"
+						>A</span
 					>
-						{shellUser.username.substring(0, 2).toUpperCase()}
-					</div>
 				</a>
 
-				<button
-					onclick={() => authStore.logout()}
-					class="group relative flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-300"
-					title="Cerrar sesión"
-				>
-					<div
-						class="absolute inset-0 rounded-xl bg-gradient-to-br from-red-400/20 to-rose-500/20 opacity-0 blur-lg transition-all duration-300 group-hover:opacity-60"
-					></div>
-					<svg
-						class="relative z-10 h-5 w-5 text-text-muted transition-all duration-300 group-hover:text-red-500"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
+				<!-- Navigation items with blur balls -->
+				<nav class="no-scrollbar flex flex-1 flex-col items-center gap-1 overflow-y-auto">
+					{#each sidebarItems as item (item.href)}
+						<a
+							href={item.href}
+							class="group relative flex h-16 w-24 flex-col items-center justify-center gap-0.5 rounded-xl transition-all duration-300"
+							title={item.label}
+						>
+							<!-- Blur ball background on hover/active -->
+							<div
+								class="absolute inset-0 rounded-full bg-gradient-to-br opacity-0 blur-xl transition-all duration-500 group-hover:opacity-60 {isActive(
+									item.href
+								)
+									? 'scale-110 opacity-80'
+									: 'group-hover:scale-105'} {item.color}"
+							></div>
+							<!-- Subtle background -->
+							<div
+								class="absolute inset-0 rounded-xl transition-all duration-300 group-hover:bg-bg-card/10 {isActive(
+									item.href
+								)
+									? 'bg-bg-card/20'
+									: ''}"
+							></div>
+
+							<!-- Icon + Label -->
+							<span
+								class="relative z-10 flex flex-col items-center gap-0.5 transition-all duration-300 {isActive(
+									item.href
+								)
+									? 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]'
+									: 'text-text-muted group-hover:text-text-main group-hover:drop-shadow-[0_0_5px_rgba(255,255,255,0.4)]'}"
+							>
+								{@render NavIcon(item.icon)}
+								<span class="text-[10px] leading-tight font-semibold tracking-tight">
+									{item.label}
+								</span>
+							</span>
+						</a>
+					{/each}
+				</nav>
+
+				<!-- User section at bottom -->
+				<div class="mt-auto flex flex-col items-center gap-3 pt-4">
+					<a
+						href={shellUser.esAdmin ? '/admin/perfil' : '/asesor/perfil'}
+						class="group relative flex h-12 w-12 items-center justify-center rounded-xl transition-all duration-300"
+						title={shellUser.nombre}
 					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-						/>
-					</svg>
-				</button>
-			</div>
-		</aside>
+						<div
+							class="absolute inset-0 rounded-xl bg-gradient-to-br from-amber-400/20 to-orange-500/20 opacity-0 blur-lg transition-all duration-300 group-hover:opacity-60"
+						></div>
+						<div
+							class="relative z-10 flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-xs font-bold text-white shadow-md"
+						>
+							{shellUser.username.substring(0, 2).toUpperCase()}
+						</div>
+					</a>
+
+					<button
+						onclick={() => authStore.logout()}
+						class="group relative flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-300"
+						title="Cerrar sesión"
+					>
+						<div
+							class="absolute inset-0 rounded-xl bg-gradient-to-br from-red-400/20 to-rose-500/20 opacity-0 blur-lg transition-all duration-300 group-hover:opacity-60"
+						></div>
+						<svg
+							class="relative z-10 h-5 w-5 text-text-muted transition-all duration-300 group-hover:text-red-500"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+							/>
+						</svg>
+					</button>
+				</div>
+			</aside>
+		{:else}
+			<!-- Navbar - Desktop (Only if layout is 'navbar') -->
+			<header
+				class="sticky top-0 z-50 hidden h-16 w-full items-center justify-between border-b border-border-light/50 bg-bg-base/80 px-8 backdrop-blur-xl md:flex"
+			>
+				<div class="flex items-center gap-8">
+					<a
+						href={shellUser.esAdmin ? '/admin/dashboard' : '/asesor/dashboard'}
+						class="flex items-center gap-2"
+					>
+						<span
+							class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-xs font-bold text-white shadow-md shadow-amber-500/10"
+							>A</span
+						>
+						<span class="font-display text-lg font-bold tracking-tight">ALVAS</span>
+					</a>
+
+					<nav class="flex items-center gap-1">
+						{#each sidebarItems as item (item.href)}
+							<a
+								href={item.href}
+								class="group relative flex h-10 items-center gap-2 rounded-lg px-3 transition-all duration-200 {isActive(
+									item.href
+								)
+									? 'bg-primary-light/10 text-primary'
+									: 'text-text-muted hover:bg-surface-muted hover:text-text-main'}"
+							>
+								{@render NavIcon(item.icon)}
+								<span class="text-sm font-semibold tracking-tight">{item.label}</span>
+								{#if isActive(item.href)}
+									<div
+										class="absolute right-2 -bottom-[17px] left-2 h-0.5 rounded-full bg-primary"
+									></div>
+								{/if}
+							</a>
+						{/each}
+					</nav>
+				</div>
+
+				<div class="flex items-center gap-4">
+					<a
+						href={shellUser.esAdmin ? '/admin/perfil' : '/asesor/perfil'}
+						class="flex items-center gap-2 rounded-full border border-border-light bg-bg-card py-1.5 pr-4 pl-1.5 transition hover:border-primary/30"
+					>
+						<div
+							class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-[10px] font-bold text-white"
+						>
+							{shellUser.username.substring(0, 2).toUpperCase()}
+						</div>
+						<span class="text-xs font-semibold text-text-main">{shellUser.nombre}</span>
+					</a>
+					<button
+						onclick={() => authStore.logout()}
+						class="rounded-lg p-2 text-text-muted transition hover:bg-red-50 hover:text-red-500"
+						title="Cerrar sesión"
+					>
+						<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+							/>
+						</svg>
+					</button>
+				</div>
+			</header>
+		{/if}
 
 		<!-- Mobile header -->
 		<header
-			class="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-border-light bg-white/80 px-4 backdrop-blur-md md:hidden"
+			class="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-border-light bg-bg-card/80 px-4 backdrop-blur-md md:hidden"
 		>
 			<button
 				onclick={() => (showMobileSidebar = !showMobileSidebar)}
@@ -353,7 +427,7 @@
 				onkeydown={() => (showMobileSidebar = false)}
 			></div>
 			<aside
-				class="fixed top-0 left-0 z-50 flex h-full w-64 flex-col gap-2 bg-white p-6 shadow-2xl md:hidden"
+				class="fixed top-0 left-0 z-50 flex h-full w-64 flex-col gap-2 bg-bg-card p-6 shadow-2xl md:hidden"
 			>
 				<div class="mb-6 flex items-center gap-3">
 					<span
@@ -370,8 +444,8 @@
 							class="flex items-center gap-3 rounded-xl px-4 py-3 font-medium transition-all duration-200 {isActive(
 								item.href
 							)
-								? 'bg-amber-50 text-amber-700'
-								: 'text-text-muted hover:bg-black/5 hover:text-text-main'}"
+								? 'bg-primary-light/20 text-primary'
+								: 'text-text-muted hover:bg-surface-muted hover:text-text-main'}"
 						>
 							{@render NavIcon(item.icon)}
 							{item.label}
@@ -394,7 +468,7 @@
 		{/if}
 
 		<!-- Main content -->
-		<main class="min-h-screen min-w-0 flex-1 md:ml-28">
+		<main class="min-h-screen min-w-0 flex-1 {$authStore.layout === 'sidebar' ? 'md:ml-28' : ''}">
 			<div class="mx-auto max-w-7xl p-4 md:p-8">
 				{@render children()}
 			</div>
@@ -403,10 +477,20 @@
 {:else}
 	<div class="flex min-h-screen items-center justify-center bg-bg-base p-6 font-sans">
 		<div
-			class="flex max-w-md flex-col items-center gap-4 rounded-3xl border border-border-light bg-white p-8 text-center shadow-lg"
+			class="flex max-w-md flex-col items-center gap-4 rounded-3xl border border-border-light bg-bg-card p-8 text-center shadow-lg"
 		>
 			<div class="h-10 w-10 animate-spin rounded-full border-t-2 border-b-2 border-amber-500"></div>
 			<p class="font-medium text-text-muted">Cargando sesión segura...</p>
 		</div>
 	</div>
 {/if}
+
+<style>
+	.no-scrollbar::-webkit-scrollbar {
+		display: none;
+	}
+	.no-scrollbar {
+		-ms-overflow-style: none;
+		scrollbar-width: none;
+	}
+</style>

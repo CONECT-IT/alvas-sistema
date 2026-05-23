@@ -2,6 +2,7 @@
 	import Badge from '$lib/shared/ui/Badge.svelte';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
+	import SidePanel from '$lib/shared/ui/SidePanel.svelte';
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import type { Cliente } from '../domain/models/Cliente';
 	import { obtenerCliente } from '../application/use-cases/obtenerCliente';
@@ -81,7 +82,8 @@
 		saveSuccess = null;
 	}
 
-	async function guardarCambios() {
+	async function guardarCambios(event?: SubmitEvent) {
+		event?.preventDefault();
 		if (!cliente) return;
 		saving = true;
 		saveError = null;
@@ -102,6 +104,10 @@
 		} finally {
 			saving = false;
 		}
+	}
+
+	function cancelarEdicion() {
+		editando = false;
 	}
 
 	function formatearFecha(iso: string): string {
@@ -149,61 +155,48 @@
 			</div>
 		</div>
 
+		<SidePanel isOpen={editando} title="Editar cliente" onClose={cancelarEdicion}>
+			<form class="grid gap-4" onsubmit={guardarCambios}>
+				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+					Nombre
+					<input
+						bind:value={editNombre}
+						class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+					/>
+				</label>
+				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+					Email
+					<input
+						bind:value={editEmail}
+						type="email"
+						class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+					/>
+				</label>
+				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+					Teléfono
+					<input
+						bind:value={editTelefono}
+						class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+					/>
+				</label>
+				{#if saveError}
+					<p class="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+						{saveError}
+					</p>
+				{/if}
+				<div class="flex items-center justify-end gap-3">
+					<Button type="button" variant="ghost" onclick={cancelarEdicion}>Cancelar</Button>
+					<Button type="submit" disabled={saving}>
+						{saving ? 'Guardando...' : 'Guardar cambios'}
+					</Button>
+				</div>
+			</form>
+		</SidePanel>
+
 		{#if saveSuccess}
 			<p class="rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
 				{saveSuccess}
 			</p>
-		{/if}
-		{#if saveError}
-			<p class="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{saveError}</p>
-		{/if}
-
-		{#if editando}
-			<Card>
-				<h2 class="mb-4 font-display text-xl font-bold text-text-main">Editar cliente</h2>
-				<form
-					onsubmit={(e) => {
-						e.preventDefault();
-						guardarCambios();
-					}}
-					class="grid gap-4 md:grid-cols-2"
-				>
-					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
-						Nombre
-						<input
-							bind:value={editNombre}
-							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
-						/>
-					</label>
-					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
-						Email
-						<input
-							bind:value={editEmail}
-							type="email"
-							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
-						/>
-					</label>
-					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
-						Teléfono
-						<input
-							bind:value={editTelefono}
-							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
-						/>
-					</label>
-					<div class="flex items-end gap-3 md:col-span-2 md:justify-end">
-						<Button
-							type="button"
-							variant="ghost"
-							onclick={() => {
-								editando = false;
-							}}>Cancelar</Button
-						>
-						<Button type="submit" disabled={saving}>
-							{saving ? 'Guardando...' : 'Guardar cambios'}
-						</Button>
-					</div>
-				</form>
-			</Card>
 		{/if}
 
 		{#if leadOrigen}

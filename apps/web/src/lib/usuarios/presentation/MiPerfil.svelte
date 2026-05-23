@@ -17,6 +17,7 @@
 	let saving = $state(false);
 	let saveError = $state<string | null>(null);
 	let saveSuccess = $state<string | null>(null);
+	let mostrarEdicion = $state(false);
 
 	const userId = $derived($authStore.user?.id ?? '');
 
@@ -92,6 +93,7 @@
 				rol: actualizado.rol,
 				estado: actualizado.estado
 			});
+			mostrarEdicion = false;
 			saveSuccess = 'Perfil actualizado correctamente.';
 		} catch (err) {
 			saveError = err instanceof HttpError ? err.message : 'No se pudo actualizar el perfil.';
@@ -133,13 +135,72 @@
 			</p>
 		{/if}
 
-		{#if saveError}
+		{#if saveError && !mostrarEdicion}
 			<p class="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{saveError}</p>
 		{/if}
 
 		<div class="grid gap-6 xl:grid-cols-2">
 			<Card>
-				<h2 class="mb-4 font-display text-xl font-bold text-text-main">Datos de la cuenta</h2>
+				<div class="mb-4 flex flex-wrap items-start justify-between gap-4">
+					<h2 class="font-display text-xl font-bold text-text-main">Datos de la cuenta</h2>
+					<div class="relative">
+						<Button
+							variant="secondary"
+							onclick={() => {
+								mostrarEdicion = !mostrarEdicion;
+								saveError = null;
+								saveSuccess = null;
+							}}
+						>
+							Editar
+						</Button>
+						{#if mostrarEdicion}
+							<div
+								class="fixed inset-0 z-40"
+								onclick={() => (mostrarEdicion = false)}
+								onkeydown={(e) => e.key === 'Escape' && (mostrarEdicion = false)}
+								role="button"
+								tabindex="0"
+								aria-label="Cerrar edición"
+							></div>
+							<div
+								class="absolute top-full right-0 z-50 mt-3 w-[22rem] rounded-2xl border border-border-light bg-bg-base p-5 shadow-xl"
+								role="dialog"
+								aria-label="Editar perfil"
+							>
+								<form class="grid gap-4" onsubmit={guardarCambios}>
+									<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+										Nombre visible
+										<input
+											bind:value={editNombre}
+											class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+										/>
+									</label>
+									<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+										Usuario de acceso
+										<input
+											bind:value={editUsername}
+											class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+										/>
+									</label>
+									{#if saveError}
+										<p class="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+											{saveError}
+										</p>
+									{/if}
+									<div class="flex justify-end gap-3">
+										<Button type="button" variant="ghost" onclick={() => (mostrarEdicion = false)}>
+											Cancelar
+										</Button>
+										<Button type="submit" disabled={saving}>
+											{saving ? 'Guardando...' : 'Guardar'}
+										</Button>
+									</div>
+								</form>
+							</div>
+						{/if}
+					</div>
+				</div>
 				<dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 text-sm">
 					<dt class="font-semibold text-text-muted">ID</dt>
 					<dd class="text-text-main">{usuario.id}</dd>
@@ -155,55 +216,61 @@
 			</Card>
 
 			<Card>
-				<h2 class="mb-4 font-display text-xl font-bold text-text-main">Editar perfil</h2>
-				<form class="grid gap-4" onsubmit={guardarCambios}>
-					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
-						Nombre visible
-						<input
-							bind:value={editNombre}
-							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
-						/>
-					</label>
-					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
-						Usuario de acceso
-						<input
-							bind:value={editUsername}
-							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
-						/>
-					</label>
-					<div class="flex justify-end">
-						<Button type="submit" disabled={saving}>
-							{saving ? 'Guardando...' : 'Guardar cambios'}
-						</Button>
+				<h2 class="mb-4 font-display text-xl font-bold text-text-main">Preferencias</h2>
+				<div class="flex flex-col gap-6">
+					<div class="flex items-center justify-between">
+						<div>
+							<p class="font-semibold text-text-main">Tema</p>
+							<p class="mt-1 text-sm text-text-muted">
+								Alterna entre modo claro y oscuro para la interfaz.
+							</p>
+						</div>
+						<button
+							onclick={toggleTema}
+							class="relative flex h-8 w-14 cursor-pointer items-center rounded-full bg-surface-muted p-1 transition-colors"
+							aria-label="Cambiar tema"
+						>
+							<span
+								class="flex h-6 w-6 items-center justify-center rounded-full bg-bg-card text-xs shadow-md transition-transform {tema ===
+								'dark'
+									? 'translate-x-6'
+									: ''}"
+							>
+								{tema === 'light' ? '☀️' : '🌙'}
+							</span>
+						</button>
 					</div>
-				</form>
+
+					<div class="flex items-center justify-between">
+						<div>
+							<p class="font-semibold text-text-main">Ubicación del menú</p>
+							<p class="mt-1 text-sm text-text-muted">
+								Mueve el menú de navegación a la izquierda o arriba (escritorio).
+							</p>
+						</div>
+						<div class="flex items-center rounded-xl bg-surface-muted p-1">
+							<button
+								onclick={() => authStore.setLayout('sidebar')}
+								class="rounded-lg px-3 py-1 text-xs font-bold transition {$authStore.layout ===
+								'sidebar'
+									? 'bg-bg-card text-primary shadow-xs'
+									: 'text-text-muted hover:text-text-main'}"
+							>
+								Lateral
+							</button>
+							<button
+								onclick={() => authStore.setLayout('navbar')}
+								class="rounded-lg px-3 py-1 text-xs font-bold transition {$authStore.layout ===
+								'navbar'
+									? 'bg-bg-card text-primary shadow-xs'
+									: 'text-text-muted hover:text-text-main'}"
+							>
+								Superior
+							</button>
+						</div>
+					</div>
+				</div>
 			</Card>
 		</div>
-
-		<Card>
-			<h2 class="mb-4 font-display text-xl font-bold text-text-main">Preferencias</h2>
-			<div class="flex items-center justify-between">
-				<div>
-					<p class="font-semibold text-text-main">Tema</p>
-					<p class="mt-1 text-sm text-text-muted">
-						Alterna entre modo claro y oscuro para la interfaz.
-					</p>
-				</div>
-				<button
-					onclick={toggleTema}
-					class="relative flex h-8 w-14 cursor-pointer items-center rounded-full bg-surface-muted p-1 transition-colors"
-					aria-label="Cambiar tema"
-				>
-					<span
-						class="flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs shadow-md transition-transform {tema ===
-						'dark'
-							? 'translate-x-6'
-							: ''}"
-					>
-						{tema === 'light' ? '☀️' : '🌙'}
-					</span>
-				</button>
-			</div>
-		</Card>
 	</div>
 {/if}

@@ -127,7 +127,7 @@
 						Título
 						<input
 							bind:value={titulo}
-							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+							class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 						/>
 					</label>
 
@@ -136,7 +136,7 @@
 						<input
 							type="number"
 							bind:value={precio}
-							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+							class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 						/>
 					</label>
 
@@ -144,7 +144,7 @@
 						Estado
 						<select
 							bind:value={estado}
-							class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+							class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 						>
 							<option value="PRELIMINAR">Preliminar (Borrador)</option>
 							<option value="EN_VALIDACION">En Validación</option>
@@ -159,7 +159,7 @@
 						Descripción
 						<textarea
 							bind:value={descripcion}
-							class="min-h-[120px] rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+							class="min-h-[120px] rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 						></textarea>
 					</label>
 
