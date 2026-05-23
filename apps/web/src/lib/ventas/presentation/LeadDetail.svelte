@@ -111,7 +111,7 @@
 					<dt class="font-semibold text-text-muted">Estado</dt>
 					<dd class="text-text-main">{lead.estado}</dd>
 					<dt class="font-semibold text-text-muted">Asesor asignado</dt>
-					<dd class="text-text-main">{lead.idAsesor}</dd>
+					<dd class="text-text-main">{lead.nombreAsesor || lead.idAsesor}</dd>
 					{#if lead.idPropiedadInteres}
 						<dt class="font-semibold text-text-muted">Propiedad de interés</dt>
 						<dd class="text-text-main">{lead.idPropiedadInteres}</dd>

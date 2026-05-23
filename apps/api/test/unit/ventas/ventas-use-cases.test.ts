@@ -423,7 +423,7 @@ describe("ventas / use cases", () => {
     expect(resultado.esExito).toBe(true);
     expect(lead?.citas).toHaveLength(1);
     if (resultado.esExito) {
-      expect(lead?.citas[0]!.estado).toBe("PENDIENTE");
+      expect(lead?.citas[0]!.estado.valor).toBe("PENDIENTE");
     }
     expect(repo.actividades).toContain("CITA_AGENDADA");
     expect(repo.descripcionesActividad[0]).toBeTruthy();
@@ -712,7 +712,7 @@ describe("ventas / use cases", () => {
     expect(resultado.esExito).toBe(true);
     expect(cita?.fechaInicio.toISOString()).toBe("2026-06-02T15:30:00.000Z");
     expect(cita?.fechaFin.toISOString()).toBe("2026-06-02T16:15:00.000Z");
-    expect(cita?.estado).toBe("REPROGRAMADA");
+    expect(cita?.estado.valor).toBe("REPROGRAMADA");
     expect(cita?.observacion).toBe("Reprogramada por cliente");
     expect(repo.actividades).toContain("CITA_ACTUALIZADA");
     expect(repo.descripcionesActividad).toContain("Cita cita-001 actualizada desde el agregado.");

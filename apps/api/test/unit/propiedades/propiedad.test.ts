@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 
 import { Propiedad } from "../../../src/lib/propiedades/domain/entities/Propiedad";
 import { PropiedadError } from "../../../src/lib/propiedades/domain/errors/PropiedadError";
+import { EstadoPropiedad } from "../../../src/lib/propiedades/domain/value-objects/EstadoPropiedad";
 import { idPropiedad, idUsuarioRef } from "../../../src/lib/propiedades/domain/value-objects";
 
 describe("propiedades / Propiedad", () => {
@@ -23,7 +24,7 @@ describe("propiedades / Propiedad", () => {
     expect(propiedad.descripcion).toBe("Casa de dos pisos");
     expect(propiedad.precio).toBe(250000);
     expect(propiedad.origen).toBe("ALVAS");
-    expect(propiedad.estado).toBe("DISPONIBLE");
+    expect(propiedad.estado.valor).toBe("DISPONIBLE");
     expect(propiedad.asesorResponsableId as string).toBe("asesor-001");
     expect(propiedad.creadoEn.getTime()).toBeGreaterThanOrEqual(antes);
     expect(propiedad.creadoEn.getTime()).toBeLessThanOrEqual(despues);
@@ -40,7 +41,7 @@ describe("propiedades / Propiedad", () => {
       descripcion: "Apartamento con balcon",
       precio: 180000,
       origen: "CAPTACION",
-      estado: "PRELIMINAR",
+      estado: EstadoPropiedad.desde("PRELIMINAR"),
       idLeadOrigen: "lead-001",
       captadaPorAsesorId: idUsuarioRef("asesor-002"),
       creadoEn,
@@ -52,7 +53,7 @@ describe("propiedades / Propiedad", () => {
     expect(propiedad.descripcion).toBe("Apartamento con balcon");
     expect(propiedad.precio).toBe(180000);
     expect(propiedad.origen).toBe("CAPTACION");
-    expect(propiedad.estado).toBe("PRELIMINAR");
+    expect(propiedad.estado.valor).toBe("PRELIMINAR");
     expect(propiedad.idLeadOrigen).toBe("lead-001");
     expect(propiedad.captadaPorAsesorId as string).toBe("asesor-002");
     expect(propiedad.creadoEn).toBe(creadoEn);
@@ -83,7 +84,7 @@ describe("propiedades / Propiedad", () => {
     expect(propiedad.titulo).toBe("Casa validada");
     expect(propiedad.descripcion).toBe("Lista para publicar");
     expect(propiedad.precio).toBe(300000);
-    expect(propiedad.estado).toBe("DISPONIBLE");
+    expect(propiedad.estado.valor).toBe("DISPONIBLE");
     expect(propiedad.idClientePropietario).toBe("cliente-001");
     expect(propiedad.asesorResponsableId as string).toBe("asesor-002");
   });
@@ -116,7 +117,7 @@ describe("propiedades / Propiedad", () => {
       precio: 100,
       origen: "ALVAS",
     });
-    expect(propiedad.estado).toBe("DISPONIBLE");
+    expect(propiedad.estado.valor).toBe("DISPONIBLE");
   });
 
   test("crear normaliza origen a mayusculas y trim", () => {
@@ -222,7 +223,7 @@ describe("propiedades / Propiedad", () => {
     });
     const antes = Date.now();
     propiedad.actualizar({ estado: " disponible " });
-    expect(propiedad.estado).toBe("DISPONIBLE");
+    expect(propiedad.estado.valor).toBe("DISPONIBLE");
     expect(propiedad.actualizadoEn.getTime()).toBeGreaterThanOrEqual(antes);
   });
 
@@ -241,7 +242,7 @@ describe("propiedades / Propiedad", () => {
     expect(propiedad.titulo).toBe("Fijo");
     expect(propiedad.descripcion).toBe("Fijo");
     expect(propiedad.precio).toBe(100);
-    expect(propiedad.estado).toBe("DISPONIBLE");
+    expect(propiedad.estado.valor).toBe("DISPONIBLE");
     expect(propiedad.idClientePropietario).toBe("cli-001");
     expect(propiedad.asesorResponsableId as string).toBe("asesor-001");
   });

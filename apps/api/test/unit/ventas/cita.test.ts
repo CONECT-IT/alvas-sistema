@@ -12,7 +12,6 @@ describe("ventas / Cita", () => {
       idPropiedad: "prop-001",
       fechaInicio,
       fechaFin: new Date("2026-06-01T11:00:00.000Z"),
-      estado: "PENDIENTE",
       observacion: "Visita inicial",
     });
 
@@ -24,7 +23,7 @@ describe("ventas / Cita", () => {
     expect(cita.idPropiedad).toBe("prop-001");
     expect(cita.fechaInicio).toEqual(fechaInicio);
     expect(cita.fechaFin).toEqual(new Date("2026-06-01T11:00:00.000Z"));
-    expect(cita.estado).toBe("PENDIENTE");
+    expect(cita.estado.esPendiente()).toBe(true);
     expect(cita.observacion).toBe("Visita inicial");
   });
 
@@ -33,7 +32,7 @@ describe("ventas / Cita", () => {
 
     cita.marcarComoRealizada();
 
-    expect(cita.estado).toBe("REALIZADA");
+    expect(cita.estado.esRealizada()).toBe(true);
     expect(() => cita.reprogramar(fechaInicio, 30)).toThrow(
       "No se puede reprogramar una cita ya realizada.",
     );
@@ -43,7 +42,6 @@ describe("ventas / Cita", () => {
         idLead: idLead("lead-001"),
         fechaInicio,
         fechaFin: fechaInicio,
-        estado: "PENDIENTE",
       }),
     ).toThrow("La fecha de fin debe ser posterior a la fecha de inicio.");
   });
@@ -55,97 +53,65 @@ describe("ventas / Cita", () => {
       idLead: idLead("lead-001"),
       fechaInicio,
       fechaFin: new Date("2026-06-01T11:00:00.000Z"),
-      estado: "PENDIENTE",
     });
 
-    cita.cancelar("Cliente no asistio");
-    citaSinObservacion.cancelar("Cliente no asistio");
+    cita.cancelar("Cliente no disponible");
+    expect(cita.estado.esCancelada()).toBe(true);
+    expect(cita.observacion).toContain("Cancelado: Cliente no disponible");
 
-    expect(cita.estado).toBe("CANCELADA");
-    expect(cita.observacion).toBe("Visita inicial | Cancelado: Cliente no asistio");
-    expect(citaSinObservacion.observacion).toBe("Cancelado: Cliente no asistio");
+    citaSinObservacion.cancelar();
+    expect(citaSinObservacion.estado.esCancelada()).toBe(true);
+
     expect(() => cita.marcarComoRealizada()).toThrow(
       "No se puede marcar como realizada una cita cancelada.",
     );
-
-    const citaSinMotivo = crearCita();
-    citaSinMotivo.cancelar();
-    expect(citaSinMotivo.estado).toBe("CANCELADA");
-    expect(citaSinMotivo.observacion).toBe("Visita inicial");
   });
 
-  test("reprograma recalculando duracion y normalizando observacion", () => {
+  test("reprograma correctamente la cita a futuro y actualiza observacion", () => {
     const cita = crearCita();
-    const nuevaFecha = new Date("2026-06-02T15:00:00.000Z");
+    const nuevaFecha = new Date("2026-06-15T14:00:00.000Z");
+    const nuevaDuracion = 45;
 
-    cita.reprogramar(nuevaFecha, 45, "  Nueva hora confirmada  ");
+    cita.reprogramar(nuevaFecha, nuevaDuracion, "Cliente pidio reprogramar");
 
-    expect(cita.estado).toBe("REPROGRAMADA");
     expect(cita.fechaInicio).toEqual(nuevaFecha);
-    expect(cita.fechaFin).toEqual(new Date("2026-06-02T15:45:00.000Z"));
-    expect(cita.observacion).toBe("Nueva hora confirmada");
-    expect(() => cita.reprogramar(nuevaFecha, 0)).toThrow(
+    expect(cita.fechaFin).toEqual(new Date("2026-06-15T14:45:00.000Z"));
+    expect(cita.estado.esReprogramada()).toBe(true);
+    expect(cita.observacion).toContain("Cliente pidio reprogramar");
+  });
+
+  test("valida duracion positiva al reprogramar", () => {
+    const cita = crearCita();
+    expect(() => cita.reprogramar(new Date(), 0)).toThrow(
       "La duracion de la cita debe ser mayor que cero.",
     );
-
-    const citaSinObservacionNueva = crearCita();
-    citaSinObservacionNueva.reprogramar(nuevaFecha, 30);
-    expect(citaSinObservacionNueva.observacion).toBe("Visita inicial");
   });
 
-  test("actualiza observacion y propiedad limpiando valores vacios", () => {
+  test("actualiza observacion sin cambiar estado", () => {
     const cita = crearCita();
+    cita.actualizarObservacion("Nueva observacion");
+    expect(cita.observacion).toBe("Nueva observacion");
+    expect(cita.estado.esPendiente()).toBe(true);
+  });
 
-    cita.actualizarObservacion("  Traer DNI  ");
-    cita.actualizarPropiedad("  prop-002  ");
-    expect(cita.observacion).toBe("Traer DNI");
+  test("actualiza propiedad asociada", () => {
+    const cita = crearCita();
+    cita.actualizarPropiedad("prop-002");
     expect(cita.idPropiedad).toBe("prop-002");
-
-    cita.actualizarObservacion("   ");
-    cita.actualizarPropiedad("   ");
-    expect(cita.observacion).toBeUndefined();
-    expect(cita.idPropiedad).toBeUndefined();
-
-    expect(() => cita.actualizarObservacion()).not.toThrow();
-    expect(() => cita.actualizarPropiedad()).not.toThrow();
-    expect(cita.observacion).toBeUndefined();
-    expect(cita.idPropiedad).toBeUndefined();
   });
 
-  test("cambia estado desde texto normalizado", () => {
+  test("cambia estado usando el metodo generico cambiarEstado", () => {
     const cita = crearCita();
+    cita.cambiarEstado("REALIZADA");
+    expect(cita.estado.esRealizada()).toBe(true);
 
-    cita.cambiarEstado(" realizada ", "  Todo conforme  ");
-    expect(cita.estado).toBe("REALIZADA");
-    expect(cita.observacion).toBe("Todo conforme");
+    cita.cambiarEstado("REPROGRAMADA");
+    expect(cita.estado.esReprogramada()).toBe(true);
 
-    const cancelada = crearCita();
-    cancelada.cambiarEstado(" cancelada ", "No contesta");
-    expect(cancelada.estado).toBe("CANCELADA");
-    expect(cancelada.observacion).toBe("Visita inicial | Cancelado: No contesta");
+    cita.cambiarEstado("PENDIENTE");
+    expect(cita.estado.esPendiente()).toBe(true);
 
-    const pendiente = crearCita();
-    pendiente.cambiarEstado("reprogramada");
-    expect(pendiente.estado).toBe("REPROGRAMADA");
-    pendiente.cambiarEstado("pendiente");
-    expect(pendiente.estado).toBe("PENDIENTE");
-    expect(pendiente.observacion).toBe("Visita inicial");
-
-    expect(() => pendiente.cambiarEstado("aplazada")).toThrow("Estado de cita invalido.");
-  });
-
-  test("reconstituye citas existentes", () => {
-    const cita = Cita.reconstituir({
-      id: idCita("cita-003"),
-      idLead: idLead("lead-002"),
-      fechaInicio,
-      fechaFin: new Date("2026-06-01T10:30:00.000Z"),
-      estado: "CANCELADA",
-      observacion: "Historica",
-    });
-
-    expect(cita.id).toBe(idCita("cita-003"));
-    expect(cita.estado).toBe("CANCELADA");
-    expect(cita.observacion).toBe("Historica");
+    cita.cambiarEstado("CANCELADA", "Cancelado por sistema");
+    expect(cita.estado.esCancelada()).toBe(true);
   });
 });

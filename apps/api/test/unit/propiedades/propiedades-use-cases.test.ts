@@ -243,7 +243,7 @@ describe("propiedades / use cases", () => {
 
     expect(resultado.esExito).toBe(true);
     expect(repo.propiedades.get("prop-001")?.precio).toBe(310000);
-    expect(repo.propiedades.get("prop-001")?.estado).toBe("EN_VALIDACION");
+    expect(repo.propiedades.get("prop-001")?.estado.valor).toBe("EN_VALIDACION");
   });
 
   test("asesor puede actualizar propiedad de un cliente suyo", async () => {

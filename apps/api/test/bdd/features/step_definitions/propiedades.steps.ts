@@ -161,7 +161,7 @@ Then(
     assert.strictEqual(resultadoCrear.esExito, true);
     if (resultadoCrear.esExito) {
       assert.strictEqual(resultadoCrear.valor.origen, origen);
-      assert.strictEqual(resultadoCrear.valor.estado, estado);
+      assert.strictEqual(resultadoCrear.valor.estado.valor, estado);
     }
   },
 );
@@ -170,5 +170,5 @@ Then("la propiedad refleja el nuevo precio y estado", async function () {
   assert.strictEqual(resultadoActualizar.esExito, true);
   const propiedad = await repository.obtenerPorId(idPropiedad("prop-001"));
   assert.strictEqual(propiedad?.precio, 310000);
-  assert.strictEqual(propiedad?.estado, "EN_VALIDACION");
+  assert.strictEqual(propiedad?.estado?.valor, "EN_VALIDACION");
 });
