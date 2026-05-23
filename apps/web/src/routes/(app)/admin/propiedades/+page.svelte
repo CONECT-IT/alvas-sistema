@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
+	import SidePanel from '$lib/shared/ui/SidePanel.svelte';
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import type { Propiedad } from '$lib/propiedades/domain/models/Propiedad';
 	import { actualizarPropiedad } from '$lib/propiedades/application/use-cases/actualizarPropiedad';
@@ -15,17 +16,10 @@
 	let creating = $state(false);
 	let updatingId = $state<string | null>(null);
 	let error = $state<string | null>(null);
-	let mostrarSoloPublicadas = $state(false);
-	const propiedadesFiltradas = $derived(
-		mostrarSoloPublicadas
-			? propiedades.filter((p) => p.estado.toUpperCase() !== 'PRELIMINAR')
-			: propiedades
-	);
 	let createError = $state<string | null>(null);
-	let createSuccess = $state<string | null>(null);
 	let reviewError = $state<string | null>(null);
 	let reviewSuccess = $state<string | null>(null);
-	let mostrarFormulario = $state(false);
+	let mostrarPanel = $state(false);
 	let titulo = $state('');
 	let descripcion = $state('');
 	let precio = $state('');
@@ -33,10 +27,10 @@
 	let asesorResponsableId = $state('');
 	const skeletonCards = [1, 2, 3];
 	const estados = ['PRELIMINAR', 'EN_VALIDACION', 'DISPONIBLE', 'RESERVADA'];
-	const propiedadesEnRevision = $derived(
-		propiedades.filter((propiedad) =>
-			['PRELIMINAR', 'EN_VALIDACION'].includes(propiedad.estado.toUpperCase())
-		)
+	const captaciones = $derived(propiedades.filter((p) => p.estado.toUpperCase() === 'PRELIMINAR'));
+	const disponibles = $derived(propiedades.filter((p) => p.estado.toUpperCase() === 'DISPONIBLE'));
+	const otras = $derived(
+		propiedades.filter((p) => !['PRELIMINAR', 'DISPONIBLE'].includes(p.estado.toUpperCase()))
 	);
 
 	async function cargarPropiedades() {
@@ -87,7 +81,6 @@
 	async function registrarPropiedad(event: SubmitEvent) {
 		event.preventDefault();
 		createError = null;
-		createSuccess = null;
 
 		const precioNumerico = Number(precio);
 
@@ -111,9 +104,8 @@
 				estado,
 				asesorResponsableId: asesorResponsableId.trim() || undefined
 			});
-			createSuccess = 'Propiedad ALVAS registrada correctamente.';
 			limpiarFormulario();
-			mostrarFormulario = false;
+			mostrarPanel = false;
 			await cargarPropiedades();
 		} catch (err) {
 			createError =
@@ -144,110 +136,76 @@
 		</div>
 
 		<div class="flex items-center gap-4 md:self-end">
-			<label class="flex cursor-pointer items-center gap-2 text-sm text-text-muted">
-				<input
-					type="checkbox"
-					bind:checked={mostrarSoloPublicadas}
-					class="h-4 w-4 rounded border-border-light text-primary accent-primary"
-				/>
-				Solo publicadas
-			</label>
+			<Button variant="secondary" onclick={() => (mostrarPanel = true)}>Nueva propiedad</Button>
 			<Button variant="secondary" onclick={cargarPropiedades}>Actualizar listado</Button>
 		</div>
 	</div>
 
-	<Card>
-		<div class="flex flex-col justify-between gap-4 md:flex-row md:items-start">
-			<div>
-				<h2 class="font-display text-xl font-bold text-text-main">Registrar propiedad ALVAS</h2>
-				<p class="mt-1 max-w-2xl text-sm leading-relaxed text-text-muted">
-					Alta directa de propiedades que pertenecen al inventario de la empresa, sin asociarlas a
-					un cliente propietario.
+	<SidePanel isOpen={mostrarPanel} title="Nueva propiedad" onClose={() => (mostrarPanel = false)}>
+		<form class="grid gap-4" onsubmit={registrarPropiedad}>
+			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+				Título
+				<input
+					bind:value={titulo}
+					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					placeholder="Terreno en zona residencial"
+				/>
+			</label>
+
+			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+				Precio
+				<input
+					bind:value={precio}
+					type="number"
+					min="0"
+					step="0.01"
+					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					placeholder="150000"
+				/>
+			</label>
+
+			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+				Descripción
+				<textarea
+					bind:value={descripcion}
+					rows="4"
+					class="resize-none rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					placeholder="Ubicación, metraje, accesos y observaciones comerciales."
+				></textarea>
+			</label>
+
+			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+				Estado inicial
+				<select
+					bind:value={estado}
+					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+				>
+					{#each estados as item (item)}
+						<option value={item}>{item}</option>
+					{/each}
+				</select>
+			</label>
+
+			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+				Asesor responsable
+				<input
+					bind:value={asesorResponsableId}
+					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					placeholder="ID del asesor, opcional"
+				/>
+			</label>
+
+			{#if createError}
+				<p class="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+					{createError}
 				</p>
-			</div>
-			<Button
-				variant={mostrarFormulario ? 'ghost' : 'primary'}
-				onclick={() => (mostrarFormulario = !mostrarFormulario)}
-			>
-				{mostrarFormulario ? 'Cerrar formulario' : 'Nueva propiedad'}
+			{/if}
+
+			<Button type="submit" disabled={creating}>
+				{creating ? 'Registrando...' : 'Registrar propiedad'}
 			</Button>
-		</div>
-
-		{#if createSuccess}
-			<p class="mt-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
-				{createSuccess}
-			</p>
-		{/if}
-
-		{#if createError}
-			<p class="mt-4 rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-				{createError}
-			</p>
-		{/if}
-
-		{#if mostrarFormulario}
-			<form class="mt-6 grid gap-4 md:grid-cols-2" onsubmit={registrarPropiedad}>
-				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
-					Título
-					<input
-						bind:value={titulo}
-						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
-						placeholder="Terreno en zona residencial"
-					/>
-				</label>
-
-				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
-					Precio
-					<input
-						bind:value={precio}
-						type="number"
-						min="0"
-						step="0.01"
-						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
-						placeholder="150000"
-					/>
-				</label>
-
-				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main md:col-span-2">
-					Descripción
-					<textarea
-						bind:value={descripcion}
-						rows="4"
-						class="resize-none rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
-						placeholder="Ubicación, metraje, accesos y observaciones comerciales."
-					></textarea>
-				</label>
-
-				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
-					Estado inicial
-					<select
-						bind:value={estado}
-						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
-					>
-						{#each estados as item (item)}
-							<option value={item}>{item}</option>
-						{/each}
-					</select>
-				</label>
-
-				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
-					Asesor responsable
-					<input
-						bind:value={asesorResponsableId}
-						class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
-						placeholder="ID del asesor, opcional"
-					/>
-				</label>
-
-				<div class="flex flex-col gap-3 md:col-span-2 md:flex-row md:justify-end">
-					<Button type="button" variant="ghost" onclick={limpiarFormulario}>Limpiar</Button>
-					<Button type="submit" disabled={creating}>
-						{creating ? 'Registrando...' : 'Registrar propiedad'}
-					</Button>
-				</div>
-			</form>
-		{/if}
-	</Card>
+		</form>
+	</SidePanel>
 
 	{#if loading}
 		<div class="grid gap-4 md:grid-cols-3">
@@ -280,39 +238,34 @@
 		</Card>
 	{:else}
 		<PropiedadStats {propiedades} />
-		<Card>
-			<div class="mb-5 flex flex-col justify-between gap-3 md:flex-row md:items-center">
-				<div>
-					<h2 class="font-display text-xl font-bold text-text-main">Revisión de captaciones</h2>
-					<p class="mt-1 text-sm text-text-muted">
-						Propiedades que todavía no deben mostrarse al equipo comercial ni al público.
-					</p>
+
+		{#if captaciones.length > 0}
+			<Card>
+				<div class="mb-5 flex flex-col justify-between gap-3 md:flex-row md:items-center">
+					<div>
+						<h2 class="font-display text-xl font-bold text-text-main">Captaciones</h2>
+						<p class="mt-1 text-sm text-text-muted">
+							Propiedades preliminares captadas que requieren validación antes de publicarse.
+						</p>
+					</div>
+					<p class="text-sm font-semibold text-amber-600">{captaciones.length} pendientes</p>
 				</div>
-				<p class="text-sm font-semibold text-primary">
-					{propiedadesEnRevision.length} pendientes
-				</p>
-			</div>
 
-			{#if reviewSuccess}
-				<p class="mb-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
-					{reviewSuccess}
-				</p>
-			{/if}
+				{#if reviewSuccess}
+					<p class="mb-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+						{reviewSuccess}
+					</p>
+				{/if}
 
-			{#if reviewError}
-				<p class="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-					{reviewError}
-				</p>
-			{/if}
+				{#if reviewError}
+					<p class="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+						{reviewError}
+					</p>
+				{/if}
 
-			{#if propiedadesEnRevision.length === 0}
-				<p class="rounded-2xl bg-surface-muted px-4 py-5 text-sm text-text-muted">
-					No hay propiedades preliminares o en validación.
-				</p>
-			{:else}
 				<div class="grid gap-4">
-					{#each propiedadesEnRevision as propiedad (propiedad.id)}
-						<article class="rounded-2xl border border-border-light bg-bg-base p-5">
+					{#each captaciones as propiedad (propiedad.id)}
+						<article class="rounded-2xl border border-amber-200 bg-amber-50/30 p-5">
 							<div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
 								<div>
 									<div class="flex flex-wrap items-center gap-2">
@@ -320,7 +273,7 @@
 											{propiedad.titulo}
 										</p>
 										<span
-											class="rounded-full bg-primary-light px-3 py-1 text-xs font-semibold text-primary-dark"
+											class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700"
 										>
 											{propiedad.estado}
 										</span>
@@ -366,21 +319,34 @@
 						</article>
 					{/each}
 				</div>
-			{/if}
-		</Card>
+			</Card>
+		{/if}
 
-		<Card>
-			<div class="mb-5 flex flex-col justify-between gap-3 md:flex-row md:items-center">
-				<div>
-					<h2 class="font-display text-xl font-bold text-text-main">Inventario registrado</h2>
+		{#if disponibles.length > 0}
+			<Card>
+				<div class="mb-5">
+					<h2 class="font-display text-xl font-bold text-text-main">Disponibles</h2>
 					<p class="mt-1 text-sm text-text-muted">
-						Datos cargados directamente desde la API de propiedades.
+						Propiedades listas para comercialización, visibles para el equipo de ventas.
 					</p>
 				</div>
-				<p class="text-sm font-semibold text-primary">{propiedades.length} registros</p>
-			</div>
+				<PropiedadAdminTable propiedades={disponibles} />
+			</Card>
+		{/if}
 
-			<PropiedadAdminTable propiedades={propiedadesFiltradas} />
-		</Card>
+		{#if otras.length > 0}
+			<Card>
+				<div class="mb-5 flex flex-col justify-between gap-3 md:flex-row md:items-center">
+					<div>
+						<h2 class="font-display text-xl font-bold text-text-main">Otras propiedades</h2>
+						<p class="mt-1 text-sm text-text-muted">
+							Propiedades en validación, reservadas, vendidas o descartadas.
+						</p>
+					</div>
+					<p class="text-sm font-semibold text-primary">{otras.length} registros</p>
+				</div>
+				<PropiedadAdminTable propiedades={otras} />
+			</Card>
+		{/if}
 	{/if}
 </div>
