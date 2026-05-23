@@ -23,7 +23,7 @@ export class RegistroPropiedadVendedorAdapter implements IRegistroPropiedadVende
       descripcion: input.descripcion,
       precio: input.precio,
       origen: "CLIENTE", // Origen cliente porque viene de un lead que será cliente
-      estado: "PRELIMINAR", // Estado inicial no público
+      estado: "BORRADOR",
       idLeadOrigen: input.idLeadOrigen,
       captadaPorAsesorId: input.idAsesor,
       asesorResponsableId: input.idAsesor,

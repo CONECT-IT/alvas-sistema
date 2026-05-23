@@ -90,7 +90,7 @@ Given("una propiedad existente {string} creada por el asesor", async function (i
     descripcion: "Captacion inicial",
     precio: 0,
     origen: "CAPTACION",
-    estado: "PRELIMINAR",
+    estado: "BORRADOR",
     idLeadOrigen: "lead-001",
   });
   await repository.guardar(propiedad);
@@ -132,7 +132,7 @@ When(
       descripcion: "Propiedad del lead",
       precio: 0,
       origen: "CAPTACION",
-      estado: "PRELIMINAR",
+      estado: "BORRADOR",
       idLeadOrigen: idLead,
       usuarioAutenticado: { id: "asesor-1", rol: "ASESOR" },
     });
@@ -170,5 +170,5 @@ Then("la propiedad refleja el nuevo precio y estado", async function () {
   assert.strictEqual(resultadoActualizar.esExito, true);
   const propiedad = await repository.obtenerPorId(idPropiedad("prop-001"));
   assert.strictEqual(propiedad?.precio, 310000);
-  assert.strictEqual(propiedad?.estado?.valor, "EN_VALIDACION");
+  assert.strictEqual(propiedad?.estado?.valor, "DISPONIBLE");
 });

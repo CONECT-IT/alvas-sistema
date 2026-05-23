@@ -1,12 +1,11 @@
 import { PropiedadError } from "../errors/PropiedadError";
 
 export const ESTADOS_PROPIEDAD = [
-  "PRELIMINAR",
-  "EN_VALIDACION",
+  "BORRADOR",
   "DISPONIBLE",
   "RESERVADA",
   "VENDIDA",
-  "DESCARTADA",
+  "ARCHIVADA",
 ] as const;
 export type ValorEstadoPropiedad = (typeof ESTADOS_PROPIEDAD)[number];
 
@@ -25,19 +24,18 @@ export class EstadoPropiedad {
     return new EstadoPropiedad(normalizado);
   }
 
-  static preliminar = () => new EstadoPropiedad("PRELIMINAR");
-  static enValidacion = () => new EstadoPropiedad("EN_VALIDACION");
+  static borrador = () => new EstadoPropiedad("BORRADOR");
   static disponible = () => new EstadoPropiedad("DISPONIBLE");
   static reservada = () => new EstadoPropiedad("RESERVADA");
   static vendida = () => new EstadoPropiedad("VENDIDA");
-  static descartada = () => new EstadoPropiedad("DESCARTADA");
+  static archivada = () => new EstadoPropiedad("ARCHIVADA");
 
   get valor(): ValorEstadoPropiedad {
     return this.valorInterno;
   }
 
-  esPreliminar(): boolean {
-    return this.valorInterno === "PRELIMINAR";
+  esBorrador(): boolean {
+    return this.valorInterno === "BORRADOR";
   }
 
   esDisponible(): boolean {
@@ -50,5 +48,9 @@ export class EstadoPropiedad {
 
   esVendida(): boolean {
     return this.valorInterno === "VENDIDA";
+  }
+
+  esArchivada(): boolean {
+    return this.valorInterno === "ARCHIVADA";
   }
 }

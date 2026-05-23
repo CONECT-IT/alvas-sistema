@@ -45,8 +45,8 @@ export class ListarPropiedadesUseCase
         return resultadoExitoso(todas);
       }
 
-      // ASESOR: ve todas las DISPONIBLES/RESERVADAS/VENDIDAS
-      // + las PRELIMINARES/EN_VALIDACION donde él sea el captador o responsable
+      // ASESOR: ve inventario comercial no archivado
+      // + borradores donde él sea el captador o responsable
       const filtradas = todas.filter((p) => {
         const esPublica = p.estado.esDisponible() || p.estado.esReservada() || p.estado.esVendida();
         if (esPublica) return true;

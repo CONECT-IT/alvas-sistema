@@ -1,8 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { TipoVenta, TIPOS_VENTA } from "./TipoVenta";
-import { ErrorDeDominio } from "../../../shared/domain";
+import {
+  TipoVenta,
+  TIPOS_VENTA,
+} from "../../../../../src/lib/ventas/domain/value-objects/TipoVenta";
+import { ErrorDeDominio } from "../../../../../src/lib/shared/domain";
 
-describe("Value Object: TipoVenta", () => {
+describe("ventas / domain / TipoVenta", () => {
   test("Debe crear tipos validos via factory desde(), normalizando mayusculas y espacios", () => {
     for (const valor of TIPOS_VENTA) {
       expect(TipoVenta.desde(valor.toLowerCase()).valor).toBe(valor);

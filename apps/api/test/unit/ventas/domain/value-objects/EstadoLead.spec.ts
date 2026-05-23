@@ -1,8 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { EstadoLead, ESTADOS_LEAD } from "./EstadoLead";
-import { ErrorDeValidacion } from "../../../shared/domain";
+import {
+  EstadoLead,
+  ESTADOS_LEAD,
+} from "../../../../../src/lib/ventas/domain/value-objects/EstadoLead";
+import { ErrorDeValidacion } from "../../../../../src/lib/shared/domain";
 
-describe("Value Object: EstadoLead SDD", () => {
+describe("ventas / domain / EstadoLead", () => {
   test("Debe crear estados validos via factory desde() normalizando mayusculas y espacios", () => {
     for (const valor of ESTADOS_LEAD) {
       expect(EstadoLead.desde(valor.toLowerCase()).valor).toBe(valor);

@@ -234,7 +234,7 @@ export async function ejecutarSeed(env: SeedEnv): Promise<string[]> {
     push(`  ✔ Lead ${l.id} (${l.nombre})`);
   }
 
-  // ── Propiedades PRELIMINAR para leads vendedor ───────────
+  // ── Propiedades BORRADOR para leads vendedor ───────────
   const preliminaresSeed = [
     {
       id: "prop-prel-001",
@@ -270,7 +270,7 @@ export async function ejecutarSeed(env: SeedEnv): Promise<string[]> {
       titulo: p.titulo,
       descripcion: p.descripcion,
       precio: p.precio,
-      estado: "PRELIMINAR",
+      estado: "BORRADOR",
       idLeadOrigen: p.idLead,
     });
     await propiedadRepo.guardar(prop);

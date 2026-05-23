@@ -1,14 +1,14 @@
 import { describe, expect, test } from "bun:test";
-import { Lead } from "./Lead";
-import { Cita } from "./Cita";
-import { EstadoLead } from "../value-objects/EstadoLead";
-import { TipoVenta } from "../value-objects/TipoVenta";
-import { EstadoCita } from "../value-objects/EstadoCita";
-import { idLead, idCliente, idCita } from "../value-objects/Ids";
-import { idUsuarioRef } from "../../../shared/domain/value-objects/IdUsuarioRef";
-import { idPropiedad } from "../value-objects/IdPropiedad";
+import { Lead } from "../../../../../src/lib/ventas/domain/entities/Lead";
+import { Cita } from "../../../../../src/lib/ventas/domain/entities/Cita";
+import { EstadoLead } from "../../../../../src/lib/ventas/domain/value-objects/EstadoLead";
+import { TipoVenta } from "../../../../../src/lib/ventas/domain/value-objects/TipoVenta";
+import { EstadoCita } from "../../../../../src/lib/ventas/domain/value-objects/EstadoCita";
+import { idLead, idCliente, idCita } from "../../../../../src/lib/ventas/domain/value-objects/Ids";
+import { idUsuarioRef } from "../../../../../src/lib/shared/domain/value-objects/IdUsuarioRef";
+import { idPropiedad } from "../../../../../src/lib/ventas/domain/value-objects/IdPropiedad";
 
-describe("Agregado de Dominio: Gestión de Leads", () => {
+describe("ventas / domain / Lead", () => {
   const registrarLead = () =>
     Lead.registrar({
       id: "lead-123",

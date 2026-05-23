@@ -41,7 +41,7 @@ describe("propiedades / Propiedad", () => {
       descripcion: "Apartamento con balcon",
       precio: 180000,
       origen: "CAPTACION",
-      estado: EstadoPropiedad.desde("PRELIMINAR"),
+      estado: EstadoPropiedad.desde("BORRADOR"),
       idLeadOrigen: "lead-001",
       captadaPorAsesorId: idUsuarioRef("asesor-002"),
       creadoEn,
@@ -53,7 +53,7 @@ describe("propiedades / Propiedad", () => {
     expect(propiedad.descripcion).toBe("Apartamento con balcon");
     expect(propiedad.precio).toBe(180000);
     expect(propiedad.origen).toBe("CAPTACION");
-    expect(propiedad.estado.valor).toBe("PRELIMINAR");
+    expect(propiedad.estado.valor).toBe("BORRADOR");
     expect(propiedad.idLeadOrigen).toBe("lead-001");
     expect(propiedad.captadaPorAsesorId as string).toBe("asesor-002");
     expect(propiedad.creadoEn).toBe(creadoEn);
@@ -67,7 +67,7 @@ describe("propiedades / Propiedad", () => {
       descripcion: "Pendiente validacion",
       precio: 0,
       origen: "CAPTACION",
-      estado: "PRELIMINAR",
+      estado: "BORRADOR",
       idLeadOrigen: "lead-002",
       captadaPorAsesorId: "asesor-001",
     });
@@ -219,7 +219,7 @@ describe("propiedades / Propiedad", () => {
       descripcion: "Original",
       precio: 100,
       origen: "ALVAS",
-      estado: "PRELIMINAR",
+      estado: "BORRADOR",
     });
     const antes = Date.now();
     propiedad.actualizar({ estado: " disponible " });

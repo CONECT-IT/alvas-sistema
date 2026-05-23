@@ -120,7 +120,7 @@ describe("propiedades / use cases", () => {
       descripcion: "Propiedad adicional del lead vendedor",
       precio: 0,
       origen: "CAPTACION",
-      estado: "PRELIMINAR",
+      estado: "BORRADOR",
       idLeadOrigen: "lead-001",
       usuarioAutenticado: { id: "asesor-1", rol: "ASESOR" },
     });
@@ -142,7 +142,7 @@ describe("propiedades / use cases", () => {
       descripcion: "Propiedad agregada por asesor",
       precio: 450000,
       origen: "CLIENTE",
-      estado: "EN_VALIDACION",
+      estado: "DISPONIBLE",
       idClientePropietario: "cliente-001",
       usuarioAutenticado: { id: "asesor-1", rol: "ASESOR" },
     });
@@ -225,7 +225,7 @@ describe("propiedades / use cases", () => {
         descripcion: "Captacion inicial",
         precio: 0,
         origen: "CAPTACION",
-        estado: "PRELIMINAR",
+        estado: "BORRADOR",
         idLeadOrigen: "lead-001",
       }),
     );
@@ -237,13 +237,13 @@ describe("propiedades / use cases", () => {
     ).ejecutar({
       idPropiedad: "prop-001",
       precio: 310000,
-      estado: "EN_VALIDACION",
+      estado: "DISPONIBLE",
       usuarioAutenticado: { id: "asesor-1", rol: "ASESOR" },
     });
 
     expect(resultado.esExito).toBe(true);
     expect(repo.propiedades.get("prop-001")?.precio).toBe(310000);
-    expect(repo.propiedades.get("prop-001")?.estado.valor).toBe("EN_VALIDACION");
+    expect(repo.propiedades.get("prop-001")?.estado.valor).toBe("DISPONIBLE");
   });
 
   test("asesor puede actualizar propiedad de un cliente suyo", async () => {
@@ -255,7 +255,7 @@ describe("propiedades / use cases", () => {
         descripcion: "Propiedad de cliente existente",
         precio: 420000,
         origen: "CLIENTE",
-        estado: "EN_VALIDACION",
+        estado: "DISPONIBLE",
         idClientePropietario: "cliente-001",
       }),
     );
@@ -283,7 +283,7 @@ describe("propiedades / use cases", () => {
         descripcion: "Captacion de otro asesor",
         precio: 300000,
         origen: "CAPTACION",
-        estado: "PRELIMINAR",
+        estado: "BORRADOR",
         idLeadOrigen: "lead-002",
       }),
     );

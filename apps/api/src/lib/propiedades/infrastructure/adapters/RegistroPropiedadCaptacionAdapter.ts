@@ -29,7 +29,7 @@ export class RegistroPropiedadCaptacionAdapter implements IRegistroPropiedadCapt
       descripcion,
       precio: Number.isFinite(precio) ? precio : 0,
       origen: "CAPTACION",
-      estado: "PRELIMINAR",
+      estado: "BORRADOR",
       idLeadOrigen: input.idLeadOrigen,
       captadaPorAsesorId: input.asesorCaptadorId,
       asesorResponsableId: input.asesorCaptadorId,

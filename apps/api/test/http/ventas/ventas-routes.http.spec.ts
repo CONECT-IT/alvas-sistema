@@ -1,0 +1,359 @@
+import { describe, expect, it } from "bun:test";
+import { Hono } from "hono";
+import { crearVentasRouter } from "../../../src/lib/ventas/infrastructure";
+import { resultadoExitoso, resultadoFallido } from "../../../src/lib/shared/application/Resultado";
+import type { VentasControllerDeps } from "../../../src/lib/ventas/infrastructure";
+import { ErrorDeDominio } from "../../../src/lib/shared/domain";
+import { crearAuthHeader, envConAuth } from "../helpers/auth";
+
+type VentasEntradasCapturadas = {
+  registrarLead: unknown[];
+  actualizarLead: unknown[];
+  agendarCita: unknown[];
+  crearContrato: unknown[];
+  firmarContrato: unknown[];
+};
+
+function crearDeps(capturadas: VentasEntradasCapturadas = crearCapturadas()): VentasControllerDeps {
+  const lead = {
+    id: "lead-1",
+    nombre: "Ana Vendedora",
+    estado: { valor: "NUEVO" },
+    tipo: { valor: "VENTA" },
+    idAsesor: "usuario-1",
+    citas: [],
+  };
+
+  return {
+    crearRegistrarLead: () => ({
+      ejecutar: async (input: unknown) => {
+        capturadas.registrarLead.push(input);
+        return resultadoExitoso({ id: "lead-1" });
+      },
+    }),
+    crearAgendarCita: () => ({
+      ejecutar: async (input: unknown) => {
+        capturadas.agendarCita.push(input);
+        return resultadoExitoso(undefined);
+      },
+    }),
+    crearRegistrarClienteDirecto: () => ({
+      ejecutar: async () => resultadoExitoso({ id: "cliente-1" }),
+    }),
+    crearConvertirLeadACliente: () => ({ ejecutar: async () => resultadoExitoso("cliente-1") }),
+    crearActualizarLead: () => ({
+      ejecutar: async (input: unknown) => {
+        capturadas.actualizarLead.push(input);
+        return resultadoExitoso(lead);
+      },
+    }),
+    crearActualizarCita: () => ({ ejecutar: async () => resultadoExitoso(undefined) }),
+    crearListarLeadsPorAsesor: () => ({ ejecutar: async () => resultadoExitoso([lead]) }),
+    crearListarClientes: () => ({ ejecutar: async () => resultadoExitoso([]) }),
+    crearObtenerLead: () => ({ ejecutar: async () => resultadoExitoso(lead) }),
+    crearListarLeads: () => ({ ejecutar: async () => resultadoExitoso([lead]) }),
+    crearAsignarLeadAAsesor: () => ({ ejecutar: async () => resultadoExitoso(lead) }),
+    crearListarAsesoresConLeads: () => ({ ejecutar: async () => resultadoExitoso([]) }),
+    crearListarCitas: () => ({ ejecutar: async () => resultadoExitoso([]) }),
+    crearObtenerCitaPorId: () => ({ ejecutar: async () => resultadoExitoso(undefined) }),
+    crearObtenerCliente: () => ({ ejecutar: async () => resultadoExitoso(undefined) }),
+    crearActualizarCliente: () => ({ ejecutar: async () => resultadoExitoso(undefined) }),
+    crearListarPropiedadesPorCliente: () => ({ ejecutar: async () => resultadoExitoso([]) }),
+    crearCrearContrato: () => ({
+      ejecutar: async (input: unknown) => {
+        capturadas.crearContrato.push(input);
+        return resultadoExitoso({
+          id: "contrato-1",
+          idLead: "lead-1",
+          idPropiedad: "propiedad-1",
+          estado: "BORRADOR",
+        });
+      },
+    }),
+    crearListarContratos: () => ({ ejecutar: async () => resultadoExitoso([]) }),
+    crearListarContratosPorAsesor: () => ({ ejecutar: async () => resultadoExitoso([]) }),
+    crearFirmarContrato: () => ({
+      ejecutar: async (input: unknown) => {
+        capturadas.firmarContrato.push(input);
+        return resultadoExitoso(undefined);
+      },
+    }),
+    crearCancelarContrato: () => ({ ejecutar: async () => resultadoExitoso(undefined) }),
+    crearListarActividadLead: () => ({ ejecutar: async () => resultadoExitoso([]) }),
+    crearVentasRepo: () => ({}) as never,
+    crearPropiedadRepo: () => ({}) as never,
+    crearUsuarioRepo: () =>
+      ({
+        obtenerPorId: async () => ({ nombre: { valor: "Luis Asesor" } }),
+      }) as never,
+  } as unknown as VentasControllerDeps;
+}
+
+function crearDepsSinPermisos(): VentasControllerDeps {
+  return {
+    ...crearDeps(),
+    crearActualizarLead: () => ({
+      ejecutar: async () =>
+        resultadoFallido(
+          new ErrorDeDominio("El asesor no puede modificar leads ajenos.", {
+            codigo: "SIN_PERMISOS_LEAD",
+          }),
+        ),
+    }),
+  };
+}
+
+function crearCapturadas(): VentasEntradasCapturadas {
+  return {
+    registrarLead: [],
+    actualizarLead: [],
+    agendarCita: [],
+    crearContrato: [],
+    firmarContrato: [],
+  };
+}
+
+describe("http / ventas routes", () => {
+  it("lista pipeline para asesor autenticado con nombre de asesor resuelto", async () => {
+    const app = new Hono();
+    app.route("/ventas", crearVentasRouter(crearDeps()));
+
+    const res = await app.request(
+      "/ventas/pipeline",
+      {
+        headers: {
+          Authorization: await crearAuthHeader({ idUsuario: "usuario-1", rol: "ASESOR" }),
+        },
+      },
+      envConAuth,
+    );
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({
+      success: true,
+      data: [
+        expect.objectContaining({
+          id: "lead-1",
+          nombre: "Ana Vendedora",
+          estado: "NUEVO",
+          tipo: "VENTA",
+          idAsesor: "usuario-1",
+          nombreAsesor: "Luis Asesor",
+        }),
+      ],
+    });
+  });
+
+  it("registra lead de asesor asignandolo al usuario autenticado aunque el body mande otro asesor", async () => {
+    const capturadas = crearCapturadas();
+    const app = new Hono();
+    app.route("/ventas", crearVentasRouter(crearDeps(capturadas)));
+
+    const res = await app.request(
+      "/ventas/lead",
+      {
+        method: "POST",
+        headers: {
+          Authorization: await crearAuthHeader({ idUsuario: "asesor-1", rol: "ASESOR" }),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nombre: "Carlos Comprador",
+          email: "carlos@example.com",
+          telefono: "555",
+          tipo: "COMPRA",
+          idAsesor: "asesor-ajeno",
+        }),
+      },
+      envConAuth,
+    );
+
+    expect(res.status).toBe(201);
+    expect(await res.json()).toEqual({ success: true, data: { id: "lead-1" } });
+    expect(capturadas.registrarLead[0]).toEqual(
+      expect.objectContaining({
+        nombre: "Carlos Comprador",
+        tipo: "COMPRA",
+        idAsesor: "asesor-1",
+        usuarioAutenticado: { id: "asesor-1", rol: "ASESOR" },
+      }),
+    );
+  });
+
+  it("permite que admin registre lead asignado a un asesor explicito", async () => {
+    const capturadas = crearCapturadas();
+    const app = new Hono();
+    app.route("/ventas", crearVentasRouter(crearDeps(capturadas)));
+
+    const res = await app.request(
+      "/ventas/lead",
+      {
+        method: "POST",
+        headers: {
+          Authorization: await crearAuthHeader({ idUsuario: "admin-1", rol: "ADMIN" }),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nombre: "Maria Vendedora",
+          email: "maria@example.com",
+          telefono: "777",
+          tipo: "VENTA",
+          idAsesor: "asesor-2",
+        }),
+      },
+      envConAuth,
+    );
+
+    expect(res.status).toBe(201);
+    expect(capturadas.registrarLead[0]).toEqual(
+      expect.objectContaining({
+        idAsesor: "asesor-2",
+        usuarioAutenticado: { id: "admin-1", rol: "ADMIN" },
+      }),
+    );
+  });
+
+  it("actualiza lead pasando id de ruta y usuario autenticado al use case", async () => {
+    const capturadas = crearCapturadas();
+    const app = new Hono();
+    app.route("/ventas", crearVentasRouter(crearDeps(capturadas)));
+
+    const res = await app.request(
+      "/ventas/lead/lead-1",
+      {
+        method: "PUT",
+        headers: {
+          Authorization: await crearAuthHeader({ idUsuario: "asesor-1", rol: "ASESOR" }),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ estado: "TRABAJANDO", telefono: "888" }),
+      },
+      envConAuth,
+    );
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ success: true, message: "Lead actualizado" });
+    expect(capturadas.actualizarLead[0]).toEqual(
+      expect.objectContaining({
+        id: "lead-1",
+        estado: "TRABAJANDO",
+        telefono: "888",
+        usuarioAutenticado: { id: "asesor-1", rol: "ASESOR" },
+      }),
+    );
+  });
+
+  it("responde 403 cuando el asesor intenta actualizar lead ajeno", async () => {
+    const app = new Hono();
+    app.route("/ventas", crearVentasRouter(crearDepsSinPermisos()));
+
+    const res = await app.request(
+      "/ventas/lead/lead-ajeno",
+      {
+        method: "PUT",
+        headers: {
+          Authorization: await crearAuthHeader({ idUsuario: "asesor-1", rol: "ASESOR" }),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ estado: "TRABAJANDO" }),
+      },
+      envConAuth,
+    );
+
+    expect(res.status).toBe(403);
+    expect(await res.json()).toEqual({
+      success: false,
+      message: "El asesor no puede modificar leads ajenos.",
+      code: "SIN_PERMISOS_LEAD",
+    });
+  });
+
+  it("agenda cita convirtiendo fecha de entrada y preservando asesor autenticado", async () => {
+    const capturadas = crearCapturadas();
+    const app = new Hono();
+    app.route("/ventas", crearVentasRouter(crearDeps(capturadas)));
+
+    const res = await app.request(
+      "/ventas/cita",
+      {
+        method: "POST",
+        headers: {
+          Authorization: await crearAuthHeader({ idUsuario: "asesor-1", rol: "ASESOR" }),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          idLead: "lead-1",
+          fechaInicio: "2026-06-01T14:00:00.000Z",
+          duracionMinutos: 60,
+          observacion: "Visita a propiedad",
+        }),
+      },
+      envConAuth,
+    );
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ success: true, message: "Cita agendada" });
+    expect(capturadas.agendarCita[0]).toEqual(
+      expect.objectContaining({
+        idLead: "lead-1",
+        fechaInicio: new Date("2026-06-01T14:00:00.000Z"),
+        duracionMinutos: 60,
+        usuarioAutenticado: { id: "asesor-1", rol: "ASESOR" },
+      }),
+    );
+  });
+
+  it("crea y firma contrato desde el adaptador HTTP", async () => {
+    const capturadas = crearCapturadas();
+    const app = new Hono();
+    app.route("/ventas", crearVentasRouter(crearDeps(capturadas)));
+
+    const crearRes = await app.request(
+      "/ventas/contratos",
+      {
+        method: "POST",
+        headers: {
+          Authorization: await crearAuthHeader({ idUsuario: "admin-1", rol: "ADMIN" }),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: "contrato-1",
+          idLead: "lead-1",
+          idPropiedad: "propiedad-1",
+          fechaInicio: "2026-06-01T00:00:00.000Z",
+          fechaFin: "2026-12-01T00:00:00.000Z",
+        }),
+      },
+      envConAuth,
+    );
+
+    const firmarRes = await app.request(
+      "/ventas/contratos/contrato-1/firmar",
+      {
+        method: "POST",
+        headers: {
+          Authorization: await crearAuthHeader({ idUsuario: "admin-1", rol: "ADMIN" }),
+        },
+      },
+      envConAuth,
+    );
+
+    expect(crearRes.status).toBe(201);
+    expect(await crearRes.json()).toEqual({
+      success: true,
+      data: expect.objectContaining({ id: "contrato-1", estado: "BORRADOR" }),
+    });
+    expect(capturadas.crearContrato[0]).toEqual(
+      expect.objectContaining({
+        id: "contrato-1",
+        idLead: "lead-1",
+        idPropiedad: "propiedad-1",
+        fechaInicio: new Date("2026-06-01T00:00:00.000Z"),
+        fechaFin: new Date("2026-12-01T00:00:00.000Z"),
+      }),
+    );
+    expect(firmarRes.status).toBe(200);
+    expect(await firmarRes.json()).toEqual({ success: true, message: "Contrato firmado" });
+    expect(capturadas.firmarContrato[0]).toEqual({ idContrato: "contrato-1" });
+  });
+});
