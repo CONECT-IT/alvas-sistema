@@ -15,6 +15,12 @@
 	let creating = $state(false);
 	let updatingId = $state<string | null>(null);
 	let error = $state<string | null>(null);
+	let mostrarSoloPublicadas = $state(false);
+	const propiedadesFiltradas = $derived(
+		mostrarSoloPublicadas
+			? propiedades.filter((p) => p.estado.toUpperCase() !== 'PRELIMINAR')
+			: propiedades
+	);
 	let createError = $state<string | null>(null);
 	let createSuccess = $state<string | null>(null);
 	let reviewError = $state<string | null>(null);
@@ -137,9 +143,17 @@
 			</p>
 		</div>
 
-		<Button variant="secondary" onclick={cargarPropiedades} class="md:self-end">
-			Actualizar listado
-		</Button>
+		<div class="flex items-center gap-4 md:self-end">
+			<label class="flex cursor-pointer items-center gap-2 text-sm text-text-muted">
+				<input
+					type="checkbox"
+					bind:checked={mostrarSoloPublicadas}
+					class="h-4 w-4 rounded border-border-light text-primary accent-primary"
+				/>
+				Solo publicadas
+			</label>
+			<Button variant="secondary" onclick={cargarPropiedades}>Actualizar listado</Button>
+		</div>
 	</div>
 
 	<Card>
@@ -366,7 +380,7 @@
 				<p class="text-sm font-semibold text-primary">{propiedades.length} registros</p>
 			</div>
 
-			<PropiedadAdminTable {propiedades} />
+			<PropiedadAdminTable propiedades={propiedadesFiltradas} />
 		</Card>
 	{/if}
 </div>

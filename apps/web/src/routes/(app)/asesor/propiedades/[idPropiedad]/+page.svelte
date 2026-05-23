@@ -67,9 +67,10 @@
 		}
 	}
 
-	function getEstadoTone(e: string): 'brand' | 'success' | 'neutral' {
+	function getEstadoTone(e: string): 'brand' | 'success' | 'warning' | 'neutral' {
 		const n = e.toUpperCase();
 		if (n === 'DISPONIBLE') return 'success';
+		if (n === 'PRELIMINAR') return 'warning';
 		if (n === 'RESERVADA') return 'brand';
 		return 'neutral';
 	}

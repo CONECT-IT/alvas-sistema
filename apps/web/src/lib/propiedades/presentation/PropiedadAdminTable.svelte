@@ -15,9 +15,10 @@
 		maximumFractionDigits: 0
 	});
 
-	function getEstadoTone(estado: string): 'brand' | 'success' | 'neutral' {
+	function getEstadoTone(estado: string): 'brand' | 'success' | 'warning' | 'neutral' {
 		const normalized = estado.toUpperCase();
 		if (normalized === 'DISPONIBLE') return 'success';
+		if (normalized === 'PRELIMINAR') return 'warning';
 		if (normalized === 'RESERVADA') return 'brand';
 		return 'neutral';
 	}

@@ -12,6 +12,12 @@
 	let propiedades = $state<Propiedad[]>([]);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
+	let mostrarSoloPublicadas = $state(false);
+	const propiedadesFiltradas = $derived(
+		mostrarSoloPublicadas
+			? propiedades.filter((p) => p.estado.toUpperCase() !== 'PRELIMINAR')
+			: propiedades
+	);
 
 	async function cargarPropiedades() {
 		loading = true;
@@ -49,7 +55,17 @@
 			</p>
 		</div>
 
-		<Button variant="secondary" onclick={cargarPropiedades}>Actualizar inventario</Button>
+		<div class="flex items-center gap-4">
+			<label class="flex cursor-pointer items-center gap-2 text-sm text-text-muted">
+				<input
+					type="checkbox"
+					bind:checked={mostrarSoloPublicadas}
+					class="h-4 w-4 rounded border-border-light text-primary accent-primary"
+				/>
+				Solo publicadas
+			</label>
+			<Button variant="secondary" onclick={cargarPropiedades}>Actualizar inventario</Button>
+		</div>
 	</div>
 
 	{#if loading}
@@ -65,7 +81,7 @@
 	{:else}
 		<PropiedadStats {propiedades} />
 		<Card>
-			<PropiedadAdminTable {propiedades} onPropiedadClick={irAPropiedad} />
+			<PropiedadAdminTable propiedades={propiedadesFiltradas} onPropiedadClick={irAPropiedad} />
 		</Card>
 	{/if}
 </div>

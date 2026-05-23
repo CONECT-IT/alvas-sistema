@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 
-	type BadgeTone = 'brand' | 'success' | 'neutral';
+	type BadgeTone = 'brand' | 'success' | 'warning' | 'neutral';
 
 	interface Props {
 		tone?: BadgeTone;
@@ -14,6 +14,7 @@
 	const tones: Record<BadgeTone, string> = {
 		brand: 'bg-primary-light text-primary-dark',
 		success: 'bg-emerald-50 text-emerald-700',
+		warning: 'bg-amber-50 text-amber-700',
 		neutral: 'bg-surface-muted text-text-muted'
 	};
 </script>
