@@ -7,6 +7,7 @@ export type ActualizarLeadInput = Readonly<{
 	telefono?: string;
 	tipo?: 'COMPRA' | 'VENTA';
 	idPropiedadInteres?: string;
+	estado?: string;
 }>;
 
 export function actualizarLead(repository: VentasRepository, input: ActualizarLeadInput) {

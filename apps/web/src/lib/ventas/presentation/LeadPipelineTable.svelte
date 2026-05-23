@@ -1,20 +1,43 @@
 <script lang="ts">
 	import Badge from '$lib/shared/ui/Badge.svelte';
 	import type { LeadPipeline } from '../domain/models/LeadPipeline';
+	import { actualizarLead } from '../application/use-cases/actualizarLead';
+	import { ventasRepository } from '../infrastructure/ventasRepository';
 
 	interface Props {
 		leads: LeadPipeline[];
 		onLeadClick?: (lead: LeadPipeline) => void;
 		onEditClick?: (lead: LeadPipeline) => void;
+		onStatusChanged?: () => void;
 	}
 
-	let { leads, onLeadClick, onEditClick }: Props = $props();
+	let { leads, onLeadClick, onEditClick, onStatusChanged }: Props = $props();
 
-	function getEstadoTone(estado: string): 'brand' | 'success' | 'neutral' {
+	const estados = ['NUEVO', 'CONTACTO', 'AGENDADO', 'TRABAJANDO', 'CONVERTIDO', 'PERDIDO'];
+	let activeMenuId = $state<string | null>(null);
+
+	function getEstadoTone(estado: string): 'brand' | 'success' | 'neutral' | 'warning' {
 		const normalized = estado.toUpperCase();
-		if (normalized.includes('CONVERTIDO') || normalized.includes('CLIENTE')) return 'success';
-		if (normalized.includes('NUEVO') || normalized.includes('CONTACTO')) return 'brand';
-		return 'neutral';
+		if (normalized === 'CONVERTIDO') return 'success';
+		if (normalized === 'PERDIDO') return 'neutral';
+		if (normalized === 'AGENDADO' || normalized === 'TRABAJANDO') return 'brand';
+		return 'warning';
+	}
+
+	async function cambiarEstado(lead: LeadPipeline, nuevoEstado: string) {
+		activeMenuId = null;
+		if (lead.estado.toUpperCase() === nuevoEstado.toUpperCase()) return;
+
+		try {
+			await actualizarLead(ventasRepository, {
+				idLead: lead.id,
+				estado: nuevoEstado
+			});
+			onStatusChanged?.();
+		} catch (error) {
+			console.error('Error al actualizar estado:', error);
+			alert('No se pudo actualizar el estado.');
+		}
 	}
 </script>
 
@@ -33,18 +56,59 @@
 		<tbody class="divide-y divide-border-light text-sm">
 			{#each leads as lead (lead.id)}
 				<tr
-					class="cursor-pointer transition hover:bg-bg-base"
+					class={onLeadClick ? 'cursor-pointer transition hover:bg-bg-base' : undefined}
 					onclick={() => onLeadClick?.(lead)}
 					role={onLeadClick ? 'button' : undefined}
 					tabindex={onLeadClick ? 0 : undefined}
 					onkeydown={(e) => {
-						if (e.key === 'Enter' && onLeadClick) onLeadClick(lead);
+						if (!onLeadClick) return;
+						if (e.key === 'Enter' || e.key === ' ') onLeadClick(lead);
 					}}
 				>
 					<td class="py-4 pr-6 font-semibold text-text-main">{lead.nombre}</td>
 					<td class="py-4 pr-6 text-text-muted">{lead.tipo}</td>
-					<td class="py-4 pr-6">
-						<Badge tone={getEstadoTone(lead.estado)}>{lead.estado}</Badge>
+					<td class="relative py-4 pr-6">
+						<button
+							class="group focus:outline-none"
+							onclick={(e) => {
+								e.stopPropagation();
+								activeMenuId = activeMenuId === lead.id ? null : lead.id;
+							}}
+						>
+							<Badge
+								tone={getEstadoTone(lead.estado)}
+								class="transition-all group-hover:ring-2 group-hover:ring-primary/20"
+							>
+								{lead.estado}
+							</Badge>
+						</button>
+
+						{#if activeMenuId === lead.id}
+							<div
+								class="absolute top-12 left-0 z-50 w-40 rounded-xl border border-border-light bg-bg-card p-1 shadow-xl"
+								onclick={(e) => e.stopPropagation()}
+								role="menu"
+							>
+								{#each estados as estado (estado)}
+									<button
+										class="w-full rounded-lg px-3 py-2 text-left text-xs font-medium transition hover:bg-surface-muted {lead.estado.toUpperCase() ===
+										estado
+											? 'text-primary'
+											: 'text-text-main'}"
+										onclick={() => cambiarEstado(lead, estado)}
+									>
+										{estado}
+									</button>
+								{/each}
+							</div>
+							<div
+								class="fixed inset-0 z-40"
+								onclick={() => (activeMenuId = null)}
+								role="button"
+								tabindex="-1"
+								aria-label="Cerrar menú"
+							></div>
+						{/if}
 					</td>
 					<td class="py-4 pr-6 text-text-muted">{lead.nombreAsesor || lead.idAsesor || '-'}</td>
 					<td class="py-4 text-text-muted">{lead.citasCount}</td>

@@ -66,7 +66,8 @@ export class HttpVentasRepository implements VentasRepository {
 			email: input.email || undefined,
 			telefono: input.telefono || undefined,
 			tipo: input.tipo,
-			idPropiedadInteres: input.idPropiedadInteres || undefined
+			idPropiedadInteres: input.idPropiedadInteres || undefined,
+			estado: input.estado || undefined
 		};
 
 		await httpClient.put<ApiSuccessResponse<{ message?: string }>>(

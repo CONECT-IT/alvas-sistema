@@ -7,10 +7,12 @@
 	import { listarPipeline } from '$lib/ventas/application/use-cases/listarPipeline';
 	import { ventasRepository } from '$lib/ventas/infrastructure/ventasRepository';
 	import LeadPipelineTable from '$lib/ventas/presentation/LeadPipelineTable.svelte';
+	import LeadKanban from '$lib/ventas/presentation/LeadKanban.svelte';
 	import PipelineStats from '$lib/ventas/presentation/PipelineStats.svelte';
 
 	let leads = $state<LeadPipeline[]>([]);
 	let mostrarConvertidos = $state(false);
+	let vista = $state<'tabla' | 'kanban'>('kanban');
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 
@@ -76,6 +78,24 @@
 					<p class="mt-1 text-sm text-text-muted">Todos los prospectos visibles en el sistema.</p>
 				</div>
 				<div class="flex items-center gap-4">
+					<div class="mr-2 flex items-center rounded-xl bg-surface-muted p-1">
+						<button
+							onclick={() => (vista = 'tabla')}
+							class="rounded-lg px-3 py-1 text-xs font-bold transition {vista === 'tabla'
+								? 'bg-bg-card text-primary shadow-xs'
+								: 'text-text-muted hover:text-text-main'}"
+						>
+							Lista
+						</button>
+						<button
+							onclick={() => (vista = 'kanban')}
+							class="rounded-lg px-3 py-1 text-xs font-bold transition {vista === 'kanban'
+								? 'bg-bg-card text-primary shadow-xs'
+								: 'text-text-muted hover:text-text-main'}"
+						>
+							Kanban
+						</button>
+					</div>
 					<label class="flex cursor-pointer items-center gap-2 text-sm text-text-muted">
 						<input type="checkbox" bind:checked={mostrarConvertidos} class="accent-primary" />
 						Mostrar convertidos
@@ -84,7 +104,11 @@
 				</div>
 			</div>
 
-			<LeadPipelineTable leads={leadsFiltrados} onLeadClick={irALead} />
+			{#if vista === 'tabla'}
+				<LeadPipelineTable leads={leadsFiltrados} onLeadClick={irALead} onStatusChanged={cargar} />
+			{:else}
+				<LeadKanban leads={leadsFiltrados} onLeadClick={irALead} onStatusChanged={cargar} />
+			{/if}
 		</Card>
 	{/if}
 </div>

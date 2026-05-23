@@ -55,6 +55,7 @@ export type ActualizarLeadRequestDTO = Readonly<{
 	telefono?: string;
 	tipo?: 'COMPRA' | 'VENTA';
 	idPropiedadInteres?: string;
+	estado?: string;
 }>;
 
 export type ConvertirLeadRequestDTO = Readonly<{
