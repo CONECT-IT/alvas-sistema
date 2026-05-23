@@ -31,6 +31,7 @@ export interface ActualizarLeadBodyDTO {
   telefono?: string;
   tipo?: string;
   idPropiedadInteres?: string;
+  estado?: string;
 }
 
 export interface CrearContratoInputDTO {

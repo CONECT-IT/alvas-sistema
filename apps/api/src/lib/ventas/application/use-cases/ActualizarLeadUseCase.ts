@@ -20,6 +20,7 @@ export type ActualizarLeadInput = {
   telefono?: string;
   tipo?: string;
   idPropiedadInteres?: string;
+  estado?: string;
   usuarioAutenticado?: UsuarioAutenticadoVentas;
 };
 
@@ -67,6 +68,10 @@ export class ActualizarLeadUseCase
         telefono: input.telefono,
         tipo: input.tipo,
       });
+
+      if (input.estado) {
+        lead.cambiarEstado(input.estado);
+      }
 
       if (input.idPropiedadInteres !== undefined) {
         lead.actualizarDatosPropiedad(input.idPropiedadInteres);
