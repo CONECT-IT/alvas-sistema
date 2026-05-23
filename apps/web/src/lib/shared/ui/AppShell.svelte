@@ -215,7 +215,7 @@
 	<div class="flex min-h-screen bg-bg-base font-sans text-text-main">
 		<!-- Sidebar - Transparent type, Arc inspired -->
 		<aside
-			class="fixed top-0 left-0 z-50 hidden h-screen w-20 flex-col items-center gap-2 py-6 md:flex"
+			class="fixed top-0 left-0 z-50 hidden h-screen w-28 flex-col items-center gap-2 py-6 md:flex"
 		>
 			<!-- Logo -->
 			<a
@@ -233,7 +233,7 @@
 				{#each sidebarItems as item (item.href)}
 					<a
 						href={item.href}
-						class="group relative flex h-12 w-12 items-center justify-center rounded-xl transition-all duration-300"
+						class="group relative flex h-16 w-24 flex-col items-center justify-center gap-0.5 rounded-xl transition-all duration-300"
 						title={item.label}
 					>
 						<!-- Blur ball background on hover/active -->
@@ -252,13 +252,18 @@
 								? 'bg-black/5 opacity-100'
 								: ''}"
 						></div>
-						<!-- Icon -->
+						<!-- Icon + Label -->
 						<span
-							class="relative z-10 transition-all duration-300 {isActive(item.href)
+							class="relative z-10 flex flex-col items-center gap-0.5 transition-all duration-300 {isActive(
+								item.href
+							)
 								? 'text-amber-600'
 								: 'text-text-muted group-hover:text-text-main'}"
 						>
 							{@render NavIcon(item.icon)}
+							<span class="text-[10px] leading-tight font-semibold tracking-tight">
+								{item.label}
+							</span>
 						</span>
 					</a>
 				{/each}
@@ -389,7 +394,7 @@
 		{/if}
 
 		<!-- Main content -->
-		<main class="min-h-screen min-w-0 flex-1 md:ml-20">
+		<main class="min-h-screen min-w-0 flex-1 md:ml-28">
 			<div class="mx-auto max-w-7xl p-4 md:p-8">
 				{@render children()}
 			</div>
