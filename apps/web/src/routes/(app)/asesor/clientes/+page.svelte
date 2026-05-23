@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
+	import SidePanel from '$lib/shared/ui/SidePanel.svelte';
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import type { Cliente } from '$lib/clientes/domain/models/Cliente';
 	import { listarClientes } from '$lib/clientes/application/use-cases/listarClientes';
@@ -13,7 +14,7 @@
 	let creating = $state(false);
 	let error = $state<string | null>(null);
 	let createError = $state<string | null>(null);
-	let createSuccess = $state<string | null>(null);
+	let mostrarPanel = $state(false);
 	let nombre = $state('');
 	let email = $state('');
 	let telefono = $state('');
@@ -40,7 +41,6 @@
 	async function crearCliente(event: SubmitEvent) {
 		event.preventDefault();
 		createError = null;
-		createSuccess = null;
 
 		if (!nombre.trim() || !email.trim() || !telefono.trim()) {
 			createError = 'Completa nombre, correo y teléfono del cliente.';
@@ -50,13 +50,13 @@
 		creating = true;
 
 		try {
-			const idCliente = await registrarCliente(clienteRepository, {
+			await registrarCliente(clienteRepository, {
 				nombre: nombre.trim(),
 				email: email.trim(),
 				telefono: telefono.trim()
 			});
-			createSuccess = `Cliente registrado: ${idCliente}`;
 			limpiarFormulario();
+			mostrarPanel = false;
 			await cargarClientes();
 		} catch (err) {
 			createError = err instanceof HttpError ? err.message : 'No se pudo registrar el cliente.';
@@ -85,36 +85,16 @@
 			</p>
 		</div>
 
-		<Button variant="secondary" onclick={cargarClientes}>Actualizar clientes</Button>
+		<Button variant="secondary" onclick={() => (mostrarPanel = true)}>Nuevo cliente</Button>
 	</div>
 
-	<Card>
-		<div class="mb-5">
-			<h2 class="font-display text-xl font-bold text-text-main">Registrar cliente directo</h2>
-			<p class="mt-1 text-sm leading-relaxed text-text-muted">
-				Usa este registro cuando el cliente ya existe fuera del flujo de leads o viene por una
-				atención presencial.
-			</p>
-		</div>
-
-		{#if createSuccess}
-			<p class="mb-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
-				{createSuccess}
-			</p>
-		{/if}
-
-		{#if createError}
-			<p class="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-				{createError}
-			</p>
-		{/if}
-
-		<form class="grid gap-4 md:grid-cols-3" onsubmit={crearCliente}>
+	<SidePanel isOpen={mostrarPanel} title="Nuevo cliente" onClose={() => (mostrarPanel = false)}>
+		<form class="grid gap-4" onsubmit={crearCliente}>
 			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
 				Nombre
 				<input
 					bind:value={nombre}
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 					placeholder="Nombre del cliente"
 				/>
 			</label>
@@ -123,7 +103,7 @@
 				Teléfono
 				<input
 					bind:value={telefono}
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 					placeholder="Número de contacto"
 				/>
 			</label>
@@ -133,19 +113,22 @@
 				<input
 					bind:value={email}
 					type="email"
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 					placeholder="correo@ejemplo.com"
 				/>
 			</label>
 
-			<div class="flex flex-col gap-3 md:col-span-3 md:flex-row md:justify-end">
-				<Button type="button" variant="ghost" onclick={limpiarFormulario}>Limpiar</Button>
-				<Button type="submit" disabled={creating}>
-					{creating ? 'Registrando...' : 'Registrar cliente'}
-				</Button>
-			</div>
+			{#if createError}
+				<p class="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+					{createError}
+				</p>
+			{/if}
+
+			<Button type="submit" disabled={creating}>
+				{creating ? 'Registrando...' : 'Registrar cliente'}
+			</Button>
 		</form>
-	</Card>
+	</SidePanel>
 
 	{#if loading}
 		<Card>
