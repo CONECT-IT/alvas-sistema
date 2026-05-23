@@ -1,12 +1,14 @@
 <script lang="ts">
 	import Badge from '$lib/shared/ui/Badge.svelte';
+	import Button from '$lib/shared/ui/Button.svelte';
 	import type { Usuario } from '../domain/models/Usuario';
 
 	interface Props {
 		usuarios: Usuario[];
+		onEditClick?: (usuario: Usuario) => void;
 	}
 
-	let { usuarios }: Props = $props();
+	let { usuarios, onEditClick }: Props = $props();
 </script>
 
 <div class="overflow-x-auto">
@@ -17,6 +19,7 @@
 				<th class="pb-3">Nombre</th>
 				<th class="pb-3">Rol</th>
 				<th class="pb-3">Estado</th>
+				<th class="pb-3">Acción</th>
 			</tr>
 		</thead>
 		<tbody class="divide-y divide-border-light text-sm">
@@ -27,10 +30,13 @@
 					<td class="py-4 pr-6">
 						<Badge tone={usuario.rol === 'ADMIN' ? 'brand' : 'neutral'}>{usuario.rol}</Badge>
 					</td>
-					<td class="py-4">
+					<td class="py-4 pr-6">
 						<Badge tone={usuario.estado.toUpperCase() === 'ACTIVO' ? 'success' : 'neutral'}>
 							{usuario.estado}
 						</Badge>
+					</td>
+					<td class="py-4">
+						<Button variant="ghost" onclick={() => onEditClick?.(usuario)}>Editar</Button>
 					</td>
 				</tr>
 			{/each}
