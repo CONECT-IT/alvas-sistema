@@ -1,110 +1,153 @@
-# Plan de Pruebas (Test Plan) v1.0
+# Plan Maestro de Pruebas (Test Plan) v2.2
 
-Este documento define la estrategia de aseguramiento de calidad, enfocada en pruebas unitarias, pruebas de aplicación con puertos/fakes y cobertura del núcleo de dominio del servicio `apps/api`.
+Este documento define la estrategia de testing de ALVAS para API y Web. El objetivo no es solo correr tests: es proteger la arquitectura DDD + hexagonal, el lenguaje ubicuo y los flujos comerciales de la inmobiliaria.
 
-## 1. Alcance de las Pruebas
+## 1. Regla de lenguaje
 
-- **Pruebas Unitarias de Value Objects:** validar normalización, rangos y estados permitidos.
-- **Pruebas de Invariantes en Entidades y Aggregate Roots:** verificar que el dominio rechace estados inválidos.
-- **Pruebas de Casos de Uso con fakes in-memory:** validar orquestación de aplicación mediante puertos, sin base de datos ni HTTP.
-- **Reporte de Cobertura:** evidenciar qué parte del núcleo probado queda blindada por tests automatizados.
+| Area                | Regla                                                                                                                                                                       |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dominio y negocio   | Espanol con lenguaje ubicuo: `asesor`, `lead vendedor`, `lead comprador`, `cliente vendedor`, `cliente comprador`, `cita`, `contrato`, `captacion`, `propiedad disponible`. |
+| Artefactos tecnicos | Ingles permitido: `Controller`, `Repository`, `DTO`, `Mapper`, `Middleware`, `Adapter`, `Port`, `QueryHandler`, `SidePanel`, `E2E`, `contract test`.                        |
+| Nombres de suites   | Nombrar comportamiento, no metodologia. Correcto: `ventas / domain / Lead`.                                                                                                 |
+| Ubicacion           | `src/` es codigo productivo. `test/` y `*.spec.ts` son specs ejecutables. `docs/specs/` son specs humanas SDD.                                                              |
 
-Este plan se alinea con con el fin de mapear los casos de prueba hacia eventos y Bounded Contexts al cubrir:
+## 2. Mapa de capas de testing
 
-- **Unit Testing:** validación aislada de Value Objects, entidades, Aggregate Roots y Domain Services.
-- **Integration/Application Testing:** validación de casos de uso mediante puertos y fakes in-memory, sin acoplamiento a D1, Drizzle ni HTTP.
-- **Testing Architecture:** verificación práctica de que el dominio y la aplicación pueden probarse sin depender de infraestructura.
+| Capa                 | Que valida                                                 | Infraestructura real                         | Herramienta                  | Ubicacion                                       | Estado        |
+| -------------------- | ---------------------------------------------------------- | -------------------------------------------- | ---------------------------- | ----------------------------------------------- | ------------- |
+| Static analysis      | Formato, lint, tipos estrictos                             | No                                           | Prettier, ESLint, TypeScript | Root, API, Web                                  | Activo        |
+| API unit domain      | Value Objects, entidades, Aggregate Roots, Domain Services | No                                           | `bun test`                   | `apps/api/test/unit/<context>/domain/`          | Activo        |
+| API application      | Use cases contra ports y fakes in-memory                   | No                                           | `bun test`                   | `apps/api/test/unit/<context>/`                 | Activo        |
+| API BDD              | Flujos de negocio con lenguaje Gherkin                     | No                                           | Cucumber + TypeScript        | `apps/api/test/bdd/features/`                   | Activo        |
+| API HTTP             | Adaptadores HTTP, status codes, serializacion, auth        | No servidor real; `app.request()` in-process | Hono + `bun test`            | `apps/api/test/http/<context>/`                 | Inicial       |
+| API contract         | Contratos serializados API-Web sin paquete compartido      | No                                           | `bun test`                   | `apps/api/test/contract/`                       | Inicial       |
+| API coverage         | Cobertura de `domain/`                                     | No                                           | Bun coverage + script local  | `coverage/`                                     | Gate 80%      |
+| API mutation         | Fuerza de asserts en dominio y use cases                   | No                                           | Stryker                      | `reports/mutation/`                             | Gate 70%      |
+| Web unit/application | Use cases de Web contra ports                              | No                                           | Vitest                       | `apps/web/src/lib/**/application/**/*.spec.ts`  | Activo        |
+| Web component        | Componentes Svelte 5 y UI aislada                          | jsdom                                        | Vitest + Testing Library     | `apps/web/src/lib/**/presentation/**/*.spec.ts` | Inicial       |
+| Web coverage         | Cobertura de `domain/` y `application/`                    | No                                           | Vitest coverage v8           | `apps/web/coverage/`                            | Gate 70%      |
+| Web E2E              | Flujos UX reales                                           | Si: preview + Chromium                       | Playwright                   | `apps/web/e2e/`                                 | Smoke inicial |
 
-## 2. Ubicación de la Suite
+## 3. Matriz por bounded context
+
+| Contexto        | Reglas principales                                                   | Unit/Application | HTTP                   | Contract                | Web/component              | E2E                        |
+| --------------- | -------------------------------------------------------------------- | ---------------- | ---------------------- | ----------------------- | -------------------------- | -------------------------- |
+| `auth`          | Sesion, tokens, refresh, rechazo de usuario deshabilitado            | Activo           | Login/refresh inicial  | Pendiente               | `User` domain web          | Rutas protegidas pendiente |
+| `usuarios`      | Admin gestiona usuarios; asesor edita solo datos permitidos          | Activo           | Listar/obtener inicial | Usuario sin `hashClave` | Use cases web activos      | Admin usuarios pendiente   |
+| `ventas`        | Leads, citas, conversion, contratos, historial, asesor asignado      | Activo           | Pipeline inicial       | Pipeline inicial        | Kanban y use cases activos | Kanban drag/drop pendiente |
+| `propiedades`   | Propias, preliminares, disponibles, cliente vendedor                 | Activo           | Listado/filtro inicial | Pendiente               | Use cases web activos      | Catalogo pendiente         |
+| `integraciones` | Captacion WhatsApp, normalizacion, email local, propiedad preliminar | Activo           | Pendiente              | Pendiente               | Captaciones web activo     | Pendiente                  |
+| `reportes`      | KPIs, conversion, carga por asesor, actividad                        | Activo           | Pendiente              | Pendiente               | Use cases web activo       | Dashboard pendiente        |
+
+## 4. Estructura esperada
 
 ```text
 apps/api/test/
   unit/
-    auth/
-    integraciones/
-    reportes/
-    usuarios/
-    ventas/
+    <context>/
+      domain/
+      application/
+  bdd/
+    features/
+      *.feature
+      step_definitions/*.steps.ts
+  http/
+    auth/*.http.spec.ts
+    usuarios/*.http.spec.ts
+    ventas/*.http.spec.ts
+    propiedades/*.http.spec.ts
+  contract/
+    api-web.contract.spec.ts
+
+apps/web/
+  src/lib/<context>/
+    domain/**/*.spec.ts
+    application/**/*.spec.ts
+    presentation/**/*.spec.ts
+  e2e/*.spec.ts
 ```
 
-## 3. Herramientas Utilizadas
+## 5. Comandos
 
-- **Test Runner:** `bun test`.
-- **Cobertura:** `bun test --coverage`.
-- **Validación estática:** `bun run typecheck` y `bun run lint`.
+| Comando                                      | Proposito                                             |
+| -------------------------------------------- | ----------------------------------------------------- |
+| `bun run typecheck`                          | TypeScript estricto de API y Web.                     |
+| `bun run test:unit`                          | API unit, application, HTTP y contract specs con Bun. |
+| `bun run test:bdd`                           | BDD Gherkin de API.                                   |
+| `bun run test:web`                           | Web unit/component specs con Vitest.                  |
+| `bun run coverage:domain`                    | Gate API domain coverage >= 80%.                      |
+| `bun run --cwd apps/web coverage:components` | Gate Web domain/application coverage >= 70%.          |
+| `bun run test:mutation`                      | Gate mutation score >= 70%.                           |
+| `bun run --cwd apps/web test:e2e`            | E2E Playwright.                                       |
 
-## 4. Plan del Aggregate Root Priorizado
+## 6. Pipeline CI/CD
 
-### Aggregate Root Seleccionado
+| Stage | Job                   | Scope     | Dependencia           | Gate                                    |
+| ----- | --------------------- | --------- | --------------------- | --------------------------------------- |
+| 1     | `lint` matrix         | API, Web  | Ninguna               | Formato, lint, typecheck por app        |
+| 2     | `build` matrix        | API, Web  | `lint`                | Build por app                           |
+| 3a    | `api-unit-test`       | API       | `build`               | `bun --cwd apps/api test`               |
+| 4a    | `api-integration-bdd` | API       | `api-unit-test`       | Gherkin                                 |
+| 5a    | `api-coverage`        | API       | `api-integration-bdd` | Domain coverage >= 80%                  |
+| 6a    | `api-mutation`        | API       | `api-coverage`        | Mutation >= 70%                         |
+| 3b    | `web-component-test`  | Web       | `build`               | Vitest                                  |
+| 4b    | `web-e2e`             | Web       | `web-component-test`  | Playwright                              |
+| 5b    | `web-coverage`        | Web       | `web-e2e`             | Coverage >= 70%                         |
+| Final | `quality-gate`        | API + Web | Todos                 | Falla si cualquier job no fue `success` |
 
-`Lead`, dentro del bounded context `ventas`.
+## 7. Quality gates
 
-### Casos de Uso Transaccionales
+| Gate                | Umbral    | Justificacion                                                                       |
+| ------------------- | --------- | ----------------------------------------------------------------------------------- |
+| API domain coverage | 80%       | El dominio es el nucleo comercial; debe estar protegido con alta cobertura.         |
+| API mutation score  | 70%       | Evita asserts debiles en reglas de negocio y casos de uso.                          |
+| Web coverage        | 70%       | Protege `domain/` y `application/`; UI visual se complementa con component/E2E.     |
+| E2E                 | Pass/fail | Los flujos UX criticos no tienen umbral numerico: si falla el flujo, falla el gate. |
 
-`AgendarCitaUseCase` y `ConvertirLeadAClienteUseCase` operan sobre el agregado `Lead`.
+No se bajan umbrales para hacer pasar CI. Si un gate falla, se agregan specs o se corrige el codigo.
 
-### Invariantes Protegidas
+## 8. Estado actual de specs ejecutables
 
-- Un lead cerrado (`PERDIDO` o `CONVERTIDO`) no puede recibir nuevas citas.
-- Un lead no puede convertirse dos veces a cliente.
-- Una cita debe tener fecha de fin posterior a la fecha de inicio.
-- La conversión a cliente se registra mediante IDs, evitando referencias directas entre agregados.
+| Area                                                 | Archivos principales                                                                                                                               | Estado  |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| API domain ventas                                    | `Lead.spec.ts`, `EstadoLead.spec.ts`, `TipoVenta.spec.ts`, `cita.test.ts`, `contrato.test.ts`, `cliente.test.ts`                                   | Activo  |
+| API application ventas                               | `ventas-use-cases.test.ts`, `evaluador-asignacion.test.ts`                                                                                         | Activo  |
+| API auth/usuarios/propiedades/reportes/integraciones | `test/unit/<context>/`                                                                                                                             | Activo  |
+| API HTTP                                             | `health.http.spec.ts`, `auth-routes.http.spec.ts`, `usuarios-routes.http.spec.ts`, `ventas-routes.http.spec.ts`, `propiedades-routes.http.spec.ts` | Inicial |
+| API contract                                         | `api-web.contract.spec.ts`                                                                                                                         | Inicial |
+| Web application                                      | `*-use-cases.spec.ts` por contexto                                                                                                                 | Activo  |
+| Web component                                        | `LeadKanban.spec.ts`, `SidePanel.spec.ts`                                                                                                          | Inicial |
+| Web E2E                                              | `smoke.spec.ts`                                                                                                                                    | Inicial |
 
-### Casos Unitarios de Aislamiento
+## 9. Backlog de testing
 
-- `Lead` rechaza agendar citas cuando está cerrado.
-- `Lead` rechaza conversión duplicada.
-- `Cita` rechaza rangos de fecha inválidos y reprogramación después de realizada.
+| Prioridad | Capa             | Trabajo                                                                                           |
+| --------- | ---------------- | ------------------------------------------------------------------------------------------------- |
+| Alta      | HTTP ventas      | Completar specs para registrar lead, actualizar lead, agendar cita, contratos y permisos por rol. |
+| Alta      | HTTP propiedades | Completar specs para crear/actualizar propiedades, permisos por rol y reglas de disponibilidad.   |
+| Alta      | E2E Web          | Kanban drag/drop actualiza estado, dark mode persiste, SidePanel edita sin perder lista.          |
+| Alta      | Contract         | Contratos locales por contexto: usuarios, ventas, propiedades, auth.                              |
+| Media     | Component Web    | Tablas, badges de estado, sidebar, perfil, formularios dentro de SidePanel.                       |
+| Media     | BDD              | Escenarios de lead vendedor, lead comprador, contrato y cliente recurrente.                       |
+| Media     | Mutation         | Subir mutantes sobrevivientes hasta 70% real.                                                     |
+| Baja      | Integration DB   | D1 test para repositorios criticos, migraciones e integridad referencial.                         |
 
-### Estrategia de Test Doubles
+## 10. Trazabilidad SDD
 
-- Los puertos de salida (`IVentasRepository`, `IUsuarioRepository`, `IConsultaCredencialesUsuario`, `IVerificadorDeClave`, `ITokenProvider`) se reemplazan por fakes in-memory y stubs simples.
-- Se usan mocks/spies con `mock()` de Bun para verificar interacciones relevantes con puertos de salida, por ejemplo llamadas a `registrarActividad` y `hashear`.
-- Los tests de aplicación llaman use cases reales y verifican comportamiento observable.
+| Spec humana                                  | Specs ejecutables esperadas                                                         |
+| -------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `docs/specs/ventas-leads-clientes.spec.md`   | Domain specs de `Lead`, application specs de ventas, BDD, HTTP ventas, E2E Kanban.  |
+| `docs/specs/usuarios-roles-permisos.spec.md` | Unit/application usuarios, HTTP usuarios, E2E admin usuarios, rutas protegidas.     |
+| `docs/specs/web-ux-design-system.spec.md`    | Component specs, E2E dark mode, SidePanel, sidebar y vistas informativas.           |
+| `docs/specs/propiedades.spec.md`             | Domain/application propiedades, HTTP propiedades, contract propiedad, E2E catalogo. |
+| `docs/specs/integraciones-whatsapp.spec.md`  | Unit/application integraciones, HTTP webhook, BDD captacion WhatsApp.               |
+| `docs/specs/reportes.spec.md`                | Unit reportes, contract dashboard, Web dashboard, E2E dashboard operativo.          |
 
-## 5. Matriz de Pruebas Priorizadas
+## 11. Principios
 
-| Componente                                                    | Bounded Context | Tipo de Prueba           | Criterio de Aceptación                                                          |
-| :------------------------------------------------------------ | :-------------- | :----------------------- | :------------------------------------------------------------------------------ |
-| `AuthToken`, `RefreshToken`                                   | `auth`          | Unitaria                 | Deben rechazar tokens vacíos.                                                   |
-| `Sesion`                                                      | `auth`          | Unitaria                 | Debe exponer tokens y datos de usuario autenticado.                             |
-| `IniciarSesionUseCase`                                        | `auth`          | Aplicación con fakes     | Debe emitir tokens con credenciales válidas y rechazar usuarios deshabilitados. |
-| `Username`, `Nombre`, `Rol`, `EstadoUsuario`                  | `usuarios`      | Unitaria                 | Deben normalizar valores y rechazar estados fuera del lenguaje ubicuo.          |
-| `Usuario`                                                     | `usuarios`      | Unitaria                 | Nace activo y no puede deshabilitarse dos veces.                                |
-| `CrearUsuarioUseCase`                                         | `usuarios`      | Aplicación con fake repo | Debe guardar usuario con hash y rechazar duplicados.                            |
-| `EstadoLead`                                                  | `ventas`        | Unitaria                 | Debe rechazar cualquier string que no pertenezca al enum.                       |
-| `TipoVenta`                                                   | `ventas`        | Unitaria                 | Debe normalizar valores y rechazar inválidos.                                   |
-| `Lead`                                                        | `ventas`        | Unitaria                 | No debe agendar citas si está cerrado ni convertirse dos veces.                 |
-| `Cita`                                                        | `ventas`        | Unitaria                 | Debe validar rangos de fecha y no reprogramar citas realizadas.                 |
-| `Contrato`                                                    | `ventas`        | Unitaria                 | Debe iniciar en BORRADOR y solo firmarse desde ese estado.                      |
-| `EvaluadorAsignacionService`                                  | `ventas`        | Unitaria                 | Debe elegir el asesor con menor carga y fallar si no hay asesores.              |
-| `AgendarCitaUseCase`                                          | `ventas`        | Aplicación con fake repo | Debe agregar cita al lead y registrar actividad.                                |
-| `ConvertirLeadAClienteUseCase`                                | `ventas`        | Aplicación con fake repo | Debe crear cliente y cerrar lead.                                               |
-| `CanalCaptacion`, `OrigenCaptacion`, `DatosContactoCaptacion` | `integraciones` | Unitaria                 | Deben normalizar canal/origen/contacto y rechazar datos obligatorios vacíos.    |
-| `Captacion`                                                   | `integraciones` | Unitaria                 | Debe normalizar canal/tipo/contacto y generar email local si falta correo.      |
-| `PorcentajeConversion`                                        | `reportes`      | Unitaria                 | Debe calcular porcentaje derivado y proteger divisiones por cero.               |
-
-## 6. Ejecución de las Pruebas
-
-```bash
-# Ejecutar pruebas unitarias y de aplicación
-bun test
-
-# Ejecutar pruebas con cobertura
-bun test --coverage
-
-# Validar tipos y reglas estáticas
-bun run typecheck
-bun run lint
-```
-
-## 7. Criterio de Cobertura
-
-La cobertura se interpreta como evidencia de blindaje del núcleo probado, no como garantía absoluta del backend completo. La suite prioriza reglas de dominio, invariantes y casos de uso de alto valor. El reporte asociado está en `apps/api/coverage-report.md`.
-
-## 8. Prueba de Código vs Prueba de Arquitectura
-
-- **Probar código:** verifica algoritmos, validaciones e invariantes locales en clases y funciones concretas.
-- **Probar arquitectura:** verifica que el sistema pueda ejercitar casos de uso por puertos, con dependencias sustituibles, sin acoplarse a DB, HTTP o frameworks.
-
-La suite actual prueba ambas dimensiones: los unit tests validan el modelo de dominio; los tests de aplicación con fakes verifican que la arquitectura hexagonal permite sustituir adaptadores secundarios sin cambiar los casos de uso.
+- Los tests de dominio no conocen HTTP, DB, Hono, Drizzle ni Svelte.
+- Los tests de application usan fakes tipados por ports.
+- Los HTTP tests usan `app.request()` o routers Hono in-process, sin abrir puertos.
+- Los contract tests no crean paquetes compartidos; validan la forma serializada acordada entre API y Web.
+- Los E2E son los unicos que levantan servidor y browser real.
+- Cada nuevo bounded context debe traer su carpeta en `src/lib/<context>/` y su espejo minimo en tests.
