@@ -17,19 +17,25 @@
 	let loading = $state(true);
 	let creating = $state(false);
 	let mostrarPanelCrear = $state(false);
+	let mostrarPanelEditar = $state(false);
 	let error = $state<string | null>(null);
 	let createError = $state<string | null>(null);
 	let updating = $state(false);
+
 	let idLead = $state('');
 	let idPropiedad = $state('');
 	let fechaInicio = $state('');
 	let duracionMinutos = $state('60');
 	let observacion = $state('');
-	let selectedCitaKey = $state('');
+
+	let editKey = $state('');
+	let editLeadNombre = $state('');
+	let editIdLead = $state('');
 	let editFechaInicio = $state('');
 	let editDuracionMinutos = $state('');
 	let editEstado = $state<EstadoCita | ''>('');
 	let editObservacion = $state('');
+
 	const leadsConCitas = $derived(leads.filter((lead) => lead.citasCount > 0));
 	const citasAgenda = $derived(
 		leads.flatMap((lead) =>
@@ -65,15 +71,29 @@
 	}
 
 	function limpiarFormularioEdicion() {
-		selectedCitaKey = '';
+		editKey = '';
+		editLeadNombre = '';
+		editIdLead = '';
 		editFechaInicio = '';
 		editDuracionMinutos = '';
 		editEstado = '';
 		editObservacion = '';
+		mostrarPanelEditar = false;
 	}
 
-	function obtenerCitaSeleccionada(): (CitaPipeline & { leadNombre: string; key: string }) | null {
-		return citasAgenda.find((cita) => cita.key === selectedCitaKey) ?? null;
+	function abrirEditarCita(
+		cita: CitaPipeline & { leadNombre: string; key: string; idLead: string }
+	) {
+		editKey = cita.key;
+		editLeadNombre = cita.leadNombre;
+		editIdLead = cita.idLead;
+		editFechaInicio = cita.fechaInicio.slice(0, 16);
+		editDuracionMinutos = String(
+			Math.round((new Date(cita.fechaFin).getTime() - new Date(cita.fechaInicio).getTime()) / 60000)
+		);
+		editEstado = cita.estado as EstadoCita;
+		editObservacion = cita.observacion ?? '';
+		mostrarPanelEditar = true;
 	}
 
 	function formatearFecha(fechaIso: string): string {
@@ -119,9 +139,7 @@
 
 		const duracion = editDuracionMinutos ? Number(editDuracionMinutos) : undefined;
 
-		const citaSeleccionada = obtenerCitaSeleccionada();
-
-		if (!citaSeleccionada) {
+		if (!editKey) {
 			error = 'Selecciona una cita registrada.';
 			return;
 		}
@@ -145,8 +163,8 @@
 
 		try {
 			await actualizarCita(ventasRepository, {
-				idLead: citaSeleccionada.idLead,
-				idCita: citaSeleccionada.id,
+				idLead: editIdLead,
+				idCita: editKey.split('::')[1],
 				fechaInicio: editFechaInicio ? new Date(editFechaInicio).toISOString() : undefined,
 				duracionMinutos: duracion,
 				estado: editEstado || undefined,
@@ -251,41 +269,29 @@
 		</form>
 	</SidePanel>
 
-	<Card>
-		<h2 class="mb-4 font-display text-xl font-bold text-text-main">Editar cita</h2>
-		<form class="grid gap-4 md:grid-cols-2" onsubmit={editarCita}>
-			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main md:col-span-2">
-				Cita
-				<select
-					bind:value={selectedCitaKey}
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
-				>
-					<option value="">Selecciona una cita</option>
-					{#each citasAgenda as cita (cita.key)}
-						<option value={cita.key}>
-							{cita.leadNombre} - {formatearFecha(cita.fechaInicio)} - {cita.estado}
-						</option>
-					{/each}
-				</select>
-			</label>
-
+	<SidePanel
+		isOpen={mostrarPanelEditar}
+		title={editLeadNombre ? `Editar cita - ${editLeadNombre}` : 'Editar cita'}
+		onClose={() => (mostrarPanelEditar = false)}
+	>
+		<form class="grid gap-4" onsubmit={editarCita}>
 			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
-				Nueva fecha y hora
+				Fecha y hora
 				<input
 					bind:value={editFechaInicio}
 					type="datetime-local"
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 				/>
 			</label>
 
 			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
-				Duración
+				Duración (minutos)
 				<input
 					bind:value={editDuracionMinutos}
 					type="number"
 					min="15"
 					step="15"
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 					placeholder="Sin cambio"
 				/>
 			</label>
@@ -294,7 +300,7 @@
 				Estado
 				<select
 					bind:value={editEstado}
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 				>
 					<option value="">Sin cambio</option>
 					<option value="PENDIENTE">Pendiente</option>
@@ -304,30 +310,36 @@
 				</select>
 			</label>
 
-			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main md:col-span-2">
+			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
 				Observación
 				<textarea
 					bind:value={editObservacion}
 					rows="3"
-					class="resize-none rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+					class="resize-none rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 					placeholder="Motivo de reprogramación, cierre de visita o cancelación."
 				></textarea>
 			</label>
 
-			<div class="flex flex-col gap-3 md:col-span-2 md:flex-row md:justify-end">
-				<Button type="button" variant="ghost" onclick={limpiarFormularioEdicion}>Limpiar</Button>
+			{#if error}
+				<p class="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+					{error}
+				</p>
+			{/if}
+
+			<div class="flex gap-3">
+				<Button type="button" variant="ghost" onclick={limpiarFormularioEdicion}>Cancelar</Button>
 				<Button type="submit" disabled={updating}>
-					{updating ? 'Actualizando...' : 'Actualizar cita'}
+					{updating ? 'Actualizando...' : 'Guardar cambios'}
 				</Button>
 			</div>
 		</form>
-	</Card>
+	</SidePanel>
 
 	{#if loading}
 		<Card>
 			<div class="h-64 animate-pulse rounded-2xl bg-surface-muted"></div>
 		</Card>
-	{:else if error}
+	{:else if error && !mostrarPanelEditar}
 		<Card class="text-center">
 			<p class="font-display text-xl font-bold text-text-main">No se pudo cargar la agenda</p>
 			<p class="mx-auto mt-2 max-w-xl text-sm text-text-muted">{error}</p>
@@ -352,7 +364,7 @@
 			<div class="grid gap-3">
 				{#each citasAgenda as cita (cita.key)}
 					<div
-						class="grid gap-3 rounded-2xl border border-border-light bg-white px-4 py-3 md:grid-cols-[1.2fr_0.9fr_auto]"
+						class="grid items-center gap-3 rounded-2xl border border-border-light bg-white px-4 py-3 md:grid-cols-[1.2fr_0.9fr_auto_auto]"
 					>
 						<div>
 							<p class="font-semibold text-text-main">{cita.leadNombre}</p>
@@ -369,6 +381,7 @@
 						>
 							{cita.estado}
 						</p>
+						<Button variant="ghost" onclick={() => abrirEditarCita(cita)}>Editar</Button>
 					</div>
 				{/each}
 			</div>
