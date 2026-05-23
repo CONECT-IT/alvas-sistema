@@ -8,6 +8,7 @@ export type LeadDetalle = Readonly<{
 	tipo: string;
 	estado: string;
 	idAsesor: string;
+	nombreAsesor?: string;
 	idCliente: string | null;
 	idPropiedadInteres: string | null;
 	citas: CitaPipeline[];

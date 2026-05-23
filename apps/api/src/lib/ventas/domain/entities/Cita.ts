@@ -1,8 +1,6 @@
 import { ErrorDeValidacion } from "../../../shared/domain";
 import { type IdCita, type IdLead } from "../value-objects/Ids";
-
-export const ESTADOS_CITA = ["PENDIENTE", "REALIZADA", "CANCELADA", "REPROGRAMADA"] as const;
-export type ValorEstadoCita = (typeof ESTADOS_CITA)[number];
+import { EstadoCita } from "../value-objects/EstadoCita";
 
 export type PropsCita = {
   id: IdCita;
@@ -10,7 +8,7 @@ export type PropsCita = {
   idPropiedad?: string;
   fechaInicio: Date;
   fechaFin: Date;
-  estado: ValorEstadoCita;
+  estado: EstadoCita;
   observacion?: string;
 };
 
@@ -19,8 +17,8 @@ export class Cita {
     this.validarFechas();
   }
 
-  static crear(params: Omit<PropsCita, "id"> & { id: IdCita }): Cita {
-    return new Cita(params);
+  static crear(params: Omit<PropsCita, "id" | "estado"> & { id: IdCita }): Cita {
+    return new Cita({ ...params, estado: EstadoCita.pendiente() });
   }
 
   static reconstituir(props: PropsCita): Cita {
@@ -42,7 +40,7 @@ export class Cita {
   get fechaFin(): Date {
     return this.props.fechaFin;
   }
-  get estado(): ValorEstadoCita {
+  get estado(): EstadoCita {
     return this.props.estado;
   }
   get observacion(): string | undefined {
@@ -50,14 +48,14 @@ export class Cita {
   }
 
   marcarComoRealizada(): void {
-    if (this.props.estado === "CANCELADA") {
+    if (this.props.estado.esCancelada()) {
       throw new ErrorDeValidacion("No se puede marcar como realizada una cita cancelada.");
     }
-    this.props.estado = "REALIZADA";
+    this.props.estado = EstadoCita.realizada();
   }
 
   cancelar(motivo?: string): void {
-    this.props.estado = "CANCELADA";
+    this.props.estado = EstadoCita.cancelada();
     if (motivo) {
       this.props.observacion = this.props.observacion
         ? `${this.props.observacion} | Cancelado: ${motivo}`
@@ -66,7 +64,7 @@ export class Cita {
   }
 
   reprogramar(fechaInicio: Date, duracionMinutos: number, observacion?: string): void {
-    if (this.props.estado === "REALIZADA") {
+    if (this.props.estado.esRealizada()) {
       throw new ErrorDeValidacion("No se puede reprogramar una cita ya realizada.");
     }
 
@@ -76,7 +74,7 @@ export class Cita {
 
     this.props.fechaInicio = fechaInicio;
     this.props.fechaFin = new Date(fechaInicio.getTime() + duracionMinutos * 60000);
-    this.props.estado = "REPROGRAMADA";
+    this.props.estado = EstadoCita.reprogramada();
 
     if (observacion !== undefined) {
       this.props.observacion = observacion.trim() || undefined;
@@ -94,13 +92,9 @@ export class Cita {
   }
 
   cambiarEstado(estado: string, observacion?: string): void {
-    const estadoNormalizado = estado.trim().toUpperCase() as ValorEstadoCita;
+    const nuevoEstado = EstadoCita.desde(estado);
 
-    if (!ESTADOS_CITA.includes(estadoNormalizado)) {
-      throw new ErrorDeValidacion("Estado de cita invalido.");
-    }
-
-    switch (estadoNormalizado) {
+    switch (nuevoEstado.valor) {
       case "REALIZADA":
         this.marcarComoRealizada();
         break;
@@ -108,10 +102,10 @@ export class Cita {
         this.cancelar(observacion);
         return;
       case "REPROGRAMADA":
-        this.props.estado = "REPROGRAMADA";
+        this.props.estado = EstadoCita.reprogramada();
         break;
       case "PENDIENTE":
-        this.props.estado = "PENDIENTE";
+        this.props.estado = EstadoCita.pendiente();
         break;
     }
 

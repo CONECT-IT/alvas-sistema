@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
+	import SidePanel from '$lib/shared/ui/SidePanel.svelte';
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import type { CitaPipeline, LeadPipeline } from '$lib/ventas/domain/models/LeadPipeline';
 	import {
@@ -15,11 +16,9 @@
 	let leads = $state<LeadPipeline[]>([]);
 	let loading = $state(true);
 	let creating = $state(false);
+	let mostrarPanelCrear = $state(false);
 	let error = $state<string | null>(null);
 	let createError = $state<string | null>(null);
-	let createSuccess = $state<string | null>(null);
-	let updateError = $state<string | null>(null);
-	let updateSuccess = $state<string | null>(null);
 	let updating = $state(false);
 	let idLead = $state('');
 	let idPropiedad = $state('');
@@ -62,6 +61,7 @@
 		fechaInicio = '';
 		duracionMinutos = '60';
 		observacion = '';
+		mostrarPanelCrear = false;
 	}
 
 	function limpiarFormularioEdicion() {
@@ -86,7 +86,6 @@
 	async function crearCita(event: SubmitEvent) {
 		event.preventDefault();
 		createError = null;
-		createSuccess = null;
 
 		const duracion = Number(duracionMinutos);
 
@@ -105,7 +104,6 @@
 				duracionMinutos: duracion,
 				observacion: observacion.trim() || undefined
 			});
-			createSuccess = 'Cita agendada correctamente.';
 			limpiarFormularioCita();
 			await cargarCitas();
 		} catch (err) {
@@ -117,15 +115,14 @@
 
 	async function editarCita(event: SubmitEvent) {
 		event.preventDefault();
-		updateError = null;
-		updateSuccess = null;
+		error = null;
 
 		const duracion = editDuracionMinutos ? Number(editDuracionMinutos) : undefined;
 
 		const citaSeleccionada = obtenerCitaSeleccionada();
 
 		if (!citaSeleccionada) {
-			updateError = 'Selecciona una cita registrada.';
+			error = 'Selecciona una cita registrada.';
 			return;
 		}
 
@@ -135,12 +132,12 @@
 			!editEstado &&
 			!editObservacion.trim()
 		) {
-			updateError = 'Indica al menos un cambio para la cita.';
+			error = 'Indica al menos un cambio para la cita.';
 			return;
 		}
 
 		if (duracion !== undefined && (Number.isNaN(duracion) || duracion <= 0)) {
-			updateError = 'La duración debe ser un número mayor que cero.';
+			error = 'La duración debe ser un número mayor que cero.';
 			return;
 		}
 
@@ -155,11 +152,10 @@
 				estado: editEstado || undefined,
 				observacion: editObservacion.trim() || undefined
 			});
-			updateSuccess = 'Cita actualizada. La actividad quedó registrada en ventas.';
 			limpiarFormularioEdicion();
 			await cargarCitas();
 		} catch (err) {
-			updateError = err instanceof HttpError ? err.message : 'No se pudo actualizar la cita.';
+			error = err instanceof HttpError ? err.message : 'No se pudo actualizar la cita.';
 		} finally {
 			updating = false;
 		}
@@ -178,50 +174,40 @@
 	<div class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
 		<div>
 			<p class="text-sm font-semibold tracking-[0.18em] text-primary uppercase">Agenda</p>
-			<h1 class="mt-2 font-display text-3xl font-bold text-text-main">Leads con citas</h1>
-			<p class="mt-2 max-w-2xl text-sm leading-relaxed text-text-muted">
-				Seguimiento de prospectos que ya tienen una cita o contacto programado en la cartera.
-			</p>
+			<h1 class="mt-2 font-display text-3xl font-bold text-text-main">Gestión de citas</h1>
 		</div>
 
-		<Button variant="secondary" onclick={cargarCitas}>Actualizar agenda</Button>
+		<Button variant="secondary" onclick={() => (mostrarPanelCrear = true)}
+			>Agendar nueva cita</Button
+		>
 	</div>
 
-	<Card>
-		<div class="mb-5">
-			<h2 class="font-display text-xl font-bold text-text-main">Agendar cita</h2>
-			<p class="mt-1 text-sm leading-relaxed text-text-muted">
-				Programa una visita, llamada o seguimiento sobre un lead activo. Puedes asociar una
-				propiedad si la cita corresponde a una visita concreta.
-			</p>
-		</div>
-
-		{#if createSuccess}
-			<p class="mb-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
-				{createSuccess}
-			</p>
-		{/if}
-
-		{#if createError}
-			<p class="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-				{createError}
-			</p>
-		{/if}
-
-		<form class="grid gap-4 md:grid-cols-2" onsubmit={crearCita}>
+	<SidePanel
+		isOpen={mostrarPanelCrear}
+		title="Nueva cita"
+		onClose={() => (mostrarPanelCrear = false)}
+	>
+		<form class="grid gap-4" onsubmit={crearCita}>
 			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
 				Lead
-				<input
+				<select
 					bind:value={idLead}
-					list="leads-disponibles"
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
-					placeholder="ID del lead"
-				/>
-				<datalist id="leads-disponibles">
+					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+				>
+					<option value="">Selecciona un lead</option>
 					{#each leads as lead (lead.id)}
 						<option value={lead.id}>{lead.nombre}</option>
 					{/each}
-				</datalist>
+				</select>
+			</label>
+
+			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+				Propiedad (opcional)
+				<input
+					bind:value={idPropiedad}
+					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					placeholder="ID de propiedad"
+				/>
 			</label>
 
 			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
@@ -229,71 +215,44 @@
 				<input
 					bind:value={fechaInicio}
 					type="datetime-local"
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 				/>
 			</label>
 
 			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
-				Duración
+				Duración (minutos)
 				<input
 					bind:value={duracionMinutos}
 					type="number"
 					min="15"
 					step="15"
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
-					placeholder="60"
+					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 				/>
 			</label>
 
 			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
-				Propiedad opcional
-				<input
-					bind:value={idPropiedad}
-					class="rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
-					placeholder="ID de propiedad"
-				/>
-			</label>
-
-			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main md:col-span-2">
 				Observación
 				<textarea
 					bind:value={observacion}
 					rows="3"
-					class="resize-none rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
-					placeholder="Motivo, dirección, documentos o acuerdos previos."
+					class="resize-none rounded-2xl border border-border-light bg-white px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 				></textarea>
 			</label>
 
-			<div class="flex flex-col gap-3 md:col-span-2 md:flex-row md:justify-end">
-				<Button type="button" variant="ghost" onclick={limpiarFormularioCita}>Limpiar</Button>
-				<Button type="submit" disabled={creating}>
-					{creating ? 'Agendando...' : 'Agendar cita'}
-				</Button>
-			</div>
+			{#if createError}
+				<p class="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+					{createError}
+				</p>
+			{/if}
+
+			<Button type="submit" disabled={creating}>
+				{creating ? 'Agendando...' : 'Guardar cita'}
+			</Button>
 		</form>
-	</Card>
+	</SidePanel>
 
 	<Card>
-		<div class="mb-5">
-			<h2 class="font-display text-xl font-bold text-text-main">Actualizar cita</h2>
-			<p class="mt-1 text-sm leading-relaxed text-text-muted">
-				Reprograma, marca como realizada o cancela una cita ya registrada. La API conserva el
-				historial del cambio.
-			</p>
-		</div>
-
-		{#if updateSuccess}
-			<p class="mb-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
-				{updateSuccess}
-			</p>
-		{/if}
-
-		{#if updateError}
-			<p class="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-				{updateError}
-			</p>
-		{/if}
-
+		<h2 class="mb-4 font-display text-xl font-bold text-text-main">Editar cita</h2>
 		<form class="grid gap-4 md:grid-cols-2" onsubmit={editarCita}>
 			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main md:col-span-2">
 				Cita

@@ -3,6 +3,7 @@ import { Lead } from "./Lead";
 import { Cita } from "./Cita";
 import { EstadoLead } from "../value-objects/EstadoLead";
 import { TipoVenta } from "../value-objects/TipoVenta";
+import { EstadoCita } from "../value-objects/EstadoCita";
 import { idLead, idCliente, idCita } from "../value-objects/Ids";
 import { idUsuarioRef } from "../../../shared/domain/value-objects/IdUsuarioRef";
 import { idPropiedad } from "../value-objects/IdPropiedad";
@@ -19,11 +20,7 @@ describe("Agregado de Dominio: Gestión de Leads", () => {
       idPropiedadInteres: "prop-1",
     });
 
-  const crearCita = (params: {
-    id: string;
-    estado: "PENDIENTE" | "REALIZADA" | "CANCELADA" | "REPROGRAMADA";
-    fechaInicio: string;
-  }) => {
+  const crearCita = (params: { id: string; estado: string; fechaInicio: string }) => {
     const fechaInicio = new Date(params.fechaInicio);
 
     return Cita.reconstituir({
@@ -31,12 +28,11 @@ describe("Agregado de Dominio: Gestión de Leads", () => {
       idLead: idLead("lead-123"),
       fechaInicio,
       fechaFin: new Date(fechaInicio.getTime() + 60 * 60000),
-      estado: params.estado,
+      estado: EstadoCita.desde(params.estado),
     });
   };
 
   test("Debe registrar un nuevo lead con estado inicial NUEVO", () => {
-    // Arrange
     const params = {
       id: "lead-123",
       nombre: "Juan Perez",
@@ -47,16 +43,14 @@ describe("Agregado de Dominio: Gestión de Leads", () => {
       idPropiedadInteres: "prop-1",
     };
 
-    // Act
     const lead = Lead.registrar(params);
 
-    // Assert
     expect(lead.id).toBe(idLead("lead-123"));
     expect(lead.nombre).toBe("Juan Perez");
     expect(lead.email).toBe("juan@example.com");
     expect(lead.telefono).toBe("987654321");
     expect(lead.estado).toEqual(EstadoLead.nuevo());
-    expect(lead.tipo).toEqual(new TipoVenta("COMPRA"));
+    expect(lead.tipo).toEqual(TipoVenta.compra());
     expect(lead.idAsesor).toBe(idUsuarioRef("asesor-1"));
     expect(lead.idPropiedadInteres).toBe(idPropiedad("prop-1"));
     expect(lead.idCliente).toBeUndefined();
@@ -79,8 +73,8 @@ describe("Agregado de Dominio: Gestión de Leads", () => {
       nombre: "Maria",
       email: "maria@example.com",
       telefono: "123456789",
-      tipo: new TipoVenta("VENTA"),
-      estado: new EstadoLead("CONTACTO"),
+      tipo: TipoVenta.venta(),
+      estado: EstadoLead.contacto(),
       idAsesor: idUsuarioRef("asesor-2"),
       idCliente: idCliente("cliente-1"),
       idPropiedadInteres: idPropiedad("prop-2"),
@@ -104,7 +98,6 @@ describe("Agregado de Dominio: Gestión de Leads", () => {
   });
 
   test("Debe proteger la invariante: No se puede agendar cita en un lead cerrado", () => {
-    // Arrange
     const lead = Lead.registrar({
       id: "lead-123",
       nombre: "Juan Perez",
@@ -114,7 +107,6 @@ describe("Agregado de Dominio: Gestión de Leads", () => {
       idAsesor: "asesor-1",
     });
 
-    // Cambiamos el estado a CERRADO para la prueba
     lead.cambiarEstado("PERDIDO");
 
     const citaMock = Cita.reconstituir({
@@ -122,10 +114,9 @@ describe("Agregado de Dominio: Gestión de Leads", () => {
       idLead: lead.id,
       fechaInicio: new Date(),
       fechaFin: new Date(Date.now() + 3600000),
-      estado: "PENDIENTE",
+      estado: EstadoCita.pendiente(),
     });
 
-    // Act & Assert
     expect(() => {
       lead.agendarCita(citaMock);
     }).toThrow("No se pueden agendar citas en un lead cerrado.");
@@ -283,7 +274,7 @@ describe("Agregado de Dominio: Gestión de Leads", () => {
       estado: "realizada",
       observacion: "  Visita completada  ",
     });
-    expect(cita.estado).toBe("REALIZADA");
+    expect(cita.estado.esRealizada()).toBe(true);
     expect(cita.observacion).toBe("Visita completada");
 
     const citaReprogramable = crearCita({
@@ -299,7 +290,7 @@ describe("Agregado de Dominio: Gestión de Leads", () => {
       observacion: "  Nueva fecha  ",
     });
 
-    expect(citaReprogramable.estado).toBe("REPROGRAMADA");
+    expect(citaReprogramable.estado.esReprogramada()).toBe(true);
     expect(citaReprogramable.fechaFin).toEqual(new Date("2026-06-04T10:30:00.000Z"));
     expect(citaReprogramable.observacion).toBe("Nueva fecha");
 

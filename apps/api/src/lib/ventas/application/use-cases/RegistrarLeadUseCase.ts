@@ -14,6 +14,7 @@ import { type IEvaluadorAsignacion } from "../../domain/services/EvaluadorAsigna
 import { type IAutorizadorVentas } from "../../domain/ports/IAutorizadorVentas";
 import { type IConsultaPropiedadInteres } from "../../domain/ports/IConsultaPropiedadInteres";
 import { type IRegistroPropiedadVendedor } from "../../domain/ports/IRegistroPropiedadVendedor";
+import { TipoVenta } from "../../domain/value-objects/TipoVenta";
 
 export type UsuarioAutenticadoVentas = {
   id: string;
@@ -93,7 +94,7 @@ export class RegistrarLeadUseCase
 
       // Si es VENDEDOR y trae datos de propiedad, registrarla
       if (
-        input.tipo.toUpperCase() === "VENTA" &&
+        TipoVenta.desde(input.tipo).esVenta() &&
         input.datosPropiedad &&
         this.registroPropiedadVendedor
       ) {
@@ -134,7 +135,7 @@ export class RegistrarLeadUseCase
       return resultadoExitoso(undefined);
     }
 
-    if (input.tipo.trim().toUpperCase() !== "COMPRA") {
+    if (!TipoVenta.desde(input.tipo).esCompra()) {
       return resultadoFallido(
         new ErrorDeDominio("Solo los leads compradores pueden relacionarse con una propiedad.", {
           codigo: "PROPIEDAD_INTERES_NO_APLICA",

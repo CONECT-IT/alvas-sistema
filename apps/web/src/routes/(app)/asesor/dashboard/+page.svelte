@@ -5,7 +5,10 @@
 
 	let { data }: { data: PageData } = $props();
 
-	const { leadsActivos, citasPendientes, citasHoy, portafolio } = data;
+	let leadsActivos = $derived(data.leadsActivos);
+	let citasPendientes = $derived(data.citasPendientes);
+	let citasHoy = $derived(data.citasHoy);
+	let portafolio = $derived(data.portafolio);
 
 	function formatearHora(iso: string): string {
 		return new Date(iso).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });

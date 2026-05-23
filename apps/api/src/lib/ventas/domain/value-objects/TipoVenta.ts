@@ -6,12 +6,24 @@ export type ValorTipoVenta = (typeof TIPOS_VENTA)[number];
 export class TipoVenta {
   private readonly valorInterno: ValorTipoVenta;
 
-  constructor(valor: string) {
+  private constructor(valor: ValorTipoVenta) {
+    this.valorInterno = valor;
+  }
+
+  static compra(): TipoVenta {
+    return new TipoVenta("COMPRA");
+  }
+
+  static venta(): TipoVenta {
+    return new TipoVenta("VENTA");
+  }
+
+  static desde(valor: string): TipoVenta {
     const valorNormalizado = valor.trim().toUpperCase();
     if (!TIPOS_VENTA.includes(valorNormalizado as ValorTipoVenta)) {
       throw new ErrorDeValidacion(`Tipo de venta inválido: ${valor}`);
     }
-    this.valorInterno = valorNormalizado as ValorTipoVenta;
+    return new TipoVenta(valorNormalizado as ValorTipoVenta);
   }
 
   get valor(): ValorTipoVenta {

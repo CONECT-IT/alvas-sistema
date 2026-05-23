@@ -49,7 +49,8 @@ export class HttpVentasRepository implements VentasRepository {
 			email: input.email,
 			telefono: input.telefono,
 			tipo: input.tipo,
-			idPropiedadInteres: input.idPropiedadInteres || undefined
+			idPropiedadInteres: input.idPropiedadInteres || undefined,
+			datosPropiedad: input.datosPropiedad || undefined
 		};
 		const response = await httpClient.post<ApiSuccessResponse<RegistrarLeadResponseDTO>>(
 			`${this.apiBaseUrl}/ventas/lead`,

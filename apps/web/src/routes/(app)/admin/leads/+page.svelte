@@ -10,8 +10,13 @@
 	import PipelineStats from '$lib/ventas/presentation/PipelineStats.svelte';
 
 	let leads = $state<LeadPipeline[]>([]);
+	let mostrarConvertidos = $state(false);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
+
+	let leadsFiltrados = $derived(
+		mostrarConvertidos ? leads : leads.filter((l) => l.estado !== 'CONVERTIDO')
+	);
 
 	async function cargar() {
 		loading = true;
@@ -63,17 +68,23 @@
 			<Button class="mt-5" onclick={cargar}>Intentar nuevamente</Button>
 		</Card>
 	{:else}
-		<PipelineStats {leads} />
+		<PipelineStats leads={leadsFiltrados} />
 		<Card>
 			<div class="mb-5 flex flex-col justify-between gap-3 md:flex-row md:items-center">
 				<div>
 					<h2 class="font-display text-xl font-bold text-text-main">Leads registrados</h2>
 					<p class="mt-1 text-sm text-text-muted">Todos los prospectos visibles en el sistema.</p>
 				</div>
-				<p class="text-sm font-semibold text-primary">{leads.length} leads</p>
+				<div class="flex items-center gap-4">
+					<label class="flex cursor-pointer items-center gap-2 text-sm text-text-muted">
+						<input type="checkbox" bind:checked={mostrarConvertidos} class="accent-primary" />
+						Mostrar convertidos
+					</label>
+					<p class="text-sm font-semibold text-primary">{leadsFiltrados.length} leads</p>
+				</div>
 			</div>
 
-			<LeadPipelineTable {leads} onLeadClick={irALead} />
+			<LeadPipelineTable leads={leadsFiltrados} onLeadClick={irALead} />
 		</Card>
 	{/if}
 </div>

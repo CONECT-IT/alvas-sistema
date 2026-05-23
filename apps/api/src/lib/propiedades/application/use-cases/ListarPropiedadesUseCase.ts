@@ -48,7 +48,7 @@ export class ListarPropiedadesUseCase
       // ASESOR: ve todas las DISPONIBLES/RESERVADAS/VENDIDAS
       // + las PRELIMINARES/EN_VALIDACION donde él sea el captador o responsable
       const filtradas = todas.filter((p) => {
-        const esPublica = ["DISPONIBLE", "RESERVADA", "VENDIDA"].includes(p.estado);
+        const esPublica = p.estado.esDisponible() || p.estado.esReservada() || p.estado.esVendida();
         if (esPublica) return true;
 
         const esAsociado =

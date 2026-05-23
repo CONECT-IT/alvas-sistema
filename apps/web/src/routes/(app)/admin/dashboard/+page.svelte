@@ -6,7 +6,9 @@
 
 	let { data }: { data: PageData } = $props();
 
-	const { estadisticas, propiedades, reporte } = data;
+	let estadisticas = $derived(data.estadisticas);
+	let propiedades = $derived(data.propiedades);
+	let reporte = $derived(data.reporte);
 
 	const labels: Record<string, string> = {
 		LEAD_REGISTRADO: 'Lead registrado',
@@ -38,10 +40,10 @@
 		return new Date(iso).toLocaleDateString('es-PE');
 	}
 
-	const propiedadesRecientes = propiedades.slice(0, 3);
-	const totalPropiedades = propiedades.length;
-	const disponibles = propiedades.filter((p) => p.estado === 'DISPONIBLE').length;
-	const actividadReciente = reporte?.actividadReciente?.slice(0, 5) ?? [];
+	let propiedadesRecientes = $derived(propiedades.slice(0, 3));
+	let totalPropiedades = $derived(propiedades.length);
+	let disponibles = $derived(propiedades.filter((p) => p.estado === 'DISPONIBLE').length);
+	let actividadReciente = $derived(reporte?.actividadReciente?.slice(0, 5) ?? []);
 </script>
 
 <svelte:head>

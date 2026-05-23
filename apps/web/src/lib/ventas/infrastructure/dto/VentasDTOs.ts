@@ -19,6 +19,7 @@ export type LeadPipelineDTO = Readonly<{
 	estado: string;
 	tipo: string;
 	idAsesor?: string;
+	nombreAsesor?: string;
 	citasCount: number;
 	citas?: CitaPipelineDTO[];
 }>;
@@ -81,9 +82,12 @@ export type ActividadLeadDTO = Readonly<{
 export type ContratoDTO = Readonly<{
 	id: string;
 	idLead?: string;
+	nombreLead?: string;
 	idCliente?: string;
 	idPropiedad: string;
+	nombrePropiedad?: string;
 	idAsesor?: string;
+	nombreAsesor?: string;
 	fechaInicio: string;
 	fechaFin: string;
 	estado: string;
@@ -106,6 +110,7 @@ export type LeadDetalleDTO = Readonly<{
 	tipo: string;
 	estado: string;
 	idAsesor: string;
+	nombreAsesor?: string;
 	idCliente: string | null;
 	idPropiedadInteres: string | null;
 	citas: CitaPipelineDTO[];

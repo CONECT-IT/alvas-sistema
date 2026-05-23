@@ -14,16 +14,16 @@ export type ValorEstadoLead = (typeof ESTADOS_LEAD)[number];
 export class EstadoLead {
   private readonly valorInterno: ValorEstadoLead;
 
-  constructor(valor: string) {
+  private constructor(valor: ValorEstadoLead) {
+    this.valorInterno = valor;
+  }
+
+  static desde(valor: string): EstadoLead {
     const valorNormalizado = valor.trim().toUpperCase();
     if (!ESTADOS_LEAD.includes(valorNormalizado as ValorEstadoLead)) {
       throw new ErrorDeValidacion(`Estado de lead inválido: ${valor}`);
     }
-    this.valorInterno = valorNormalizado as ValorEstadoLead;
-  }
-
-  get valor(): ValorEstadoLead {
-    return this.valorInterno;
+    return new EstadoLead(valorNormalizado as ValorEstadoLead);
   }
 
   static nuevo = () => new EstadoLead("NUEVO");
@@ -33,7 +33,35 @@ export class EstadoLead {
   static convertido = () => new EstadoLead("CONVERTIDO");
   static perdido = () => new EstadoLead("PERDIDO");
 
+  get valor(): ValorEstadoLead {
+    return this.valorInterno;
+  }
+
   estaCerrado(): boolean {
-    return this.valorInterno === "CONVERTIDO" || this.valorInterno === "PERDIDO";
+    return this.esConvertido() || this.esPerdido();
+  }
+
+  esConvertido(): boolean {
+    return this.valorInterno === "CONVERTIDO";
+  }
+
+  esPerdido(): boolean {
+    return this.valorInterno === "PERDIDO";
+  }
+
+  esNuevo(): boolean {
+    return this.valorInterno === "NUEVO";
+  }
+
+  esContacto(): boolean {
+    return this.valorInterno === "CONTACTO";
+  }
+
+  esAgendado(): boolean {
+    return this.valorInterno === "AGENDADO";
+  }
+
+  esTrabajando(): boolean {
+    return this.valorInterno === "TRABAJANDO";
   }
 }

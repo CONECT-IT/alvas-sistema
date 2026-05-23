@@ -9,9 +9,12 @@ export interface CrearContratoInputDTO {
 export interface ContratoOutputDTO {
   id: string;
   idLead?: string;
+  nombreLead?: string;
   idCliente?: string;
   idPropiedad: string;
+  nombrePropiedad?: string;
   idAsesor?: string;
+  nombreAsesor?: string;
   fechaInicio: string;
   fechaFin: string;
   estado: string;

@@ -7,6 +7,8 @@ export function mapLeadPipelineFromDto(dto: LeadPipelineDTO): LeadPipeline {
 		nombre: dto.nombre,
 		estado: dto.estado,
 		tipo: dto.tipo,
+		idAsesor: dto.idAsesor,
+		nombreAsesor: dto.nombreAsesor,
 		citasCount: dto.citasCount,
 		citas: (dto.citas ?? []).map((cita) => ({
 			id: cita.id,

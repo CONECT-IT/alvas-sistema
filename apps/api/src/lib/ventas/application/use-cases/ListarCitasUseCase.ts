@@ -38,7 +38,7 @@ export class ListarCitasUseCase
             idAsesor: lead.idAsesor as string,
             fechaInicio: cita.fechaInicio,
             fechaFin: cita.fechaFin,
-            estado: cita.estado,
+            estado: cita.estado.valor,
             observacion: cita.observacion,
           });
         }

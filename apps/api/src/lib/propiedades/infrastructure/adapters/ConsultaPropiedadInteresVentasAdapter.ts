@@ -7,6 +7,6 @@ export class ConsultaPropiedadInteresVentasAdapter implements IConsultaPropiedad
 
   async propiedadDisponibleParaCompra(id: string): Promise<boolean> {
     const propiedad = await this.propiedadRepository.obtenerPorId(idPropiedad(id));
-    return propiedad?.estado === "DISPONIBLE";
+    return propiedad?.estado?.esDisponible() === true;
   }
 }

@@ -1,5 +1,7 @@
-import { Propiedad, type EstadoPropiedad, type OrigenPropiedad } from "../../domain/entities";
+import { Propiedad } from "../../domain/entities";
+import { EstadoPropiedad } from "../../domain/value-objects/EstadoPropiedad";
 import { idPropiedad, idUsuarioRef } from "../../domain/value-objects";
+import { type OrigenPropiedad } from "../../domain/entities/Propiedad";
 import { type PropiedadRow } from "./schema";
 
 export class PropiedadMapper {
@@ -10,7 +12,7 @@ export class PropiedadMapper {
       descripcion: row.descripcion,
       precio: row.precio,
       origen: row.origen as OrigenPropiedad,
-      estado: row.estado as EstadoPropiedad,
+      estado: EstadoPropiedad.desde(row.estado),
       idLeadOrigen: row.idLeadOrigen ?? undefined,
       idClientePropietario: row.idClientePropietario ?? undefined,
       captadaPorAsesorId: row.captadaPorAsesorId ? idUsuarioRef(row.captadaPorAsesorId) : undefined,
@@ -29,11 +31,11 @@ export class PropiedadMapper {
       descripcion: propiedad.descripcion,
       precio: propiedad.precio,
       origen: propiedad.origen,
-      estado: propiedad.estado,
+      estado: propiedad.estado.valor,
       idLeadOrigen: propiedad.idLeadOrigen,
       idClientePropietario: propiedad.idClientePropietario,
-      captadaPorAsesorId: propiedad.captadaPorAsesorId,
-      asesorResponsableId: propiedad.asesorResponsableId,
+      captadaPorAsesorId: propiedad.captadaPorAsesorId as string | undefined,
+      asesorResponsableId: propiedad.asesorResponsableId as string | undefined,
       creadoEn: propiedad.creadoEn.toISOString(),
       actualizadoEn: propiedad.actualizadoEn.toISOString(),
     };

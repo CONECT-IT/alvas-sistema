@@ -5,9 +5,10 @@
 	interface Props {
 		leads: LeadPipeline[];
 		onLeadClick?: (lead: LeadPipeline) => void;
+		onEditClick?: (lead: LeadPipeline) => void;
 	}
 
-	let { leads, onLeadClick }: Props = $props();
+	let { leads, onLeadClick, onEditClick }: Props = $props();
 
 	function getEstadoTone(estado: string): 'brand' | 'success' | 'neutral' {
 		const normalized = estado.toUpperCase();
@@ -26,6 +27,7 @@
 				<th class="pb-3">Estado</th>
 				<th class="pb-3">Asesor</th>
 				<th class="pb-3">Citas</th>
+				<th class="w-20 pb-3">Acción</th>
 			</tr>
 		</thead>
 		<tbody class="divide-y divide-border-light text-sm">
@@ -44,8 +46,19 @@
 					<td class="py-4 pr-6">
 						<Badge tone={getEstadoTone(lead.estado)}>{lead.estado}</Badge>
 					</td>
-					<td class="py-4 pr-6 text-text-muted">{lead.idAsesor || '-'}</td>
+					<td class="py-4 pr-6 text-text-muted">{lead.nombreAsesor || lead.idAsesor || '-'}</td>
 					<td class="py-4 text-text-muted">{lead.citasCount}</td>
+					<td class="py-4 pl-3">
+						{#if onEditClick}
+							<button
+								class="rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary transition hover:bg-primary/20"
+								onclick={(e) => {
+									e.stopPropagation();
+									onEditClick(lead);
+								}}>Editar</button
+							>
+						{/if}
+					</td>
 				</tr>
 			{/each}
 		</tbody>

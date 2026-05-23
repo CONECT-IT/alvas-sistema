@@ -84,12 +84,12 @@ export class PropiedadController {
         titulo: p.titulo,
         descripcion: p.descripcion,
         precio: p.precio,
-        origen: p.origen,
-        estado: p.estado,
+        origen: p.origen as string,
+        estado: p.estado.valor,
         idLeadOrigen: p.idLeadOrigen,
         idClientePropietario: p.idClientePropietario,
-        captadaPorAsesorId: p.captadaPorAsesorId,
-        asesorResponsableId: p.asesorResponsableId,
+        captadaPorAsesorId: p.captadaPorAsesorId as string | undefined,
+        asesorResponsableId: p.asesorResponsableId as string | undefined,
       }));
 
       return c.json({

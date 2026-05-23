@@ -1,18 +1,9 @@
 import { idPropiedad, type IdPropiedad, type IdUsuarioRef } from "../value-objects";
+import { EstadoPropiedad } from "../value-objects/EstadoPropiedad";
 import { PropiedadError } from "../errors/PropiedadError";
 
 export const ORIGENES_PROPIEDAD = ["ALVAS", "CLIENTE", "CAPTACION"] as const;
 export type OrigenPropiedad = (typeof ORIGENES_PROPIEDAD)[number];
-
-export const ESTADOS_PROPIEDAD = [
-  "PRELIMINAR",
-  "EN_VALIDACION",
-  "DISPONIBLE",
-  "RESERVADA",
-  "VENDIDA",
-  "DESCARTADA",
-] as const;
-export type EstadoPropiedad = (typeof ESTADOS_PROPIEDAD)[number];
 
 type PropsPropiedad = {
   id: IdPropiedad;
@@ -46,14 +37,6 @@ const normalizarOrigen = (valor?: string): OrigenPropiedad => {
   return normalizado as OrigenPropiedad;
 };
 
-const normalizarEstado = (valor?: string): EstadoPropiedad => {
-  const normalizado = (valor ?? "DISPONIBLE").trim().toUpperCase();
-  if (!ESTADOS_PROPIEDAD.includes(normalizado as EstadoPropiedad)) {
-    throw new PropiedadError("El estado de la propiedad no es valido.", "ESTADO_INVALIDO");
-  }
-  return normalizado as EstadoPropiedad;
-};
-
 const textoOpcional = (valor?: string): string | undefined => valor?.trim() || undefined;
 
 export class Propiedad {
@@ -82,7 +65,7 @@ export class Propiedad {
       descripcion: params.descripcion.trim(),
       precio: params.precio,
       origen: normalizarOrigen(params.origen),
-      estado: normalizarEstado(params.estado),
+      estado: EstadoPropiedad.desde(params.estado ?? "DISPONIBLE"),
       idLeadOrigen: textoOpcional(params.idLeadOrigen),
       idClientePropietario: textoOpcional(params.idClientePropietario),
       captadaPorAsesorId: params.captadaPorAsesorId
@@ -161,7 +144,7 @@ export class Propiedad {
     }
 
     if (datos.estado !== undefined) {
-      this.props.estado = normalizarEstado(datos.estado);
+      this.props.estado = EstadoPropiedad.desde(datos.estado);
     }
 
     if (datos.idClientePropietario !== undefined) {

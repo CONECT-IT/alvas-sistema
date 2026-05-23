@@ -5,6 +5,9 @@ import {
   responderErrorInterno,
   type VentasControllerDeps,
 } from "./VentasHttp";
+import { D1VentasRepository } from "../persistence/D1VentasRepository";
+import { D1PropiedadRepository } from "../../../propiedades/infrastructure/persistence/D1PropiedadRepository";
+import { idLead, idPropiedad } from "../../domain/value-objects/Ids";
 
 export class ContratosController {
   constructor(private readonly deps: VentasControllerDeps) {}
@@ -40,7 +43,32 @@ export class ContratosController {
         return responderErrorDeDominio(c, resultado.error);
       }
 
-      return c.json({ success: true, data: resultado.valor.contratos });
+      const ventasRepo = new D1VentasRepository(c.env.DB);
+      const propRepo = new D1PropiedadRepository(c.env.DB);
+
+      const data = await Promise.all(
+        (resultado.valor.contratos ?? []).map(async (ctr) => {
+          let nombreLead: string | undefined;
+          let nombrePropiedad: string | undefined;
+
+          if (ctr.idLead) {
+            const lead = await ventasRepo.obtenerLeadPorId(idLead(ctr.idLead));
+            nombreLead = lead?.nombre;
+          }
+          if (ctr.idPropiedad) {
+            try {
+              const prop = await propRepo.obtenerPorId(idPropiedad(ctr.idPropiedad));
+              nombrePropiedad = prop?.titulo;
+            } catch {
+              /* ignorar */
+            }
+          }
+
+          return { ...ctr, nombreLead, nombrePropiedad };
+        }),
+      );
+
+      return c.json({ success: true, data });
     } catch (error) {
       return responderErrorInterno(c, "ContratosController.listar:", error);
     }
@@ -57,7 +85,32 @@ export class ContratosController {
         return responderErrorDeDominio(c, resultado.error);
       }
 
-      return c.json({ success: true, data: resultado.valor.contratos });
+      const ventasRepo = new D1VentasRepository(c.env.DB);
+      const propRepo = new D1PropiedadRepository(c.env.DB);
+
+      const data = await Promise.all(
+        (resultado.valor.contratos ?? []).map(async (ctr) => {
+          let nombreLead: string | undefined;
+          let nombrePropiedad: string | undefined;
+
+          if (ctr.idLead) {
+            const lead = await ventasRepo.obtenerLeadPorId(idLead(ctr.idLead));
+            nombreLead = lead?.nombre;
+          }
+          if (ctr.idPropiedad) {
+            try {
+              const prop = await propRepo.obtenerPorId(idPropiedad(ctr.idPropiedad));
+              nombrePropiedad = prop?.titulo;
+            } catch {
+              /* ignorar */
+            }
+          }
+
+          return { ...ctr, nombreLead, nombrePropiedad };
+        }),
+      );
+
+      return c.json({ success: true, data });
     } catch (error) {
       return responderErrorInterno(c, "ContratosController.listarPorAsesor:", error);
     }

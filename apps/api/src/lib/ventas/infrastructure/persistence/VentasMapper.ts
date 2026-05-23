@@ -1,10 +1,9 @@
 import { Lead } from "../../domain/entities/Lead";
 import { Cita } from "../../domain/entities/Cita";
 import { Cliente } from "../../domain/entities/Cliente";
-import { Contrato } from "../../domain/entities/Contrato";
-import { type ValorEstadoCita } from "../../domain/entities/Cita";
-import { type ValorEstadoContrato } from "../../domain/entities/Contrato";
+import { Contrato, type ValorEstadoContrato } from "../../domain/entities/Contrato";
 import { EstadoLead } from "../../domain/value-objects/EstadoLead";
+import { EstadoCita } from "../../domain/value-objects/EstadoCita";
 import { TipoVenta } from "../../domain/value-objects/TipoVenta";
 import { idUsuarioRef } from "../../../shared/domain/value-objects/IdUsuarioRef";
 import { type LeadRow, type ClienteRow, type CitaVentaRow, type ContratoRow } from "./schema";
@@ -17,8 +16,8 @@ export class VentasMapper {
       nombre: row.nombre,
       email: row.email,
       telefono: row.telefono,
-      tipo: new TipoVenta(row.tipo),
-      estado: new EstadoLead(row.estado),
+      tipo: TipoVenta.desde(row.tipo),
+      estado: EstadoLead.desde(row.estado),
       idAsesor: idUsuarioRef(row.idAsesor),
       idCliente: row.idCliente ? idCliente(row.idCliente) : undefined,
       idPropiedadInteres: row.idPropiedadInteres ? idPropiedad(row.idPropiedadInteres) : undefined,
@@ -51,7 +50,7 @@ export class VentasMapper {
       idPropiedad: row.idPropiedad ?? undefined,
       fechaInicio: new Date(row.fechaInicio),
       fechaFin: new Date(row.fechaFin),
-      estado: row.estado as ValorEstadoCita,
+      estado: EstadoCita.desde(row.estado),
       observacion: row.observacion ?? undefined,
     });
   }
@@ -63,7 +62,7 @@ export class VentasMapper {
       idPropiedad: cita.idPropiedad,
       fechaInicio: cita.fechaInicio.toISOString(),
       fechaFin: cita.fechaFin.toISOString(),
-      estado: cita.estado,
+      estado: cita.estado.valor,
       observacion: cita.observacion,
     };
   }
@@ -116,7 +115,7 @@ export class VentasMapper {
       idPropiedad: contrato.idPropiedad as string,
       fechaInicio: contrato.fechaInicio.toISOString(),
       fechaFin: contrato.fechaFin.toISOString(),
-      estado: contrato.estado,
+      estado: contrato.estado as string,
       creadoEn: contrato.creadoEn.toISOString(),
       actualizadoEn: contrato.actualizadoEn.toISOString(),
     };

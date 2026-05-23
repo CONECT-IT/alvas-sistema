@@ -41,7 +41,7 @@ export class Lead {
       nombre: params.nombre,
       email: params.email,
       telefono: params.telefono,
-      tipo: new TipoVenta(params.tipo),
+      tipo: TipoVenta.desde(params.tipo),
       estado: EstadoLead.nuevo(),
       idAsesor: params.idAsesor as IdUsuarioRef,
       idPropiedadInteres: params.idPropiedadInteres as IdPropiedad | undefined,
@@ -102,12 +102,12 @@ export class Lead {
   }
 
   cambiarEstado(nuevoEstado: string): void {
-    this.props.estado = new EstadoLead(nuevoEstado);
+    this.props.estado = EstadoLead.desde(nuevoEstado);
     this.props.actualizadoEn = new Date();
   }
 
   convertirACliente(idCliente: IdCliente): void {
-    if (this.props.estado.valor === "CONVERTIDO") {
+    if (this.props.estado.esConvertido()) {
       throw new ErrorDeValidacion("El lead ya ha sido convertido a cliente.");
     }
     this.props.estado = EstadoLead.convertido();
@@ -121,7 +121,7 @@ export class Lead {
 
   obtenerVisitasRealizadas(): Cita[] {
     return [...this.props.citas]
-      .filter((cita) => cita.estado === "REALIZADA")
+      .filter((cita) => cita.estado.esRealizada())
       .sort((a, b) => a.fechaInicio.getTime() - b.fechaInicio.getTime());
   }
 
@@ -190,7 +190,7 @@ export class Lead {
     }
 
     if (params.tipo !== undefined) {
-      this.props.tipo = new TipoVenta(params.tipo);
+      this.props.tipo = TipoVenta.desde(params.tipo);
     }
 
     this.props.actualizadoEn = new Date();

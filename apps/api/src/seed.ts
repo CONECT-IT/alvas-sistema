@@ -9,6 +9,7 @@ import { Cliente } from "./lib/ventas/domain/entities/Cliente";
 import { Cita } from "./lib/ventas/domain/entities/Cita";
 import { Contrato } from "./lib/ventas/domain/entities/Contrato";
 import { Propiedad } from "./lib/propiedades/domain/entities";
+import { EstadoLead } from "./lib/ventas/domain/value-objects/EstadoLead";
 import { type D1DatabaseLike } from "./lib/shared/infrastructure";
 import {
   idCita,
@@ -112,7 +113,20 @@ export async function ejecutarSeed(env: SeedEnv): Promise<string[]> {
   }
 
   // ── Leads ─────────────────────────────────────────────────
-  const leadsSeed = [
+  const ahora = new Date();
+
+  type LeadSeed = {
+    id: string;
+    nombre: string;
+    email: string;
+    telefono: string;
+    tipo: string;
+    idAsesor: string;
+    idPropiedadInteres?: string;
+    estadoOverride?: EstadoLead;
+  };
+
+  const leadsSeed: LeadSeed[] = [
     {
       id: "lead-001",
       nombre: "María Torres",
@@ -121,6 +135,7 @@ export async function ejecutarSeed(env: SeedEnv): Promise<string[]> {
       tipo: "COMPRA",
       idAsesor: "jramirez",
       idPropiedadInteres: "prop-001",
+      estadoOverride: EstadoLead.desde("CONTACTO"),
     },
     {
       id: "lead-002",
@@ -138,6 +153,7 @@ export async function ejecutarSeed(env: SeedEnv): Promise<string[]> {
       telefono: "999555666",
       tipo: "VENTA",
       idAsesor: "lmartinez",
+      estadoOverride: EstadoLead.desde("TRABAJANDO"),
     },
     {
       id: "lead-004",
@@ -156,26 +172,112 @@ export async function ejecutarSeed(env: SeedEnv): Promise<string[]> {
       tipo: "VENTA",
       idAsesor: "jramirez",
     },
+    {
+      id: "lead-006",
+      nombre: "Ricardo Mendoza",
+      email: "ricardo@example.com",
+      telefono: "999222333",
+      tipo: "COMPRA",
+      idAsesor: "jramirez",
+      idPropiedadInteres: "prop-001",
+    },
+    {
+      id: "lead-007",
+      nombre: "Carmen Flores",
+      email: "carmen@example.com",
+      telefono: "999444555",
+      tipo: "VENTA",
+      idAsesor: "lmartinez",
+    },
+    {
+      id: "lead-008",
+      nombre: "Diego Castillo",
+      email: "diego@example.com",
+      telefono: "999666777",
+      tipo: "COMPRA",
+      idAsesor: "jramirez",
+    },
+    {
+      id: "lead-009",
+      nombre: "Valeria Ríos",
+      email: "valeria@example.com",
+      telefono: "999888999",
+      tipo: "VENTA",
+      idAsesor: "lmartinez",
+      estadoOverride: EstadoLead.desde("PERDIDO"),
+    },
   ];
 
   for (const l of leadsSeed) {
-    const leadExistente = await ventasRepo.obtenerLeadPorId(idLead(l.id));
+    const idL = idLead(l.id);
+    const leadExistente = await ventasRepo.obtenerLeadPorId(idL);
     if (leadExistente) {
       push(`  ↺ Lead ${l.id} ya existe, se omite`);
       continue;
     }
     const lead = Lead.registrar({
-      ...l,
+      id: l.id,
+      nombre: l.nombre,
+      email: l.email,
+      telefono: l.telefono,
+      tipo: l.tipo,
       idAsesor: l.idAsesor,
       idPropiedadInteres: l.idPropiedadInteres,
     });
+
+    if (l.estadoOverride) {
+      lead.cambiarEstado(l.estadoOverride.valor);
+    }
+
     await ventasRepo.guardarLead(lead);
-    await ventasRepo.registrarActividad(idLead(l.id), "LEAD_CREADO", "Lead registrado vía seed");
+    await ventasRepo.registrarActividad(idL, "LEAD_CREADO", "Lead registrado vía seed");
     push(`  ✔ Lead ${l.id} (${l.nombre})`);
   }
 
+  // ── Propiedades PRELIMINAR para leads vendedor ───────────
+  const preliminaresSeed = [
+    {
+      id: "prop-prel-001",
+      idLead: "lead-003",
+      titulo: "Casa en La Molina (Venta - Ana García)",
+      descripcion: "Casa de 4 dormitorios con amplio jardín",
+      precio: 520000,
+    },
+    {
+      id: "prop-prel-002",
+      idLead: "lead-005",
+      titulo: "Departamento en Barranco (Venta - Sofía Díaz)",
+      descripcion: "Departamento de 3 dormitorios con terraza",
+      precio: 380000,
+    },
+    {
+      id: "prop-prel-003",
+      idLead: "lead-007",
+      titulo: "Casa en Chorrillos (Venta - Carmen Flores)",
+      descripcion: "Casa de 2 dormitorios cerca al malecón",
+      precio: 250000,
+    },
+  ];
+
+  for (const p of preliminaresSeed) {
+    const existe = await propiedadRepo.existePorId(idPropiedad(p.id));
+    if (existe) {
+      push(`  ↺ Propiedad preliminar ${p.id} ya existe, se omite`);
+      continue;
+    }
+    const prop = Propiedad.crear({
+      id: p.id,
+      titulo: p.titulo,
+      descripcion: p.descripcion,
+      precio: p.precio,
+      estado: "PRELIMINAR",
+      idLeadOrigen: p.idLead,
+    });
+    await propiedadRepo.guardar(prop);
+    push(`  ✔ Propiedad preliminar ${p.id} (${p.titulo})`);
+  }
+
   // ── Citas ─────────────────────────────────────────────────
-  const ahora = new Date();
   const citasSeed = [
     {
       id: "cita-001",
@@ -183,7 +285,7 @@ export async function ejecutarSeed(env: SeedEnv): Promise<string[]> {
       idPropiedad: "prop-001",
       fechaInicio: new Date(ahora.getTime() + 86400000),
       fechaFin: new Date(ahora.getTime() + 86400000 + 3600000),
-      observacion: "Primera visita",
+      observacion: "Primera visita - Casa en Surco",
     },
     {
       id: "cita-002",
@@ -191,7 +293,23 @@ export async function ejecutarSeed(env: SeedEnv): Promise<string[]> {
       idPropiedad: "prop-002",
       fechaInicio: new Date(ahora.getTime() + 172800000),
       fechaFin: new Date(ahora.getTime() + 172800000 + 3600000),
-      observacion: "Segunda visita",
+      observacion: "Segunda visita - Depto Miraflores",
+    },
+    {
+      id: "cita-003",
+      idLead: "lead-004",
+      idPropiedad: "prop-004",
+      fechaInicio: new Date(ahora.getTime() + 259200000),
+      fechaFin: new Date(ahora.getTime() + 259200000 + 3600000),
+      observacion: "Primera visita - Local San Isidro",
+    },
+    {
+      id: "cita-004",
+      idLead: "lead-006",
+      idPropiedad: "prop-001",
+      fechaInicio: new Date(ahora.getTime() - 86400000),
+      fechaFin: new Date(ahora.getTime() - 86400000 + 3600000),
+      observacion: "Visita realizada - Casa en Surco",
     },
   ];
 
@@ -211,7 +329,6 @@ export async function ejecutarSeed(env: SeedEnv): Promise<string[]> {
       idPropiedad: c.idPropiedad ? idPropiedad(c.idPropiedad) : undefined,
       fechaInicio: c.fechaInicio,
       fechaFin: c.fechaFin,
-      estado: "PENDIENTE",
       observacion: c.observacion,
     });
     lead.agendarCita(cita);
@@ -228,6 +345,7 @@ export async function ejecutarSeed(env: SeedEnv): Promise<string[]> {
   const contratosSeed = [
     { id: "contrato-001", idLead: "lead-001", idPropiedad: "prop-001", meses: 12 },
     { id: "contrato-002", idLead: "lead-003", idPropiedad: "prop-003", meses: 6 },
+    { id: "contrato-003", idLead: "lead-004", idPropiedad: "prop-004", meses: 24 },
   ];
 
   for (const c of contratosSeed) {
@@ -267,6 +385,22 @@ export async function ejecutarSeed(env: SeedEnv): Promise<string[]> {
       telefono: "999111222",
       idAsesor: idUsuarioRef("jramirez"),
       idLeadOrigen: idLead("lead-001"),
+    },
+    {
+      id: "cliente-002",
+      nombre: "Pedro Sánchez (Cliente)",
+      email: "pedro.cliente@example.com",
+      telefono: "999777888",
+      idAsesor: idUsuarioRef("lmartinez"),
+      idLeadOrigen: idLead("lead-004"),
+    },
+    {
+      id: "cliente-003",
+      nombre: "Ana García (Cliente)",
+      email: "ana.cliente@example.com",
+      telefono: "999555666",
+      idAsesor: idUsuarioRef("lmartinez"),
+      idLeadOrigen: idLead("lead-003"),
     },
   ];
 

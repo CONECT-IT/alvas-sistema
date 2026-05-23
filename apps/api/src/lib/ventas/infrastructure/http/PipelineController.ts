@@ -4,6 +4,8 @@ import {
   responderErrorInterno,
   type VentasControllerDeps,
 } from "./VentasHttp";
+import { D1UsuarioRepository } from "../../../usuarios/infrastructure/persistence/D1UsuarioRepository";
+import { IdUsuario } from "../../../usuarios/domain/value-objects/IdUsuario";
 
 export class PipelineController {
   constructor(private readonly deps: VentasControllerDeps) {}
@@ -11,6 +13,7 @@ export class PipelineController {
   async listar(c: ContextoVentas): Promise<Response> {
     try {
       const authPayload = c.get("authPayload");
+      const usuarioRepo = new D1UsuarioRepository(c.env.DB);
 
       let leads;
 
@@ -31,23 +34,38 @@ export class PipelineController {
 
       return c.json({
         success: true,
-        data: leads.map((lead) => ({
-          id: lead.id as string,
-          nombre: lead.nombre,
-          estado: lead.estado.valor,
-          tipo: lead.tipo.valor,
-          idAsesor: lead.idAsesor as string,
-          citasCount: lead.citas.length,
-          citas: lead.citas.map((cita) => ({
-            id: cita.id as string,
-            idLead: cita.idLead as string,
-            idPropiedad: cita.idPropiedad,
-            fechaInicio: cita.fechaInicio.toISOString(),
-            fechaFin: cita.fechaFin.toISOString(),
-            estado: cita.estado,
-            observacion: cita.observacion,
-          })),
-        })),
+        data: await Promise.all(
+          leads.map(async (lead) => {
+            let nombreAsesor: string | undefined;
+            try {
+              const usuario = await usuarioRepo.obtenerPorId(
+                new IdUsuario(lead.idAsesor as string),
+              );
+              nombreAsesor = usuario?.nombre.valor;
+            } catch {
+              /* lookup opcional */
+            }
+
+            return {
+              id: lead.id as string,
+              nombre: lead.nombre,
+              estado: lead.estado?.valor ?? lead.estado,
+              tipo: lead.tipo?.valor ?? lead.tipo,
+              idAsesor: lead.idAsesor as string,
+              nombreAsesor,
+              citasCount: lead.citas.length,
+              citas: lead.citas.map((cita) => ({
+                id: cita.id as string,
+                idLead: cita.idLead as string,
+                idPropiedad: cita.idPropiedad,
+                fechaInicio: cita.fechaInicio.toISOString(),
+                fechaFin: cita.fechaFin.toISOString(),
+                estado: cita.estado?.valor ?? cita.estado,
+                observacion: cita.observacion,
+              })),
+            };
+          }),
+        ),
       });
     } catch (error) {
       return responderErrorInterno(c, "PipelineController.listar:", error);

@@ -6,6 +6,11 @@ export type RegistrarLeadInput = Readonly<{
 	telefono: string;
 	tipo: 'COMPRA' | 'VENTA';
 	idPropiedadInteres?: string;
+	datosPropiedad?: {
+		titulo: string;
+		descripcion: string;
+		precio: number;
+	};
 }>;
 
 export function registrarLead(repository: VentasRepository, input: RegistrarLeadInput) {

@@ -3,25 +3,32 @@ import { TipoVenta, TIPOS_VENTA } from "./TipoVenta";
 import { ErrorDeDominio } from "../../../shared/domain";
 
 describe("Value Object: TipoVenta", () => {
-  test("Debe crear tipos validos normalizando mayusculas y espacios", () => {
+  test("Debe crear tipos validos via factory desde(), normalizando mayusculas y espacios", () => {
     for (const valor of TIPOS_VENTA) {
-      expect(new TipoVenta(valor.toLowerCase()).valor).toBe(valor);
-      expect(new TipoVenta(`  ${valor}  `).valor).toBe(valor);
+      expect(TipoVenta.desde(valor.toLowerCase()).valor).toBe(valor);
+      expect(TipoVenta.desde(`  ${valor}  `).valor).toBe(valor);
     }
+  });
+
+  test("Debe crear instancias con factory methods estaticos", () => {
+    expect(TipoVenta.compra().valor).toBe("COMPRA");
+    expect(TipoVenta.venta().valor).toBe("VENTA");
+    expect(TipoVenta.compra().esCompra()).toBe(true);
+    expect(TipoVenta.venta().esVenta()).toBe(true);
   });
 
   test("Debe lanzar ErrorDeDominio si el tipo es invalido", () => {
     expect(() => {
-      new TipoVenta("PRESTAMO");
+      TipoVenta.desde("PRESTAMO");
     }).toThrow(ErrorDeDominio);
     expect(() => {
-      new TipoVenta(" VENTA FUTURA ");
+      TipoVenta.desde(" VENTA FUTURA ");
     }).toThrow("Tipo de venta inválido:  VENTA FUTURA ");
   });
 
   test("Debe identificar compra y venta sin ambiguedad", () => {
-    const compra = new TipoVenta("COMPRA");
-    const venta = new TipoVenta("VENTA");
+    const compra = TipoVenta.compra();
+    const venta = TipoVenta.venta();
 
     expect(compra.esCompra()).toBe(true);
     expect(compra.esVenta()).toBe(false);

@@ -63,7 +63,6 @@ export class AgendarCitaUseCase
         idPropiedad: input.idPropiedad,
         fechaInicio: input.fechaInicio,
         fechaFin: fechaFin,
-        estado: "PENDIENTE",
         observacion: input.observacion,
       });
 

@@ -16,7 +16,7 @@ export class ConsultaVentasParaReportesAdapter implements IConsultaVentasParaRep
       id: l.id as string,
       estado: l.estado.valor,
       creadoEn: l.creadoEn,
-      citas: l.citas.map((c) => ({ estado: c.estado })),
+      citas: l.citas.map((c) => ({ estado: c.estado.valor })),
     }));
   }
 

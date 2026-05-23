@@ -119,7 +119,7 @@
 									</h3>
 								</button>
 								<p class="mt-1 text-sm text-text-muted">
-									Propiedad: {contrato.idPropiedad}
+									Propiedad: {contrato.nombrePropiedad || contrato.idPropiedad}
 								</p>
 							</div>
 							<span
@@ -134,11 +134,15 @@
 						<div class="grid gap-2 text-sm sm:grid-cols-2">
 							<div>
 								<span class="font-semibold text-text-main">Lead:</span>
-								<span class="ml-1 text-text-muted">{contrato.idLead ?? '—'}</span>
+								<span class="ml-1 text-text-muted"
+									>{contrato.nombreLead || contrato.idLead || '—'}</span
+								>
 							</div>
 							<div>
 								<span class="font-semibold text-text-main">Asesor:</span>
-								<span class="ml-1 text-text-muted">{contrato.idAsesor ?? '—'}</span>
+								<span class="ml-1 text-text-muted"
+									>{contrato.nombreAsesor || contrato.idAsesor || '—'}</span
+								>
 							</div>
 							<div>
 								<span class="font-semibold text-text-main">Cliente:</span>

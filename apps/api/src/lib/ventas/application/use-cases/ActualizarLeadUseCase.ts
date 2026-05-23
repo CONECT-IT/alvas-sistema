@@ -8,6 +8,7 @@ import { ErrorDeDominio } from "../../../shared/domain";
 import { type IVentasRepository } from "../../domain/ports/IVentasRepository";
 import { type IAutorizadorVentas } from "../../domain/ports/IAutorizadorVentas";
 import { idLead } from "../../domain/value-objects/Ids";
+import { TipoVenta } from "../../domain/value-objects/TipoVenta";
 import { type IConsultaPropiedadInteres } from "../../domain/ports/IConsultaPropiedadInteres";
 import { type IActualizarLead } from "../ports/in";
 import { type UsuarioAutenticadoVentas } from "./RegistrarLeadUseCase";
@@ -93,8 +94,8 @@ export class ActualizarLeadUseCase
       return resultadoExitoso(undefined);
     }
 
-    const tipoFinal = (input.tipo ?? tipoActual).trim().toUpperCase();
-    if (tipoFinal !== "COMPRA") {
+    const tipoFinal = TipoVenta.desde(input.tipo ?? tipoActual);
+    if (!tipoFinal.esCompra()) {
       return resultadoFallido(
         new ErrorDeDominio("Solo los leads compradores pueden relacionarse con una propiedad.", {
           codigo: "PROPIEDAD_INTERES_NO_APLICA",
