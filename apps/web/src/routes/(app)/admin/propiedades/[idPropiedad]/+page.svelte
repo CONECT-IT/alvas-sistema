@@ -87,7 +87,7 @@
 	function getEstadoTone(e: string): 'brand' | 'success' | 'warning' | 'neutral' {
 		const n = e.toUpperCase();
 		if (n === 'DISPONIBLE') return 'success';
-		if (n === 'PRELIMINAR') return 'warning';
+		if (n === 'BORRADOR') return 'warning';
 		if (n === 'RESERVADA') return 'brand';
 		return 'neutral';
 	}
@@ -159,12 +159,11 @@
 						bind:value={estado}
 						class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
 					>
-						<option value="PRELIMINAR">Preliminar (Borrador)</option>
-						<option value="EN_VALIDACION">En Validación</option>
+						<option value="BORRADOR">Borrador</option>
 						<option value="DISPONIBLE">Disponible (Pública)</option>
 						<option value="RESERVADA">Reservada</option>
 						<option value="VENDIDA">Vendida</option>
-						<option value="DESCARTADA">Descartada</option>
+						<option value="ARCHIVADA">Archivada</option>
 					</select>
 				</label>
 

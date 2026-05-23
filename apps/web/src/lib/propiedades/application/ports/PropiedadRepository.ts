@@ -4,6 +4,7 @@ import type { CrearPropiedadInput } from '../use-cases/crearPropiedad';
 
 export interface PropiedadRepository {
 	listar(): Promise<Propiedad[]>;
+	obtener(id: string): Promise<Propiedad | null>;
 	crear(input: CrearPropiedadInput): Promise<string>;
 	actualizar(input: ActualizarPropiedadInput): Promise<void>;
 }

@@ -22,4 +22,5 @@ export interface VentasRepository {
 	firmarContrato(idContrato: string): Promise<void>;
 	cancelarContrato(idContrato: string): Promise<void>;
 	listarContratos(): Promise<ContratoDTO[]>;
+	listarPropiedadesPorCliente(idLead: string): Promise<string[]>;
 }

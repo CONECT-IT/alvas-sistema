@@ -27,11 +27,11 @@
 	let estado = $state('DISPONIBLE');
 	let asesorResponsableId = $state('');
 	const skeletonCards = [1, 2, 3];
-	const estados = ['PRELIMINAR', 'EN_VALIDACION', 'DISPONIBLE', 'RESERVADA'];
-	const captaciones = $derived(propiedades.filter((p) => p.estado.toUpperCase() === 'PRELIMINAR'));
+	const estados = ['BORRADOR', 'DISPONIBLE', 'RESERVADA', 'VENDIDA', 'ARCHIVADA'];
+	const captaciones = $derived(propiedades.filter((p) => p.estado.toUpperCase() === 'BORRADOR'));
 	const disponibles = $derived(propiedades.filter((p) => p.estado.toUpperCase() === 'DISPONIBLE'));
 	const otras = $derived(
-		propiedades.filter((p) => !['PRELIMINAR', 'DISPONIBLE'].includes(p.estado.toUpperCase()))
+		propiedades.filter((p) => !['BORRADOR', 'DISPONIBLE'].includes(p.estado.toUpperCase()))
 	);
 
 	async function cargarPropiedades() {
@@ -302,7 +302,7 @@
 									<Button
 										variant="secondary"
 										disabled={updatingId === propiedad.id}
-										onclick={() => cambiarEstadoPropiedad(propiedad, 'EN_VALIDACION')}
+										onclick={() => cambiarEstadoPropiedad(propiedad, 'BORRADOR')}
 									>
 										Validar datos
 									</Button>
@@ -315,7 +315,7 @@
 									<Button
 										variant="ghost"
 										disabled={updatingId === propiedad.id}
-										onclick={() => cambiarEstadoPropiedad(propiedad, 'DESCARTADA')}
+										onclick={() => cambiarEstadoPropiedad(propiedad, 'ARCHIVADA')}
 									>
 										Descartar
 									</Button>

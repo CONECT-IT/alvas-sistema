@@ -162,4 +162,12 @@ export class HttpVentasRepository implements VentasRepository {
 
 		return response.data;
 	}
+
+	async listarPropiedadesPorCliente(idLead: string): Promise<string[]> {
+		const response = await httpClient.get<ApiSuccessResponse<{ id: string }[]>>(
+			`${this.apiBaseUrl}/propiedades?leadId=${encodeURIComponent(idLead)}`
+		);
+
+		return response.data.map((propiedad) => propiedad.id);
+	}
 }

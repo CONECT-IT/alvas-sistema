@@ -1,4 +1,10 @@
-export type EstadoPropiedad = 'DISPONIBLE' | 'RESERVADA' | 'VENDIDA' | 'INACTIVA' | string;
+export type EstadoPropiedad =
+	| 'BORRADOR'
+	| 'DISPONIBLE'
+	| 'RESERVADA'
+	| 'VENDIDA'
+	| 'ARCHIVADA'
+	| string;
 
 export type OrigenPropiedad = 'MANUAL' | 'CAPTACION' | string;
 

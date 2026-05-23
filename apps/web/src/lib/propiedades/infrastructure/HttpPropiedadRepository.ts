@@ -23,6 +23,11 @@ export class HttpPropiedadRepository implements PropiedadRepository {
 		return response.data.map(mapPropiedadFromDto);
 	}
 
+	async obtener(id: string): Promise<Propiedad | null> {
+		const propiedades = await this.listar();
+		return propiedades.find((propiedad) => propiedad.id === id) ?? null;
+	}
+
 	async crear(input: CrearPropiedadInput): Promise<string> {
 		const body: CrearPropiedadRequestDTO = {
 			titulo: input.titulo,

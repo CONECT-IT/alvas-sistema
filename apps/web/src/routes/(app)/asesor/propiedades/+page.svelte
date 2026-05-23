@@ -14,10 +14,10 @@
 	let error = $state<string | null>(null);
 	let mostrarSoloPublicadas = $state(false);
 
-	const captaciones = $derived(propiedades.filter((p) => p.estado.toUpperCase() === 'PRELIMINAR'));
+	const captaciones = $derived(propiedades.filter((p) => p.estado.toUpperCase() === 'BORRADOR'));
 	const disponibles = $derived(propiedades.filter((p) => p.estado.toUpperCase() === 'DISPONIBLE'));
 	const otras = $derived(
-		propiedades.filter((p) => !['PRELIMINAR', 'DISPONIBLE'].includes(p.estado.toUpperCase()))
+		propiedades.filter((p) => !['BORRADOR', 'DISPONIBLE'].includes(p.estado.toUpperCase()))
 	);
 
 	async function cargarPropiedades() {
