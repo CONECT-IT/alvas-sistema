@@ -154,3 +154,15 @@ Deuda registrada: `apps/api/src/lib/auth/domain/ports/ITokenProvider.ts` importa
 - Reporte de Stryker: artefacto `stryker-report`.
 - Log de walkthrough cruzado: `docs/walkthrough-log.md`.
 - Tag esperado al cierre: `v1.1.0`.
+
+## Especificaciones SDD
+
+Las especificaciones humanas viven en `docs/specs/`. Ese directorio define reglas de negocio, lenguaje ubicuo, criterios de aceptacion y trazabilidad hacia tests ejecutables (`unit`, `bdd`, `http`, `contract`, component y E2E).
+
+## Deuda tecnica
+
+El roadmap de deuda tecnica vive en `docs/technical-debt-roadmap.md`. Consolida hallazgos del audit generado y los separa entre verificados, parcialmente corregidos y pendientes de validacion.
+
+## Roadmap
+
+El plan de trabajo consolidado vive en `docs/roadmap-alvas.md`. Define fases, capas de testing, deuda arquitectonica, specs SDD y reglas de lenguaje ubicuo.
