@@ -20,6 +20,28 @@
 
 	const userId = $derived($authStore.user?.id ?? '');
 
+	let tema = $state<'light' | 'dark'>('light');
+
+	function cargarTema() {
+		if (typeof localStorage !== 'undefined') {
+			const guardado = localStorage.getItem('alvas-tema');
+			if (guardado === 'dark' || guardado === 'light') {
+				tema = guardado;
+			}
+		}
+		aplicarTema();
+	}
+
+	function aplicarTema() {
+		document.documentElement.setAttribute('data-tema', tema);
+		localStorage.setItem('alvas-tema', tema);
+	}
+
+	function toggleTema() {
+		tema = tema === 'light' ? 'dark' : 'light';
+		aplicarTema();
+	}
+
 	async function cargar() {
 		if (!userId) {
 			usuario = null;
@@ -81,6 +103,7 @@
 	$effect(() => {
 		if (!userId) return;
 		cargar();
+		cargarTema();
 	});
 </script>
 
@@ -100,7 +123,7 @@
 			<p class="text-sm font-semibold tracking-[0.18em] text-primary uppercase">Cuenta</p>
 			<h1 class="mt-2 font-display text-3xl font-bold text-text-main">Mi perfil</h1>
 			<p class="mt-2 max-w-2xl text-sm leading-relaxed text-text-muted">
-				Actualiza tu nombre visible y usuario de acceso.
+				Actualiza tu información personal y preferencias de la aplicación.
 			</p>
 		</div>
 
@@ -156,5 +179,31 @@
 				</form>
 			</Card>
 		</div>
+
+		<Card>
+			<h2 class="mb-4 font-display text-xl font-bold text-text-main">Preferencias</h2>
+			<div class="flex items-center justify-between">
+				<div>
+					<p class="font-semibold text-text-main">Tema</p>
+					<p class="mt-1 text-sm text-text-muted">
+						Alterna entre modo claro y oscuro para la interfaz.
+					</p>
+				</div>
+				<button
+					onclick={toggleTema}
+					class="relative flex h-8 w-14 cursor-pointer items-center rounded-full bg-surface-muted p-1 transition-colors"
+					aria-label="Cambiar tema"
+				>
+					<span
+						class="flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs shadow-md transition-transform {tema ===
+						'dark'
+							? 'translate-x-6'
+							: ''}"
+					>
+						{tema === 'light' ? '☀️' : '🌙'}
+					</span>
+				</button>
+			</div>
+		</Card>
 	</div>
 {/if}
