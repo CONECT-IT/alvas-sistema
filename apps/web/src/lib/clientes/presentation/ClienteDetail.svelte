@@ -7,6 +7,11 @@
 	import { obtenerCliente } from '../application/use-cases/obtenerCliente';
 	import { actualizarCliente } from '../application/use-cases/actualizarCliente';
 	import { clienteRepository } from '../infrastructure/clienteRepository';
+	import { listarContratos } from '$lib/ventas/application/use-cases/listarContratos';
+	import { obtenerLead } from '$lib/ventas/application/use-cases/obtenerLead';
+	import { ventasRepository } from '$lib/ventas/infrastructure/ventasRepository';
+	import type { ContratoDTO } from '$lib/ventas/infrastructure/dto/VentasDTOs';
+	import type { LeadDetalle } from '$lib/ventas/domain/models/LeadDetalle';
 
 	interface Props {
 		clienteId: string;
@@ -25,6 +30,10 @@
 	let saveError = $state<string | null>(null);
 	let saveSuccess = $state<string | null>(null);
 
+	let leadOrigen = $state<LeadDetalle | null>(null);
+	let contratos = $state<ContratoDTO[]>([]);
+	let cargandoHistorial = $state(true);
+
 	async function cargar() {
 		if (!clienteId.trim()) {
 			cliente = null;
@@ -35,10 +44,30 @@
 		error = null;
 		try {
 			cliente = await obtenerCliente(clienteRepository, clienteId.trim());
+			if (cliente) {
+				await cargarHistorial(cliente);
+			}
 		} catch (err) {
 			error = err instanceof HttpError ? err.message : 'No se pudo cargar el cliente.';
 		} finally {
 			loading = false;
+		}
+	}
+
+	async function cargarHistorial(cli: Cliente) {
+		cargandoHistorial = true;
+		try {
+			if (cli.idLeadOrigen) {
+				try {
+					leadOrigen = await obtenerLead(ventasRepository, cli.idLeadOrigen);
+				} catch {
+					/* ignorar */
+				}
+			}
+			const todos = await listarContratos(ventasRepository);
+			contratos = todos.filter((c) => c.idCliente === cli.id);
+		} finally {
+			cargandoHistorial = false;
 		}
 	}
 
@@ -110,9 +139,6 @@
 				</div>
 				<p class="mt-2 text-sm text-text-muted">
 					ID: {cliente.id} &middot; Asesor: {cliente.idAsesor}
-					{#if cliente.idLeadOrigen}
-						&middot; Lead origen: {cliente.idLeadOrigen}
-					{/if}
 				</p>
 			</div>
 			<div class="flex gap-3">
@@ -180,6 +206,29 @@
 			</Card>
 		{/if}
 
+		{#if leadOrigen}
+			<Card>
+				<div class="mb-4 flex items-center gap-3">
+					<h2 class="font-display text-xl font-bold text-text-main">Historial como lead</h2>
+					<Badge tone="brand">Lead</Badge>
+				</div>
+				<dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 text-sm">
+					<dt class="font-semibold text-text-muted">Nombre</dt>
+					<dd class="text-text-main">{leadOrigen.nombre}</dd>
+					<dt class="font-semibold text-text-muted">Tipo</dt>
+					<dd class="text-text-main">{leadOrigen.tipo}</dd>
+					<dt class="font-semibold text-text-muted">Estado del lead</dt>
+					<dd><Badge>{leadOrigen.estado}</Badge></dd>
+					<dt class="font-semibold text-text-muted">Asesor asignado</dt>
+					<dd class="text-text-main">{leadOrigen.nombreAsesor ?? leadOrigen.idAsesor}</dd>
+					{#if leadOrigen.citas.length > 0}
+						<dt class="font-semibold text-text-muted">Citas realizadas</dt>
+						<dd class="text-text-main">{leadOrigen.citas.length}</dd>
+					{/if}
+				</dl>
+			</Card>
+		{/if}
+
 		<div class="grid gap-6 xl:grid-cols-2">
 			<Card>
 				<h2 class="mb-4 font-display text-xl font-bold text-text-main">Información de contacto</h2>
@@ -207,5 +256,37 @@
 				</dl>
 			</Card>
 		</div>
+
+		{#if contratos.length > 0}
+			<Card>
+				<div class="mb-5">
+					<h2 class="font-display text-xl font-bold text-text-main">Contratos</h2>
+					<p class="mt-1 text-sm text-text-muted">Contratos asociados a este cliente.</p>
+				</div>
+				<div class="grid gap-3">
+					{#each contratos as ctr (ctr.id)}
+						<div class="rounded-2xl border border-border-light bg-bg-base px-4 py-3">
+							<div class="flex flex-wrap items-center justify-between gap-3">
+								<div>
+									<p class="font-semibold text-text-main">
+										{ctr.nombrePropiedad ?? ctr.idPropiedad}
+									</p>
+									<p class="mt-0.5 text-xs text-text-muted">
+										{ctr.nombreLead ?? '—'} &middot; {formatearFecha(ctr.fechaInicio)}
+									</p>
+								</div>
+								<Badge tone={ctr.estado === 'VIGENTE' ? 'success' : 'neutral'}>{ctr.estado}</Badge>
+							</div>
+						</div>
+					{/each}
+				</div>
+			</Card>
+		{/if}
+
+		{#if cargandoHistorial}
+			<Card>
+				<div class="h-16 animate-pulse rounded-2xl bg-surface-muted"></div>
+			</Card>
+		{/if}
 	</div>
 {/if}

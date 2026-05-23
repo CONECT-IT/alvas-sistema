@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
+	import { goto } from '$app/navigation';
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import type { Cliente } from '$lib/clientes/domain/models/Cliente';
 	import { listarClientes } from '$lib/clientes/application/use-cases/listarClientes';
@@ -10,6 +11,10 @@
 	let clientes = $state<Cliente[]>([]);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
+
+	function irACliente(c: Cliente) {
+		goto(`/admin/clientes/${encodeURIComponent(c.id)}`);
+	}
 
 	async function cargar() {
 		loading = true;
@@ -67,7 +72,7 @@
 		</Card>
 	{:else}
 		<Card>
-			<ClienteTable {clientes} />
+			<ClienteTable {clientes} onClienteClick={irACliente} />
 		</Card>
 	{/if}
 </div>
