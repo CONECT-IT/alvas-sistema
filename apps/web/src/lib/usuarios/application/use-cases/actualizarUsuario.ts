@@ -5,6 +5,7 @@ export type ActualizarUsuarioInput = Readonly<{
 	idUsuario: string;
 	username?: string;
 	nombre?: string;
+	clave?: string;
 	rol?: UserRol;
 	estado?: string;
 }>;

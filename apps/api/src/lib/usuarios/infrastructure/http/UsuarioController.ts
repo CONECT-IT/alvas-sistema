@@ -104,6 +104,7 @@ export class UsuarioController {
         idUsuario: c.req.param("idUsuario") ?? "",
         username: body.username,
         nombre: body.nombre,
+        clave: body.clave,
         rol: body.rol,
       });
 

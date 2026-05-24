@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "apps/*"
   ],
   "scripts": {
     "dev:api": "bun run --cwd apps/api dev",
@@ -20,11 +19,12 @@
     "test:unit": "bun run --cwd apps/api test",
     "test:web": "bun run --cwd apps/web test:unit",
     "test:bdd": "bun run --cwd apps/api test:bdd",
-    "test:coverage": "bun test --coverage --coverage-reporter=lcov --coverage-dir=coverage",
-    "coverage:domain": "bun run test:coverage && bun scripts/check-domain-coverage.mjs coverage/lcov.info 80",
+    "test:coverage": "bun --cwd apps/api test --coverage --coverage-reporter=lcov --coverage-dir=coverage",
+    "coverage:domain": "bun run test:coverage && bun scripts/check-domain-coverage.mjs apps/api/coverage/lcov.info 80",
     "test:mutation": "stryker run",
     "test:mutation:dry-run": "stryker run --dryRunOnly",
     "test:all": "bun run test:unit && bun run test:bdd && bun run test:web && bun run coverage:domain && bun run test:mutation",
+    "lint:staged": "lint-staged",
     "typecheck": "tsc --noEmit -p apps/api/tsconfig.json && tsc --noEmit -p apps/web/tsconfig.json",
     "format": "prettier --write . && bun run --cwd apps/api format && bun run --cwd apps/web format",
     "format:check": "prettier --check . && bun run --cwd apps/api format:check && bun run --cwd apps/web format:check",
@@ -42,11 +42,17 @@
     "bun-types": "latest",
     "eslint": "^10.4.0",
     "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "prettier": "^3.8.3",
     "typescript": "^5.9.3",
     "wrangler": "^4.94.0"
   },
   "dependencies": {
     "drizzle-kit": "^0.31.10"
+  },
+  "lint-staged": {
+    "*.{js,ts,mjs,cjs,json,md,yml,yaml,css,html,svelte}": "prettier --write",
+    "apps/api/**/*.{ts,js,mjs}": "eslint --fix",
+    "apps/web/**/*.{ts,js,svelte}": "eslint --fix"
   }
 }

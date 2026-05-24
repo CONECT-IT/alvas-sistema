@@ -31,12 +31,11 @@ ALVAS tiene tres perfiles principales: admin, asesor y variaciones futuras por r
 - Puede gestionar citas, comentarios y seguimiento de sus leads.
 - No puede ver ni modificar leads asignados a otros asesores.
 - No puede asignar leads a otros asesores salvo que una futura regla de negocio lo permita.
-- Puede actualizar solo su propia contraseña.
+- Puede actualizar solo su propio `username` y contraseña.
 
 ### Edicion de usuario propio
 
-- Un asesor puede actualizar solo su contraseña.
-- El `username` es editable por admin y asesor cuando aplique, pero no sustituye la regla de actualizacion de contraseña como caso principal del perfil propio.
+- Un asesor puede actualizar solo su `username` y contraseña desde perfil propio.
 - Un asesor no puede cambiar su rol, estado, permisos ni campos que lo hagan desaparecer operativamente del sistema.
 - Un asesor no puede cambiar su nombre visible.
 - Un asesor no puede deshabilitarse a si mismo.
@@ -49,7 +48,7 @@ ALVAS tiene tres perfiles principales: admin, asesor y variaciones futuras por r
 - Dado un asesor autenticado, cuando intenta actualizar un lead ajeno, recibe rechazo de autorizacion.
 - Dado un admin autenticado, cuando lista leads, recibe todos los leads.
 - Dado un admin autenticado, puede reasignar un lead de un asesor a otro.
-- Dado un asesor autenticado, puede actualizar su contraseña si pasa validaciones de dominio.
+- Dado un asesor autenticado, puede actualizar su `username` y contraseña si pasan validaciones de dominio.
 - Dado un asesor autenticado, no puede cambiar su `rol` ni su `estado`.
 - Dado un asesor autenticado, no puede cambiar su nombre visible desde perfil propio.
 - Dado un usuario deshabilitado, no puede iniciar sesion.
@@ -65,9 +64,9 @@ ALVAS tiene tres perfiles principales: admin, asesor y variaciones futuras por r
 ## Decisiones cerradas
 
 - Por ahora no existe rol separado de supervisor o coordinador comercial.
-- El asesor no edita nombre visible ni datos administrativos desde perfil propio; solo contraseña.
+- El asesor no edita nombre visible ni datos administrativos desde perfil propio; solo `username` y contraseña.
 - La asignacion automatica de leads entrantes por WhatsApp considera disponibilidad/rendimiento y excluye asesores deshabilitados o en pausa.
 
 ## Preguntas abiertas
 
-- Debe existir un flujo separado de recuperacion/cambio de contraseña para asesores desde perfil propio?
+- Debe exigirse contraseña actual para cambiar la contraseña desde perfil propio?

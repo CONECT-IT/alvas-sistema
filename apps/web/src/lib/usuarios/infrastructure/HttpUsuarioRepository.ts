@@ -42,6 +42,7 @@ export class HttpUsuarioRepository implements UsuarioRepository {
 		const body: ActualizarUsuarioRequestDTO = {
 			username: input.username,
 			nombre: input.nombre,
+			clave: input.clave,
 			rol: input.rol,
 			estado: input.estado
 		};

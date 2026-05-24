@@ -13,7 +13,7 @@
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 	let editUsername = $state('');
-	let editNombre = $state('');
+	let editClave = $state('');
 	let saving = $state(false);
 	let saveError = $state<string | null>(null);
 	let saveSuccess = $state<string | null>(null);
@@ -57,7 +57,7 @@
 			usuario = await obtenerUsuario(usuarioRepository, userId);
 			if (!usuario) return;
 			editUsername = usuario.username;
-			editNombre = usuario.nombre;
+			editClave = '';
 		} catch (err) {
 			error = err instanceof HttpError ? err.message : 'No se pudo cargar tu perfil.';
 		} finally {
@@ -72,8 +72,16 @@
 		saveError = null;
 		saveSuccess = null;
 
-		if (!editUsername.trim() && !editNombre.trim()) {
+		const username = editUsername.trim();
+		const clave = editClave.trim();
+
+		if (!username && !clave) {
 			saveError = 'Indica al menos un dato para actualizar.';
+			return;
+		}
+
+		if (clave && clave.length < 8) {
+			saveError = 'La contraseña debe tener al menos 8 caracteres.';
 			return;
 		}
 
@@ -82,10 +90,11 @@
 		try {
 			const actualizado = await actualizarUsuario(usuarioRepository, {
 				idUsuario: usuario.id,
-				username: editUsername.trim() || undefined,
-				nombre: editNombre.trim() || undefined
+				username: username || undefined,
+				clave: clave || undefined
 			});
 			usuario = actualizado;
+			editClave = '';
 			authStore.hydrate({
 				id: actualizado.id,
 				username: actualizado.username,
@@ -125,7 +134,7 @@
 			<p class="text-sm font-semibold tracking-[0.18em] text-primary uppercase">Cuenta</p>
 			<h1 class="mt-2 font-display text-3xl font-bold text-text-main">Mi perfil</h1>
 			<p class="mt-2 max-w-2xl text-sm leading-relaxed text-text-muted">
-				Actualiza tu información personal y preferencias de la aplicación.
+				Actualiza tu usuario de acceso, contraseña y preferencias de la aplicación.
 			</p>
 		</div>
 
@@ -170,16 +179,18 @@
 							>
 								<form class="grid gap-4" onsubmit={guardarCambios}>
 									<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
-										Nombre visible
+										Usuario de acceso
 										<input
-											bind:value={editNombre}
+											bind:value={editUsername}
 											class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
 										/>
 									</label>
 									<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
-										Usuario de acceso
+										Nueva contraseña
 										<input
-											bind:value={editUsername}
+											type="password"
+											bind:value={editClave}
+											autocomplete="new-password"
 											class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
 										/>
 									</label>
@@ -202,6 +213,10 @@
 					</div>
 				</div>
 				<dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 text-sm">
+					<dt class="font-semibold text-text-muted">Nombre</dt>
+					<dd class="text-text-main">{usuario.nombre}</dd>
+					<dt class="font-semibold text-text-muted">Usuario</dt>
+					<dd class="text-text-main">{usuario.username}</dd>
 					<dt class="font-semibold text-text-muted">ID</dt>
 					<dd class="text-text-main">{usuario.id}</dd>
 					<dt class="font-semibold text-text-muted">Rol</dt>

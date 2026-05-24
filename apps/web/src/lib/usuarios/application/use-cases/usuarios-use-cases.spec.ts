@@ -47,13 +47,15 @@ describe('usuarios / application use cases', () => {
 		});
 		await actualizarUsuario(repository, {
 			idUsuario: 'usuario-1',
-			nombre: 'Asesor Actualizado'
+			username: 'asesor.actualizado',
+			clave: 'clave-segura'
 		});
 
 		expect(repository.crear).toHaveBeenCalledOnce();
 		expect(repository.actualizar).toHaveBeenCalledWith({
 			idUsuario: 'usuario-1',
-			nombre: 'Asesor Actualizado'
+			username: 'asesor.actualizado',
+			clave: 'clave-segura'
 		});
 	});
 });

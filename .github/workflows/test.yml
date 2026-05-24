@@ -19,6 +19,7 @@ concurrency:
 env:
   CI: "true"
   NODE_ENV: test
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 jobs:
   lint:
@@ -107,13 +108,25 @@ jobs:
         with:
           bun-version: latest
       - run: bun install --frozen-lockfile
-      - name: Domain coverage gate
+      - name: Quality gate de cobertura de dominio
         run: bun run coverage:domain
+      - name: Resumen de cobertura API
+        if: always()
+        run: |
+          {
+            echo "## Cobertura de dominio API"
+            echo ""
+            if [ -f apps/api/coverage/lcov.info ]; then
+              bun scripts/check-domain-coverage.mjs apps/api/coverage/lcov.info 80
+            else
+              echo "No se encontro el reporte de coverage."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: api-coverage-report
-          path: coverage/
+          path: apps/api/coverage/
           retention-days: 60
 
   api-mutation:
@@ -130,10 +143,31 @@ jobs:
         with:
           bun-version: latest
       - run: bun install --frozen-lockfile
-      - name: Stryker mutation gate
+      - name: Quality gate de mutation testing
         env:
           STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
         run: bun run test:mutation
+      - name: Resumen de mutation testing
+        if: always()
+        env:
+          STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
+        run: |
+          {
+            echo "## Mutation testing API"
+            echo ""
+            if [ -f reports/mutation/mutation.json ]; then
+              bun scripts/write-mutation-summary.mjs reports/mutation/mutation.json
+            else
+              echo "No se encontro el reporte de mutation testing. Revisa los logs del job de Stryker."
+            fi
+            echo ""
+            echo "Artifact: \`stryker-report\`"
+            if [ -n "$STRYKER_DASHBOARD_API_KEY" ]; then
+              echo "Stryker dashboard upload: habilitado"
+            else
+              echo "Stryker dashboard upload: deshabilitado (falta secret)"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -172,6 +206,7 @@ jobs:
           bun-version: latest
       - run: bun install --frozen-lockfile
       - run: bunx playwright install --with-deps chromium
+        working-directory: apps/web
       - run: bun run --cwd apps/web test:e2e
       - uses: actions/upload-artifact@v4
         if: always()
@@ -217,7 +252,7 @@ jobs:
       - web-coverage
     if: always()
     steps:
-      - name: Verify all stages
+      - name: Verificar todos los stages
         run: |
           if [ "${{ needs.lint.result }}" != "success" ] ||
              [ "${{ needs.build.result }}" != "success" ] ||
@@ -228,7 +263,7 @@ jobs:
              [ "${{ needs.web-component-test.result }}" != "success" ] ||
              [ "${{ needs.web-e2e.result }}" != "success" ] ||
              [ "${{ needs.web-coverage.result }}" != "success" ]; then
-            echo "Pipeline failed before satisfying all API/Web quality gates."
+            echo "El pipeline fallo antes de cumplir todos los quality gates de API/Web."
             exit 1
           fi
-          echo "All API and Web quality gates passed."
+          echo "Todos los quality gates de API y Web pasaron."

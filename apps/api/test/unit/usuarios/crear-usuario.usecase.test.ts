@@ -137,6 +137,35 @@ describe("usuarios / ActualizarUsuarioUseCase", () => {
     expect(repo.usuarios.get("user-001")?.username.valor).toBe("asesorprincipal");
   });
 
+  test("actualiza clave con hash generado sin exponerla en la respuesta", async () => {
+    const repo = new FakeUsuarioRepository();
+    const passwordHasher = new FakePasswordHasher();
+    const hashearSpy = mock(passwordHasher.hashear.bind(passwordHasher));
+    passwordHasher.hashear = hashearSpy;
+    await repo.guardar(
+      Usuario.crear({
+        id: "user-001",
+        username: "asesor1",
+        nombre: "Asesor Uno",
+        hashClave: "hash-anterior-001",
+        rol: "ASESOR",
+      }),
+    );
+
+    const resultado = await new ActualizarUsuarioUseCase(repo, passwordHasher).ejecutar({
+      idUsuario: "user-001",
+      clave: "nueva-clave",
+    });
+
+    expect(resultado.esExito).toBe(true);
+    expect(hashearSpy).toHaveBeenCalledTimes(1);
+    expect(repo.usuarios.get("user-001")?.hashClave.valor).toBe("hash-seguro-001");
+    if (resultado.esExito) {
+      expect(JSON.stringify(resultado.valor)).not.toContain("hashClave");
+      expect(JSON.stringify(resultado.valor)).not.toContain("nueva-clave");
+    }
+  });
+
   test("rechaza usuario inexistente y no guarda cambios", async () => {
     const repo = new FakeUsuarioRepository();
 

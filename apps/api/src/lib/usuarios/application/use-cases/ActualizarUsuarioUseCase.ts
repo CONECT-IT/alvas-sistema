@@ -5,7 +5,7 @@ import {
   type Resultado,
 } from "../../../shared";
 import { ErrorDeDominio } from "../../../shared/domain/errors/ErrorDeDominio";
-import { type IUsuarioRepository } from "../../domain/ports/IUsuarioRepository";
+import { type IPasswordHasher, type IUsuarioRepository } from "../../domain/ports";
 import { IdUsuario } from "../../domain/value-objects";
 import { type ActualizarUsuarioInputDTO } from "../dto/UsuarioActualizacionDTOs";
 import { type UsuarioOutputDTO } from "../dto/UsuarioActualizacionDTOs";
@@ -19,7 +19,10 @@ export class ActualizarUsuarioUseCase
     CasoDeUso<ActualizarUsuarioInput, Resultado<ActualizarUsuarioOutput, ErrorDeDominio>>,
     IActualizarUsuario
 {
-  constructor(private readonly usuarioRepository: IUsuarioRepository) {}
+  constructor(
+    private readonly usuarioRepository: IUsuarioRepository,
+    private readonly passwordHasher?: IPasswordHasher,
+  ) {}
 
   async ejecutar(
     input: ActualizarUsuarioInput,
@@ -38,6 +41,19 @@ export class ActualizarUsuarioUseCase
 
       if (input.username) {
         usuario.cambiarUsername(input.username);
+      }
+
+      if (input.clave) {
+        if (!this.passwordHasher) {
+          return resultadoFallido(
+            new ErrorDeDominio("No se puede actualizar la clave sin hasher configurado", {
+              codigo: "PASSWORD_HASHER_NO_CONFIGURADO",
+            }),
+          );
+        }
+
+        const hashClave = await this.passwordHasher.hashear(input.clave);
+        usuario.cambiarHashClave(hashClave.valor);
       }
 
       if (input.rol) {

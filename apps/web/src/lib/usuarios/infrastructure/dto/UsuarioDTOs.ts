@@ -24,6 +24,7 @@ export type CrearUsuarioRequestDTO = Readonly<{
 export type ActualizarUsuarioRequestDTO = Readonly<{
 	username?: string;
 	nombre?: string;
+	clave?: string;
 	rol?: UserRol;
 	estado?: string;
 }>;

@@ -17,6 +17,10 @@ export function crearUsuarioControllerDeps(): UsuarioControllerDeps {
       ),
     crearListarUsuarios: (c) => new ListarUsuariosUseCase(new D1UsuarioRepository(c.env.DB)),
     crearObtenerUsuario: (c) => new ObtenerUsuarioUseCase(new D1UsuarioRepository(c.env.DB)),
-    crearActualizarUsuario: (c) => new ActualizarUsuarioUseCase(new D1UsuarioRepository(c.env.DB)),
+    crearActualizarUsuario: (c) =>
+      new ActualizarUsuarioUseCase(
+        new D1UsuarioRepository(c.env.DB),
+        new Pbkdf2PasswordHasher(c.env.AUTH_PEPPER),
+      ),
   };
 }

@@ -33,6 +33,15 @@ export default ts.config(
 		}
 	},
 	{
-		ignores: ['.svelte-kit/**', 'build/**', 'dist/**', 'worker-configuration.d.ts', 'coverage/**']
+		ignores: [
+			'.svelte-kit/**',
+			'.wrangler/**',
+			'build/**',
+			'dist/**',
+			'worker-configuration.d.ts',
+			'coverage/**',
+			'playwright-report/**',
+			'test-results/**'
+		]
 	}
 );

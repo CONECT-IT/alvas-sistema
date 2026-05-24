@@ -1,2 +1,2 @@
 #!/usr/bin/env sh
-bun run lint && bun run typecheck
+bun run lint:staged && bun run typecheck

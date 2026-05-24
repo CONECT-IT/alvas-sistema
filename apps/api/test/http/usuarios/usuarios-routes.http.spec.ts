@@ -14,7 +14,9 @@ const usuarioRespuesta = {
   actualizadoEn: "2026-05-23T00:00:00.000Z",
 };
 
-function crearDeps(): UsuarioControllerDeps {
+function crearDeps(): UsuarioControllerDeps & { readonly ultimoActualizarInput: unknown } {
+  let ultimoActualizarInput: unknown;
+
   return {
     crearCrearUsuario: () => ({
       ejecutar: async () =>
@@ -33,12 +35,17 @@ function crearDeps(): UsuarioControllerDeps {
       ejecutar: async () => resultadoExitoso(usuarioRespuesta),
     }),
     crearActualizarUsuario: () => ({
-      ejecutar: async () =>
-        resultadoExitoso({
+      ejecutar: async (input: unknown) => {
+        ultimoActualizarInput = input;
+        return resultadoExitoso({
           ...usuarioRespuesta,
           nombre: "Asesor Actualizado",
-        }),
+        });
+      },
     }),
+    get ultimoActualizarInput() {
+      return ultimoActualizarInput;
+    },
   };
 }
 
@@ -69,5 +76,29 @@ describe("http / usuarios routes", () => {
       success: true,
       data: usuarioRespuesta,
     });
+  });
+
+  it("envia username y clave al caso de uso sin serializar datos sensibles", async () => {
+    const app = new Hono();
+    const deps = crearDeps();
+    app.route("/usuarios", crearUsuarioRouter(deps));
+
+    const res = await app.request("/usuarios/usuario-1", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: "asesor2", clave: "nueva-clave" }),
+    });
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect((deps as { ultimoActualizarInput?: unknown }).ultimoActualizarInput).toEqual({
+      idUsuario: "usuario-1",
+      username: "asesor2",
+      nombre: undefined,
+      clave: "nueva-clave",
+      rol: undefined,
+    });
+    expect(JSON.stringify(body)).not.toContain("nueva-clave");
+    expect(JSON.stringify(body)).not.toContain("hashClave");
   });
 });
