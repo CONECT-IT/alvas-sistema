@@ -266,9 +266,7 @@
       "indexes": {
         "usuarios_username_unique": {
           "name": "usuarios_username_unique",
-          "columns": [
-            "username"
-          ],
+          "columns": ["username"],
           "isUnique": true
         }
       },
