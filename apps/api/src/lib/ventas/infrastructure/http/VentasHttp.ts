@@ -74,12 +74,11 @@ export function responderErrorDeDominio(
   error: ErrorDeDominio,
   status: 400 | 401 | 403 | 404 | 409 = 400,
 ): Response {
-  const statusFinal =
-    error.codigo === "SIN_PERMISOS_LEAD"
-      ? 403
-      : error.codigo.includes("NOT_FOUND") || error.codigo.includes("NO_ENCONTRADO")
-        ? 404
-        : status;
+  const statusFinal = error.codigo.startsWith("SIN_PERMISOS")
+    ? 403
+    : error.codigo.includes("NOT_FOUND") || error.codigo.includes("NO_ENCONTRADO")
+      ? 404
+      : status;
 
   return c.json({ success: false, message: error.message, code: error.codigo }, statusFinal);
 }

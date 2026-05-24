@@ -181,8 +181,13 @@ export class LeadsController {
     try {
       const id = c.req.param("id") ?? "";
       const body = await c.req.json<AsignarLeadAAsesorInputDTO>();
+      const authPayload = c.get("authPayload");
       const useCase = this.deps.crearAsignarLeadAAsesor(c);
-      const resultado = await useCase.ejecutar({ idLead: id, idAsesor: body.idAsesor });
+      const resultado = await useCase.ejecutar({
+        idLead: id,
+        idAsesor: body.idAsesor,
+        usuarioAutenticado: { id: authPayload.idUsuario, rol: authPayload.rol },
+      });
 
       if (!resultado.esExito) {
         return responderErrorDeDominio(c, resultado.error);

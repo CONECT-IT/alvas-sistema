@@ -45,6 +45,10 @@ export interface CrearContratoInputDTO {
 export interface AsignarLeadAAsesorInputDTO {
   idLead: string;
   idAsesor: string;
+  usuarioAutenticado?: {
+    id: string;
+    rol: string;
+  };
 }
 
 export interface ObtenerCitaPorIdInputDTO {

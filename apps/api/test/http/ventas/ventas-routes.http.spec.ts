@@ -12,6 +12,7 @@ type VentasEntradasCapturadas = {
   agendarCita: unknown[];
   crearContrato: unknown[];
   firmarContrato: unknown[];
+  asignarLead: unknown[];
 };
 
 function crearDeps(capturadas: VentasEntradasCapturadas = crearCapturadas()): VentasControllerDeps {
@@ -52,7 +53,12 @@ function crearDeps(capturadas: VentasEntradasCapturadas = crearCapturadas()): Ve
     crearListarClientes: () => ({ ejecutar: async () => resultadoExitoso([]) }),
     crearObtenerLead: () => ({ ejecutar: async () => resultadoExitoso(lead) }),
     crearListarLeads: () => ({ ejecutar: async () => resultadoExitoso([lead]) }),
-    crearAsignarLeadAAsesor: () => ({ ejecutar: async () => resultadoExitoso(lead) }),
+    crearAsignarLeadAAsesor: () => ({
+      ejecutar: async (input: unknown) => {
+        capturadas.asignarLead.push(input);
+        return resultadoExitoso(undefined);
+      },
+    }),
     crearListarAsesoresConLeads: () => ({ ejecutar: async () => resultadoExitoso([]) }),
     crearListarCitas: () => ({ ejecutar: async () => resultadoExitoso([]) }),
     crearObtenerCitaPorId: () => ({ ejecutar: async () => resultadoExitoso(undefined) }),
@@ -103,6 +109,20 @@ function crearDepsSinPermisos(): VentasControllerDeps {
   };
 }
 
+function crearDepsSinPermisosReasignacion(): VentasControllerDeps {
+  return {
+    ...crearDeps(),
+    crearAsignarLeadAAsesor: () => ({
+      ejecutar: async () =>
+        resultadoFallido(
+          new ErrorDeDominio("Solo el admin puede reasignar leads.", {
+            codigo: "SIN_PERMISOS_REASIGNAR_LEAD",
+          }),
+        ),
+    }),
+  } as unknown as VentasControllerDeps;
+}
+
 function crearCapturadas(): VentasEntradasCapturadas {
   return {
     registrarLead: [],
@@ -110,6 +130,7 @@ function crearCapturadas(): VentasEntradasCapturadas {
     agendarCita: [],
     crearContrato: [],
     firmarContrato: [],
+    asignarLead: [],
   };
 }
 
@@ -265,6 +286,58 @@ describe("http / ventas routes", () => {
       success: false,
       message: "El asesor no puede modificar leads ajenos.",
       code: "SIN_PERMISOS_LEAD",
+    });
+  });
+
+  it("reasigna lead preservando usuario admin autenticado", async () => {
+    const capturadas = crearCapturadas();
+    const app = new Hono();
+    app.route("/ventas", crearVentasRouter(crearDeps(capturadas)));
+
+    const res = await app.request(
+      "/ventas/lead/lead-1/asesor",
+      {
+        method: "PUT",
+        headers: {
+          Authorization: await crearAuthHeader({ idUsuario: "admin-1", rol: "ADMIN" }),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ idAsesor: "asesor-2" }),
+      },
+      envConAuth,
+    );
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ success: true, message: "Lead reasignado" });
+    expect(capturadas.asignarLead[0]).toEqual({
+      idLead: "lead-1",
+      idAsesor: "asesor-2",
+      usuarioAutenticado: { id: "admin-1", rol: "ADMIN" },
+    });
+  });
+
+  it("responde 403 cuando asesor intenta reasignar lead", async () => {
+    const app = new Hono();
+    app.route("/ventas", crearVentasRouter(crearDepsSinPermisosReasignacion()));
+
+    const res = await app.request(
+      "/ventas/lead/lead-1/asesor",
+      {
+        method: "PUT",
+        headers: {
+          Authorization: await crearAuthHeader({ idUsuario: "asesor-1", rol: "ASESOR" }),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ idAsesor: "asesor-2" }),
+      },
+      envConAuth,
+    );
+
+    expect(res.status).toBe(403);
+    expect(await res.json()).toEqual({
+      success: false,
+      message: "Solo el admin puede reasignar leads.",
+      code: "SIN_PERMISOS_REASIGNAR_LEAD",
     });
   });
 

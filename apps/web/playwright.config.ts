@@ -1,5 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const webServerCommand = process.env.CI
+	? 'bun run preview'
+	: 'bun run dev -- --host 127.0.0.1 --port 5173';
+
 export default defineConfig({
 	testDir: './e2e',
 	timeout: 30_000,
@@ -18,7 +22,7 @@ export default defineConfig({
 		}
 	],
 	webServer: {
-		command: 'bun run dev -- --host 127.0.0.1 --port 5173',
+		command: webServerCommand,
 		url: 'http://localhost:5173',
 		reuseExistingServer: !process.env.CI,
 		timeout: 120_000

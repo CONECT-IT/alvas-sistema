@@ -880,6 +880,7 @@ describe("ventas / use cases", () => {
     const resultado = await new AsignarLeadAAsesorUseCase(repo).ejecutar({
       idLead: "lead-001",
       idAsesor: "asesor-2",
+      usuarioAutenticado: { id: "admin-1", rol: "ADMIN" },
     });
 
     const lead = await repo.obtenerLeadPorId("lead-001" as IdLead);
@@ -889,12 +890,31 @@ describe("ventas / use cases", () => {
     expect(repo.descripcionesActividad).toContain("Lead asignado al asesor asesor-2");
   });
 
+  test("AsignarLeadAAsesorUseCase rechaza reasignacion hecha por asesor", async () => {
+    const repo = new FakeVentasRepository();
+    await repo.guardarLead(crearLead());
+
+    const resultado = await new AsignarLeadAAsesorUseCase(repo).ejecutar({
+      idLead: "lead-001",
+      idAsesor: "asesor-2",
+      usuarioAutenticado: { id: "asesor-1", rol: "ASESOR" },
+    });
+
+    const lead = await repo.obtenerLeadPorId("lead-001" as IdLead);
+    expect(resultado.esExito).toBe(false);
+    expect(resultado.esExito ? undefined : resultado.error.codigo).toBe(
+      "SIN_PERMISOS_REASIGNAR_LEAD",
+    );
+    expect(lead?.idAsesor).toBe(idUsuarioRef("asesor-1"));
+  });
+
   test("AsignarLeadAAsesorUseCase rechaza lead inexistente", async () => {
     const repo = new FakeVentasRepository();
 
     const resultado = await new AsignarLeadAAsesorUseCase(repo).ejecutar({
       idLead: "lead-no-existe",
       idAsesor: "asesor-2",
+      usuarioAutenticado: { id: "admin-1", rol: "ADMIN" },
     });
 
     expect(resultado.esExito).toBe(false);
@@ -1193,6 +1213,7 @@ describe("ventas / use cases", () => {
     const resultado = new AsignarLeadAAsesorUseCase(repo).ejecutar({
       idLead: "lead-001",
       idAsesor: "asesor-2",
+      usuarioAutenticado: { id: "admin-1", rol: "ADMIN" },
     });
 
     await expect(resultado).rejects.toThrow("db error");
@@ -1422,6 +1443,7 @@ describe("ventas / use cases", () => {
     const resultado = await new AsignarLeadAAsesorUseCase(repo).ejecutar({
       idLead: "lead-001",
       idAsesor: "asesor-2",
+      usuarioAutenticado: { id: "admin-1", rol: "ADMIN" },
     });
 
     expect(resultado.esExito).toBe(false);

@@ -26,6 +26,14 @@ export class AsignarLeadAAsesorUseCase
     input: AsignarLeadAAsesorInput,
   ): Promise<Resultado<AsignarLeadAAsesorOutput, ErrorDeDominio>> {
     try {
+      if (input.usuarioAutenticado?.rol !== "ADMIN") {
+        return resultadoFallido(
+          new ErrorDeDominio("Solo el admin puede reasignar leads.", {
+            codigo: "SIN_PERMISOS_REASIGNAR_LEAD",
+          }),
+        );
+      }
+
       const lead = await this.repository.obtenerLeadPorId(idLead(input.idLead));
       if (!lead) {
         return resultadoFallido(new LeadNoEncontradoError(input.idLead));

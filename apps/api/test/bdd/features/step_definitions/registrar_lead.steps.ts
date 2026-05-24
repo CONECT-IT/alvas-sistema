@@ -2,8 +2,9 @@ import { Given, When, Then } from "@cucumber/cucumber";
 import * as assert from "assert";
 
 import { RegistrarLeadUseCase } from "../../../../src/lib/ventas/application/use-cases/RegistrarLeadUseCase";
+import { AsignarLeadAAsesorUseCase } from "../../../../src/lib/ventas/application/use-cases/AsignarLeadAAsesorUseCase";
 import { type IVentasRepository } from "../../../../src/lib/ventas/domain/ports/IVentasRepository";
-import { type Lead } from "../../../../src/lib/ventas/domain/entities/Lead";
+import { Lead } from "../../../../src/lib/ventas/domain/entities/Lead";
 import { type Cita } from "../../../../src/lib/ventas/domain/entities/Cita";
 import { type Cliente } from "../../../../src/lib/ventas/domain/entities/Cliente";
 import { type Contrato } from "../../../../src/lib/ventas/domain/entities/Contrato";
@@ -137,6 +138,7 @@ class ConsultaPropiedadDisponible implements IConsultaPropiedadInteres {
 let repository: FakeVentasRepository;
 let useCase: RegistrarLeadUseCase;
 let resultado: Awaited<ReturnType<RegistrarLeadUseCase["ejecutar"]>>;
+let resultadoReasignacion: Awaited<ReturnType<AsignarLeadAAsesorUseCase["ejecutar"]>>;
 let consultaPropiedad: ConsultaPropiedadDisponible | undefined;
 let autorizador: AutorizadorVentasAdapter | undefined;
 let evaluador: IEvaluadorAsignacion;
@@ -155,6 +157,18 @@ Given("un asesor autenticado", function () {
 
 Given("una propiedad disponible para compra", function () {
   consultaPropiedad = new ConsultaPropiedadDisponible(new Set(["prop-001"]));
+});
+
+Given("un lead existente pertenece a {string}", function (idAsesor: string) {
+  const lead = Lead.registrar({
+    id: "lead-001",
+    nombre: "Carlos Comprador",
+    email: "carlos@example.com",
+    telefono: "300000000",
+    tipo: "COMPRA",
+    idAsesor,
+  });
+  repository.leads.set(lead.id, lead);
 });
 
 When(
@@ -239,3 +253,24 @@ Then("el lead se crea con la propiedad de interes vinculada", function () {
     assert.strictEqual(resultado.valor.idPropiedadInteres as string, "prop-001");
   }
 });
+
+When("el asesor intenta reasignar el lead a {string}", async function (idAsesor: string) {
+  resultadoReasignacion = await new AsignarLeadAAsesorUseCase(repository).ejecutar({
+    idLead: "lead-001",
+    idAsesor,
+    usuarioAutenticado: { id: "asesor-1", rol: "ASESOR" },
+  });
+});
+
+Then(
+  "el sistema rechaza la reasignacion porque solo admin puede reasignar leads",
+  async function () {
+    assert.strictEqual(resultadoReasignacion.esExito, false);
+    if (!resultadoReasignacion.esExito) {
+      assert.strictEqual(resultadoReasignacion.error.codigo, "SIN_PERMISOS_REASIGNAR_LEAD");
+    }
+
+    const lead = await repository.obtenerLeadPorId("lead-001" as IdLead);
+    assert.strictEqual(lead?.idAsesor, idUsuarioRef("asesor-1"));
+  },
+);

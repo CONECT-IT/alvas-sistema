@@ -61,6 +61,12 @@ jobs:
           bun-version: latest
       - run: bun install --frozen-lockfile
       - run: bun run --cwd apps/${{ matrix.app }} build
+      - uses: actions/upload-artifact@v6
+        if: matrix.app == 'web'
+        with:
+          name: web-build-cloudflare
+          path: apps/web/.svelte-kit/cloudflare/
+          retention-days: 7
 
   api-unit-test:
     name: "Stage 3a: API Unit Test"
@@ -206,6 +212,10 @@ jobs:
         with:
           bun-version: latest
       - run: bun install --frozen-lockfile
+      - uses: actions/download-artifact@v6
+        with:
+          name: web-build-cloudflare
+          path: apps/web/.svelte-kit/cloudflare/
       - run: bunx playwright install --with-deps chromium
         working-directory: apps/web
       - run: bun run --cwd apps/web test:e2e
