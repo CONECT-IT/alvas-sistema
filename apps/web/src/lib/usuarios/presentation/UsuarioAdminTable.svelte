@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Badge from '$lib/shared/ui/Badge.svelte';
 	import Button from '$lib/shared/ui/Button.svelte';
+	import { presentarEstadoUsuario } from '$lib/shared/presentation';
 	import type { Usuario } from '../domain/models/Usuario';
 
 	interface Props {
@@ -41,8 +42,8 @@
 						<Badge tone={usuario.rol === 'ADMIN' ? 'brand' : 'neutral'}>{usuario.rol}</Badge>
 					</td>
 					<td class="py-4 pr-6">
-						<Badge tone={usuario.estado.toUpperCase() === 'ACTIVO' ? 'success' : 'neutral'}>
-							{usuario.estado}
+						<Badge tone={presentarEstadoUsuario(usuario.estado).tone}>
+							{presentarEstadoUsuario(usuario.estado).label}
 						</Badge>
 					</td>
 					<td class="py-4">

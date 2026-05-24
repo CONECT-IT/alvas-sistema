@@ -1,8 +1,12 @@
 import { type Context } from "hono";
 import { type D1DatabaseLike } from "../../../shared/infrastructure";
 import { type IIniciarSesion, type IRenovarSesion } from "../../application";
-import { type RenovarSesionDTO } from "../../application/dto/AuthRequestDTOs";
-import { type IniciarSesionInput } from "../../application/use-cases/IniciarSesionUseCase";
+import {
+  parseBody,
+  esValidationError,
+  formatearValidacion,
+} from "../../../shared/infrastructure/validation/helpers";
+import { IniciarSesionSchema, RenovarSesionSchema } from "../validation/schemas";
 
 export type BindingsAuth = {
   DB: D1DatabaseLike;
@@ -25,7 +29,7 @@ export class AuthController {
 
   async iniciarSesion(c: ContextoAuth): Promise<Response> {
     try {
-      const body = await c.req.json<IniciarSesionInput>();
+      const body = parseBody(IniciarSesionSchema, await c.req.json());
       const useCase = this.deps.crearIniciarSesion(c);
       const resultado = await useCase.ejecutar(body);
 
@@ -45,6 +49,9 @@ export class AuthController {
         data: resultado.valor,
       });
     } catch (error) {
+      if (esValidationError(error)) {
+        return c.json(formatearValidacion(error), 400);
+      }
       console.error("Error inesperado en AuthController.iniciarSesion:", error);
       return c.json(
         {
@@ -58,7 +65,7 @@ export class AuthController {
 
   async renovarSesion(c: ContextoAuth): Promise<Response> {
     try {
-      const body = await c.req.json<RenovarSesionDTO>();
+      const body = parseBody(RenovarSesionSchema, await c.req.json());
       const useCase = this.deps.crearRenovarSesion(c);
       const resultado = await useCase.ejecutar(body);
 
@@ -78,6 +85,9 @@ export class AuthController {
         data: resultado.valor,
       });
     } catch (error) {
+      if (esValidationError(error)) {
+        return c.json(formatearValidacion(error), 400);
+      }
       console.error("Error inesperado en AuthController.renovarSesion:", error);
       return c.json(
         {

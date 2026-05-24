@@ -2,8 +2,6 @@ import { type Context } from "hono";
 import { ErrorDeDominio } from "../../../shared/domain";
 import { type D1DatabaseLike, type SessionClaims } from "../../../shared/infrastructure";
 import {
-  type ActualizarPropiedadDTO,
-  type CrearPropiedadDTO,
   type IActualizarPropiedad,
   type ICrearPropiedad,
   type IEliminarPropiedad,
@@ -11,6 +9,12 @@ import {
   type PropiedadRespuestaDTO,
 } from "../../application";
 import { type IAutorizadorPropiedades } from "../../domain/ports";
+import {
+  parseBody,
+  esValidationError,
+  formatearValidacion,
+} from "../../../shared/infrastructure/validation/helpers";
+import { CrearPropiedadSchema, ActualizarPropiedadSchema } from "../validation/schemas";
 
 export type BindingsPropiedades = {
   DB: D1DatabaseLike;
@@ -37,7 +41,7 @@ export class PropiedadController {
 
   async crear(c: ContextoPropiedades): Promise<Response> {
     try {
-      const body = await c.req.json<CrearPropiedadDTO>();
+      const body = parseBody(CrearPropiedadSchema, await c.req.json());
       const authPayload = c.get("authPayload");
       const useCase = this.deps.crearCrearPropiedad(c);
 
@@ -53,6 +57,7 @@ export class PropiedadController {
 
       return c.json({ success: true, data: { id: resultado.valor.id as string } }, 201);
     } catch (error) {
+      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
       console.error("PropiedadController.crear:", error);
       return c.json({ success: false, message: "Error interno" }, 500);
     }
@@ -104,7 +109,7 @@ export class PropiedadController {
 
   async actualizar(c: ContextoPropiedades): Promise<Response> {
     try {
-      const body = await c.req.json<ActualizarPropiedadDTO>();
+      const body = parseBody(ActualizarPropiedadSchema, await c.req.json());
       const authPayload = c.get("authPayload");
       const useCase = this.deps.crearActualizarPropiedad(c);
 
@@ -124,6 +129,7 @@ export class PropiedadController {
 
       return c.json({ success: true, message: "Propiedad actualizada" });
     } catch (error) {
+      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
       console.error("PropiedadController.actualizar:", error);
       return c.json({ success: false, message: "Error interno" }, 500);
     }

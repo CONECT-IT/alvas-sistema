@@ -3,6 +3,7 @@
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
 	import SidePanel from '$lib/shared/ui/SidePanel.svelte';
+	import { opcionesTipoVenta } from '$lib/shared/presentation';
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import type { LeadPipeline } from '$lib/ventas/domain/models/LeadPipeline';
 	import { listarPipeline } from '$lib/ventas/application/use-cases/listarPipeline';
@@ -103,8 +104,8 @@
 <div class="flex flex-col gap-6">
 	<div class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
 		<div>
-			<p class="text-sm font-semibold tracking-[0.18em] text-primary uppercase">Leads</p>
-			<h1 class="mt-2 font-display text-3xl font-bold text-text-main">Pipeline completo</h1>
+			<p class="section-label">Leads</p>
+			<h1 class="page-heading">Pipeline completo</h1>
 			<p class="mt-2 max-w-2xl text-sm leading-relaxed text-text-muted">
 				Todos los prospectos del sistema, sus estados de avance y citas asociadas.
 			</p>
@@ -118,7 +119,7 @@
 
 	{#if loading}
 		<Card>
-			<div class="h-64 animate-pulse rounded-2xl bg-surface-muted"></div>
+			<div class="skeleton"></div>
 		</Card>
 	{:else if error}
 		<Card class="text-center">
@@ -182,8 +183,9 @@
 		<input class="input" placeholder="Email" type="email" bind:value={formLead.email} />
 		<input class="input" placeholder="Telefono" bind:value={formLead.telefono} />
 		<select class="input" bind:value={formLead.tipo}>
-			<option value="COMPRA">Comprador</option>
-			<option value="VENTA">Vendedor</option>
+			{#each opcionesTipoVenta() as opt (opt.value)}
+				<option value={opt.value}>{opt.label}</option>
+			{/each}
 		</select>
 		<input
 			class="input"

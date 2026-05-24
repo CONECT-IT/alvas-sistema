@@ -5,6 +5,7 @@
 	import { authStore } from '$lib/auth/infrastructure/authStore';
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import type { Usuario } from '../domain/models/Usuario';
+	import { presentarEstadoUsuario } from '$lib/shared/presentation';
 	import { actualizarUsuario } from '../application/use-cases/actualizarUsuario';
 	import { obtenerUsuario } from '../application/use-cases/obtenerUsuario';
 	import { usuarioRepository } from '../infrastructure/usuarioRepository';
@@ -120,7 +121,7 @@
 
 {#if loading}
 	<Card>
-		<div class="h-64 animate-pulse rounded-2xl bg-surface-muted"></div>
+		<div class="skeleton"></div>
 	</Card>
 {:else if error}
 	<Card class="text-center">
@@ -131,21 +132,21 @@
 {:else if usuario}
 	<div class="flex flex-col gap-6">
 		<div>
-			<p class="text-sm font-semibold tracking-[0.18em] text-primary uppercase">Cuenta</p>
-			<h1 class="mt-2 font-display text-3xl font-bold text-text-main">Mi perfil</h1>
+			<p class="section-label">Cuenta</p>
+			<h1 class="page-heading">Mi perfil</h1>
 			<p class="mt-2 max-w-2xl text-sm leading-relaxed text-text-muted">
 				Actualiza tu usuario de acceso, contraseña y preferencias de la aplicación.
 			</p>
 		</div>
 
 		{#if saveSuccess}
-			<p class="rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+			<p class="success-alert">
 				{saveSuccess}
 			</p>
 		{/if}
 
 		{#if saveError && !mostrarEdicion}
-			<p class="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{saveError}</p>
+			<p class="error-alert">{saveError}</p>
 		{/if}
 
 		<div class="grid gap-6 xl:grid-cols-2">
@@ -178,24 +179,24 @@
 								aria-label="Editar perfil"
 							>
 								<form class="grid gap-4" onsubmit={guardarCambios}>
-									<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+									<label class="label-field">
 										Usuario de acceso
 										<input
 											bind:value={editUsername}
-											class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+											class="input-field"
 										/>
 									</label>
-									<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+									<label class="label-field">
 										Nueva contraseña
 										<input
 											type="password"
 											bind:value={editClave}
 											autocomplete="new-password"
-											class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+											class="input-field"
 										/>
 									</label>
 									{#if saveError}
-										<p class="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+										<p class="error-alert">
 											{saveError}
 										</p>
 									{/if}
@@ -212,7 +213,7 @@
 						{/if}
 					</div>
 				</div>
-				<dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 text-sm">
+				<dl class="dl-grid">
 					<dt class="font-semibold text-text-muted">Nombre</dt>
 					<dd class="text-text-main">{usuario.nombre}</dd>
 					<dt class="font-semibold text-text-muted">Usuario</dt>
@@ -223,15 +224,15 @@
 					<dd><Badge tone="brand">{usuario.rol}</Badge></dd>
 					<dt class="font-semibold text-text-muted">Estado</dt>
 					<dd>
-						<Badge tone={usuario.estado === 'ACTIVO' ? 'success' : 'neutral'}>
-							{usuario.estado}
+						<Badge tone={presentarEstadoUsuario(usuario.estado).tone}>
+							{presentarEstadoUsuario(usuario.estado).label}
 						</Badge>
 					</dd>
 				</dl>
 			</Card>
 
 			<Card>
-				<h2 class="mb-4 font-display text-xl font-bold text-text-main">Preferencias</h2>
+				<h2 class="card-title">Preferencias</h2>
 				<div class="flex flex-col gap-6">
 					<div class="flex items-center justify-between">
 						<div>

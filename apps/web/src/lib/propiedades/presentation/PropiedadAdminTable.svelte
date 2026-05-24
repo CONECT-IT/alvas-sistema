@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Badge from '$lib/shared/ui/Badge.svelte';
 	import type { Propiedad } from '../domain/models/Propiedad';
+	import { presentarEstadoPropiedad } from '$lib/shared/presentation';
 
 	interface Props {
 		propiedades: Propiedad[];
@@ -14,14 +15,6 @@
 		currency: 'PEN',
 		maximumFractionDigits: 0
 	});
-
-	function getEstadoTone(estado: string): 'brand' | 'success' | 'warning' | 'neutral' {
-		const normalized = estado.toUpperCase();
-		if (normalized === 'DISPONIBLE') return 'success';
-		if (normalized === 'BORRADOR') return 'warning';
-		if (normalized === 'RESERVADA') return 'brand';
-		return 'neutral';
-	}
 </script>
 
 <div class="overflow-x-auto">
@@ -57,7 +50,7 @@
 						{currencyFormatter.format(propiedad.precio)}
 					</td>
 					<td class="py-4 pr-6">
-						<Badge tone={getEstadoTone(propiedad.estado)}>{propiedad.estado}</Badge>
+						<Badge tone={presentarEstadoPropiedad(propiedad.estado).tone}>{presentarEstadoPropiedad(propiedad.estado).label}</Badge>
 					</td>
 					<td class="py-4 text-text-muted">
 						{propiedad.asesorResponsableId ?? 'Sin asignar'}

@@ -3,11 +3,13 @@
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
 	import Badge from '$lib/shared/ui/Badge.svelte';
+	import SidePanel from '$lib/shared/ui/SidePanel.svelte';
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import { propiedadRepository } from '$lib/propiedades/infrastructure/propiedadRepository';
 	import { obtenerPropiedad } from '$lib/propiedades/application/use-cases/obtenerPropiedad';
 	import { actualizarPropiedad } from '$lib/propiedades/application/use-cases/actualizarPropiedad';
 	import type { Propiedad } from '$lib/propiedades/domain/models/Propiedad';
+	import { presentarEstadoPropiedad, opcionesEstadoPropiedad } from '$lib/shared/presentation';
 
 	let propiedadId = $derived($page.params.idPropiedad ?? '');
 	let propiedad = $state<Propiedad | null>(null);
@@ -16,8 +18,8 @@
 	let error = $state<string | null>(null);
 	let updateSuccess = $state<string | null>(null);
 	let updateError = $state<string | null>(null);
+	let editando = $state(false);
 
-	// Campos de edición
 	let titulo = $state('');
 	let descripcion = $state('');
 	let precio = $state(0);
@@ -42,6 +44,22 @@
 		}
 	}
 
+	function iniciarEdicion() {
+		if (!propiedad) return;
+		titulo = propiedad.titulo;
+		descripcion = propiedad.descripcion;
+		precio = propiedad.precio;
+		estado = propiedad.estado;
+		updateError = null;
+		updateSuccess = null;
+		editando = true;
+	}
+
+	function cancelarEdicion() {
+		editando = false;
+		updateError = null;
+	}
+
 	async function manejarActualizar(event: SubmitEvent) {
 		event.preventDefault();
 		if (!propiedad) return;
@@ -59,20 +77,13 @@
 				estado
 			});
 			updateSuccess = 'Propiedad actualizada correctamente.';
+			editando = false;
 			await cargar();
 		} catch (err) {
 			updateError = err instanceof HttpError ? err.message : 'No se pudo actualizar la propiedad.';
 		} finally {
 			updating = false;
 		}
-	}
-
-	function getEstadoTone(e: string): 'brand' | 'success' | 'warning' | 'neutral' {
-		const n = e.toUpperCase();
-		if (n === 'DISPONIBLE') return 'success';
-		if (n === 'BORRADOR') return 'warning';
-		if (n === 'RESERVADA') return 'brand';
-		return 'neutral';
 	}
 
 	$effect(() => {
@@ -87,17 +98,22 @@
 <div class="flex flex-col gap-6">
 	<div class="flex flex-wrap items-center justify-between gap-4">
 		<div>
-			<p class="text-sm font-semibold tracking-[0.18em] text-primary uppercase">Detalle</p>
-			<h1 class="mt-2 font-display text-3xl font-bold text-text-main">
+			<p class="section-label">Detalle</p>
+			<h1 class="page-heading">
 				{propiedad?.titulo || 'Cargando propiedad...'}
 			</h1>
 		</div>
-		<Button variant="secondary" onclick={() => window.history.back()}>Volver</Button>
+		<div class="flex gap-3">
+			{#if propiedad}
+				<Button variant="secondary" onclick={iniciarEdicion}>Editar</Button>
+			{/if}
+			<Button variant="ghost" onclick={() => window.history.back()}>Volver</Button>
+		</div>
 	</div>
 
 	{#if loading}
 		<Card>
-			<div class="h-64 animate-pulse rounded-2xl bg-surface-muted"></div>
+			<div class="skeleton"></div>
 		</Card>
 	{:else if error}
 		<Card class="text-center">
@@ -106,91 +122,86 @@
 			<Button onclick={cargar}>Reintentar</Button>
 		</Card>
 	{:else if propiedad}
-		<div class="grid gap-6 lg:grid-cols-2">
-			<Card>
-				<h2 class="mb-5 font-display text-xl font-bold text-text-main">Editar información</h2>
+		{#if updateSuccess}
+			<p class="success-alert">
+				{updateSuccess}
+			</p>
+		{/if}
 
-				{#if updateSuccess}
-					<p class="mb-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
-						{updateSuccess}
-					</p>
-				{/if}
+		<SidePanel isOpen={editando} title="Editar propiedad" onClose={cancelarEdicion}>
+			<form class="grid gap-4" onsubmit={manejarActualizar}>
+				<label class="label-field">
+					Título
+					<input
+						bind:value={titulo}
+						class="input-field"
+					/>
+				</label>
+
+				<label class="label-field">
+					Precio (USD)
+					<input
+						type="number"
+						bind:value={precio}
+						class="input-field"
+					/>
+				</label>
+
+				<label class="label-field">
+					Estado
+					<select
+						bind:value={estado}
+						class="input-field"
+					>
+						{#each opcionesEstadoPropiedad() as opt (opt.value)}
+							<option value={opt.value}>{opt.label}</option>
+						{/each}
+					</select>
+				</label>
+
+				<label class="label-field">
+					Descripción
+					<textarea
+						bind:value={descripcion}
+						class="min-h-[120px] input-field"
+					></textarea>
+				</label>
 
 				{#if updateError}
-					<p class="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+					<p class="error-alert">
 						{updateError}
 					</p>
 				{/if}
 
-				<form class="grid gap-4" onsubmit={manejarActualizar}>
-					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
-						Título
-						<input
-							bind:value={titulo}
-							class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
-						/>
-					</label>
-
-					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
-						Precio (USD)
-						<input
-							type="number"
-							bind:value={precio}
-							class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
-						/>
-					</label>
-
-					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
-						Estado
-						<select
-							bind:value={estado}
-							class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
-						>
-							<option value="BORRADOR">Borrador</option>
-							<option value="DISPONIBLE">Disponible (Pública)</option>
-							<option value="RESERVADA">Reservada</option>
-							<option value="VENDIDA">Vendida</option>
-							<option value="ARCHIVADA">Archivada</option>
-						</select>
-					</label>
-
-					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
-						Descripción
-						<textarea
-							bind:value={descripcion}
-							class="min-h-[120px] rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
-						></textarea>
-					</label>
-
+				<div class="flex justify-end gap-3">
+					<Button type="button" variant="ghost" onclick={cancelarEdicion}>Cancelar</Button>
 					<Button type="submit" disabled={updating}>
 						{updating ? 'Guardando...' : 'Guardar cambios'}
 					</Button>
-				</form>
-			</Card>
+				</div>
+			</form>
+		</SidePanel>
 
-			<div class="flex flex-col gap-6">
-				<Card>
-					<h2 class="mb-4 font-display text-xl font-bold text-text-main">Datos actuales</h2>
-					<dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 text-sm">
-						<dt class="font-semibold text-text-muted">ID</dt>
-						<dd class="font-mono text-text-main">{propiedad.id}</dd>
+		<Card>
+			<h2 class="card-title">Datos actuales</h2>
+			<dl class="dl-grid">
+				<dt class="font-semibold text-text-muted">ID</dt>
+				<dd class="font-mono text-text-main">{propiedad.id}</dd>
 
-						<dt class="font-semibold text-text-muted">Estado</dt>
-						<dd><Badge tone={getEstadoTone(propiedad.estado)}>{propiedad.estado}</Badge></dd>
+				<dt class="font-semibold text-text-muted">Estado</dt>
+				<dd><Badge tone={presentarEstadoPropiedad(propiedad.estado).tone}>{presentarEstadoPropiedad(propiedad.estado).label}</Badge></dd>
 
-						<dt class="font-semibold text-text-muted">Origen</dt>
-						<dd class="text-text-main">{propiedad.origen}</dd>
+				<dt class="font-semibold text-text-muted">Origen</dt>
+				<dd class="text-text-main">{propiedad.origen}</dd>
 
-						{#if propiedad.idLeadOrigen}
-							<dt class="font-semibold text-text-muted">Lead Origen</dt>
-							<dd class="text-text-main">{propiedad.idLeadOrigen}</dd>
-						{/if}
+				{#if propiedad.idLeadOrigen}
+					<dt class="font-semibold text-text-muted">Lead Origen</dt>
+					<dd class="text-text-main">{propiedad.idLeadOrigen}</dd>
+				{/if}
 
-						<dt class="font-semibold text-text-muted">Responsable</dt>
-						<dd class="text-text-main">{propiedad.asesorResponsableId ?? 'Sin asignar'}</dd>
-					</dl>
-				</Card>
-			</div>
-		</div>
+				<dt class="font-semibold text-text-muted">Responsable</dt>
+				<dd class="text-text-main">{propiedad.asesorResponsableId ?? 'Sin asignar'}</dd>
+			</dl>
+		</Card>
 	{/if}
 </div>

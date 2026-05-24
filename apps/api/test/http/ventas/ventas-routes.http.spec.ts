@@ -86,6 +86,21 @@ function crearDeps(capturadas: VentasEntradasCapturadas = crearCapturadas()): Ve
     }),
     crearCancelarContrato: () => ({ ejecutar: async () => resultadoExitoso(undefined) }),
     crearListarActividadLead: () => ({ ejecutar: async () => resultadoExitoso([]) }),
+    crearListarPipeline: () => ({
+      ejecutar: async () =>
+        resultadoExitoso([
+          {
+            id: "lead-1",
+            nombre: "Ana Vendedora",
+            estado: "NUEVO",
+            tipo: "VENTA",
+            idAsesor: "usuario-1",
+            nombreAsesor: "Luis Asesor",
+            citasCount: 0,
+            citas: [],
+          },
+        ]),
+    }),
     crearVentasRepo: () => ({}) as never,
     crearPropiedadRepo: () => ({}) as never,
     crearUsuarioRepo: () =>

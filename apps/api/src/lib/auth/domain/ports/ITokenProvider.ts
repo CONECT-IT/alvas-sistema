@@ -1,5 +1,5 @@
 import { AuthToken, RefreshToken } from "../../domain/value-objects";
-import { type SessionClaims } from "../../../shared/infrastructure/session";
+import { type SessionClaims } from "../../../shared/domain/types/SessionClaims";
 
 export interface ITokenProvider {
   generarAuthToken(payload: SessionClaims): Promise<AuthToken> | AuthToken;

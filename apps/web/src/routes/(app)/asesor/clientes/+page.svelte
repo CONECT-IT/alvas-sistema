@@ -82,8 +82,8 @@
 <div class="flex flex-col gap-6">
 	<div class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
 		<div>
-			<p class="text-sm font-semibold tracking-[0.18em] text-primary uppercase">Clientes</p>
-			<h1 class="mt-2 font-display text-3xl font-bold text-text-main">Cartera de clientes</h1>
+			<p class="section-label">Clientes</p>
+			<h1 class="page-heading">Cartera de clientes</h1>
 			<p class="mt-2 max-w-2xl text-sm leading-relaxed text-text-muted">
 				Clientes formalizados desde leads convertidos o registrados directamente para seguimiento
 				comercial.
@@ -95,36 +95,36 @@
 
 	<SidePanel isOpen={mostrarPanel} title="Nuevo cliente" onClose={() => (mostrarPanel = false)}>
 		<form class="grid gap-4" onsubmit={crearCliente}>
-			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+			<label class="label-field">
 				Nombre
 				<input
 					bind:value={nombre}
-					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="input-field"
 					placeholder="Nombre del cliente"
 				/>
 			</label>
 
-			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+			<label class="label-field">
 				Teléfono
 				<input
 					bind:value={telefono}
-					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="input-field"
 					placeholder="Número de contacto"
 				/>
 			</label>
 
-			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+			<label class="label-field">
 				Correo
 				<input
 					bind:value={email}
 					type="email"
-					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="input-field"
 					placeholder="correo@ejemplo.com"
 				/>
 			</label>
 
 			{#if createError}
-				<p class="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+				<p class="error-alert">
 					{createError}
 				</p>
 			{/if}
@@ -137,7 +137,7 @@
 
 	{#if loading}
 		<Card>
-			<div class="h-64 animate-pulse rounded-2xl bg-surface-muted"></div>
+			<div class="skeleton"></div>
 		</Card>
 	{:else if error}
 		<Card class="text-center">

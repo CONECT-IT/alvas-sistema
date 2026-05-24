@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import Badge from '$lib/shared/ui/Badge.svelte';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
+	import { presentarEstadoCita } from '$lib/shared/presentation';
 	import { httpClient, HttpError } from '$lib/shared/http/httpClient';
 
 	type CitaAgenda = {
@@ -42,16 +44,6 @@
 		}).format(new Date(fechaIso));
 	}
 
-	function estadoBadge(estado: string): string {
-		const map: Record<string, string> = {
-			PENDIENTE: 'bg-amber-500/10 text-amber-500',
-			REALIZADA: 'bg-emerald-500/10 text-emerald-500',
-			CANCELADA: 'bg-red-500/10 text-red-500',
-			REPROGRAMADA: 'bg-blue-500/10 text-blue-500'
-		};
-		return map[estado] ?? 'bg-surface-muted text-text-muted';
-	}
-
 	function verLead(idLead: string) {
 		goto(`/admin/leads/${encodeURIComponent(idLead)}`);
 	}
@@ -68,8 +60,8 @@
 <div class="flex flex-col gap-6">
 	<div class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
 		<div>
-			<p class="text-sm font-semibold tracking-[0.18em] text-primary uppercase">Citas</p>
-			<h1 class="mt-2 font-display text-3xl font-bold text-text-main">Todas las citas</h1>
+			<p class="section-label">Citas</p>
+			<h1 class="page-heading">Todas las citas</h1>
 			<p class="mt-2 max-w-2xl text-sm leading-relaxed text-text-muted">
 				Citas registradas en el sistema por todos los asesores.
 			</p>
@@ -80,7 +72,7 @@
 
 	{#if loading}
 		<Card>
-			<div class="h-64 animate-pulse rounded-2xl bg-surface-muted"></div>
+			<div class="skeleton"></div>
 		</Card>
 	{:else if error}
 		<Card class="text-center">
@@ -125,13 +117,9 @@
 							</p>
 						</div>
 						<div class="flex items-center">
-							<p
-								class="w-full rounded-full px-3 py-1 text-center text-xs font-bold {estadoBadge(
-									cita.estado
-								)}"
-							>
-								{cita.estado}
-							</p>
+							<Badge tone={presentarEstadoCita(cita.estado).tone}>
+								{presentarEstadoCita(cita.estado).label}
+							</Badge>
 						</div>
 					</button>
 				{/each}

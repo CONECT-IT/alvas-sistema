@@ -132,8 +132,8 @@
 <div class="flex flex-col gap-6">
 	<div class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
 		<div>
-			<p class="text-sm font-semibold tracking-[0.18em] text-primary uppercase">Administración</p>
-			<h1 class="mt-2 font-display text-3xl font-bold text-text-main">Catálogo de propiedades</h1>
+			<p class="section-label">Administración</p>
+			<h1 class="page-heading">Catálogo de propiedades</h1>
 			<p class="mt-2 max-w-2xl text-sm leading-relaxed text-text-muted">
 				Consulta el inventario registrado, revisa disponibilidad y detecta propiedades sin asesor
 				responsable.
@@ -148,42 +148,42 @@
 
 	<SidePanel isOpen={mostrarPanel} title="Nueva propiedad" onClose={() => (mostrarPanel = false)}>
 		<form class="grid gap-4" onsubmit={registrarPropiedad}>
-			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+			<label class="label-field">
 				Título
 				<input
 					bind:value={titulo}
-					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="input-field"
 					placeholder="Terreno en zona residencial"
 				/>
 			</label>
 
-			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+			<label class="label-field">
 				Precio
 				<input
 					bind:value={precio}
 					type="number"
 					min="0"
 					step="0.01"
-					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="input-field"
 					placeholder="150000"
 				/>
 			</label>
 
-			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+			<label class="label-field">
 				Descripción
 				<textarea
 					bind:value={descripcion}
 					rows="4"
-					class="resize-none rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="resize-none input-field"
 					placeholder="Ubicación, metraje, accesos y observaciones comerciales."
 				></textarea>
 			</label>
 
-			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+			<label class="label-field">
 				Estado inicial
 				<select
 					bind:value={estado}
-					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="input-field"
 				>
 					{#each estados as item (item)}
 						<option value={item}>{item}</option>
@@ -191,17 +191,17 @@
 				</select>
 			</label>
 
-			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+			<label class="label-field">
 				Asesor responsable
 				<input
 					bind:value={asesorResponsableId}
-					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="input-field"
 					placeholder="ID del asesor, opcional"
 				/>
 			</label>
 
 			{#if createError}
-				<p class="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+				<p class="error-alert">
 					{createError}
 				</p>
 			{/if}
@@ -223,7 +223,7 @@
 			{/each}
 		</div>
 		<Card>
-			<div class="h-64 animate-pulse rounded-2xl bg-surface-muted"></div>
+			<div class="skeleton"></div>
 		</Card>
 	{:else if error}
 		<Card class="text-center">
@@ -257,13 +257,13 @@
 				</div>
 
 				{#if reviewSuccess}
-					<p class="mb-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+					<p class="mb-4 success-alert">
 						{reviewSuccess}
 					</p>
 				{/if}
 
 				{#if reviewError}
-					<p class="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+					<p class="mb-4 error-alert">
 						{reviewError}
 					</p>
 				{/if}

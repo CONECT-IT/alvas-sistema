@@ -14,6 +14,7 @@
 	import { listarCaptacionesPendientes } from '../application/use-cases/listarCaptacionesPendientes';
 	import { captacionRepository } from '../infrastructure/captacionRepository';
 	import type { CaptacionPendiente } from '../domain/models/CaptacionPendiente';
+	import { presentarEstadoCaptacion, presentarTipoVenta } from '$lib/shared/presentation';
 
 	let captaciones = $state<CaptacionPendiente[]>([]);
 	let loading = $state(true);
@@ -61,13 +62,6 @@
 		});
 	}
 
-	function tonoEstado(estado: string): 'brand' | 'success' | 'warning' | 'neutral' {
-		if (estado === 'PENDIENTE') return 'warning';
-		if (estado === 'REVISADA') return 'brand';
-		if (estado === 'CONVERTIDA') return 'success';
-		return 'neutral';
-	}
-
 	$effect(() => {
 		cargar();
 	});
@@ -76,10 +70,10 @@
 <div class="flex flex-col gap-6">
 	<div class="flex flex-wrap items-start justify-between gap-4">
 		<div>
-			<p class="text-sm font-semibold tracking-[0.18em] text-primary uppercase">
+			<p class="section-label">
 				Captaciones WhatsApp
 			</p>
-			<h1 class="mt-2 font-display text-3xl font-bold text-text-main">Bandeja de revisión</h1>
+			<h1 class="page-heading">Bandeja de revisión</h1>
 			<p class="mt-2 max-w-2xl text-sm leading-relaxed text-text-muted">
 				Prospectos captados desde WhatsApp antes de convertirse en leads operativos.
 			</p>
@@ -89,16 +83,16 @@
 
 	<div class="grid gap-4 md:grid-cols-3">
 		<Card>
-			<p class="text-xs font-semibold tracking-wider text-text-muted uppercase">Pendientes</p>
-			<p class="mt-2 font-display text-3xl font-bold text-text-main">{pendientes.length}</p>
+			<p class="stat-label">Pendientes</p>
+			<p class="page-heading">{pendientes.length}</p>
 		</Card>
 		<Card>
-			<p class="text-xs font-semibold tracking-wider text-text-muted uppercase">Revisadas</p>
-			<p class="mt-2 font-display text-3xl font-bold text-text-main">{revisadas.length}</p>
+			<p class="stat-label">Revisadas</p>
+			<p class="page-heading">{revisadas.length}</p>
 		</Card>
 		<Card>
-			<p class="text-xs font-semibold tracking-wider text-text-muted uppercase">Total visible</p>
-			<p class="mt-2 font-display text-3xl font-bold text-text-main">{captaciones.length}</p>
+			<p class="stat-label">Total visible</p>
+			<p class="page-heading">{captaciones.length}</p>
 		</Card>
 	</div>
 
@@ -127,9 +121,9 @@
 						<div class="min-w-0 flex-1">
 							<div class="flex flex-wrap items-center gap-2">
 								<h2 class="font-display text-xl font-bold text-text-main">{captacion.nombre}</h2>
-								<Badge tone={tonoEstado(captacion.estado)}>{captacion.estado}</Badge>
-								<Badge tone={captacion.tipo === 'VENTA' ? 'success' : 'brand'}>
-									{captacion.tipo}
+								<Badge tone={presentarEstadoCaptacion(captacion.estado).tone}>{presentarEstadoCaptacion(captacion.estado).label}</Badge>
+								<Badge tone={presentarTipoVenta(captacion.tipo).tone}>
+									{presentarTipoVenta(captacion.tipo).label}
 								</Badge>
 							</div>
 							<div class="mt-3 grid gap-2 text-sm text-text-muted md:grid-cols-2">

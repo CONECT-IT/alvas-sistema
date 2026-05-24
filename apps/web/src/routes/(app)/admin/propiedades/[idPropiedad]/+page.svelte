@@ -9,6 +9,7 @@
 	import { obtenerPropiedad } from '$lib/propiedades/application/use-cases/obtenerPropiedad';
 	import { actualizarPropiedad } from '$lib/propiedades/application/use-cases/actualizarPropiedad';
 	import type { Propiedad } from '$lib/propiedades/domain/models/Propiedad';
+	import { presentarEstadoPropiedad, opcionesEstadoPropiedad } from '$lib/shared/presentation';
 
 	let propiedadId = $derived($page.params.idPropiedad ?? '');
 	let propiedad = $state<Propiedad | null>(null);
@@ -84,14 +85,6 @@
 		updateError = null;
 	}
 
-	function getEstadoTone(e: string): 'brand' | 'success' | 'warning' | 'neutral' {
-		const n = e.toUpperCase();
-		if (n === 'DISPONIBLE') return 'success';
-		if (n === 'BORRADOR') return 'warning';
-		if (n === 'RESERVADA') return 'brand';
-		return 'neutral';
-	}
-
 	$effect(() => {
 		cargar();
 	});
@@ -104,8 +97,8 @@
 <div class="flex flex-col gap-6">
 	<div class="flex flex-wrap items-center justify-between gap-4">
 		<div>
-			<p class="text-sm font-semibold tracking-[0.18em] text-primary uppercase">Detalle</p>
-			<h1 class="mt-2 font-display text-3xl font-bold text-text-main">
+			<p class="section-label">Detalle</p>
+			<h1 class="page-heading">
 				{propiedad?.titulo || 'Cargando propiedad...'}
 			</h1>
 		</div>
@@ -119,7 +112,7 @@
 
 	{#if loading}
 		<Card>
-			<div class="h-64 animate-pulse rounded-2xl bg-surface-muted"></div>
+			<div class="skeleton"></div>
 		</Card>
 	{:else if error}
 		<Card class="text-center">
@@ -129,54 +122,52 @@
 		</Card>
 	{:else if propiedad}
 		{#if updateSuccess}
-			<p class="rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+			<p class="success-alert">
 				{updateSuccess}
 			</p>
 		{/if}
 
 		<SidePanel isOpen={editando} title="Editar propiedad" onClose={cancelarEdicion}>
 			<form class="grid gap-4" onsubmit={manejarActualizar}>
-				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+				<label class="label-field">
 					Título
 					<input
 						bind:value={titulo}
-						class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+						class="input-field"
 					/>
 				</label>
 
-				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+				<label class="label-field">
 					Precio (USD)
 					<input
 						type="number"
 						bind:value={precio}
-						class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+						class="input-field"
 					/>
 				</label>
 
-				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+				<label class="label-field">
 					Estado
 					<select
 						bind:value={estado}
-						class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+						class="input-field"
 					>
-						<option value="BORRADOR">Borrador</option>
-						<option value="DISPONIBLE">Disponible (Pública)</option>
-						<option value="RESERVADA">Reservada</option>
-						<option value="VENDIDA">Vendida</option>
-						<option value="ARCHIVADA">Archivada</option>
+						{#each opcionesEstadoPropiedad() as opt (opt.value)}
+							<option value={opt.value}>{opt.label}</option>
+						{/each}
 					</select>
 				</label>
 
-				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+				<label class="label-field">
 					Descripción
 					<textarea
 						bind:value={descripcion}
-						class="min-h-[120px] rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+						class="min-h-[120px] input-field"
 					></textarea>
 				</label>
 
 				{#if updateError}
-					<p class="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+					<p class="error-alert">
 						{updateError}
 					</p>
 				{/if}
@@ -191,13 +182,13 @@
 		</SidePanel>
 
 		<Card>
-			<h2 class="mb-4 font-display text-xl font-bold text-text-main">Datos actuales</h2>
-			<dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 text-sm">
+			<h2 class="card-title">Datos actuales</h2>
+			<dl class="dl-grid">
 				<dt class="font-semibold text-text-muted">ID</dt>
 				<dd class="font-mono text-text-main">{propiedad.id}</dd>
 
 				<dt class="font-semibold text-text-muted">Estado</dt>
-				<dd><Badge tone={getEstadoTone(propiedad.estado)}>{propiedad.estado}</Badge></dd>
+				<dd><Badge tone={presentarEstadoPropiedad(propiedad.estado).tone}>{presentarEstadoPropiedad(propiedad.estado).label}</Badge></dd>
 
 				<dt class="font-semibold text-text-muted">Origen</dt>
 				<dd class="text-text-main">{propiedad.origen}</dd>

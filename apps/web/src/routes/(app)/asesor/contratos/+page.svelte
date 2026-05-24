@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import Badge from '$lib/shared/ui/Badge.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
 	import Button from '$lib/shared/ui/Button.svelte';
+	import { presentarEstadoContrato } from '$lib/shared/presentation';
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import type { ContratoDTO } from '$lib/ventas/infrastructure/dto/VentasDTOs';
 	import { listarContratos } from '$lib/ventas/application/use-cases/listarContratos';
@@ -51,16 +53,6 @@
 		}
 	}
 
-	function estadoBadge(estado: string) {
-		const estilos: Record<string, string> = {
-			BORRADOR: 'bg-amber-50 text-amber-700 border-amber-200',
-			VIGENTE: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-			FINALIZADO: 'bg-slate-50 text-slate-600 border-slate-200',
-			CANCELADO: 'bg-red-50 text-red-700 border-red-200'
-		};
-		return estilos[estado] ?? 'bg-gray-50 text-gray-600 border-gray-200';
-	}
-
 	$effect(() => {
 		cargar();
 	});
@@ -73,8 +65,8 @@
 <div class="flex flex-col gap-6">
 	<div class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
 		<div>
-			<p class="text-sm font-semibold tracking-[0.18em] text-primary uppercase">Gestión</p>
-			<h1 class="mt-2 font-display text-3xl font-bold text-text-main">Mis contratos</h1>
+			<p class="section-label">Gestión</p>
+			<h1 class="page-heading">Mis contratos</h1>
 			<p class="mt-2 max-w-2xl text-sm leading-relaxed text-text-muted">
 				Contratos creados a partir de tus leads. Fírmalos para convertirlos en clientes.
 			</p>
@@ -84,7 +76,7 @@
 
 	{#if loading}
 		<Card>
-			<div class="h-64 animate-pulse rounded-2xl bg-surface-muted"></div>
+			<div class="skeleton"></div>
 		</Card>
 	{:else if error}
 		<Card class="text-center">
@@ -120,13 +112,9 @@
 									Propiedad: {contrato.idPropiedad}
 								</p>
 							</div>
-							<span
-								class="shrink-0 rounded-full border px-3 py-1 text-xs font-semibold uppercase {estadoBadge(
-									contrato.estado
-								)}"
-							>
-								{contrato.estado}
-							</span>
+							<Badge tone={presentarEstadoContrato(contrato.estado).tone} class="uppercase">
+								{presentarEstadoContrato(contrato.estado).label}
+							</Badge>
 						</div>
 
 						<div class="grid gap-2 text-sm sm:grid-cols-2">

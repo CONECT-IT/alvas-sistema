@@ -3,6 +3,7 @@
 	import type { LeadPipeline } from '../domain/models/LeadPipeline';
 	import { actualizarLead } from '../application/use-cases/actualizarLead';
 	import { ventasRepository } from '../infrastructure/ventasRepository';
+	import { presentarEstadoLead, presentarTipoVenta } from '$lib/shared/presentation';
 
 	interface Props {
 		leads: LeadPipeline[];
@@ -18,10 +19,6 @@
 
 	function getLeadsByColumn(column: string) {
 		return leads.filter((l) => l.estado.toUpperCase() === column);
-	}
-
-	function getBadgeTone(tipo: string): 'brand' | 'success' | 'neutral' {
-		return tipo === 'VENTA' ? 'brand' : 'success';
 	}
 
 	async function updateLeadStatus(idLead: string, nuevoEstado: string) {
@@ -80,7 +77,7 @@
 			aria-label="Columna {column}"
 		>
 			<div class="flex items-center justify-between px-2">
-				<h3 class="text-xs font-bold tracking-widest text-text-muted uppercase">{column}</h3>
+				<h3 class="text-xs font-bold tracking-widest text-text-muted uppercase">{presentarEstadoLead(column).label}</h3>
 				<span
 					class="rounded-full bg-surface-muted px-2 py-0.5 text-[10px] font-bold text-text-muted"
 				>
@@ -148,7 +145,7 @@
 											showStatusMenu = null;
 										}}
 									>
-										{status}
+										{presentarEstadoLead(status).label}
 									</button>
 								{/each}
 							</div>
@@ -165,7 +162,7 @@
 						<button onclick={() => onLeadClick?.(lead)} class="w-full text-left">
 							<div class="flex items-start justify-between gap-2">
 								<p class="font-display text-sm font-bold text-text-main">{lead.nombre}</p>
-								<Badge tone={getBadgeTone(lead.tipo)}>{lead.tipo}</Badge>
+								<Badge tone={presentarTipoVenta(lead.tipo).tone}>{presentarTipoVenta(lead.tipo).label}</Badge>
 							</div>
 
 							<div class="mt-3 flex flex-col gap-2">

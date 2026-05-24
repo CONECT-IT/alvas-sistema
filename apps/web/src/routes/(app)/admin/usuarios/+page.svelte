@@ -146,8 +146,8 @@
 <div class="flex flex-col gap-6">
 	<div class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
 		<div>
-			<p class="text-sm font-semibold tracking-[0.18em] text-primary uppercase">Equipo</p>
-			<h1 class="mt-2 font-display text-3xl font-bold text-text-main">Usuarios y asesores</h1>
+			<p class="section-label">Equipo</p>
+			<h1 class="page-heading">Usuarios y asesores</h1>
 			<p class="mt-2 max-w-2xl text-sm leading-relaxed text-text-muted">
 				Consulta las cuentas del sistema, valida roles activos y controla qué asesores pueden operar
 				la cartera comercial.
@@ -163,47 +163,47 @@
 		onClose={() => (mostrarPanelCrear = false)}
 	>
 		<form class="grid gap-4" onsubmit={registrarUsuario}>
-			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+			<label class="label-field">
 				Usuario de acceso
 				<input
 					bind:value={username}
-					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="input-field"
 					placeholder="asesor.surco"
 				/>
 			</label>
 
-			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+			<label class="label-field">
 				Nombre
 				<input
 					bind:value={nombre}
-					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="input-field"
 					placeholder="Nombre completo"
 				/>
 			</label>
 
-			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+			<label class="label-field">
 				Rol
 				<select
 					bind:value={rol}
-					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="input-field"
 				>
 					<option value="ASESOR">Asesor</option>
 					<option value="ADMIN">Administrador</option>
 				</select>
 			</label>
 
-			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+			<label class="label-field">
 				Clave temporal
 				<input
 					bind:value={clave}
 					type="password"
-					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="input-field"
 					placeholder="Se entrega al asesor para su primer ingreso"
 				/>
 			</label>
 
 			{#if formError}
-				<p class="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+				<p class="error-alert">
 					{formError}
 				</p>
 			{/if}
@@ -220,29 +220,29 @@
 		onClose={() => (mostrarPanelEditar = false)}
 	>
 		<form class="grid gap-4" onsubmit={guardarCambiosUsuario}>
-			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+			<label class="label-field">
 				Usuario de acceso
 				<input
 					bind:value={editUsername}
-					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="input-field"
 					placeholder="Usuario de acceso"
 				/>
 			</label>
 
-			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+			<label class="label-field">
 				Nombre visible
 				<input
 					bind:value={editNombre}
-					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="input-field"
 					placeholder="Nombre completo"
 				/>
 			</label>
 
-			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+			<label class="label-field">
 				Rol
 				<select
 					bind:value={editRol}
-					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="input-field"
 				>
 					<option value="">Sin cambio</option>
 					<option value="ASESOR">Asesor</option>
@@ -251,7 +251,7 @@
 			</label>
 
 			{#if formError}
-				<p class="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+				<p class="error-alert">
 					{formError}
 				</p>
 			{/if}
@@ -264,7 +264,7 @@
 
 	{#if loading}
 		<Card>
-			<div class="h-64 animate-pulse rounded-2xl bg-surface-muted"></div>
+			<div class="skeleton"></div>
 		</Card>
 	{:else if error}
 		<Card class="text-center">

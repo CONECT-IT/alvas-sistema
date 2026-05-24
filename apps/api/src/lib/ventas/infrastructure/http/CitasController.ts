@@ -1,26 +1,27 @@
 import {
-  type ActualizarCitaBodyDTO,
-  type AgendarCitaInputDTO,
-} from "../../application/dto/LeadDTOs";
-import {
   type ContextoVentas,
   responderErrorDeDominio,
   responderErrorInterno,
   type VentasControllerDeps,
 } from "./VentasHttp";
+import {
+  parseBody,
+  esValidationError,
+  formatearValidacion,
+} from "../../../shared/infrastructure/validation/helpers";
+import { AgendarCitaSchema, ActualizarCitaBodySchema } from "../validation/schemas";
 
 export class CitasController {
   constructor(private readonly deps: VentasControllerDeps) {}
 
   async agendar(c: ContextoVentas): Promise<Response> {
     try {
-      const body = await c.req.json<AgendarCitaInputDTO>();
+      const body = parseBody(AgendarCitaSchema, await c.req.json());
       const authPayload = c.get("authPayload");
       const useCase = this.deps.crearAgendarCita(c);
 
       const resultado = await useCase.ejecutar({
         ...body,
-        fechaInicio: new Date(body.fechaInicio),
         usuarioAutenticado: { id: authPayload.idUsuario, rol: authPayload.rol },
       });
 
@@ -30,6 +31,7 @@ export class CitasController {
 
       return c.json({ success: true, message: "Cita agendada" });
     } catch (error) {
+      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
       return responderErrorInterno(c, "CitasController.agendar:", error);
     }
   }
@@ -38,7 +40,7 @@ export class CitasController {
     try {
       const idLead = c.req.param("idLead") ?? "";
       const idCita = c.req.param("idCita") ?? "";
-      const body = await c.req.json<ActualizarCitaBodyDTO>();
+      const body = parseBody(ActualizarCitaBodySchema, await c.req.json());
       const authPayload = c.get("authPayload");
       const useCase = this.deps.crearActualizarCita(c);
 
@@ -56,6 +58,7 @@ export class CitasController {
 
       return c.json({ success: true, message: "Cita actualizada" });
     } catch (error) {
+      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
       return responderErrorInterno(c, "CitasController.actualizar:", error);
     }
   }

@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { authStore } from '$lib/auth/infrastructure/authStore';
+	import Badge from '$lib/shared/ui/Badge.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
+	import { presentarEstadoCita } from '$lib/shared/presentation';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -14,11 +16,6 @@
 		return new Date(iso).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
 	}
 
-	function badgeEstado(estado: string): string {
-		if (estado === 'CONFIRMADO' || estado === 'REALIZADA') return 'bg-emerald-50 text-emerald-700';
-		if (estado === 'PENDIENTE') return 'bg-amber-50 text-amber-700';
-		return 'bg-red-50 text-red-700';
-	}
 </script>
 
 <svelte:head>
@@ -37,7 +34,7 @@
 
 	<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
 		<Card>
-			<span class="text-xs font-semibold tracking-wider text-text-muted uppercase"
+			<span class="stat-label"
 				>Mis Leads Activos</span
 			>
 			<h2 class="mt-1 font-display text-3xl font-bold text-text-main">{leadsActivos}</h2>
@@ -49,7 +46,7 @@
 		</Card>
 
 		<Card>
-			<span class="text-xs font-semibold tracking-wider text-text-muted uppercase"
+			<span class="stat-label"
 				>Citas Pendientes</span
 			>
 			<h2 class="mt-1 font-display text-3xl font-bold text-text-main">{citasPendientes}</h2>
@@ -61,12 +58,12 @@
 		</Card>
 
 		<Card>
-			<span class="text-xs font-semibold tracking-wider text-text-muted uppercase">Citas Hoy</span>
+			<span class="stat-label">Citas Hoy</span>
 			<h2 class="mt-1 font-display text-3xl font-bold text-text-main">{citasHoy.length}</h2>
 		</Card>
 
 		<Card>
-			<span class="text-xs font-semibold tracking-wider text-text-muted uppercase"
+			<span class="stat-label"
 				>Propiedades en Cartera</span
 			>
 			<h2 class="mt-1 font-display text-3xl font-bold text-text-main">{portafolio}</h2>
@@ -110,13 +107,9 @@
 									Lead: {cita.leadNombre}
 								</p>
 							</div>
-							<span
-								class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold {badgeEstado(
-									cita.estado
-								)}"
-							>
-								{cita.estado}
-							</span>
+							<Badge tone={presentarEstadoCita(cita.estado).tone}>
+								{presentarEstadoCita(cita.estado).label}
+							</Badge>
 						</div>
 					{/each}
 				</div>

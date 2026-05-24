@@ -155,7 +155,7 @@
 <main class="flex-1 bg-bg-base">
 	<section class="mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-7xl items-center px-6 py-10">
 		<div class="max-w-3xl">
-			<p class="mb-4 text-sm font-semibold tracking-[0.18em] text-primary uppercase">
+			<p class="mb-4 section-label">
 				Terrenos y proyectos en Tacna
 			</p>
 			<h1 class="font-display text-4xl leading-tight font-bold text-text-main sm:text-6xl">
@@ -176,10 +176,10 @@
 		<div class="mx-auto max-w-7xl px-6">
 			<div class="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
 				<div>
-					<p class="text-sm font-semibold tracking-[0.18em] text-primary uppercase">
+					<p class="section-label">
 						Proyectos activos
 					</p>
-					<h2 class="mt-2 font-display text-3xl font-bold text-text-main">
+					<h2 class="page-heading">
 						Propiedades disponibles para visitar
 					</h2>
 				</div>
@@ -221,10 +221,10 @@
 	<section id="asesores" class="mx-auto max-w-7xl px-6 py-16">
 		<div class="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
 			<div>
-				<p class="text-sm font-semibold tracking-[0.18em] text-primary uppercase">
+				<p class="section-label">
 					Asesoría personalizada
 				</p>
-				<h2 class="mt-2 font-display text-3xl font-bold text-text-main">
+				<h2 class="page-heading">
 					Conversa con alguien que conoce la zona
 				</h2>
 				<p class="mt-4 leading-relaxed text-text-muted">
@@ -255,10 +255,10 @@
 	<section id="contacto" class="border-t border-border-light bg-bg-card py-16">
 		<div class="mx-auto grid max-w-7xl gap-8 px-6 md:grid-cols-[1fr_0.9fr] md:items-center">
 			<div>
-				<p class="text-sm font-semibold tracking-[0.18em] text-primary uppercase">
+				<p class="section-label">
 					Compra o venta asistida
 				</p>
-				<h2 class="mt-2 font-display text-3xl font-bold text-text-main">
+				<h2 class="page-heading">
 					¿Quieres vender una propiedad con ALVAS?
 				</h2>
 				<p class="mt-4 max-w-2xl leading-relaxed text-text-muted">
@@ -269,73 +269,73 @@
 			<div class="rounded-2xl border border-border-light bg-bg-base p-6 shadow-sm">
 				<form class="grid gap-4" onsubmit={enviarCaptacionVendedor}>
 					<div class="grid gap-3 sm:grid-cols-2">
-						<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+						<label class="label-field">
 							Nombre
 							<input
 								bind:value={nombreVendedor}
-								class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+								class="input-field"
 								placeholder="Tu nombre"
 							/>
 						</label>
-						<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+						<label class="label-field">
 							Teléfono
 							<input
 								bind:value={telefonoVendedor}
-								class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+								class="input-field"
 								placeholder="Número de contacto"
 							/>
 						</label>
 					</div>
 
-					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+					<label class="label-field">
 						Correo opcional
 						<input
 							bind:value={emailVendedor}
 							type="email"
-							class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+							class="input-field"
 							placeholder="correo@ejemplo.com"
 						/>
 					</label>
 
-					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+					<label class="label-field">
 						Propiedad
 						<input
 							bind:value={tituloPropiedad}
-							class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+							class="input-field"
 							placeholder="Terreno, casa, local o predio"
 						/>
 					</label>
 
-					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+					<label class="label-field">
 						Descripción inicial
 						<textarea
 							bind:value={descripcionPropiedad}
 							rows="4"
-							class="resize-none rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+							class="resize-none input-field"
 							placeholder="Zona, metraje aproximado, referencias y condiciones conocidas."
 						></textarea>
 					</label>
 
-					<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+					<label class="label-field">
 						Precio estimado opcional
 						<input
 							bind:value={precioEstimado}
 							type="number"
 							min="0"
 							step="0.01"
-							class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+							class="input-field"
 							placeholder="Monto referencial"
 						/>
 					</label>
 
 					{#if captacionOk}
-						<p class="rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+						<p class="success-alert">
 							{captacionOk}
 						</p>
 					{/if}
 
 					{#if captacionError}
-						<p class="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+						<p class="error-alert">
 							{captacionError}
 						</p>
 					{/if}

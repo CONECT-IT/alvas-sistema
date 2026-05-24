@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import Badge from '$lib/shared/ui/Badge.svelte';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
 	import SidePanel from '$lib/shared/ui/SidePanel.svelte';
+	import { presentarEstadoCita, opcionesEstadoCita } from '$lib/shared/presentation';
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import type { CitaPipeline, LeadPipeline } from '$lib/ventas/domain/models/LeadPipeline';
 	import {
@@ -104,16 +106,6 @@
 		}).format(new Date(fechaIso));
 	}
 
-	function estadoBadge(estado: string): string {
-		const map: Record<string, string> = {
-			PENDIENTE: 'bg-amber-500/10 text-amber-500',
-			REALIZADA: 'bg-emerald-500/10 text-emerald-500',
-			CANCELADA: 'bg-red-500/10 text-red-500',
-			REPROGRAMADA: 'bg-blue-500/10 text-blue-500'
-		};
-		return map[estado] ?? 'bg-surface-muted text-text-muted';
-	}
-
 	async function crearCita(event: SubmitEvent) {
 		event.preventDefault();
 		createError = null;
@@ -206,8 +198,8 @@
 <div class="flex flex-col gap-6">
 	<div class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
 		<div>
-			<p class="text-sm font-semibold tracking-[0.18em] text-primary uppercase">Agenda</p>
-			<h1 class="mt-2 font-display text-3xl font-bold text-text-main">Gestión de citas</h1>
+			<p class="section-label">Agenda</p>
+			<h1 class="page-heading">Gestión de citas</h1>
 		</div>
 
 		<Button variant="secondary" onclick={() => (mostrarPanelCrear = true)}
@@ -221,11 +213,11 @@
 		onClose={() => (mostrarPanelCrear = false)}
 	>
 		<form class="grid gap-4" onsubmit={crearCita}>
-			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+			<label class="label-field">
 				Lead
 				<select
 					bind:value={idLead}
-					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="input-field"
 				>
 					<option value="">Selecciona un lead</option>
 					{#each leads as lead (lead.id)}
@@ -234,46 +226,46 @@
 				</select>
 			</label>
 
-			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+			<label class="label-field">
 				Propiedad (opcional)
 				<input
 					bind:value={idPropiedad}
-					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="input-field"
 					placeholder="ID de propiedad"
 				/>
 			</label>
 
-			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+			<label class="label-field">
 				Fecha y hora
 				<input
 					bind:value={fechaInicio}
 					type="datetime-local"
-					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="input-field"
 				/>
 			</label>
 
-			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+			<label class="label-field">
 				Duración (minutos)
 				<input
 					bind:value={duracionMinutos}
 					type="number"
 					min="15"
 					step="15"
-					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="input-field"
 				/>
 			</label>
 
-			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+			<label class="label-field">
 				Observación
 				<textarea
 					bind:value={observacion}
 					rows="3"
-					class="resize-none rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="resize-none input-field"
 				></textarea>
 			</label>
 
 			{#if createError}
-				<p class="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+				<p class="error-alert">
 					{createError}
 				</p>
 			{/if}
@@ -290,53 +282,52 @@
 		onClose={() => (mostrarPanelEditar = false)}
 	>
 		<form class="grid gap-4" onsubmit={editarCita}>
-			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+			<label class="label-field">
 				Fecha y hora
 				<input
 					bind:value={editFechaInicio}
 					type="datetime-local"
-					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="input-field"
 				/>
 			</label>
 
-			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+			<label class="label-field">
 				Duración (minutos)
 				<input
 					bind:value={editDuracionMinutos}
 					type="number"
 					min="15"
 					step="15"
-					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="input-field"
 					placeholder="Sin cambio"
 				/>
 			</label>
 
-			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+			<label class="label-field">
 				Estado
 				<select
 					bind:value={editEstado}
-					class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="input-field"
 				>
 					<option value="">Sin cambio</option>
-					<option value="PENDIENTE">Pendiente</option>
-					<option value="REALIZADA">Realizada</option>
-					<option value="CANCELADA">Cancelada</option>
-					<option value="REPROGRAMADA">Reprogramada</option>
+					{#each opcionesEstadoCita() as opt (opt.value)}
+						<option value={opt.value}>{opt.label}</option>
+					{/each}
 				</select>
 			</label>
 
-			<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+			<label class="label-field">
 				Observación
 				<textarea
 					bind:value={editObservacion}
 					rows="3"
-					class="resize-none rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main outline-none focus:border-primary"
+					class="resize-none input-field"
 					placeholder="Motivo de reprogramación, cierre de visita o cancelación."
 				></textarea>
 			</label>
 
 			{#if error}
-				<p class="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+				<p class="error-alert">
 					{error}
 				</p>
 			{/if}
@@ -352,7 +343,7 @@
 
 	{#if loading}
 		<Card>
-			<div class="h-64 animate-pulse rounded-2xl bg-surface-muted"></div>
+			<div class="skeleton"></div>
 		</Card>
 	{:else if error && !mostrarPanelEditar}
 		<Card class="text-center">
@@ -392,13 +383,9 @@
 							</p>
 						</div>
 						<div class="flex items-center">
-							<p
-								class="w-full rounded-full px-3 py-1 text-center text-xs font-bold {estadoBadge(
-									cita.estado
-								)}"
-							>
-								{cita.estado}
-							</p>
+							<Badge tone={presentarEstadoCita(cita.estado).tone}>
+								{presentarEstadoCita(cita.estado).label}
+							</Badge>
 						</div>
 						<Button variant="ghost" onclick={() => abrirEditarCita(cita)}>Editar</Button>
 					</div>

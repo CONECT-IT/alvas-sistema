@@ -8,8 +8,12 @@ import {
   type IObtenerUsuario,
 } from "../../application";
 import { UsuarioMapper } from "../persistence/UsuarioMapper";
-import { type CrearUsuarioDTO } from "../../application/dto/UsuarioDTOs";
-import { type ActualizarUsuarioBodyDTO } from "../../application/dto/UsuarioRequestDTOs";
+import {
+  parseBody,
+  esValidationError,
+  formatearValidacion,
+} from "../../../shared/infrastructure/validation/helpers";
+import { CrearUsuarioSchema, ActualizarUsuarioSchema } from "../validation/schemas";
 
 export type BindingsUsuarios = {
   DB: D1DatabaseLike;
@@ -30,15 +34,9 @@ export class UsuarioController {
 
   async crear(c: ContextoUsuarios): Promise<Response> {
     try {
-      const body = await c.req.json<CrearUsuarioDTO>();
+      const body = parseBody(CrearUsuarioSchema, await c.req.json());
       const useCase = this.deps.crearCrearUsuario(c);
-      const resultado = await useCase.ejecutar({
-        idUsuario: body.idUsuario,
-        username: body.username,
-        nombre: body.nombre,
-        clave: body.clave,
-        rol: body.rol,
-      });
+      const resultado = await useCase.ejecutar(body);
 
       if (!resultado.esExito) {
         return this.responderErrorDeDominio(resultado.error, c);
@@ -52,12 +50,12 @@ export class UsuarioController {
         201,
       );
     } catch (error) {
+      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
       console.error("Error inesperado en UsuarioController.crear:", error);
       return c.json(
         {
           success: false,
           message: "Error interno del servidor",
-          error: error instanceof Error ? error.message : String(error),
         },
         500,
       );
@@ -98,14 +96,11 @@ export class UsuarioController {
 
   async actualizar(c: ContextoUsuarios): Promise<Response> {
     try {
+      const body = parseBody(ActualizarUsuarioSchema, await c.req.json());
       const useCase = this.deps.crearActualizarUsuario(c);
-      const body = await c.req.json<ActualizarUsuarioBodyDTO>();
       const resultado = await useCase.ejecutar({
         idUsuario: c.req.param("idUsuario") ?? "",
-        username: body.username,
-        nombre: body.nombre,
-        clave: body.clave,
-        rol: body.rol,
+        ...body,
       });
 
       if (!resultado.esExito) {
@@ -114,6 +109,7 @@ export class UsuarioController {
 
       return c.json({ success: true, data: resultado.valor });
     } catch (error) {
+      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
       console.error("Error inesperado en UsuarioController.actualizar:", error);
       return c.json({ success: false, message: "Error interno del servidor" }, 500);
     }

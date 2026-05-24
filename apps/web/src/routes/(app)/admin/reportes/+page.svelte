@@ -43,8 +43,8 @@
 <div class="flex flex-col gap-6">
 	<div class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
 		<div>
-			<p class="text-sm font-semibold tracking-[0.18em] text-primary uppercase">Reportes</p>
-			<h1 class="mt-2 font-display text-3xl font-bold text-text-main">Resumen comercial</h1>
+			<p class="section-label">Reportes</p>
+			<h1 class="page-heading">Resumen comercial</h1>
 			<p class="mt-2 max-w-2xl text-sm leading-relaxed text-text-muted">
 				Consulta métricas globales, conversión, leads recientes y actividad comercial del sistema.
 			</p>
@@ -55,7 +55,7 @@
 
 	{#if loading}
 		<Card>
-			<div class="h-64 animate-pulse rounded-2xl bg-surface-muted"></div>
+			<div class="skeleton"></div>
 		</Card>
 	{:else if error}
 		<Card class="text-center">

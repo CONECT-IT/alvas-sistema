@@ -1,16 +1,26 @@
 import { type Context } from "hono";
 import {
-  type CaptacionEntranteDTO,
   type IConvertirCaptacionPendiente,
   type IListarCaptacionesPendientes,
   type IMarcarCaptacionDuplicada,
-  type EntradaWhatsAppWebhookDTO,
   type IProcesarCaptacionEntrante,
   type IProcesarWhatsAppWebhook,
   type IRechazarCaptacionPendiente,
   type IRevisarCaptacionPendiente,
 } from "../../application";
 import { type D1DatabaseLike, type SessionClaims } from "../../../shared/infrastructure";
+import {
+  parseBody,
+  esValidationError,
+  formatearValidacion,
+} from "../../../shared/infrastructure/validation/helpers";
+import {
+  CaptacionEntranteSchema,
+  WhatsAppWebhookSchema,
+  MarcarDuplicadaSchema,
+  RechazarCaptacionSchema,
+  ConvertirCaptacionSchema,
+} from "../validation/schemas";
 
 function comparacionSeguraConstante(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
@@ -65,7 +75,7 @@ export class IntegracionesController {
     }
 
     try {
-      const body = await c.req.json<EntradaWhatsAppWebhookDTO>();
+      const body = parseBody(WhatsAppWebhookSchema, await c.req.json());
       const useCase = this.deps.crearProcesarWhatsAppWebhook(c);
       const resultado = await useCase.ejecutar(body);
 
@@ -81,6 +91,7 @@ export class IntegracionesController {
         201,
       );
     } catch (error) {
+      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
       console.error("IntegracionesController.recibirWhatsAppLead:", error);
       return c.json(
         { success: false, message: "Error procesando webhook", code: "WEBHOOK_ERROR_INTERNO" },
@@ -135,11 +146,11 @@ export class IntegracionesController {
 
   async marcarCaptacionDuplicada(c: ContextoIntegraciones): Promise<Response> {
     try {
-      const body = await c.req.json<{ razon?: string }>();
+      const body = parseBody(MarcarDuplicadaSchema, await c.req.json());
       const useCase = this.deps.crearMarcarCaptacionDuplicada(c);
       const resultado = await useCase.ejecutar({
         idCaptacion: obtenerIdCaptacion(c),
-        razon: body.razon ?? "",
+        razon: body.razon,
       });
 
       if (!resultado.esExito) {
@@ -155,6 +166,7 @@ export class IntegracionesController {
         data: resultado.valor,
       });
     } catch (error) {
+      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
       console.error("IntegracionesController.marcarCaptacionDuplicada:", error);
       return c.json(
         { success: false, message: "Error marcando captacion", code: "CAPTACION_ERROR_INTERNO" },
@@ -165,7 +177,7 @@ export class IntegracionesController {
 
   async rechazarCaptacionPendiente(c: ContextoIntegraciones): Promise<Response> {
     try {
-      const body = await c.req.json<{ razon?: string }>();
+      const body = parseBody(RechazarCaptacionSchema, await c.req.json());
       const useCase = this.deps.crearRechazarCaptacionPendiente(c);
       const resultado = await useCase.ejecutar({
         idCaptacion: obtenerIdCaptacion(c),
@@ -181,6 +193,7 @@ export class IntegracionesController {
 
       return c.json({ success: true, message: "Captacion rechazada", data: resultado.valor });
     } catch (error) {
+      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
       console.error("IntegracionesController.rechazarCaptacionPendiente:", error);
       return c.json(
         { success: false, message: "Error rechazando captacion", code: "CAPTACION_ERROR_INTERNO" },
@@ -191,7 +204,7 @@ export class IntegracionesController {
 
   async convertirCaptacionPendiente(c: ContextoIntegraciones): Promise<Response> {
     try {
-      const body = await c.req.json<{ idAsesor?: string }>();
+      const body = parseBody(ConvertirCaptacionSchema, await c.req.json());
       const authPayload = c.get("authPayload");
       const useCase = this.deps.crearConvertirCaptacionPendiente(c);
       const resultado = await useCase.ejecutar({
@@ -208,6 +221,7 @@ export class IntegracionesController {
 
       return c.json({ success: true, message: "Captacion convertida", data: resultado.valor });
     } catch (error) {
+      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
       console.error("IntegracionesController.convertirCaptacionPendiente:", error);
       return c.json(
         {
@@ -222,7 +236,7 @@ export class IntegracionesController {
 
   async recibirCaptacion(c: ContextoIntegraciones): Promise<Response> {
     try {
-      const body = await c.req.json<CaptacionEntranteDTO>();
+      const body = parseBody(CaptacionEntranteSchema, await c.req.json());
       const useCase = this.deps.crearProcesarCaptacionEntrante(c);
       const resultado = await useCase.ejecutar(body);
 
@@ -238,6 +252,7 @@ export class IntegracionesController {
         201,
       );
     } catch (error) {
+      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
       console.error("IntegracionesController.recibirCaptacion:", error);
       return c.json(
         { success: false, message: "Error procesando captacion", code: "CAPTACION_ERROR_INTERNO" },

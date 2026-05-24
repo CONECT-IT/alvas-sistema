@@ -1,22 +1,27 @@
 import {
-  type ActualizarLeadBodyDTO,
-  type ConvertirLeadInputDTO,
-  type RegistrarLeadInputDTO,
-  type AsignarLeadAAsesorInputDTO,
-} from "../../application/dto/LeadDTOs";
-import {
   type ContextoVentas,
   responderErrorDeDominio,
   responderErrorInterno,
   type VentasControllerDeps,
 } from "./VentasHttp";
+import {
+  parseBody,
+  esValidationError,
+  formatearValidacion,
+} from "../../../shared/infrastructure/validation/helpers";
+import {
+  RegistrarLeadSchema,
+  ActualizarLeadSchema,
+  ConvertirLeadSchema,
+  AsignarLeadAsesorSchema,
+} from "../validation/schemas";
 
 export class LeadsController {
   constructor(private readonly deps: VentasControllerDeps) {}
 
   async registrar(c: ContextoVentas): Promise<Response> {
     try {
-      const body = await c.req.json<RegistrarLeadInputDTO>();
+      const body = parseBody(RegistrarLeadSchema, await c.req.json());
       const authPayload = c.get("authPayload");
       const useCase = this.deps.crearRegistrarLead(c);
 
@@ -32,6 +37,7 @@ export class LeadsController {
 
       return c.json({ success: true, data: { id: resultado.valor.id as string } }, 201);
     } catch (error) {
+      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
       return responderErrorInterno(c, "LeadsController.registrar:", error);
     }
   }
@@ -39,7 +45,7 @@ export class LeadsController {
   async actualizar(c: ContextoVentas): Promise<Response> {
     try {
       const id = c.req.param("id") ?? "";
-      const body = await c.req.json<ActualizarLeadBodyDTO>();
+      const body = parseBody(ActualizarLeadSchema, await c.req.json());
       const authPayload = c.get("authPayload");
       const useCase = this.deps.crearActualizarLead(c);
 
@@ -55,13 +61,14 @@ export class LeadsController {
 
       return c.json({ success: true, message: "Lead actualizado" });
     } catch (error) {
+      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
       return responderErrorInterno(c, "LeadsController.actualizar:", error);
     }
   }
 
   async convertirACliente(c: ContextoVentas): Promise<Response> {
     try {
-      const body = await c.req.json<ConvertirLeadInputDTO>();
+      const body = parseBody(ConvertirLeadSchema, await c.req.json());
       const authPayload = c.get("authPayload");
       const useCase = this.deps.crearConvertirLeadACliente(c);
       const resultado = await useCase.ejecutar({
@@ -75,6 +82,7 @@ export class LeadsController {
 
       return c.json({ success: true, data: { idCliente: resultado.valor.id as string } });
     } catch (error) {
+      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
       return responderErrorInterno(c, "LeadsController.convertirACliente:", error);
     }
   }
@@ -180,7 +188,7 @@ export class LeadsController {
   async asignarAsesor(c: ContextoVentas): Promise<Response> {
     try {
       const id = c.req.param("id") ?? "";
-      const body = await c.req.json<AsignarLeadAAsesorInputDTO>();
+      const body = parseBody(AsignarLeadAsesorSchema, await c.req.json());
       const authPayload = c.get("authPayload");
       const useCase = this.deps.crearAsignarLeadAAsesor(c);
       const resultado = await useCase.ejecutar({
@@ -195,6 +203,7 @@ export class LeadsController {
 
       return c.json({ success: true, message: "Lead reasignado" });
     } catch (error) {
+      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
       return responderErrorInterno(c, "LeadsController.asignarAsesor:", error);
     }
   }

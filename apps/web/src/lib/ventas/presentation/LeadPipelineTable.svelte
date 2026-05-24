@@ -3,6 +3,7 @@
 	import type { LeadPipeline } from '../domain/models/LeadPipeline';
 	import { actualizarLead } from '../application/use-cases/actualizarLead';
 	import { ventasRepository } from '../infrastructure/ventasRepository';
+	import { presentarEstadoLead, ESTADOS_LEAD } from '$lib/shared/presentation';
 
 	interface Props {
 		leads: LeadPipeline[];
@@ -13,16 +14,8 @@
 
 	let { leads, onLeadClick, onEditClick, onStatusChanged }: Props = $props();
 
-	const estados = ['NUEVO', 'CONTACTO', 'AGENDADO', 'TRABAJANDO', 'CONVERTIDO', 'PERDIDO'];
+	const estados = ESTADOS_LEAD;
 	let activeMenuId = $state<string | null>(null);
-
-	function getEstadoTone(estado: string): 'brand' | 'success' | 'neutral' | 'warning' {
-		const normalized = estado.toUpperCase();
-		if (normalized === 'CONVERTIDO') return 'success';
-		if (normalized === 'PERDIDO') return 'neutral';
-		if (normalized === 'AGENDADO' || normalized === 'TRABAJANDO') return 'brand';
-		return 'warning';
-	}
 
 	async function cambiarEstado(lead: LeadPipeline, nuevoEstado: string) {
 		activeMenuId = null;
@@ -76,10 +69,10 @@
 							}}
 						>
 							<Badge
-								tone={getEstadoTone(lead.estado)}
+								tone={presentarEstadoLead(lead.estado).tone}
 								class="transition-all group-hover:ring-2 group-hover:ring-primary/20"
 							>
-								{lead.estado}
+								{presentarEstadoLead(lead.estado).label}
 							</Badge>
 						</button>
 
@@ -97,7 +90,7 @@
 											: 'text-text-main'}"
 										onclick={() => cambiarEstado(lead, estado)}
 									>
-										{estado}
+										{presentarEstadoLead(estado).label}
 									</button>
 								{/each}
 							</div>

@@ -16,6 +16,7 @@ import {
   ListarContratosPorAsesorUseCase,
   ListarLeadsPorAsesorUseCase,
   ListarLeadsUseCase,
+  ListarPipelineUseCase,
   ListarPropiedadesPorClienteUseCase,
   ObtenerCitaPorIdUseCase,
   ObtenerClienteUseCase,
@@ -25,6 +26,7 @@ import {
   type IRegistrarLead,
 } from "../lib/ventas/application";
 import {
+  ConsultaNombreAsesorAdapter,
   D1ContratoRepository,
   D1VentasRepository,
   type VentasControllerDeps,
@@ -57,6 +59,13 @@ export function crearRegistrarLeadUseCase(db: D1DatabaseLike): IRegistrarLead {
     new AutorizadorVentasAdapter(),
     crearConsultaPropiedadInteres(db),
     crearRegistroPropiedadVendedor(db),
+  );
+}
+
+function crearListarPipelineUseCase(db: D1DatabaseLike) {
+  return new ListarPipelineUseCase(
+    new D1VentasRepository(db),
+    new ConsultaNombreAsesorAdapter(new D1UsuarioRepository(db)),
   );
 }
 
@@ -117,6 +126,7 @@ export function crearVentasControllerDeps(): VentasControllerDeps {
       new ListarPropiedadesPorClienteUseCase(new D1ContratoRepository(c.env.DB)),
     crearListarActividadLead: (c) =>
       new ListarActividadLeadUseCase(new D1VentasRepository(c.env.DB)),
+    crearListarPipeline: (c) => crearListarPipelineUseCase(c.env.DB),
     crearVentasRepo: (c) => new D1VentasRepository(c.env.DB),
     crearPropiedadRepo: (c) => new D1PropiedadRepository(c.env.DB),
     crearUsuarioRepo: (c) => new D1UsuarioRepository(c.env.DB),

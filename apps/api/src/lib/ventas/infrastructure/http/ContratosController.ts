@@ -1,4 +1,3 @@
-import { type CrearContratoInputDTO } from "../../application/dto/ContratoDTOs";
 import {
   type ContextoVentas,
   responderErrorDeDominio,
@@ -6,21 +5,21 @@ import {
   type VentasControllerDeps,
 } from "./VentasHttp";
 import { idLead, idPropiedad } from "../../domain/value-objects/Ids";
+import {
+  parseBody,
+  esValidationError,
+  formatearValidacion,
+} from "../../../shared/infrastructure/validation/helpers";
+import { CrearContratoSchema } from "../validation/schemas";
 
 export class ContratosController {
   constructor(private readonly deps: VentasControllerDeps) {}
 
   async crear(c: ContextoVentas): Promise<Response> {
     try {
-      const body = await c.req.json<Partial<CrearContratoInputDTO>>();
+      const body = parseBody(CrearContratoSchema, await c.req.json());
       const useCase = this.deps.crearCrearContrato(c);
-      const resultado = await useCase.ejecutar({
-        id: body.id ?? crypto.randomUUID(),
-        idLead: body.idLead ?? "",
-        idPropiedad: body.idPropiedad ?? "",
-        fechaInicio: body.fechaInicio ? new Date(body.fechaInicio) : new Date(),
-        fechaFin: body.fechaFin ? new Date(body.fechaFin) : new Date(),
-      });
+      const resultado = await useCase.ejecutar(body);
 
       if (!resultado.esExito) {
         return responderErrorDeDominio(c, resultado.error);
@@ -28,6 +27,7 @@ export class ContratosController {
 
       return c.json({ success: true, data: resultado.valor }, 201);
     } catch (error) {
+      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
       return responderErrorInterno(c, "ContratosController.crear:", error);
     }
   }

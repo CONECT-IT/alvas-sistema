@@ -19,6 +19,7 @@ import {
   type IListarContratosPorAsesor,
   type IListarLeads,
   type IListarLeadsPorAsesor,
+  type IListarPipeline,
   type IListarPropiedadesPorCliente,
   type IObtenerCitaPorId,
   type IObtenerCliente,
@@ -64,6 +65,7 @@ export type VentasControllerDeps = Readonly<{
   crearFirmarContrato: (c: ContextoVentas) => IFirmarContrato;
   crearCancelarContrato: (c: ContextoVentas) => ICancelarContrato;
   crearListarActividadLead: (c: ContextoVentas) => IListarActividadLead;
+  crearListarPipeline: (c: ContextoVentas) => IListarPipeline;
   crearVentasRepo: (c: ContextoVentas) => IVentasRepository;
   crearPropiedadRepo: (c: ContextoVentas) => IPropiedadRepository;
   crearUsuarioRepo: (c: ContextoVentas) => IUsuarioRepository;

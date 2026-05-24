@@ -18,6 +18,7 @@
 	import type { Propiedad } from '$lib/propiedades/domain/models/Propiedad';
 	import { obtenerPropiedad } from '$lib/propiedades/application/use-cases/obtenerPropiedad';
 	import { propiedadRepository } from '$lib/propiedades/infrastructure/propiedadRepository';
+	import { presentarEstadoLead, presentarTipoVenta, presentarEstadoCita, presentarEstadoPropiedad, opcionesEstadoLead } from '$lib/shared/presentation';
 
 	interface Props {
 		leadId: string;
@@ -209,25 +210,6 @@
 		}
 	}
 
-	function badgeTone(estado: string): 'brand' | 'success' | 'neutral' {
-		if (estado === 'NUEVO') return 'brand';
-		if (estado === 'CONTACTO' || estado === 'VISITA_PROGRAMADA') return 'neutral';
-		if (estado === 'NEGOCIACION' || estado === 'CONVERTIDO') return 'success';
-		return 'neutral';
-	}
-
-	function badgeTipo(tipo: string): 'brand' | 'success' | 'neutral' {
-		return tipo === 'COMPRA' ? 'brand' : 'success';
-	}
-
-	function tonePropiedad(estado: string): 'brand' | 'success' | 'warning' | 'neutral' {
-		const normalized = estado.toUpperCase();
-		if (normalized === 'DISPONIBLE') return 'success';
-		if (normalized === 'BORRADOR') return 'warning';
-		if (normalized === 'RESERVADA') return 'brand';
-		return 'neutral';
-	}
-
 	function formatearFecha(iso: string): string {
 		return new Date(iso).toLocaleDateString('es-PE', {
 			day: '2-digit',
@@ -245,7 +227,7 @@
 
 {#if loading}
 	<Card>
-		<div class="h-64 animate-pulse rounded-2xl bg-surface-muted"></div>
+		<div class="skeleton"></div>
 	</Card>
 {:else if error}
 	<Card class="text-center">
@@ -259,8 +241,8 @@
 			<div>
 				<div class="flex flex-wrap items-center gap-3">
 					<h1 class="font-display text-3xl font-bold text-text-main">{lead.nombre}</h1>
-					<Badge tone={badgeTone(lead.estado)}>{lead.estado}</Badge>
-					<Badge tone={badgeTipo(lead.tipo)}>{lead.tipo}</Badge>
+					<Badge tone={presentarEstadoLead(lead.estado).tone}>{presentarEstadoLead(lead.estado).label}</Badge>
+					<Badge tone={presentarTipoVenta(lead.tipo).tone}>{presentarTipoVenta(lead.tipo).label}</Badge>
 				</div>
 				<p class="mt-2 text-sm text-text-muted">
 					ID: {lead.id} &middot; Asesor: {lead.idAsesor}
@@ -289,8 +271,8 @@
 
 		<div class="grid gap-6 xl:grid-cols-2">
 			<Card>
-				<h2 class="mb-4 font-display text-xl font-bold text-text-main">Información de contacto</h2>
-				<dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 text-sm">
+				<h2 class="card-title">Información de contacto</h2>
+				<dl class="dl-grid">
 					<dt class="font-semibold text-text-muted">Email</dt>
 					<dd class="text-text-main">{lead.email}</dd>
 					<dt class="font-semibold text-text-muted">Teléfono</dt>
@@ -336,8 +318,8 @@
 			</Card>
 
 			<Card>
-				<h2 class="mb-4 font-display text-xl font-bold text-text-main">Fechas</h2>
-				<dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 text-sm">
+				<h2 class="card-title">Fechas</h2>
+				<dl class="dl-grid">
 					<dt class="font-semibold text-text-muted">Creado</dt>
 					<dd class="text-text-main">{formatearFecha(lead.creadoEn)}</dd>
 					<dt class="font-semibold text-text-muted">Actualizado</dt>
@@ -348,7 +330,7 @@
 
 		{#if propiedadesRelacionadas.length > 0}
 			<Card>
-				<h2 class="mb-4 font-display text-xl font-bold text-text-main">Propiedades asociadas</h2>
+				<h2 class="card-title">Propiedades asociadas</h2>
 				<div class="grid gap-3">
 					{#each propiedadesRelacionadas as idProp (idProp)}
 						<div
@@ -361,8 +343,8 @@
 								<div class="mt-1 flex flex-wrap items-center gap-2">
 									<p class="font-mono text-xs text-text-muted">{idProp}</p>
 									{#if propiedadesPorId.get(idProp)?.estado}
-										<Badge tone={tonePropiedad(propiedadesPorId.get(idProp)?.estado ?? '')}>
-											{propiedadesPorId.get(idProp)?.estado}
+										<Badge tone={presentarEstadoPropiedad(propiedadesPorId.get(idProp)?.estado ?? '').tone}>
+											{presentarEstadoPropiedad(propiedadesPorId.get(idProp)?.estado ?? '').label}
 										</Badge>
 									{/if}
 								</div>
@@ -381,7 +363,7 @@
 
 		{#if lead.citas.length > 0}
 			<Card>
-				<h2 class="mb-4 font-display text-xl font-bold text-text-main">
+				<h2 class="card-title">
 					Citas ({lead.citas.length})
 				</h2>
 				<div class="space-y-3">
@@ -411,14 +393,8 @@
 										<p class="mt-2 text-sm text-text-muted">{cita.observacion}</p>
 									{/if}
 								</div>
-								<Badge
-									tone={cita.estado === 'REALIZADA'
-										? 'success'
-										: cita.estado === 'CANCELADA'
-											? 'neutral'
-											: 'brand'}
-								>
-									{cita.estado}
+								<Badge tone={presentarEstadoCita(cita.estado).tone}>
+									{presentarEstadoCita(cita.estado).label}
 								</Badge>
 							</div>
 							{#if cita.idPropiedad}
@@ -451,12 +427,9 @@
 				class="w-full rounded-lg border border-border-light px-3 py-2"
 				bind:value={formLead.estado}
 			>
-				<option value="NUEVO">NUEVO</option>
-				<option value="CONTACTO">CONTACTO</option>
-				<option value="AGENDADO">AGENDADO</option>
-				<option value="TRABAJANDO">TRABAJANDO</option>
-				<option value="CONVERTIDO">CONVERTIDO</option>
-				<option value="PERDIDO">PERDIDO</option>
+				{#each opcionesEstadoLead() as opt (opt.value)}
+					<option value={opt.value}>{opt.label}</option>
+				{/each}
 			</select>
 			<input
 				class="w-full rounded-lg border border-border-light px-3 py-2"

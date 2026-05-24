@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Card from '$lib/shared/ui/Card.svelte';
+	import { presentarEstadoUsuario } from '$lib/shared/presentation';
 	import type { Usuario } from '../domain/models/Usuario';
 
 	interface Props {
@@ -11,7 +12,7 @@
 	const asesores = $derived(usuarios.filter((usuario) => usuario.rol === 'ASESOR').length);
 	const admins = $derived(usuarios.filter((usuario) => usuario.rol === 'ADMIN').length);
 	const activos = $derived(
-		usuarios.filter((usuario) => usuario.estado.toUpperCase() === 'ACTIVO').length
+		usuarios.filter((usuario) => presentarEstadoUsuario(usuario.estado).tone === 'success').length
 	);
 </script>
 

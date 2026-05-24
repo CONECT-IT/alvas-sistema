@@ -6,6 +6,7 @@
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import type { Cliente } from '../domain/models/Cliente';
 	import { obtenerCliente } from '../application/use-cases/obtenerCliente';
+	import { presentarEstadoContrato } from '$lib/shared/presentation';
 	import { actualizarCliente } from '../application/use-cases/actualizarCliente';
 	import { clienteRepository } from '../infrastructure/clienteRepository';
 	import { listarContratos } from '$lib/ventas/application/use-cases/listarContratos';
@@ -127,7 +128,7 @@
 
 {#if loading}
 	<Card>
-		<div class="h-64 animate-pulse rounded-2xl bg-surface-muted"></div>
+		<div class="skeleton"></div>
 	</Card>
 {:else if error}
 	<Card class="text-center">
@@ -157,30 +158,30 @@
 
 		<SidePanel isOpen={editando} title="Editar cliente" onClose={cancelarEdicion}>
 			<form class="grid gap-4" onsubmit={guardarCambios}>
-				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+				<label class="label-field">
 					Nombre
 					<input
 						bind:value={editNombre}
-						class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+						class="input-field"
 					/>
 				</label>
-				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+				<label class="label-field">
 					Email
 					<input
 						bind:value={editEmail}
 						type="email"
-						class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+						class="input-field"
 					/>
 				</label>
-				<label class="flex flex-col gap-2 text-sm font-semibold text-text-main">
+				<label class="label-field">
 					Teléfono
 					<input
 						bind:value={editTelefono}
-						class="rounded-2xl border border-border-light bg-bg-card px-4 py-3 font-normal text-text-main transition outline-none focus:border-primary"
+						class="input-field"
 					/>
 				</label>
 				{#if saveError}
-					<p class="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+					<p class="error-alert">
 						{saveError}
 					</p>
 				{/if}
@@ -194,7 +195,7 @@
 		</SidePanel>
 
 		{#if saveSuccess}
-			<p class="rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+			<p class="success-alert">
 				{saveSuccess}
 			</p>
 		{/if}
@@ -205,7 +206,7 @@
 					<h2 class="font-display text-xl font-bold text-text-main">Historial como lead</h2>
 					<Badge tone="brand">Lead</Badge>
 				</div>
-				<dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 text-sm">
+				<dl class="dl-grid">
 					<dt class="font-semibold text-text-muted">Nombre</dt>
 					<dd class="text-text-main">{leadOrigen.nombre}</dd>
 					<dt class="font-semibold text-text-muted">Tipo</dt>
@@ -224,8 +225,8 @@
 
 		<div class="grid gap-6 xl:grid-cols-2">
 			<Card>
-				<h2 class="mb-4 font-display text-xl font-bold text-text-main">Información de contacto</h2>
-				<dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 text-sm">
+				<h2 class="card-title">Información de contacto</h2>
+				<dl class="dl-grid">
 					<dt class="font-semibold text-text-muted">Email</dt>
 					<dd class="text-text-main">{cliente.email}</dd>
 					<dt class="font-semibold text-text-muted">Teléfono</dt>
@@ -240,8 +241,8 @@
 			</Card>
 
 			<Card>
-				<h2 class="mb-4 font-display text-xl font-bold text-text-main">Fechas</h2>
-				<dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 text-sm">
+				<h2 class="card-title">Fechas</h2>
+				<dl class="dl-grid">
 					<dt class="font-semibold text-text-muted">Creado</dt>
 					<dd class="text-text-main">{formatearFecha(cliente.creadoEn)}</dd>
 					<dt class="font-semibold text-text-muted">Actualizado</dt>
@@ -268,7 +269,9 @@
 										{ctr.nombreLead ?? '—'} &middot; {formatearFecha(ctr.fechaInicio)}
 									</p>
 								</div>
-								<Badge tone={ctr.estado === 'VIGENTE' ? 'success' : 'neutral'}>{ctr.estado}</Badge>
+								<Badge tone={presentarEstadoContrato(ctr.estado).tone}>
+									{presentarEstadoContrato(ctr.estado).label}
+								</Badge>
 							</div>
 						</div>
 					{/each}

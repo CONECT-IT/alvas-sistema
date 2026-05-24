@@ -426,7 +426,13 @@ describe("http / integraciones routes", () => {
     const res = await app.request("/integraciones/captaciones", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({}),
+      body: JSON.stringify({
+        canal: "web",
+        origen: "formulario",
+        nombre: "Test",
+        telefono: "999000000",
+        tipo: "COMPRA",
+      }),
     });
 
     expect(res.status).toBe(400);

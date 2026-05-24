@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Card from '$lib/shared/ui/Card.svelte';
+	import { presentarEstadoLead } from '$lib/shared/presentation';
 	import type { LeadPipeline } from '../domain/models/LeadPipeline';
 
 	interface Props {
@@ -10,7 +11,7 @@
 
 	const conCitas = $derived(leads.filter((lead) => lead.citasCount > 0).length);
 	const nuevos = $derived(
-		leads.filter((lead) => lead.estado.toUpperCase().includes('NUEVO')).length
+		leads.filter((lead) => presentarEstadoLead(lead.estado).tone === 'warning').length
 	);
 	const estados = $derived(new Set(leads.map((lead) => lead.estado)).size);
 </script>
