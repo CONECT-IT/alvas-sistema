@@ -67,6 +67,11 @@ type CaptacionPendienteContract = Readonly<{
   actualizadoEn: string;
 }>;
 
+type CaptacionConvertidaContract = CaptacionProcesadaContract &
+  Readonly<{
+    captacion: CaptacionPendienteContract;
+  }>;
+
 type ReporteGeneralContract = Readonly<{
   fechaGeneracion: string;
   metricas: Readonly<{
@@ -202,6 +207,21 @@ function esCaptacionPendienteContract(value: unknown): value is CaptacionPendien
     !Number.isNaN(Date.parse(captacion.creadoEn)) &&
     typeof captacion.actualizadoEn === "string" &&
     !Number.isNaN(Date.parse(captacion.actualizadoEn))
+  );
+}
+
+function esCaptacionConvertidaContract(value: unknown): value is CaptacionConvertidaContract {
+  if (!value || typeof value !== "object") return false;
+  const captacionConvertida = value as Record<string, unknown>;
+  return (
+    Object.keys(captacionConvertida).every((key) =>
+      ["idLead", "idPropiedadPreliminar", "captacion"].includes(key),
+    ) &&
+    typeof captacionConvertida.idLead === "string" &&
+    (captacionConvertida.idPropiedadPreliminar === undefined ||
+      typeof captacionConvertida.idPropiedadPreliminar === "string") &&
+    esCaptacionPendienteContract(captacionConvertida.captacion) &&
+    (captacionConvertida.captacion as CaptacionPendienteContract).estado === "CONVERTIDA"
   );
 }
 
@@ -420,6 +440,57 @@ describe("contract / api-web", () => {
     };
 
     expect(esCaptacionPendienteContract(payload)).toBe(true);
+  });
+
+  it("mantiene estable el contrato serializado del lifecycle de captacion", () => {
+    const base = {
+      id: "captacion-1",
+      canal: "WHATSAPP",
+      origen: "whatsapp_webhook",
+      nombre: "Carlos Comprador",
+      telefono: "59170000002",
+      email: "59170000002@contacto.whatsapp.local",
+      tipo: "COMPRA",
+      creadoEn: "2026-05-24T04:00:00.000Z",
+      actualizadoEn: "2026-05-24T04:00:00.000Z",
+    };
+
+    expect(esCaptacionPendienteContract({ ...base, estado: "REVISADA" })).toBe(true);
+    expect(
+      esCaptacionPendienteContract({
+        ...base,
+        estado: "DUPLICADA",
+        razonDuplicado: "Telefono ya registrado",
+      }),
+    ).toBe(true);
+    expect(
+      esCaptacionPendienteContract({
+        ...base,
+        estado: "RECHAZADA",
+        razonDuplicado: "Sin intencion comercial",
+      }),
+    ).toBe(true);
+  });
+
+  it("mantiene estable el contrato serializado de captacion convertida", () => {
+    const payload = {
+      idLead: "lead-captacion-1",
+      idPropiedadPreliminar: "propiedad-preliminar-1",
+      captacion: {
+        id: "captacion-1",
+        canal: "WHATSAPP",
+        origen: "whatsapp_webhook",
+        nombre: "Ana Vendedora",
+        telefono: "59170000003",
+        email: "59170000003@contacto.whatsapp.local",
+        tipo: "VENTA",
+        estado: "CONVERTIDA",
+        creadoEn: "2026-05-24T04:00:00.000Z",
+        actualizadoEn: "2026-05-24T04:10:00.000Z",
+      },
+    };
+
+    expect(esCaptacionConvertidaContract(payload)).toBe(true);
   });
 
   it("rechaza captacion procesada si expone datos crudos de contacto", () => {

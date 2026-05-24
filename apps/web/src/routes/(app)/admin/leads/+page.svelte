@@ -2,9 +2,11 @@
 	import { goto } from '$app/navigation';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
+	import SidePanel from '$lib/shared/ui/SidePanel.svelte';
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import type { LeadPipeline } from '$lib/ventas/domain/models/LeadPipeline';
 	import { listarPipeline } from '$lib/ventas/application/use-cases/listarPipeline';
+	import { registrarLead } from '$lib/ventas/application/use-cases/registrarLead';
 	import { ventasRepository } from '$lib/ventas/infrastructure/ventasRepository';
 	import LeadPipelineTable from '$lib/ventas/presentation/LeadPipelineTable.svelte';
 	import LeadKanban from '$lib/ventas/presentation/LeadKanban.svelte';
@@ -15,6 +17,20 @@
 	let vista = $state<'tabla' | 'kanban'>('kanban');
 	let loading = $state(true);
 	let error = $state<string | null>(null);
+	let panelCrear = $state(false);
+	let guardando = $state(false);
+	let accionError = $state<string | null>(null);
+	let formLead = $state({
+		nombre: '',
+		email: '',
+		telefono: '',
+		tipo: 'COMPRA' as 'COMPRA' | 'VENTA',
+		idAsesor: '',
+		idPropiedadInteres: '',
+		propiedadTitulo: '',
+		propiedadDescripcion: '',
+		propiedadPrecio: ''
+	});
 
 	let leadsFiltrados = $derived(
 		mostrarConvertidos ? leads : leads.filter((l) => l.estado !== 'CONVERTIDO')
@@ -37,6 +53,44 @@
 		goto(`/admin/leads/${encodeURIComponent(lead.id)}`);
 	}
 
+	function cerrarCrear() {
+		panelCrear = false;
+		accionError = null;
+	}
+
+	async function crearLead() {
+		guardando = true;
+		accionError = null;
+
+		try {
+			const idLead = await registrarLead(ventasRepository, {
+				nombre: formLead.nombre,
+				email: formLead.email,
+				telefono: formLead.telefono,
+				tipo: formLead.tipo,
+				idAsesor: formLead.idAsesor || undefined,
+				idPropiedadInteres:
+					formLead.tipo === 'COMPRA' && formLead.idPropiedadInteres
+						? formLead.idPropiedadInteres
+						: undefined,
+				datosPropiedad:
+					formLead.tipo === 'VENTA' && formLead.propiedadTitulo
+						? {
+								titulo: formLead.propiedadTitulo,
+								descripcion: formLead.propiedadDescripcion,
+								precio: Number(formLead.propiedadPrecio || 0)
+							}
+						: undefined
+			});
+			await cargar();
+			goto(`/admin/leads/${encodeURIComponent(idLead)}`);
+		} catch (err) {
+			accionError = err instanceof HttpError ? err.message : 'No se pudo registrar el lead.';
+		} finally {
+			guardando = false;
+		}
+	}
+
 	$effect(() => {
 		cargar();
 	});
@@ -56,7 +110,10 @@
 			</p>
 		</div>
 
-		<Button variant="secondary" onclick={cargar}>Actualizar</Button>
+		<div class="flex gap-2">
+			<Button variant="secondary" onclick={cargar}>Actualizar</Button>
+			<Button onclick={() => (panelCrear = true)}>Nuevo lead</Button>
+		</div>
 	</div>
 
 	{#if loading}
@@ -112,3 +169,59 @@
 		</Card>
 	{/if}
 </div>
+
+<SidePanel isOpen={panelCrear} onClose={cerrarCrear} title="Nuevo lead">
+	<div class="space-y-4">
+		{#if accionError}
+			<div class="border-danger/20 bg-danger/10 text-danger rounded-lg border p-3 text-sm">
+				{accionError}
+			</div>
+		{/if}
+
+		<input class="input" placeholder="Nombre" bind:value={formLead.nombre} />
+		<input class="input" placeholder="Email" type="email" bind:value={formLead.email} />
+		<input class="input" placeholder="Telefono" bind:value={formLead.telefono} />
+		<select class="input" bind:value={formLead.tipo}>
+			<option value="COMPRA">Comprador</option>
+			<option value="VENTA">Vendedor</option>
+		</select>
+		<input
+			class="input"
+			placeholder="ID asesor asignado (opcional)"
+			bind:value={formLead.idAsesor}
+		/>
+
+		{#if formLead.tipo === 'COMPRA'}
+			<input
+				class="input"
+				placeholder="ID propiedad de interes (opcional)"
+				bind:value={formLead.idPropiedadInteres}
+			/>
+		{:else}
+			<input
+				class="input"
+				placeholder="Titulo de propiedad preliminar"
+				bind:value={formLead.propiedadTitulo}
+			/>
+			<textarea
+				class="input min-h-24"
+				placeholder="Descripcion de la propiedad"
+				bind:value={formLead.propiedadDescripcion}
+			></textarea>
+			<input
+				class="input"
+				type="number"
+				min="0"
+				placeholder="Precio esperado"
+				bind:value={formLead.propiedadPrecio}
+			/>
+		{/if}
+
+		<div class="flex justify-end gap-2 pt-2">
+			<Button variant="secondary" onclick={cerrarCrear}>Cancelar</Button>
+			<Button onclick={crearLead} disabled={guardando}>
+				{guardando ? 'Registrando...' : 'Registrar lead'}
+			</Button>
+		</div>
+	</div>
+</SidePanel>

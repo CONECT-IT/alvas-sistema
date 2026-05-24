@@ -29,6 +29,7 @@ export type RegistrarLeadRequestDTO = Readonly<{
 	email: string;
 	telefono: string;
 	tipo: 'COMPRA' | 'VENTA';
+	idAsesor?: string;
 	idPropiedadInteres?: string;
 	datosPropiedad?: {
 		titulo: string;

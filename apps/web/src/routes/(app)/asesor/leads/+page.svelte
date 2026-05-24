@@ -1,10 +1,12 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
 	import SidePanel from '$lib/shared/ui/SidePanel.svelte';
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import type { LeadPipeline } from '$lib/ventas/domain/models/LeadPipeline';
 	import { listarPipeline } from '$lib/ventas/application/use-cases/listarPipeline';
+	import { registrarLead } from '$lib/ventas/application/use-cases/registrarLead';
 	import { ventasRepository } from '$lib/ventas/infrastructure/ventasRepository';
 	import LeadPipelineTable from '$lib/ventas/presentation/LeadPipelineTable.svelte';
 	import LeadKanban from '$lib/ventas/presentation/LeadKanban.svelte';
@@ -16,6 +18,18 @@
 	let vista = $state<'tabla' | 'kanban'>('kanban');
 	let loading = $state(true);
 	let error = $state<string | null>(null);
+	let guardando = $state(false);
+	let accionError = $state<string | null>(null);
+	let formLead = $state({
+		nombre: '',
+		email: '',
+		telefono: '',
+		tipo: 'COMPRA' as 'COMPRA' | 'VENTA',
+		idPropiedadInteres: '',
+		propiedadTitulo: '',
+		propiedadDescripcion: '',
+		propiedadPrecio: ''
+	});
 
 	let leadsFiltrados = $derived(
 		mostrarConvertidos ? leads : leads.filter((l) => l.estado !== 'CONVERTIDO')
@@ -34,8 +48,7 @@
 	}
 
 	function irALead(lead: LeadPipeline) {
-		// En la vista de asesor, se abre el panel de actividad
-		abrirPanel('actividad', lead);
+		goto(`/asesor/leads/${encodeURIComponent(lead.id)}`);
 	}
 
 	// SidePanel state
@@ -54,6 +67,39 @@
 	function cerrarPanel() {
 		panelOpen = false;
 		panelMode = null;
+		accionError = null;
+	}
+
+	async function crearLead() {
+		guardando = true;
+		accionError = null;
+
+		try {
+			const idLead = await registrarLead(ventasRepository, {
+				nombre: formLead.nombre,
+				email: formLead.email,
+				telefono: formLead.telefono,
+				tipo: formLead.tipo,
+				idPropiedadInteres:
+					formLead.tipo === 'COMPRA' && formLead.idPropiedadInteres
+						? formLead.idPropiedadInteres
+						: undefined,
+				datosPropiedad:
+					formLead.tipo === 'VENTA' && formLead.propiedadTitulo
+						? {
+								titulo: formLead.propiedadTitulo,
+								descripcion: formLead.propiedadDescripcion,
+								precio: Number(formLead.propiedadPrecio || 0)
+							}
+						: undefined
+			});
+			await cargarLeads();
+			goto(`/asesor/leads/${encodeURIComponent(idLead)}`);
+		} catch (err) {
+			accionError = err instanceof HttpError ? err.message : 'No se pudo registrar el lead.';
+		} finally {
+			guardando = false;
+		}
 	}
 
 	$effect(() => {
@@ -77,6 +123,7 @@
 		</div>
 		<div class="flex gap-2">
 			<Button variant="secondary" onclick={cargarLeads}>Actualizar</Button>
+			<Button onclick={() => abrirPanel('crear')}>Nuevo lead</Button>
 		</div>
 	</div>
 
@@ -132,18 +179,67 @@
 					onStatusChanged={cargarLeads}
 				/>
 			{:else}
-				<LeadKanban
-					leads={leadsFiltrados}
-					onLeadClick={(lead) => abrirPanel('actividad', lead)}
-					onStatusChanged={cargarLeads}
-				/>
+				<LeadKanban leads={leadsFiltrados} onLeadClick={irALead} onStatusChanged={cargarLeads} />
 			{/if}
 		</Card>
 	{/if}
 </div>
 
-<SidePanel isOpen={panelOpen} onClose={cerrarPanel} title="Actividad del lead">
-	{#if panelMode === 'actividad'}
+<SidePanel
+	isOpen={panelOpen}
+	onClose={cerrarPanel}
+	title={panelMode === 'crear' ? 'Nuevo lead' : 'Actividad del lead'}
+>
+	{#if panelMode === 'crear'}
+		<div class="space-y-4">
+			{#if accionError}
+				<div class="border-danger/20 bg-danger/10 text-danger rounded-lg border p-3 text-sm">
+					{accionError}
+				</div>
+			{/if}
+
+			<input class="input" placeholder="Nombre" bind:value={formLead.nombre} />
+			<input class="input" placeholder="Email" type="email" bind:value={formLead.email} />
+			<input class="input" placeholder="Telefono" bind:value={formLead.telefono} />
+			<select class="input" bind:value={formLead.tipo}>
+				<option value="COMPRA">Comprador</option>
+				<option value="VENTA">Vendedor</option>
+			</select>
+
+			{#if formLead.tipo === 'COMPRA'}
+				<input
+					class="input"
+					placeholder="ID propiedad de interes (opcional)"
+					bind:value={formLead.idPropiedadInteres}
+				/>
+			{:else}
+				<input
+					class="input"
+					placeholder="Titulo de propiedad preliminar"
+					bind:value={formLead.propiedadTitulo}
+				/>
+				<textarea
+					class="input min-h-24"
+					placeholder="Descripcion de la propiedad"
+					bind:value={formLead.propiedadDescripcion}
+				></textarea>
+				<input
+					class="input"
+					type="number"
+					min="0"
+					placeholder="Precio esperado"
+					bind:value={formLead.propiedadPrecio}
+				/>
+			{/if}
+
+			<div class="flex justify-end gap-2 pt-2">
+				<Button variant="secondary" onclick={cerrarPanel}>Cancelar</Button>
+				<Button onclick={crearLead} disabled={guardando}>
+					{guardando ? 'Registrando...' : 'Registrar lead'}
+				</Button>
+			</div>
+		</div>
+	{:else if panelMode === 'actividad'}
 		<ActividadLeadTimeline leadId={actividadLeadId} />
 	{/if}
 </SidePanel>

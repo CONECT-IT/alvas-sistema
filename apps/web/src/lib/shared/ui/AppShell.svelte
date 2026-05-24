@@ -42,6 +42,12 @@
 					color: 'from-emerald-400 to-teal-500'
 				},
 				{
+					label: 'Captaciones',
+					href: '/admin/captaciones',
+					icon: 'inbox',
+					color: 'from-lime-400 to-emerald-500'
+				},
+				{
 					label: 'Clientes',
 					href: '/admin/clientes',
 					icon: 'briefcase',
@@ -86,6 +92,12 @@
 				href: '/asesor/leads',
 				icon: 'trending-up',
 				color: 'from-emerald-400 to-teal-500'
+			},
+			{
+				label: 'Captaciones',
+				href: '/asesor/captaciones',
+				icon: 'inbox',
+				color: 'from-lime-400 to-emerald-500'
 			},
 			{
 				label: 'Agenda',
@@ -206,6 +218,15 @@
 				stroke-linejoin="round"
 				stroke-width="2"
 				d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+			/></svg
+		>
+	{:else if icon === 'inbox'}
+		<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+			><path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M20 13V7a2 2 0 00-2-2H6a2 2 0 00-2 2v6m16 0l-2.293 2.293A1 1 0 0117 15h-3a2 2 0 01-4 0H7a1 1 0 01-.707-.293L4 13m16 0v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4"
 			/></svg
 		>
 	{/if}

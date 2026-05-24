@@ -2,8 +2,13 @@
 	import Badge from '$lib/shared/ui/Badge.svelte';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
+	import SidePanel from '$lib/shared/ui/SidePanel.svelte';
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import type { LeadDetalle } from '../domain/models/LeadDetalle';
+	import { actualizarLead } from '../application/use-cases/actualizarLead';
+	import { agendarCita } from '../application/use-cases/agendarCita';
+	import { convertirLead } from '../application/use-cases/convertirLead';
+	import { crearContrato } from '../application/use-cases/crearContrato';
 	import { obtenerLead } from '../application/use-cases/obtenerLead';
 	import { listarPropiedadesPorCliente } from '../application/use-cases/listarPropiedadesPorCliente';
 	import { ventasRepository } from '../infrastructure/ventasRepository';
@@ -26,6 +31,27 @@
 	let propiedadInteres = $state<Propiedad | null>(null);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
+	let accionError = $state<string | null>(null);
+	let panel = $state<'editar' | 'cita' | 'contrato' | null>(null);
+	let guardando = $state(false);
+	let formLead = $state({
+		nombre: '',
+		email: '',
+		telefono: '',
+		estado: 'NUEVO',
+		idPropiedadInteres: ''
+	});
+	let formCita = $state({
+		fechaInicio: '',
+		duracionMinutos: 60,
+		observacion: '',
+		idPropiedad: ''
+	});
+	let formContrato = $state({
+		idPropiedad: '',
+		fechaInicio: '',
+		fechaFin: ''
+	});
 	let basePath = $derived($page.url.pathname.startsWith('/admin') ? '/admin' : '/asesor');
 	let propiedadesPorId = $derived(new Map(propiedadesDetalle.map((p) => [p.id, p])));
 
@@ -70,6 +96,116 @@
 			error = err instanceof HttpError ? err.message : 'No se pudo cargar el lead.';
 		} finally {
 			loading = false;
+		}
+	}
+
+	function abrirEditar() {
+		if (!lead) return;
+		formLead = {
+			nombre: lead.nombre,
+			email: lead.email,
+			telefono: lead.telefono,
+			estado: lead.estado,
+			idPropiedadInteres: lead.idPropiedadInteres ?? ''
+		};
+		accionError = null;
+		panel = 'editar';
+	}
+
+	function abrirCita() {
+		formCita = {
+			fechaInicio: '',
+			duracionMinutos: 60,
+			observacion: '',
+			idPropiedad: lead?.idPropiedadInteres ?? ''
+		};
+		accionError = null;
+		panel = 'cita';
+	}
+
+	function abrirContrato() {
+		formContrato = {
+			idPropiedad: lead?.idPropiedadInteres ?? '',
+			fechaInicio: '',
+			fechaFin: ''
+		};
+		accionError = null;
+		panel = 'contrato';
+	}
+
+	async function guardarLead() {
+		if (!lead) return;
+		guardando = true;
+		accionError = null;
+		try {
+			await actualizarLead(ventasRepository, {
+				idLead: lead.id,
+				nombre: formLead.nombre,
+				email: formLead.email,
+				telefono: formLead.telefono,
+				estado: formLead.estado,
+				idPropiedadInteres: formLead.idPropiedadInteres || undefined
+			});
+			panel = null;
+			await cargar();
+		} catch (err) {
+			accionError = err instanceof HttpError ? err.message : 'No se pudo actualizar el lead.';
+		} finally {
+			guardando = false;
+		}
+	}
+
+	async function guardarCita() {
+		if (!lead) return;
+		guardando = true;
+		accionError = null;
+		try {
+			await agendarCita(ventasRepository, {
+				idLead: lead.id,
+				fechaInicio: new Date(formCita.fechaInicio).toISOString(),
+				duracionMinutos: Number(formCita.duracionMinutos),
+				observacion: formCita.observacion || undefined,
+				idPropiedad: formCita.idPropiedad || undefined
+			});
+			panel = null;
+			await cargar();
+		} catch (err) {
+			accionError = err instanceof HttpError ? err.message : 'No se pudo agendar la cita.';
+		} finally {
+			guardando = false;
+		}
+	}
+
+	async function convertir() {
+		if (!lead) return;
+		guardando = true;
+		accionError = null;
+		try {
+			const idCliente = await convertirLead(ventasRepository, { idLead: lead.id });
+			await goto(`${basePath}/clientes/${encodeURIComponent(idCliente)}`);
+		} catch (err) {
+			accionError = err instanceof HttpError ? err.message : 'No se pudo convertir el lead.';
+		} finally {
+			guardando = false;
+		}
+	}
+
+	async function guardarContrato() {
+		if (!lead) return;
+		guardando = true;
+		accionError = null;
+		try {
+			const contrato = await crearContrato(ventasRepository, {
+				idLead: lead.id,
+				idPropiedad: formContrato.idPropiedad,
+				fechaInicio: new Date(formContrato.fechaInicio).toISOString(),
+				fechaFin: new Date(formContrato.fechaFin).toISOString()
+			});
+			await goto(`${basePath}/contratos/${encodeURIComponent(contrato.id)}`);
+		} catch (err) {
+			accionError = err instanceof HttpError ? err.message : 'No se pudo crear el contrato.';
+		} finally {
+			guardando = false;
 		}
 	}
 
@@ -134,9 +270,22 @@
 				</p>
 			</div>
 			<div class="flex gap-2">
+				<Button variant="secondary" onclick={abrirEditar}>Editar</Button>
+				<Button variant="secondary" onclick={abrirCita}>Agendar cita</Button>
+				{#if !lead.idCliente}
+					<Button variant="secondary" onclick={convertir} disabled={guardando}>Convertir</Button>
+				{/if}
+				{#if lead.tipo === 'VENTA'}
+					<Button onclick={abrirContrato}>Crear contrato</Button>
+				{/if}
 				<Button variant="ghost" onclick={() => window.history.back()}>Volver</Button>
 			</div>
 		</div>
+		{#if accionError}
+			<Card class="border-red-200 bg-red-50/60">
+				<p class="text-sm font-semibold text-red-700">{accionError}</p>
+			</Card>
+		{/if}
 
 		<div class="grid gap-6 xl:grid-cols-2">
 			<Card>
@@ -283,4 +432,93 @@
 
 		<ActividadLeadTimeline leadId={lead.id} />
 	</div>
+
+	<SidePanel isOpen={panel === 'editar'} title="Editar lead" onClose={() => (panel = null)}>
+		<div class="space-y-4">
+			<input
+				class="w-full rounded-lg border border-border-light px-3 py-2"
+				bind:value={formLead.nombre}
+			/>
+			<input
+				class="w-full rounded-lg border border-border-light px-3 py-2"
+				bind:value={formLead.email}
+			/>
+			<input
+				class="w-full rounded-lg border border-border-light px-3 py-2"
+				bind:value={formLead.telefono}
+			/>
+			<select
+				class="w-full rounded-lg border border-border-light px-3 py-2"
+				bind:value={formLead.estado}
+			>
+				<option value="NUEVO">NUEVO</option>
+				<option value="CONTACTO">CONTACTO</option>
+				<option value="AGENDADO">AGENDADO</option>
+				<option value="TRABAJANDO">TRABAJANDO</option>
+				<option value="CONVERTIDO">CONVERTIDO</option>
+				<option value="PERDIDO">PERDIDO</option>
+			</select>
+			<input
+				class="w-full rounded-lg border border-border-light px-3 py-2"
+				placeholder="ID propiedad de interés"
+				bind:value={formLead.idPropiedadInteres}
+			/>
+			<Button onclick={guardarLead} disabled={guardando}
+				>{guardando ? 'Guardando...' : 'Guardar'}</Button
+			>
+		</div>
+	</SidePanel>
+
+	<SidePanel isOpen={panel === 'cita'} title="Agendar cita" onClose={() => (panel = null)}>
+		<div class="space-y-4">
+			<input
+				type="datetime-local"
+				class="w-full rounded-lg border border-border-light px-3 py-2"
+				bind:value={formCita.fechaInicio}
+			/>
+			<input
+				type="number"
+				min="15"
+				step="15"
+				class="w-full rounded-lg border border-border-light px-3 py-2"
+				bind:value={formCita.duracionMinutos}
+			/>
+			<input
+				class="w-full rounded-lg border border-border-light px-3 py-2"
+				placeholder="ID propiedad opcional"
+				bind:value={formCita.idPropiedad}
+			/>
+			<textarea
+				class="min-h-24 w-full rounded-lg border border-border-light px-3 py-2"
+				placeholder="Observación"
+				bind:value={formCita.observacion}
+			></textarea>
+			<Button onclick={guardarCita} disabled={guardando}
+				>{guardando ? 'Agendando...' : 'Agendar'}</Button
+			>
+		</div>
+	</SidePanel>
+
+	<SidePanel isOpen={panel === 'contrato'} title="Crear contrato" onClose={() => (panel = null)}>
+		<div class="space-y-4">
+			<input
+				class="w-full rounded-lg border border-border-light px-3 py-2"
+				placeholder="ID propiedad"
+				bind:value={formContrato.idPropiedad}
+			/>
+			<input
+				type="date"
+				class="w-full rounded-lg border border-border-light px-3 py-2"
+				bind:value={formContrato.fechaInicio}
+			/>
+			<input
+				type="date"
+				class="w-full rounded-lg border border-border-light px-3 py-2"
+				bind:value={formContrato.fechaFin}
+			/>
+			<Button onclick={guardarContrato} disabled={guardando}>
+				{guardando ? 'Creando...' : 'Crear contrato'}
+			</Button>
+		</div>
+	</SidePanel>
 {/if}
