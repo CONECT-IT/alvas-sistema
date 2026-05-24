@@ -2,7 +2,7 @@
 
 ## Contexto
 
-Muchos leads de ALVAS llegan por WhatsApp. La integracion no debe acoplar el dominio a un proveedor externo: debe traducir mensajes entrantes a captaciones normalizadas y luego crear leads o propiedades preliminares segun reglas del negocio.
+Muchos leads de ALVAS llegan por WhatsApp. La integracion no debe acoplar el dominio a un proveedor externo: debe traducir mensajes entrantes a captaciones normalizadas y luego crear leads o propiedades `BORRADOR` segun reglas del negocio.
 
 Esta spec define el comportamiento esperado para `integraciones`.
 
@@ -12,7 +12,7 @@ Esta spec define el comportamiento esperado para `integraciones`.
 - `Canal`: origen operativo como WhatsApp, formulario web o carga manual.
 - `Lead comprador`: captacion interesada en comprar.
 - `Lead vendedor`: captacion interesada en vender una propiedad mediante ALVAS.
-- `Propiedad preliminar`: propiedad creada desde una captacion vendedora antes de formalizar contrato; queda como `BORRADOR`.
+- `Propiedad borrador`: propiedad creada desde una captacion vendedora antes de formalizar contrato.
 - `Deduplicacion`: proceso para evitar crear multiples leads por el mismo contacto e interes.
 
 ## Reglas de negocio
@@ -21,7 +21,7 @@ Esta spec define el comportamiento esperado para `integraciones`.
 - Si falta email, el sistema puede generar un email local tecnico, sin presentarlo como email real del cliente.
 - WhatsApp crea captaciones pendientes de revision y deduplicacion; no crea leads directamente.
 - Una captacion compradora validada crea o actualiza un lead comprador.
-- Una captacion vendedora validada puede crear un lead vendedor y una propiedad preliminar en estado `BORRADOR`.
+- Una captacion vendedora validada puede crear un lead vendedor y una propiedad en estado `BORRADOR`.
 - La integracion de WhatsApp debe ser un adapter primario; el dominio no conoce payloads de WhatsApp.
 - La asignacion automatica de asesor debe respetar carga, disponibilidad y reglas de visibilidad.
 - Si hay duplicado probable, la captacion debe quedar trazable antes de crear otro lead.
@@ -31,7 +31,7 @@ Esta spec define el comportamiento esperado para `integraciones`.
 
 - Dado un mensaje WhatsApp comprador valido, se crea una captacion normalizada y un lead comprador.
 - Dado un mensaje WhatsApp comprador valido, antes de crear lead queda como captacion pendiente de revision/deduplicacion.
-- Dado un mensaje WhatsApp vendedor con datos de propiedad, primero se crea captacion pendiente y luego, al validarla, lead vendedor y propiedad preliminar en estado `BORRADOR`.
+- Dado un mensaje WhatsApp vendedor con datos de propiedad, primero se crea captacion pendiente y luego, al validarla, lead vendedor y propiedad en estado `BORRADOR`.
 - Dado un telefono ya existente con lead abierto similar, el sistema evita duplicacion automatica.
 - Dado un payload invalido, el adapter responde error controlado y registra el fallo.
 - Dado una captacion sin email, el sistema genera email local solo para cumplir restricciones tecnicas.

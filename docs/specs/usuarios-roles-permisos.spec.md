@@ -41,6 +41,7 @@ ALVAS tiene tres perfiles principales: admin, asesor y variaciones futuras por r
 - Un asesor no puede deshabilitarse a si mismo.
 - Un admin conserva la capacidad de corregir datos y deshabilitar cuentas.
 - La asignacion automatica ignora asesores deshabilitados o en pausa y prioriza disponibilidad/rendimiento del lead.
+- Un token tecnicamente valido debe rechazarse si el usuario fue deshabilitado despues de emitirlo.
 
 ## Criterios de aceptacion
 
@@ -52,12 +53,13 @@ ALVAS tiene tres perfiles principales: admin, asesor y variaciones futuras por r
 - Dado un asesor autenticado, no puede cambiar su `rol` ni su `estado`.
 - Dado un asesor autenticado, no puede cambiar su nombre visible desde perfil propio.
 - Dado un usuario deshabilitado, no puede iniciar sesion.
+- Dado un usuario que inicio sesion y luego fue deshabilitado, cuando usa su token vigente, el middleware de sesion rechaza la peticion.
 
 ## Trazabilidad sugerida
 
 - Dominio: `Usuario`, `Username`, `Rol`, `EstadoUsuario`.
 - Aplicacion: actualizar usuario propio, actualizar usuario por admin, listar leads por visibilidad.
-- HTTP: middleware de sesion, roles requeridos, rechazo de operaciones no autorizadas.
+- HTTP: middleware de sesion, validacion de usuario activo, roles requeridos, rechazo de operaciones no autorizadas.
 - BDD: administracion de usuarios y gestion de leads por asesor.
 - Contract: DTOs de usuario no deben exponer `hashClave` ni detalles sensibles.
 

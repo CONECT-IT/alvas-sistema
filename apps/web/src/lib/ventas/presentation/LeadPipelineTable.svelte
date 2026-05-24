@@ -9,7 +9,7 @@
 		leads: LeadPipeline[];
 		onLeadClick?: (lead: LeadPipeline) => void;
 		onEditClick?: (lead: LeadPipeline) => void;
-		onStatusChanged?: () => void;
+		onStatusChanged?: (idLead: string, nuevoEstado: string) => void;
 	}
 
 	let { leads, onLeadClick, onEditClick, onStatusChanged }: Props = $props();
@@ -17,8 +17,17 @@
 	const estados = ESTADOS_LEAD;
 	let activeMenuId = $state<string | null>(null);
 
-	async function cambiarEstado(lead: LeadPipeline, nuevoEstado: string) {
+	function toggleMenu(leadId: string, e: MouseEvent) {
+		e.stopPropagation();
+		activeMenuId = activeMenuId === leadId ? null : leadId;
+	}
+
+	function closeMenu() {
 		activeMenuId = null;
+	}
+
+	async function cambiarEstado(lead: LeadPipeline, nuevoEstado: string) {
+		closeMenu();
 		if (lead.estado.toUpperCase() === nuevoEstado.toUpperCase()) return;
 
 		try {
@@ -26,7 +35,7 @@
 				idLead: lead.id,
 				estado: nuevoEstado
 			});
-			onStatusChanged?.();
+			onStatusChanged?.(lead.id, nuevoEstado);
 		} catch (error) {
 			console.error('Error al actualizar estado:', error);
 			alert('No se pudo actualizar el estado.');
@@ -61,13 +70,7 @@
 					<td class="py-4 pr-6 font-semibold text-text-main">{lead.nombre}</td>
 					<td class="py-4 pr-6 text-text-muted">{lead.tipo}</td>
 					<td class="relative py-4 pr-6">
-						<button
-							class="group focus:outline-none"
-							onclick={(e) => {
-								e.stopPropagation();
-								activeMenuId = activeMenuId === lead.id ? null : lead.id;
-							}}
-						>
+						<button class="group focus:outline-none" onclick={(e) => toggleMenu(lead.id, e)}>
 							<Badge
 								tone={presentarEstadoLead(lead.estado).tone}
 								class="transition-all group-hover:ring-2 group-hover:ring-primary/20"
@@ -80,7 +83,9 @@
 							<div
 								class="absolute top-12 left-0 z-50 w-40 rounded-xl border border-border-light bg-bg-card p-1 shadow-xl"
 								onclick={(e) => e.stopPropagation()}
+								onkeydown={(e) => e.key === 'Escape' && closeMenu()}
 								role="menu"
+								tabindex="0"
 							>
 								{#each estados as estado (estado)}
 									<button
@@ -96,7 +101,8 @@
 							</div>
 							<div
 								class="fixed inset-0 z-40"
-								onclick={() => (activeMenuId = null)}
+								onclick={closeMenu}
+								onkeydown={closeMenu}
 								role="button"
 								tabindex="-1"
 								aria-label="Cerrar menú"

@@ -52,6 +52,12 @@
 		goto(`/asesor/leads/${encodeURIComponent(lead.id)}`);
 	}
 
+	function actualizarEstadoLeadLocal(idLead: string, nuevoEstado: string) {
+		leads = leads.map((lead) =>
+			lead.id === idLead ? { ...lead, estado: nuevoEstado.toUpperCase() } : lead
+		);
+	}
+
 	// SidePanel state
 	let panelOpen = $state(false);
 	let panelMode = $state<'crear' | 'editar' | 'contrato' | 'actividad' | null>(null);
@@ -177,10 +183,14 @@
 				<LeadPipelineTable
 					leads={leadsFiltrados}
 					onLeadClick={irALead}
-					onStatusChanged={cargarLeads}
+					onStatusChanged={actualizarEstadoLeadLocal}
 				/>
 			{:else}
-				<LeadKanban leads={leadsFiltrados} onLeadClick={irALead} onStatusChanged={cargarLeads} />
+				<LeadKanban
+					leads={leadsFiltrados}
+					onLeadClick={irALead}
+					onStatusChanged={actualizarEstadoLeadLocal}
+				/>
 			{/if}
 		</Card>
 	{/if}
@@ -217,7 +227,7 @@
 			{:else}
 				<input
 					class="input"
-					placeholder="Titulo de propiedad preliminar"
+					placeholder="Titulo de propiedad en borrador"
 					bind:value={formLead.propiedadTitulo}
 				/>
 				<textarea

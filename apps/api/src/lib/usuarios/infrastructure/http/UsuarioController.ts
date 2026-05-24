@@ -1,5 +1,4 @@
 import { type Context } from "hono";
-import { ErrorDeDominio } from "../../../shared/domain";
 import { type D1DatabaseLike } from "../../../shared/infrastructure";
 import {
   type IActualizarUsuario,
@@ -13,6 +12,10 @@ import {
   esValidationError,
   formatearValidacion,
 } from "../../../shared/infrastructure/validation/helpers";
+import {
+  responderErrorDeDominio,
+  responderErrorInterno,
+} from "../../../shared/infrastructure/http/responses";
 import { CrearUsuarioSchema, ActualizarUsuarioSchema } from "../validation/schemas";
 
 export type BindingsUsuarios = {
@@ -39,7 +42,7 @@ export class UsuarioController {
       const resultado = await useCase.ejecutar(body);
 
       if (!resultado.esExito) {
-        return this.responderErrorDeDominio(resultado.error, c);
+        return responderErrorDeDominio(c, resultado.error);
       }
 
       return c.json(
@@ -51,14 +54,7 @@ export class UsuarioController {
       );
     } catch (error) {
       if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
-      console.error("Error inesperado en UsuarioController.crear:", error);
-      return c.json(
-        {
-          success: false,
-          message: "Error interno del servidor",
-        },
-        500,
-      );
+      return responderErrorInterno(c, "UsuarioController.crear", error);
     }
   }
 
@@ -68,13 +64,12 @@ export class UsuarioController {
       const resultado = await useCase.ejecutar();
 
       if (!resultado.esExito) {
-        return this.responderErrorDeDominio(resultado.error, c);
+        return responderErrorDeDominio(c, resultado.error);
       }
 
       return c.json({ success: true, data: resultado.valor });
     } catch (error) {
-      console.error("Error inesperado en UsuarioController.listar:", error);
-      return c.json({ success: false, message: "Error interno del servidor" }, 500);
+      return responderErrorInterno(c, "UsuarioController.listar", error);
     }
   }
 
@@ -84,13 +79,12 @@ export class UsuarioController {
       const resultado = await useCase.ejecutar({ idUsuario: c.req.param("idUsuario") ?? "" });
 
       if (!resultado.esExito) {
-        return this.responderErrorDeDominio(resultado.error, c);
+        return responderErrorDeDominio(c, resultado.error);
       }
 
       return c.json({ success: true, data: resultado.valor });
     } catch (error) {
-      console.error("Error inesperado en UsuarioController.obtener:", error);
-      return c.json({ success: false, message: "Error interno del servidor" }, 500);
+      return responderErrorInterno(c, "UsuarioController.obtener", error);
     }
   }
 
@@ -104,18 +98,13 @@ export class UsuarioController {
       });
 
       if (!resultado.esExito) {
-        return this.responderErrorDeDominio(resultado.error, c);
+        return responderErrorDeDominio(c, resultado.error);
       }
 
       return c.json({ success: true, data: resultado.valor });
     } catch (error) {
       if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
-      console.error("Error inesperado en UsuarioController.actualizar:", error);
-      return c.json({ success: false, message: "Error interno del servidor" }, 500);
+      return responderErrorInterno(c, "UsuarioController.actualizar", error);
     }
-  }
-
-  private responderErrorDeDominio(error: ErrorDeDominio, c: ContextoUsuarios): Response {
-    return c.json({ success: false, message: error.message, code: error.codigo }, 400);
   }
 }

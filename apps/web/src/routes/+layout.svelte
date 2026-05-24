@@ -18,6 +18,16 @@
 
 <svelte:head>
 	<title>ALVAS</title>
+	<script>
+		(() => {
+			try {
+				const tema = localStorage.getItem('alvas-tema') || 'light';
+				document.documentElement.setAttribute('data-tema', tema);
+			} catch {
+				document.documentElement.setAttribute('data-tema', 'light');
+			}
+		})();
+	</script>
 </svelte:head>
 
 {#if $navigating}

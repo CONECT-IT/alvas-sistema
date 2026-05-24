@@ -52,7 +52,7 @@
 			<p class="section-label">Inventario</p>
 			<h1 class="page-heading">Gestión de propiedades</h1>
 			<p class="mt-2 max-w-2xl text-sm leading-relaxed text-text-muted">
-				Inventario disponible y propiedades preliminares captadas para seguimiento.
+				Inventario disponible y propiedades en borrador captadas para seguimiento.
 			</p>
 		</div>
 
@@ -88,10 +88,10 @@
 					<div>
 						<h2 class="font-display text-xl font-bold text-text-main">Captaciones</h2>
 						<p class="mt-1 text-sm text-text-muted">
-							Tus propiedades preliminares captadas que requieren validación.
+							Tus propiedades en borrador captadas que requieren validación.
 						</p>
 					</div>
-					<p class="text-sm font-semibold text-amber-600">{captaciones.length} registros</p>
+					<p class="text-sm font-semibold text-primary">{captaciones.length} registros</p>
 				</div>
 				<PropiedadAdminTable propiedades={captaciones} onPropiedadClick={irAPropiedad} />
 			</Card>

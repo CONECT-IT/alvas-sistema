@@ -39,6 +39,7 @@ import { AutorizadorVentasAdapter } from "../lib/ventas/infrastructure/security/
 import {
   ConsultaPropiedadInteresVentasAdapter,
   D1PropiedadRepository,
+  RegistroPropiedadClienteAdapter,
   RegistroPropiedadVendedorAdapter,
 } from "../lib/propiedades/infrastructure";
 
@@ -112,6 +113,7 @@ export function crearVentasControllerDeps(): VentasControllerDeps {
         new D1ContratoRepository(c.env.DB),
         new D1VentasRepository(c.env.DB),
         new UuidGeneradorId(),
+        new RegistroPropiedadClienteAdapter(new D1PropiedadRepository(c.env.DB)),
       ),
     crearObtenerLead: (c) => new ObtenerLeadUseCase(new D1VentasRepository(c.env.DB)),
     crearListarLeads: (c) => new ListarLeadsUseCase(new D1VentasRepository(c.env.DB), autorizador),

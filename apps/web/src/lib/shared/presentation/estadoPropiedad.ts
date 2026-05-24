@@ -7,7 +7,6 @@ export interface PresentacionPropiedad {
 
 const map: Record<string, PresentacionPropiedad> = {
 	BORRADOR: { label: 'Borrador', tone: 'warning' },
-	PRELIMINAR: { label: 'Preliminar', tone: 'warning' },
 	DISPONIBLE: { label: 'Disponible', tone: 'success' },
 	RESERVADA: { label: 'Reservada', tone: 'brand' },
 	VENDIDA: { label: 'Vendida', tone: 'neutral' },

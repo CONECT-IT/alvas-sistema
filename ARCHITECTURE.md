@@ -37,6 +37,7 @@ ACLs actuales:
 - `auth <- usuarios`: `auth` define `IConsultaCredencialesUsuario` e `IVerificadorDeClave`; `usuarios` provee `ConsultaCredencialesUsuarioAdapter` y `VerificadorDeClavePbkdf2Adapter`.
 - `reportes <- ventas`: `reportes` define `IConsultaVentasParaReportes`; `ventas` provee `ConsultaVentasParaReportesAdapter`.
 - `integraciones <- ventas`: `integraciones` define `IRegistroLeadCaptacion`; `ventas` provee `RegistroLeadCaptacionVentasAdapter`.
+- `ventas <- propiedades`: `ventas` define `IRegistroPropiedadCliente`; `propiedades` provee `RegistroPropiedadClienteAdapter` para vincular una propiedad al cliente vendedor cuando se firma contrato.
 
 Esto es una ACL pragmatica: cumple la proteccion de modelos y dependencias sin crear una capa ceremonial adicional. Si una integracion crece en complejidad, el siguiente paso es mover esos adapters a carpetas nombradas explicitamente como `acl` y agregar mappers/modelos de traduccion dedicados.
 
@@ -115,12 +116,12 @@ Esto es una ACL pragmatica: cumple la proteccion de modelos y dependencias sin c
 
 ### `propiedades/Propiedad`
 
-- Tipo de lifecycle: catalogo simple.
-- Estados: no hay estados explicitos actualmente.
+- Tipo de lifecycle: catalogo comercial.
+- Estados: `BORRADOR`, `DISPONIBLE`, `RESERVADA`, `VENDIDA`, `ARCHIVADA`.
 - Inicio: `Propiedad.crear`.
-- Cambios: hoy no hay comportamiento de actualizacion modelado en dominio.
-- Cierre: no existe baja, publicacion, suspension o archivado en el modelo actual.
-- Observacion: si el negocio requiere publicar/despublicar propiedades, ese lifecycle debe agregarse como estado propio del agregado.
+- Cambios permitidos: actualizar datos comerciales, precio, estado, lead origen y cliente propietario.
+- Cierre funcional: `VENDIDA` o `ARCHIVADA`; no se elimina historial comercial.
+- Observacion: los estados legados `PRELIMINAR`, `EN_VALIDACION`, `DESCARTADA` e `INACTIVA` no pertenecen al lenguaje ubicuo vigente y se normalizan por migracion.
 
 ### `ventas/Lead`
 
@@ -154,19 +155,19 @@ Esto es una ACL pragmatica: cumple la proteccion de modelos y dependencias sin c
 - Tipo de lifecycle: contractual transaccional.
 - Estados: `BORRADOR`, `VIGENTE`, `FINALIZADO`, `CANCELADO`.
 - Inicio: `Contrato.crear`, siempre en `BORRADOR`.
-- Cambios permitidos: `firmar`, `finalizar`.
+- Cambios permitidos: `firmar`, `finalizar`, `cancelar`.
 - Cierre: `FINALIZADO` o `CANCELADO`.
 - Invariantes: solo se puede firmar desde `BORRADOR`; fecha fin debe ser posterior a fecha inicio.
-- Observacion: existe estado `CANCELADO`, pero aun no hay metodo de dominio para cancelar contrato.
+- Efecto de aplicacion: al firmar un contrato originado en lead vendedor, el lead se convierte en cliente vendedor y la propiedad asociada registra `idClientePropietario`.
 
 ### `integraciones/Captacion`
 
-- Tipo de lifecycle: normalizacion de entrada.
-- Estados: no hay estados persistidos actualmente.
+- Tipo de lifecycle: normalizacion de entrada y bandeja operativa.
+- Estados persistidos de captacion pendiente: `PENDIENTE`, `REVISADA`, `DUPLICADA`, `CONVERTIDA`, `RECHAZADA`.
 - Inicio: `Captacion.registrar`, desde un canal generico o desde `CaptacionWhatsApp`.
-- Cambios: no tiene mutaciones; representa una entrada normalizada lista para delegar a `ventas`.
-- Cierre: termina cuando `IRegistroLeadCaptacion` registra la captacion como lead en `ventas`.
-- Observacion: si se necesita reintento, rechazo, deduplicacion o auditoria de eventos externos, `Captacion` debe pasar a lifecycle persistido con estados.
+- Cambios: revision, marcado como duplicada, rechazo o conversion a lead.
+- Cierre: `CONVERTIDA`, `DUPLICADA` o `RECHAZADA`.
+- Observacion: WhatsApp entra como captacion pendiente; no crea leads directamente.
 
 ### `reportes`
 

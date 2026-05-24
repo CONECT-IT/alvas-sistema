@@ -62,7 +62,9 @@
 				estado: nuevoEstado
 			});
 			reviewSuccess = `${propiedad.titulo} pasó a ${nuevoEstado}.`;
-			await cargarPropiedades();
+			propiedades = propiedades.map((item) =>
+				item.id === propiedad.id ? { ...item, estado: nuevoEstado.toUpperCase() } : item
+			);
 		} catch (err) {
 			reviewError =
 				err instanceof HttpError ? err.message : 'No se pudo actualizar el estado de la propiedad.';
@@ -243,10 +245,10 @@
 					<div>
 						<h2 class="font-display text-xl font-bold text-text-main">Captaciones</h2>
 						<p class="mt-1 text-sm text-text-muted">
-							Propiedades preliminares captadas que requieren validación antes de publicarse.
+							Propiedades en borrador que requieren validación antes de publicarse.
 						</p>
 					</div>
-					<p class="text-sm font-semibold text-amber-600">{captaciones.length} pendientes</p>
+					<p class="text-sm font-semibold text-primary">{captaciones.length} pendientes</p>
 				</div>
 
 				{#if reviewSuccess}
@@ -263,7 +265,9 @@
 
 				<div class="grid gap-4">
 					{#each captaciones as propiedad (propiedad.id)}
-						<article class="rounded-2xl border border-amber-200 bg-amber-50/30 p-5">
+						<article
+							class="rounded-2xl border border-border-light bg-bg-base/70 p-5 shadow-xs transition hover:border-primary/30"
+						>
 							<div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
 								<div>
 									<div class="flex flex-wrap items-center gap-2">
@@ -271,7 +275,7 @@
 											{propiedad.titulo}
 										</p>
 										<span
-											class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700"
+											class="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary"
 										>
 											{propiedad.estado}
 										</span>

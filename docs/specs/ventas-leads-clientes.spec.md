@@ -27,7 +27,8 @@ Esta spec describe la regla de negocio esperada antes de ajustar entidades, caso
 - El asesor asignado puede editar los datos del lead vendedor, sus propiedades relacionadas, citas, comentarios y estado mientras el lead siga abierto.
 - Un lead vendedor puede requerir varias citas antes de decidir si firma contrato.
 - Cuando firma contrato, el lead vendedor se convierte en cliente vendedor.
-- Las propiedades cubiertas por el contrato pasan a ser propiedades disponibles para comercializacion, segun las reglas del contrato y catalogo.
+- Al firmar contrato, la propiedad asociada registra el `idClientePropietario` del cliente vendedor formal.
+- Las propiedades cubiertas por el contrato pueden pasar a ser propiedades disponibles para comercializacion, segun las reglas del contrato, catalogo y aprobacion operativa.
 - Si el mismo cliente vuelve a ofrecer otra propiedad en el futuro, se crea un nuevo ciclo de lead relacionado al cliente existente.
 - El historial debe conservar cada ciclo comercial, no sobrescribirlo.
 
@@ -71,6 +72,7 @@ Esta spec describe la regla de negocio esperada antes de ajustar entidades, caso
 - Dado un lead vendedor sin contrato, sus propiedades no aparecen como disponibles para leads compradores.
 - Dado un lead vendedor abierto, el asesor asignado puede editar datos del lead y propiedades relacionadas.
 - Dado un lead vendedor convertido, no se pueden agendar nuevas citas sobre ese ciclo.
+- Dado un contrato firmado desde un lead vendedor, el sistema crea o vincula el cliente vendedor y registra ese cliente como propietario de la propiedad asociada.
 - Dado un cliente vendedor existente, un nuevo interes de venta crea un nuevo ciclo de lead relacionado al cliente.
 - Dado un lead comprador, el sistema lista solo propiedades disponibles segun contrato, propiedad propia o reglas de visibilidad.
 - Dado un asesor, solo puede ver y modificar leads asignados a el.
@@ -91,6 +93,7 @@ Esta spec describe la regla de negocio esperada antes de ajustar entidades, caso
 
 - Solo el admin puede reasignar leads.
 - La compra de un lead comprador queda como actividad/historial comercial; por ahora no introduce una entidad transaccional propia.
+- La firma de contrato de un lead vendedor pobla `idClientePropietario` en la propiedad asociada.
 - Una propiedad comprada deja de mostrarse como disponible.
 - Los estados de propiedad esperados son `BORRADOR`, `DISPONIBLE`, `RESERVADA`, `VENDIDA` y `ARCHIVADA`.
 - WhatsApp crea captaciones pendientes de revision/deduplicacion, no leads directos.

@@ -30,14 +30,14 @@ Este documento define la estrategia de testing de ALVAS para API y Web. El objet
 
 ## 3. Matriz por bounded context
 
-| Contexto        | Reglas principales                                                   | Unit/Application | HTTP                   | Contract                | Web/component              | E2E                        |
-| --------------- | -------------------------------------------------------------------- | ---------------- | ---------------------- | ----------------------- | -------------------------- | -------------------------- |
-| `auth`          | Sesion, tokens, refresh, rechazo de usuario deshabilitado            | Activo           | Login/refresh inicial  | Pendiente               | `User` domain web          | Rutas protegidas pendiente |
-| `usuarios`      | Admin gestiona usuarios; asesor edita solo datos permitidos          | Activo           | Listar/obtener inicial | Usuario sin `hashClave` | Use cases web activos      | Admin usuarios pendiente   |
-| `ventas`        | Leads, citas, conversion, contratos, historial, asesor asignado      | Activo           | Pipeline inicial       | Pipeline inicial        | Kanban y use cases activos | Kanban drag/drop pendiente |
-| `propiedades`   | Propias, preliminares, disponibles, cliente vendedor                 | Activo           | Listado/filtro inicial | Pendiente               | Use cases web activos      | Catalogo pendiente         |
-| `integraciones` | Captacion WhatsApp, normalizacion, email local, propiedad preliminar | Activo           | Captacion/webhook      | Captacion inicial       | Captaciones web activo     | Pendiente                  |
-| `reportes`      | KPIs, conversion, carga por asesor, actividad                        | Activo           | Admin/reportes inicial | Dashboard inicial       | Use cases web activo       | Dashboard pendiente        |
+| Contexto        | Reglas principales                                                 | Unit/Application | HTTP                            | Contract                | Web/component              | E2E                        |
+| --------------- | ------------------------------------------------------------------ | ---------------- | ------------------------------- | ----------------------- | -------------------------- | -------------------------- |
+| `auth`          | Sesion, tokens, refresh, rechazo de usuario deshabilitado          | Activo           | Login/refresh/middleware activo | Pendiente               | `User` domain web          | Rutas protegidas pendiente |
+| `usuarios`      | Admin gestiona usuarios; asesor edita solo datos permitidos        | Activo           | Listar/obtener inicial          | Usuario sin `hashClave` | Use cases web activos      | Admin usuarios pendiente   |
+| `ventas`        | Leads, citas, conversion, contratos, historial, asesor asignado    | Activo           | Pipeline inicial                | Pipeline inicial        | Kanban y use cases activos | Kanban drag/drop pendiente |
+| `propiedades`   | Propias, borrador, disponibles, cliente vendedor                   | Activo           | Listado/filtro inicial          | Propiedad inicial       | Use cases web activos      | Catalogo pendiente         |
+| `integraciones` | Captacion WhatsApp, normalizacion, email local, propiedad borrador | Activo           | Captacion/webhook               | Captacion inicial       | Captaciones web activo     | Pendiente                  |
+| `reportes`      | KPIs, conversion, carga por asesor, actividad                      | Activo           | Admin/reportes inicial          | Dashboard inicial       | Use cases web activo       | Dashboard pendiente        |
 
 ## 4. Estructura esperada
 
@@ -108,29 +108,29 @@ No se bajan umbrales para hacer pasar CI. Si un gate falla, se agregan specs o s
 
 ## 8. Estado actual de specs ejecutables
 
-| Area                                                 | Archivos principales                                                                                                                                                                                                    | Estado  |
-| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| API domain ventas                                    | `Lead.spec.ts`, `EstadoLead.spec.ts`, `TipoVenta.spec.ts`, `cita.test.ts`, `contrato.test.ts`, `cliente.test.ts`                                                                                                        | Activo  |
-| API application ventas                               | `ventas-use-cases.test.ts`, `evaluador-asignacion.test.ts`                                                                                                                                                              | Activo  |
-| API auth/usuarios/propiedades/reportes/integraciones | `test/unit/<context>/`                                                                                                                                                                                                  | Activo  |
-| API HTTP                                             | `health.http.spec.ts`, `auth-routes.http.spec.ts`, `usuarios-routes.http.spec.ts`, `ventas-routes.http.spec.ts`, `propiedades-routes.http.spec.ts`, `integraciones-routes.http.spec.ts`, `reportes-routes.http.spec.ts` | Inicial |
-| API contract                                         | `api-web.contract.spec.ts` con auth, usuario, pipeline, propiedad, captacion y reportes                                                                                                                                 | Inicial |
-| Web application                                      | `*-use-cases.spec.ts` por contexto                                                                                                                                                                                      | Activo  |
-| Web component                                        | `LeadKanban.spec.ts`, `SidePanel.spec.ts`                                                                                                                                                                               | Inicial |
-| Web E2E                                              | `smoke.spec.ts`                                                                                                                                                                                                         | Inicial |
+| Area                                                 | Archivos principales                                                                                                                                                                                                                                       | Estado  |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| API domain ventas                                    | `Lead.spec.ts`, `EstadoLead.spec.ts`, `TipoVenta.spec.ts`, `cita.test.ts`, `contrato.test.ts`, `cliente.test.ts`                                                                                                                                           | Activo  |
+| API application ventas                               | `ventas-use-cases.test.ts`, `evaluador-asignacion.test.ts`                                                                                                                                                                                                 | Activo  |
+| API auth/usuarios/propiedades/reportes/integraciones | `test/unit/<context>/`                                                                                                                                                                                                                                     | Activo  |
+| API HTTP                                             | `health.http.spec.ts`, `auth-routes.http.spec.ts`, `session-middleware.http.spec.ts`, `usuarios-routes.http.spec.ts`, `ventas-routes.http.spec.ts`, `propiedades-routes.http.spec.ts`, `integraciones-routes.http.spec.ts`, `reportes-routes.http.spec.ts` | Activo  |
+| API contract                                         | `api-web.contract.spec.ts` con auth, usuario, pipeline, propiedad, captacion y reportes                                                                                                                                                                    | Inicial |
+| Web application                                      | `*-use-cases.spec.ts` por contexto                                                                                                                                                                                                                         | Activo  |
+| Web component                                        | `LeadKanban.spec.ts`, `SidePanel.spec.ts`                                                                                                                                                                                                                  | Inicial |
+| Web E2E                                              | `smoke.spec.ts`                                                                                                                                                                                                                                            | Inicial |
 
 ## 9. Backlog de testing
 
-| Prioridad | Capa             | Trabajo                                                                                  |
-| --------- | ---------------- | ---------------------------------------------------------------------------------------- |
-| Alta      | HTTP ventas      | Profundizar specs de compra concretada, reasignacion admin y asesor no reasigna.         |
-| Alta      | HTTP propiedades | Profundizar specs de propiedad vendida/archivada y disponibilidad para compradores.      |
-| Alta      | E2E Web          | Kanban drag/drop actualiza estado, dark mode persiste, SidePanel edita sin perder lista. |
-| Alta      | Contract         | Mantener contratos locales por contexto antes de cambiar DTOs.                           |
-| Media     | Component Web    | Tablas, badges de estado, sidebar, perfil, formularios dentro de SidePanel.              |
-| Media     | BDD              | Escenarios de lead vendedor, lead comprador, contrato y cliente recurrente.              |
-| Media     | Mutation         | Subir mutantes sobrevivientes hasta 70% real.                                            |
-| Baja      | Integration DB   | D1 test para repositorios criticos, migraciones e integridad referencial.                |
+| Prioridad | Capa             | Trabajo                                                                                                |
+| --------- | ---------------- | ------------------------------------------------------------------------------------------------------ |
+| Alta      | HTTP ventas      | Profundizar specs de compra concretada y firma de contrato con propiedad vinculada a cliente vendedor. |
+| Alta      | HTTP propiedades | Profundizar specs de propiedad vendida/archivada y disponibilidad para compradores.                    |
+| Alta      | E2E Web          | Kanban drag/drop actualiza estado, dark mode persiste, SidePanel edita sin perder lista.               |
+| Alta      | Contract         | Mantener contratos locales por contexto antes de cambiar DTOs.                                         |
+| Media     | Component Web    | Tablas, badges de estado, sidebar, perfil, formularios dentro de SidePanel.                            |
+| Media     | BDD              | Escenarios de lead vendedor, lead comprador, contrato y cliente recurrente.                            |
+| Media     | Mutation         | Subir mutantes sobrevivientes hasta 70% real.                                                          |
+| Baja      | Integration DB   | D1 test para repositorios criticos, migraciones e integridad referencial.                              |
 
 ## 10. Trazabilidad SDD
 

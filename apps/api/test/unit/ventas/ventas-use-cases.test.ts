@@ -43,6 +43,7 @@ import {
 import { ErrorDeDominio } from "../../../src/lib/shared/domain/errors/ErrorDeDominio";
 import { AutorizadorVentasAdapter } from "../../../src/lib/ventas/infrastructure/security/AutorizadorVentasAdapter";
 import { type IRegistroPropiedadVendedor } from "../../../src/lib/ventas/domain/ports/IRegistroPropiedadVendedor";
+import { type IRegistroPropiedadCliente } from "../../../src/lib/ventas/domain/ports/IRegistroPropiedadCliente";
 
 class SecuenciaGeneradorId implements IGeneradorId {
   private indice = 0;
@@ -145,6 +146,14 @@ class FakeConsultaPropiedadInteres implements IConsultaPropiedadInteres {
 
   async propiedadDisponibleParaCompra(idPropiedad: string): Promise<boolean> {
     return this.propiedadesDisponibles.has(idPropiedad);
+  }
+}
+
+class FakeRegistroPropiedadCliente implements IRegistroPropiedadCliente {
+  readonly registros: { idPropiedad: string; idCliente: string }[] = [];
+
+  async registrarClientePropietario(idPropiedad: string, idCliente: string): Promise<void> {
+    this.registros.push({ idPropiedad, idCliente });
   }
 }
 
@@ -1045,9 +1054,10 @@ describe("ventas / use cases", () => {
     }
   });
 
-  test("FirmarContratoUseCase cambia estado a VIGENTE", async () => {
+  test("FirmarContratoUseCase cambia estado a VIGENTE y registra cliente propietario", async () => {
     const leadRepo = new FakeVentasRepository();
     const contratoRepo = new FakeContratoRepository();
+    const registroPropiedadCliente = new FakeRegistroPropiedadCliente();
     const lead = crearLead();
     await leadRepo.guardarLead(lead);
 
@@ -1062,11 +1072,14 @@ describe("ventas / use cases", () => {
 
     const generadorId = { generar: () => "cliente-001" };
 
-    const resultado = await new FirmarContratoUseCase(contratoRepo, leadRepo, generadorId).ejecutar(
-      {
-        idContrato: "cont-001",
-      },
-    );
+    const resultado = await new FirmarContratoUseCase(
+      contratoRepo,
+      leadRepo,
+      generadorId,
+      registroPropiedadCliente,
+    ).ejecutar({
+      idContrato: "cont-001",
+    });
 
     const contratoActualizado = await contratoRepo.buscarPorId(idContrato("cont-001"));
     const clienteCreado = await leadRepo.obtenerClientePorId(idCliente("cliente-001"));
@@ -1075,6 +1088,9 @@ describe("ventas / use cases", () => {
     expect(contratoActualizado?.idCliente).toEqual(idCliente("cliente-001"));
     expect(clienteCreado).not.toBeNull();
     expect(clienteCreado?.nombre).toBe(lead.nombre);
+    expect(registroPropiedadCliente.registros).toEqual([
+      { idPropiedad: "prop-001", idCliente: "cliente-001" },
+    ]);
   });
 
   test("FirmarContratoUseCase rechaza contrato inexistente", async () => {

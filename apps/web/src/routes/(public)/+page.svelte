@@ -248,8 +248,8 @@
 				<p class="section-label">Compra o venta asistida</p>
 				<h2 class="page-heading">¿Quieres vender una propiedad con ALVAS?</h2>
 				<p class="mt-4 max-w-2xl leading-relaxed text-text-muted">
-					Registra tus datos y una descripción inicial. La propiedad entra como captación
-					preliminar, no se publica ni se ofrece a compradores hasta que el equipo la valide.
+					Registra tus datos y una descripción inicial. La propiedad entra como captación en
+					borrador, no se publica ni se ofrece a compradores hasta que el equipo la valide.
 				</p>
 			</div>
 			<div class="rounded-2xl border border-border-light bg-bg-base p-6 shadow-sm">

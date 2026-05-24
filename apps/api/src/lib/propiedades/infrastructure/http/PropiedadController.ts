@@ -1,5 +1,4 @@
 import { type Context } from "hono";
-import { ErrorDeDominio } from "../../../shared/domain";
 import { type D1DatabaseLike, type SessionClaims } from "../../../shared/infrastructure";
 import {
   type IActualizarPropiedad,
@@ -14,6 +13,10 @@ import {
   esValidationError,
   formatearValidacion,
 } from "../../../shared/infrastructure/validation/helpers";
+import {
+  responderErrorDeDominio,
+  responderErrorInterno,
+} from "../../../shared/infrastructure/http/responses";
 import { CrearPropiedadSchema, ActualizarPropiedadSchema } from "../validation/schemas";
 
 export type BindingsPropiedades = {
@@ -51,15 +54,13 @@ export class PropiedadController {
       });
 
       if (!resultado.esExito) {
-        const err = resultado.error as ErrorDeDominio;
-        return c.json({ success: false, message: err.message, code: err.codigo }, 403);
+        return responderErrorDeDominio(c, resultado.error);
       }
 
       return c.json({ success: true, data: { id: resultado.valor.id as string } }, 201);
     } catch (error) {
       if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
-      console.error("PropiedadController.crear:", error);
-      return c.json({ success: false, message: "Error interno" }, 500);
+      return responderErrorInterno(c, "PropiedadController.crear", error);
     }
   }
 
@@ -74,8 +75,7 @@ export class PropiedadController {
       });
 
       if (!resultado.esExito) {
-        const err = resultado.error as ErrorDeDominio;
-        return c.json({ success: false, message: err.message, code: err.codigo }, 403);
+        return responderErrorDeDominio(c, resultado.error);
       }
 
       let propiedades = resultado.valor;
@@ -102,8 +102,7 @@ export class PropiedadController {
         data: respuesta,
       });
     } catch (error) {
-      console.error("PropiedadController.listar:", error);
-      return c.json({ success: false, message: "Error interno" }, 500);
+      return responderErrorInterno(c, "PropiedadController.listar", error);
     }
   }
 
@@ -120,18 +119,13 @@ export class PropiedadController {
       });
 
       if (!resultado.esExito) {
-        const err = resultado.error as ErrorDeDominio;
-        return c.json(
-          { success: false, message: err.message, code: err.codigo },
-          err.codigo === "NO_ENCONTRADA" ? 404 : 403,
-        );
+        return responderErrorDeDominio(c, resultado.error);
       }
 
       return c.json({ success: true, message: "Propiedad actualizada" });
     } catch (error) {
       if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
-      console.error("PropiedadController.actualizar:", error);
-      return c.json({ success: false, message: "Error interno" }, 500);
+      return responderErrorInterno(c, "PropiedadController.actualizar", error);
     }
   }
 
@@ -146,17 +140,12 @@ export class PropiedadController {
       });
 
       if (!resultado.esExito) {
-        const err = resultado.error as ErrorDeDominio;
-        return c.json(
-          { success: false, message: err.message, code: err.codigo },
-          err.codigo === "NO_ENCONTRADA" ? 404 : 403,
-        );
+        return responderErrorDeDominio(c, resultado.error);
       }
 
       return c.json({ success: true, message: "Propiedad eliminada" });
     } catch (error) {
-      console.error("PropiedadController.eliminar:", error);
-      return c.json({ success: false, message: "Error interno" }, 500);
+      return responderErrorInterno(c, "PropiedadController.eliminar", error);
     }
   }
 }

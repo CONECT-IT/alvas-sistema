@@ -2,14 +2,14 @@
 
 ## Contexto
 
-ALVAS comercializa propiedades propias y propiedades de clientes vendedores. Una propiedad puede nacer como dato preliminar de un lead vendedor, pero solo debe ser visible para compradores cuando la regla comercial la marque como disponible.
+ALVAS comercializa propiedades propias y propiedades de clientes vendedores. Una propiedad puede nacer como `BORRADOR` desde un lead vendedor, pero solo debe ser visible para compradores cuando la regla comercial la marque como disponible.
 
 Esta spec define el comportamiento esperado del contexto `propiedades` y su relacion con `ventas`.
 
 ## Lenguaje ubicuo
 
 - `Propiedad propia`: propiedad de ALVAS, administrada por admin.
-- `Propiedad preliminar`: propiedad registrada durante la captacion de un lead vendedor; aun no esta disponible para compradores y se representa como estado `BORRADOR`.
+- `Propiedad borrador`: propiedad registrada durante la captacion de un lead vendedor; aun no esta disponible para compradores.
 - `Propiedad disponible`: propiedad lista para ser ofrecida a leads compradores.
 - `Propiedad reservada`: propiedad temporalmente apartada por una operacion en curso.
 - `Propiedad vendida`: propiedad que ya no debe mostrarse como disponible.
@@ -25,8 +25,9 @@ Esta spec define el comportamiento esperado del contexto `propiedades` y su rela
 - Un asesor no puede editar propiedades relacionadas con leads o clientes ajenos.
 - Una propiedad en estado `BORRADOR` no aparece en catalogos para leads compradores.
 - Una propiedad disponible puede mostrarse a leads compradores si pertenece a ALVAS o a un cliente vendedor habilitado.
-- La transicion de preliminar a disponible debe conservar el `lead origen` y el asesor responsable.
+- La transicion de `BORRADOR` a `DISPONIBLE` debe conservar el `lead origen`, el cliente propietario cuando exista y el asesor responsable.
 - Los estados de negocio esperados son `BORRADOR`, `DISPONIBLE`, `RESERVADA`, `VENDIDA` y `ARCHIVADA`.
+- Los estados legados `PRELIMINAR`, `EN_VALIDACION`, `DESCARTADA` e `INACTIVA` no pertenecen al lenguaje ubicuo vigente y deben normalizarse por migracion de datos.
 - Una propiedad `VENDIDA` o `ARCHIVADA` no aparece en catalogos comerciales activos.
 - El precio no puede ser negativo.
 - El titulo debe ser claro y no vacio.
@@ -39,6 +40,7 @@ Esta spec define el comportamiento esperado del contexto `propiedades` y su rela
 - Dado un admin, puede actualizar estado, precio y datos comerciales de cualquier propiedad.
 - Dado un lead comprador, solo ve propiedades `DISPONIBLE`, no propiedades `BORRADOR`.
 - Dado una propiedad de cliente vendedor, conserva referencia al cliente y al lead origen cuando existan.
+- Dado un contrato firmado desde lead vendedor, la propiedad asociada queda vinculada al cliente vendedor mediante `idClientePropietario`.
 - Dado una propiedad vendida o archivada, no aparece en catalogos comerciales activos.
 
 ## Trazabilidad sugerida
@@ -52,6 +54,6 @@ Esta spec define el comportamiento esperado del contexto `propiedades` y su rela
 
 ## Preguntas abiertas
 
-- Quien aprueba que una propiedad preliminar pase a disponible: admin, asesor responsable o contrato vigente?
+- Quien aprueba que una propiedad `BORRADOR` pase a `DISPONIBLE`: admin, asesor responsable o contrato vigente?
 - Una propiedad puede tener mas de un asesor responsable historico?
 - El comprador ve propiedades reservadas o solo disponibles?

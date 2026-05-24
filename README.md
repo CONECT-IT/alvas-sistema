@@ -12,9 +12,7 @@ Reorganizar ALVAS de forma incremental, sin romper el MVP, con arquitectura modu
 ## Estructura
 
 - `apps/api`: backend Hono sobre Cloudflare Workers.
-- `apps/web`: placeholder para frontend Svelte.
-- `packages/shared-types`: tipos compartidos del dominio.
-- `packages/shared-utils`: utilidades compartidas.
+- `apps/web`: frontend SvelteKit.
 
 Estructura objetivo del backend:
 
@@ -162,7 +160,3 @@ Las especificaciones humanas viven en `docs/specs/`. Ese directorio define regla
 ## Deuda tecnica
 
 El roadmap de deuda tecnica vive en `docs/technical-debt-roadmap.md`. Consolida hallazgos del audit generado y los separa entre verificados, parcialmente corregidos y pendientes de validacion.
-
-## Roadmap
-
-El plan de trabajo consolidado vive en `docs/roadmap-alvas.md`. Define fases, capas de testing, deuda arquitectonica, specs SDD y reglas de lenguaje ubicuo.

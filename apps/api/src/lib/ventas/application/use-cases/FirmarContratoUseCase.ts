@@ -8,6 +8,7 @@ import { type IGeneradorId } from "../../../shared/domain/ports/IGeneradorId";
 import { ErrorDeDominio } from "../../../shared/domain";
 import { ContratoNoEncontradoError } from "../../domain/errors/DomainErrors";
 import { type IFirmarContrato } from "../ports/in";
+import { type IRegistroPropiedadCliente } from "../../domain/ports/IRegistroPropiedadCliente";
 
 export type FirmarContratoInput = {
   idContrato: string;
@@ -20,6 +21,7 @@ export class FirmarContratoUseCase
     private readonly contratoRepository: IContratoRepository,
     private readonly ventasRepository: IVentasRepository,
     private readonly generadorId: IGeneradorId,
+    private readonly registroPropiedadCliente?: IRegistroPropiedadCliente,
   ) {}
 
   async ejecutar(input: FirmarContratoInput): Promise<Resultado<void, ErrorDeDominio>> {
@@ -64,6 +66,13 @@ export class FirmarContratoUseCase
 
       contrato.firmar();
       await this.contratoRepository.guardar(contrato);
+
+      if (contrato.idCliente && this.registroPropiedadCliente) {
+        await this.registroPropiedadCliente.registrarClientePropietario(
+          contrato.idPropiedad as string,
+          contrato.idCliente as string,
+        );
+      }
 
       return resultadoExitoso(undefined);
     } catch (error) {

@@ -8,7 +8,7 @@
 	interface Props {
 		leads: LeadPipeline[];
 		onLeadClick?: (lead: LeadPipeline) => void;
-		onStatusChanged?: () => void;
+		onStatusChanged?: (idLead: string, nuevoEstado: string) => void;
 	}
 
 	let { leads, onLeadClick, onStatusChanged }: Props = $props();
@@ -27,7 +27,7 @@
 				idLead,
 				estado: nuevoEstado
 			});
-			onStatusChanged?.();
+			onStatusChanged?.(idLead, nuevoEstado);
 		} catch (error) {
 			console.error('Error al cambiar estado:', error);
 			alert('No se pudo cambiar el estado del lead.');

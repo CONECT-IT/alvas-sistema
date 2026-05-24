@@ -1,5 +1,4 @@
 import { type Context } from "hono";
-import { ErrorDeDominio } from "../../../shared/domain";
 import { type D1DatabaseLike, type SessionClaims } from "../../../shared/infrastructure";
 import {
   type IActualizarCita,
@@ -30,6 +29,10 @@ import {
 import { type IVentasRepository } from "../../domain/ports/IVentasRepository";
 import { type IPropiedadRepository } from "../../../propiedades/domain/ports/IPropiedadRepository";
 import { type IUsuarioRepository } from "../../../usuarios/domain/ports/IUsuarioRepository";
+import {
+  responderErrorDeDominio,
+  responderErrorInterno,
+} from "../../../shared/infrastructure/http/responses";
 
 export type BindingsVentas = {
   DB: D1DatabaseLike;
@@ -40,6 +43,8 @@ type AppVariables = {
 };
 
 export type ContextoVentas = Context<{ Bindings: BindingsVentas; Variables: AppVariables }>;
+
+export { responderErrorDeDominio, responderErrorInterno };
 
 export type VentasControllerDeps = Readonly<{
   crearRegistrarLead: (c: ContextoVentas) => IRegistrarLead;
@@ -70,27 +75,3 @@ export type VentasControllerDeps = Readonly<{
   crearPropiedadRepo: (c: ContextoVentas) => IPropiedadRepository;
   crearUsuarioRepo: (c: ContextoVentas) => IUsuarioRepository;
 }>;
-
-export function responderErrorDeDominio(
-  c: ContextoVentas,
-  error: ErrorDeDominio,
-  status: 400 | 401 | 403 | 404 | 409 = 400,
-): Response {
-  const statusFinal = error.codigo.startsWith("SIN_PERMISOS")
-    ? 403
-    : error.codigo.includes("NOT_FOUND") || error.codigo.includes("NO_ENCONTRADO")
-      ? 404
-      : status;
-
-  return c.json({ success: false, message: error.message, code: error.codigo }, statusFinal);
-}
-
-export function responderErrorInterno(
-  c: ContextoVentas,
-  contexto: string,
-  error: unknown,
-): Response {
-  console.error(contexto, error);
-
-  return c.json({ success: false, message: "Error interno", code: "VENTAS_ERROR_INTERNO" }, 500);
-}
