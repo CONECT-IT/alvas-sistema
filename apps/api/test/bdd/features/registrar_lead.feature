@@ -19,6 +19,12 @@ Feature: Registrar Lead
     When el asesor registra un lead "Pedro" con email "pedro@example.com" tipo "COMPRA" interesado en "prop-001"
     Then el lead se crea con la propiedad de interes vinculada
 
+  Scenario: Asesor no registra lead comprador con propiedad vendida
+    Given un asesor autenticado
+    And una propiedad vendida fuera del catalogo comprador
+    When el asesor registra un lead "Pedro" con email "pedro@example.com" tipo "COMPRA" interesado en "prop-vendida"
+    Then el sistema rechaza la propiedad de interes porque no esta disponible
+
   Scenario: Asesor no puede reasignar leads
     Given un asesor autenticado
     And un lead existente pertenece a "asesor-1"

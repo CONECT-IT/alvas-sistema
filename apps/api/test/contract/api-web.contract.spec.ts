@@ -296,6 +296,22 @@ describe("contract / api-web", () => {
     expect(esPropiedadContract(payload)).toBe(true);
   });
 
+  it("acepta el catalogo completo de estados comerciales de propiedad", () => {
+    const estados = ["BORRADOR", "DISPONIBLE", "RESERVADA", "VENDIDA", "ARCHIVADA"] as const;
+
+    for (const estado of estados) {
+      expect(
+        esPropiedadContract({
+          id: `propiedad-${estado.toLowerCase()}`,
+          titulo: `Propiedad ${estado}`,
+          precio: 120000,
+          origen: "CLIENTE",
+          estado,
+        }),
+      ).toBe(true);
+    }
+  });
+
   it("rechaza propiedades con estado fuera del catalogo acordado con la web", () => {
     const payload = {
       id: "propiedad-1",
@@ -306,6 +322,22 @@ describe("contract / api-web", () => {
     };
 
     expect(esPropiedadContract(payload)).toBe(false);
+  });
+
+  it("rechaza estados legados de propiedad fuera del lenguaje ubicuo actual", () => {
+    const estadosLegados = ["PRELIMINAR", "EN_VALIDACION", "DESCARTADA", "INACTIVA"] as const;
+
+    for (const estado of estadosLegados) {
+      expect(
+        esPropiedadContract({
+          id: `propiedad-${estado.toLowerCase()}`,
+          titulo: `Propiedad ${estado}`,
+          precio: 120000,
+          origen: "CLIENTE",
+          estado,
+        }),
+      ).toBe(false);
+    }
   });
 
   it("mantiene estable el contrato serializado de captacion procesada", () => {

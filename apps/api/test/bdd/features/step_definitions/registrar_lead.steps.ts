@@ -159,6 +159,10 @@ Given("una propiedad disponible para compra", function () {
   consultaPropiedad = new ConsultaPropiedadDisponible(new Set(["prop-001"]));
 });
 
+Given("una propiedad vendida fuera del catalogo comprador", function () {
+  consultaPropiedad = new ConsultaPropiedadDisponible(new Set());
+});
+
 Given("un lead existente pertenece a {string}", function (idAsesor: string) {
   const lead = Lead.registrar({
     id: "lead-001",
@@ -251,6 +255,13 @@ Then("el lead se crea con la propiedad de interes vinculada", function () {
   assert.strictEqual(resultado.esExito, true);
   if (resultado.esExito) {
     assert.strictEqual(resultado.valor.idPropiedadInteres as string, "prop-001");
+  }
+});
+
+Then("el sistema rechaza la propiedad de interes porque no esta disponible", function () {
+  assert.strictEqual(resultado.esExito, false);
+  if (!resultado.esExito) {
+    assert.strictEqual(resultado.error.codigo, "PROPIEDAD_INTERES_NO_DISPONIBLE");
   }
 });
 

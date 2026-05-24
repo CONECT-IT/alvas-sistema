@@ -17,6 +17,7 @@ import { PropiedadError } from "../../../src/lib/propiedades/domain/errors/Propi
 import { ErrorDeDominio } from "../../../src/lib/shared/domain/errors/ErrorDeDominio";
 import { type IGeneradorId } from "../../../src/lib/shared/domain/ports/IGeneradorId";
 import { AutorizadorPropiedadesAdapter } from "../../../src/lib/propiedades/infrastructure/security/AutorizadorPropiedadesAdapter";
+import { ConsultaPropiedadInteresVentasAdapter } from "../../../src/lib/propiedades/infrastructure/adapters/ConsultaPropiedadInteresVentasAdapter";
 
 class GeneradorIdFijo implements IGeneradorId {
   constructor(private readonly id: string) {}
@@ -400,6 +401,34 @@ describe("propiedades / use cases", () => {
       "No tienes permisos para ver propiedades.",
     );
     expect(resultado.esExito ? undefined : resultado.error.codigo).toBe("ROL_NO_PERMITIDO");
+  });
+
+  test("ConsultaPropiedadInteresVentasAdapter solo expone propiedades disponibles a leads compradores", async () => {
+    const repo = new FakePropiedadRepository();
+    const estados = ["BORRADOR", "DISPONIBLE", "RESERVADA", "VENDIDA", "ARCHIVADA"] as const;
+
+    for (const estado of estados) {
+      await repo.guardar(
+        Propiedad.crear({
+          id: `prop-${estado.toLowerCase()}`,
+          titulo: `Propiedad ${estado}`,
+          descripcion: "Propiedad para validar disponibilidad comercial",
+          precio: 100,
+          origen: "CLIENTE",
+          estado,
+          idClientePropietario: "cliente-001",
+        }),
+      );
+    }
+
+    const adapter = new ConsultaPropiedadInteresVentasAdapter(repo);
+
+    expect(await adapter.propiedadDisponibleParaCompra("prop-disponible")).toBe(true);
+    expect(await adapter.propiedadDisponibleParaCompra("prop-borrador")).toBe(false);
+    expect(await adapter.propiedadDisponibleParaCompra("prop-reservada")).toBe(false);
+    expect(await adapter.propiedadDisponibleParaCompra("prop-vendida")).toBe(false);
+    expect(await adapter.propiedadDisponibleParaCompra("prop-archivada")).toBe(false);
+    expect(await adapter.propiedadDisponibleParaCompra("prop-inexistente")).toBe(false);
   });
 
   test("propaga errores no dominio en CrearPropiedadUseCase", async () => {

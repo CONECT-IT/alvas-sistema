@@ -191,6 +191,38 @@ describe("http / propiedades routes", () => {
     );
   });
 
+  it("actualiza propiedad a vendida o archivada preservando estado comercial cerrado", async () => {
+    const estadosCerrados = ["VENDIDA", "ARCHIVADA"] as const;
+
+    for (const estado of estadosCerrados) {
+      const capturadas = crearCapturadas();
+      const app = new Hono();
+      app.route("/propiedades", crearPropiedadRouter(crearDeps(capturadas)));
+
+      const res = await app.request(
+        `/propiedades/propiedad-${estado.toLowerCase()}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: await crearAuthHeader({ idUsuario: "admin-1", rol: "ADMIN" }),
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ estado }),
+        },
+        envConAuth,
+      );
+
+      expect(res.status).toBe(200);
+      expect(capturadas.actualizarPropiedad[0]).toEqual(
+        expect.objectContaining({
+          idPropiedad: `propiedad-${estado.toLowerCase()}`,
+          estado,
+          usuarioAutenticado: { id: "admin-1", rol: "ADMIN" },
+        }),
+      );
+    }
+  });
+
   it("responde 403 cuando el use case rechaza permisos de propiedad", async () => {
     const app = new Hono();
     app.route("/propiedades", crearPropiedadRouter(crearDepsSinPermisos()));
