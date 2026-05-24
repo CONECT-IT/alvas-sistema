@@ -38,4 +38,8 @@ export class EstadoCaptacion {
   esPendiente(): boolean {
     return this.valorInterno === "PENDIENTE";
   }
+
+  esProcesable(): boolean {
+    return this.valorInterno === "PENDIENTE" || this.valorInterno === "REVISADA";
+  }
 }

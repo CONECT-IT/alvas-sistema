@@ -1,5 +1,11 @@
 import { describe, expect, test } from "bun:test";
 
+import {
+  ConvertirCaptacionPendienteUseCase,
+  MarcarCaptacionDuplicadaUseCase,
+  RechazarCaptacionPendienteUseCase,
+  RevisarCaptacionPendienteUseCase,
+} from "../../../src/lib/integraciones/application/use-cases/GestionarCaptacionPendienteUseCases";
 import { ListarCaptacionesPendientesUseCase } from "../../../src/lib/integraciones/application/use-cases/ListarCaptacionesPendientesUseCase";
 import { ProcesarCaptacionEntranteUseCase } from "../../../src/lib/integraciones/application/use-cases/ProcesarCaptacionEntranteUseCase";
 import { ProcesarWhatsAppWebhookUseCase } from "../../../src/lib/integraciones/application/use-cases/ProcesarWhatsAppWebhookUseCase";
@@ -64,12 +70,39 @@ class FakeCaptacionPendienteRepository implements ICaptacionPendienteRepository 
   readonly captaciones: CaptacionPendiente[] = [];
 
   async guardar(captacion: CaptacionPendiente): Promise<void> {
+    const index = this.captaciones.findIndex((item) => item.id === captacion.id);
+    if (index >= 0) {
+      this.captaciones[index] = captacion;
+      return;
+    }
+
     this.captaciones.push(captacion);
+  }
+
+  async obtenerPorId(id: string): Promise<CaptacionPendiente | null> {
+    return this.captaciones.find((captacion) => captacion.id === id) ?? null;
   }
 
   async listarPendientes(): Promise<CaptacionPendiente[]> {
     return this.captaciones.filter((captacion) => captacion.estado.esPendiente());
   }
+}
+
+function crearCaptacionPendiente(
+  id = "captacion-pendiente",
+  tipo: "COMPRA" | "VENTA" = "COMPRA",
+): CaptacionPendiente {
+  return CaptacionPendiente.registrar({
+    id,
+    captacion: Captacion.registrar({
+      canal: "WHATSAPP",
+      origen: "whatsapp_webhook",
+      nombre: "Laura",
+      telefono: "573001112233",
+      tipo,
+      metadata: { canal: "whatsapp" },
+    }),
+  });
 }
 
 describe("integraciones / use cases", () => {
@@ -219,26 +252,8 @@ describe("integraciones / use cases", () => {
 
   test("ListarCaptacionesPendientesUseCase devuelve solo bandeja pendiente", async () => {
     const captacionRepository = new FakeCaptacionPendienteRepository();
-    const pendiente = CaptacionPendiente.registrar({
-      id: "captacion-pendiente",
-      captacion: Captacion.registrar({
-        canal: "WHATSAPP",
-        origen: "whatsapp_webhook",
-        nombre: "Laura",
-        telefono: "573001112233",
-        tipo: "COMPRA",
-      }),
-    });
-    const duplicada = CaptacionPendiente.registrar({
-      id: "captacion-duplicada",
-      captacion: Captacion.registrar({
-        canal: "WHATSAPP",
-        origen: "whatsapp_webhook",
-        nombre: "Laura",
-        telefono: "573001112233",
-        tipo: "COMPRA",
-      }),
-    });
+    const pendiente = crearCaptacionPendiente("captacion-pendiente");
+    const duplicada = crearCaptacionPendiente("captacion-duplicada");
     duplicada.marcarDuplicada("Telefono ya registrado");
     await captacionRepository.guardar(pendiente);
     await captacionRepository.guardar(duplicada);
@@ -249,6 +264,124 @@ describe("integraciones / use cases", () => {
     expect(resultado.esExito ? resultado.valor.map((item) => item.id) : []).toEqual([
       "captacion-pendiente",
     ]);
+  });
+
+  test("RevisarCaptacionPendienteUseCase cambia captacion pendiente a revisada", async () => {
+    const captacionRepository = new FakeCaptacionPendienteRepository();
+    await captacionRepository.guardar(crearCaptacionPendiente("captacion-001"));
+
+    const resultado = await new RevisarCaptacionPendienteUseCase(captacionRepository).ejecutar({
+      idCaptacion: "captacion-001",
+    });
+
+    expect(resultado.esExito).toBe(true);
+    expect(resultado.esExito ? resultado.valor.estado : undefined).toBe("REVISADA");
+    expect(captacionRepository.captaciones[0]?.estado.valor).toBe("REVISADA");
+  });
+
+  test("MarcarCaptacionDuplicadaUseCase cierra captacion con razon de duplicado", async () => {
+    const captacionRepository = new FakeCaptacionPendienteRepository();
+    await captacionRepository.guardar(crearCaptacionPendiente("captacion-001"));
+
+    const resultado = await new MarcarCaptacionDuplicadaUseCase(captacionRepository).ejecutar({
+      idCaptacion: "captacion-001",
+      razon: "Telefono ya existe en leads",
+    });
+
+    expect(resultado.esExito).toBe(true);
+    expect(resultado.esExito ? resultado.valor : undefined).toMatchObject({
+      estado: "DUPLICADA",
+      razonDuplicado: "Telefono ya existe en leads",
+    });
+  });
+
+  test("RechazarCaptacionPendienteUseCase cierra captacion no valida", async () => {
+    const captacionRepository = new FakeCaptacionPendienteRepository();
+    await captacionRepository.guardar(crearCaptacionPendiente("captacion-001"));
+
+    const resultado = await new RechazarCaptacionPendienteUseCase(captacionRepository).ejecutar({
+      idCaptacion: "captacion-001",
+      razon: "Mensaje sin intencion comercial",
+    });
+
+    expect(resultado.esExito).toBe(true);
+    expect(resultado.esExito ? resultado.valor.estado : undefined).toBe("RECHAZADA");
+  });
+
+  test("ConvertirCaptacionPendienteUseCase crea lead y cierra captacion como convertida", async () => {
+    const captacionRepository = new FakeCaptacionPendienteRepository();
+    const registroLead = new FakeRegistroLead();
+    await captacionRepository.guardar(crearCaptacionPendiente("captacion-001"));
+
+    const resultado = await new ConvertirCaptacionPendienteUseCase(
+      captacionRepository,
+      registroLead,
+    ).ejecutar({
+      idCaptacion: "captacion-001",
+      idAsesor: "asesor-admin",
+    });
+
+    expect(resultado.esExito).toBe(true);
+    expect(resultado.esExito ? resultado.valor : undefined).toMatchObject({
+      idLead: "lead-001",
+      captacion: { id: "captacion-001", estado: "CONVERTIDA" },
+    });
+    expect(registroLead.entradas[0]).toMatchObject({
+      canal: "WHATSAPP",
+      tipo: "COMPRA",
+      idAsesor: "asesor-admin",
+    });
+  });
+
+  test("ConvertirCaptacionPendienteUseCase crea propiedad preliminar cuando captacion es vendedora", async () => {
+    const captacionRepository = new FakeCaptacionPendienteRepository();
+    const registroPropiedad = new FakeRegistroPropiedad();
+    await captacionRepository.guardar(crearCaptacionPendiente("captacion-001", "VENTA"));
+
+    const resultado = await new ConvertirCaptacionPendienteUseCase(
+      captacionRepository,
+      new FakeRegistroLead(),
+      registroPropiedad,
+    ).ejecutar({
+      idCaptacion: "captacion-001",
+      idAsesor: "asesor-admin",
+    });
+
+    expect(resultado.esExito).toBe(true);
+    expect(resultado.esExito ? resultado.valor.idPropiedadPreliminar : undefined).toBe(
+      "propiedad-preliminar-001",
+    );
+    expect(registroPropiedad.entradas[0]).toMatchObject({
+      idLeadOrigen: "lead-001",
+      asesorCaptadorId: "asesor-001",
+      nombreContacto: "Laura",
+    });
+  });
+
+  test("no permite procesar una captacion ya cerrada", async () => {
+    const captacionRepository = new FakeCaptacionPendienteRepository();
+    const captacion = crearCaptacionPendiente("captacion-001");
+    captacion.marcarDuplicada("Duplicada");
+    await captacionRepository.guardar(captacion);
+
+    const resultado = await new ConvertirCaptacionPendienteUseCase(
+      captacionRepository,
+      new FakeRegistroLead(),
+    ).ejecutar({ idCaptacion: "captacion-001" });
+
+    expect(resultado.esExito).toBe(false);
+    expect(resultado.esExito ? undefined : resultado.error.codigo).toBe("CAPTACION_NO_PROCESABLE");
+  });
+
+  test("devuelve error de negocio cuando la captacion pendiente no existe", async () => {
+    const resultado = await new RevisarCaptacionPendienteUseCase(
+      new FakeCaptacionPendienteRepository(),
+    ).ejecutar({
+      idCaptacion: "captacion-inexistente",
+    });
+
+    expect(resultado.esExito).toBe(false);
+    expect(resultado.esExito ? undefined : resultado.error.codigo).toBe("CAPTACION_NO_ENCONTRADA");
   });
 
   test("ProcesarWhatsAppWebhookUseCase captura errores de dominio de captacion", async () => {

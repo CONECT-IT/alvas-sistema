@@ -36,3 +36,27 @@ export type CaptacionPendienteDTO = Readonly<{
   creadoEn: string;
   actualizadoEn: string;
 }>;
+
+export type RevisarCaptacionPendienteDTO = Readonly<{
+  idCaptacion: string;
+}>;
+
+export type MarcarCaptacionDuplicadaDTO = Readonly<{
+  idCaptacion: string;
+  razon: string;
+}>;
+
+export type RechazarCaptacionPendienteDTO = Readonly<{
+  idCaptacion: string;
+  razon?: string;
+}>;
+
+export type ConvertirCaptacionPendienteDTO = Readonly<{
+  idCaptacion: string;
+  idAsesor?: string;
+}>;
+
+export type CaptacionConvertidaDTO = CaptacionProcesadaDTO &
+  Readonly<{
+    captacion: CaptacionPendienteDTO;
+  }>;

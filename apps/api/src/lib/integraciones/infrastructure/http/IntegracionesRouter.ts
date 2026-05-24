@@ -17,6 +17,18 @@ export function crearIntegracionesRouter(deps: IntegracionesRouterDeps) {
   router.get("/captaciones/pendientes", verifySessionMiddleware(), (c) =>
     controller.listarCaptacionesPendientes(c),
   );
+  router.post("/captaciones/pendientes/:idCaptacion/revisar", verifySessionMiddleware(), (c) =>
+    controller.revisarCaptacionPendiente(c),
+  );
+  router.post("/captaciones/pendientes/:idCaptacion/duplicada", verifySessionMiddleware(), (c) =>
+    controller.marcarCaptacionDuplicada(c),
+  );
+  router.post("/captaciones/pendientes/:idCaptacion/rechazar", verifySessionMiddleware(), (c) =>
+    controller.rechazarCaptacionPendiente(c),
+  );
+  router.post("/captaciones/pendientes/:idCaptacion/convertir", verifySessionMiddleware(), (c) =>
+    controller.convertirCaptacionPendiente(c),
+  );
   router.post("/webhooks/whatsapp", (c) => controller.recibirWhatsAppLead(c));
 
   return router;

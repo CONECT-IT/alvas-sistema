@@ -1,5 +1,6 @@
 import { Captacion } from "./Captacion";
 import { EstadoCaptacion } from "../value-objects";
+import { ErrorDeDominio } from "../../../shared/domain";
 
 type CaptacionPendienteProps = Readonly<{
   id: string;
@@ -28,13 +29,51 @@ export class CaptacionPendiente {
     return new CaptacionPendiente(props);
   }
 
+  marcarRevisada(): void {
+    this.validarProcesable();
+    this.props = {
+      ...this.props,
+      estado: EstadoCaptacion.revisada(),
+      actualizadoEn: new Date(),
+    };
+  }
+
   marcarDuplicada(razon: string): void {
+    this.validarProcesable();
     this.props = {
       ...this.props,
       estado: EstadoCaptacion.duplicada(),
       razonDuplicado: razon.trim() || undefined,
       actualizadoEn: new Date(),
     };
+  }
+
+  rechazar(razon?: string): void {
+    this.validarProcesable();
+    this.props = {
+      ...this.props,
+      estado: EstadoCaptacion.rechazada(),
+      razonDuplicado: razon?.trim() || undefined,
+      actualizadoEn: new Date(),
+    };
+  }
+
+  marcarConvertida(): void {
+    this.validarProcesable();
+    this.props = {
+      ...this.props,
+      estado: EstadoCaptacion.convertida(),
+      actualizadoEn: new Date(),
+    };
+  }
+
+  private validarProcesable(): void {
+    if (!this.props.estado.esProcesable()) {
+      throw new ErrorDeDominio("La captacion ya fue cerrada y no puede procesarse otra vez.", {
+        codigo: "CAPTACION_NO_PROCESABLE",
+        detalle: { estado: this.props.estado.valor },
+      });
+    }
   }
 
   get id(): string {

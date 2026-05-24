@@ -29,12 +29,45 @@ const captacionPendiente = {
   actualizadoEn: "2026-05-24T04:00:00.000Z",
 } as const;
 
+const captacionRevisada = {
+  ...captacionPendiente,
+  estado: "REVISADA",
+} as const;
+
+const captacionDuplicada = {
+  ...captacionPendiente,
+  estado: "DUPLICADA",
+  razonDuplicado: "Telefono ya existe",
+} as const;
+
+const captacionRechazada = {
+  ...captacionPendiente,
+  estado: "RECHAZADA",
+  razonDuplicado: "Sin intencion comercial",
+} as const;
+
+const captacionConvertida = {
+  idLead: "lead-captacion-1",
+  captacion: {
+    ...captacionPendiente,
+    estado: "CONVERTIDA",
+  },
+} as const;
+
 function crearDeps(): IntegracionesRouterDeps & {
   readonly ultimaCaptacionInput: unknown;
   readonly ultimoWhatsAppInput: unknown;
+  readonly ultimaRevisionInput: unknown;
+  readonly ultimoDuplicadoInput: unknown;
+  readonly ultimoRechazoInput: unknown;
+  readonly ultimaConversionInput: unknown;
 } {
   let ultimaCaptacionInput: unknown;
   let ultimoWhatsAppInput: unknown;
+  let ultimaRevisionInput: unknown;
+  let ultimoDuplicadoInput: unknown;
+  let ultimoRechazoInput: unknown;
+  let ultimaConversionInput: unknown;
 
   return {
     crearProcesarCaptacionEntrante: () => ({
@@ -52,11 +85,47 @@ function crearDeps(): IntegracionesRouterDeps & {
     crearListarCaptacionesPendientes: () => ({
       ejecutar: async () => resultadoExitoso([captacionPendiente]),
     }),
+    crearRevisarCaptacionPendiente: () => ({
+      ejecutar: async (input) => {
+        ultimaRevisionInput = input;
+        return resultadoExitoso(captacionRevisada);
+      },
+    }),
+    crearMarcarCaptacionDuplicada: () => ({
+      ejecutar: async (input) => {
+        ultimoDuplicadoInput = input;
+        return resultadoExitoso(captacionDuplicada);
+      },
+    }),
+    crearRechazarCaptacionPendiente: () => ({
+      ejecutar: async (input) => {
+        ultimoRechazoInput = input;
+        return resultadoExitoso(captacionRechazada);
+      },
+    }),
+    crearConvertirCaptacionPendiente: () => ({
+      ejecutar: async (input) => {
+        ultimaConversionInput = input;
+        return resultadoExitoso(captacionConvertida);
+      },
+    }),
     get ultimaCaptacionInput() {
       return ultimaCaptacionInput;
     },
     get ultimoWhatsAppInput() {
       return ultimoWhatsAppInput;
+    },
+    get ultimaRevisionInput() {
+      return ultimaRevisionInput;
+    },
+    get ultimoDuplicadoInput() {
+      return ultimoDuplicadoInput;
+    },
+    get ultimoRechazoInput() {
+      return ultimoRechazoInput;
+    },
+    get ultimaConversionInput() {
+      return ultimaConversionInput;
     },
   };
 }
@@ -207,6 +276,121 @@ describe("http / integraciones routes", () => {
     });
   });
 
+  it("revisa captacion pendiente autenticada", async () => {
+    const app = new Hono();
+    const deps = crearDeps();
+    app.route("/integraciones", crearIntegracionesRouter(deps));
+
+    const res = await app.request(
+      "/integraciones/captaciones/pendientes/captacion-1/revisar",
+      {
+        method: "POST",
+        headers: {
+          Authorization: await crearAuthHeader({ idUsuario: "admin-1", rol: "ADMIN" }),
+        },
+      },
+      envConAuth,
+    );
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({
+      success: true,
+      message: "Captacion revisada",
+      data: captacionRevisada,
+    });
+    expect(deps.ultimaRevisionInput).toEqual({ idCaptacion: "captacion-1" });
+  });
+
+  it("marca captacion pendiente como duplicada con razon", async () => {
+    const app = new Hono();
+    const deps = crearDeps();
+    app.route("/integraciones", crearIntegracionesRouter(deps));
+
+    const res = await app.request(
+      "/integraciones/captaciones/pendientes/captacion-1/duplicada",
+      {
+        method: "POST",
+        headers: {
+          Authorization: await crearAuthHeader({ idUsuario: "admin-1", rol: "ADMIN" }),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ razon: "Telefono ya existe" }),
+      },
+      envConAuth,
+    );
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({
+      success: true,
+      message: "Captacion marcada como duplicada",
+      data: captacionDuplicada,
+    });
+    expect(deps.ultimoDuplicadoInput).toEqual({
+      idCaptacion: "captacion-1",
+      razon: "Telefono ya existe",
+    });
+  });
+
+  it("rechaza captacion pendiente con razon operativa", async () => {
+    const app = new Hono();
+    const deps = crearDeps();
+    app.route("/integraciones", crearIntegracionesRouter(deps));
+
+    const res = await app.request(
+      "/integraciones/captaciones/pendientes/captacion-1/rechazar",
+      {
+        method: "POST",
+        headers: {
+          Authorization: await crearAuthHeader({ idUsuario: "admin-1", rol: "ADMIN" }),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ razon: "Sin intencion comercial" }),
+      },
+      envConAuth,
+    );
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({
+      success: true,
+      message: "Captacion rechazada",
+      data: captacionRechazada,
+    });
+    expect(deps.ultimoRechazoInput).toEqual({
+      idCaptacion: "captacion-1",
+      razon: "Sin intencion comercial",
+    });
+  });
+
+  it("convierte captacion pendiente asignando asesor segun rol autenticado", async () => {
+    const app = new Hono();
+    const deps = crearDeps();
+    app.route("/integraciones", crearIntegracionesRouter(deps));
+
+    const res = await app.request(
+      "/integraciones/captaciones/pendientes/captacion-1/convertir",
+      {
+        method: "POST",
+        headers: {
+          Authorization: await crearAuthHeader({ idUsuario: "asesor-1", rol: "ASESOR" }),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ idAsesor: "asesor-ajeno" }),
+      },
+      envConAuth,
+    );
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({
+      success: true,
+      message: "Captacion convertida",
+      data: captacionConvertida,
+    });
+    expect(deps.ultimaConversionInput).toEqual({
+      idCaptacion: "captacion-1",
+      idAsesor: "asesor-1",
+    });
+  });
+
   it("serializa errores de dominio de captacion con codigo de negocio", async () => {
     const app = new Hono();
     app.route(
@@ -223,6 +407,18 @@ describe("http / integraciones routes", () => {
         }),
         crearListarCaptacionesPendientes: () => ({
           ejecutar: async () => resultadoExitoso([]),
+        }),
+        crearRevisarCaptacionPendiente: () => ({
+          ejecutar: async () => resultadoExitoso(captacionRevisada),
+        }),
+        crearMarcarCaptacionDuplicada: () => ({
+          ejecutar: async () => resultadoExitoso(captacionDuplicada),
+        }),
+        crearRechazarCaptacionPendiente: () => ({
+          ejecutar: async () => resultadoExitoso(captacionRechazada),
+        }),
+        crearConvertirCaptacionPendiente: () => ({
+          ejecutar: async () => resultadoExitoso(captacionConvertida),
         }),
       }),
     );

@@ -1,10 +1,14 @@
 import { type Context } from "hono";
 import {
   type CaptacionEntranteDTO,
+  type IConvertirCaptacionPendiente,
   type IListarCaptacionesPendientes,
+  type IMarcarCaptacionDuplicada,
   type EntradaWhatsAppWebhookDTO,
   type IProcesarCaptacionEntrante,
   type IProcesarWhatsAppWebhook,
+  type IRechazarCaptacionPendiente,
+  type IRevisarCaptacionPendiente,
 } from "../../application";
 import { type D1DatabaseLike, type SessionClaims } from "../../../shared/infrastructure";
 
@@ -15,6 +19,10 @@ function comparacionSeguraConstante(a: string, b: string): boolean {
     acum |= a.charCodeAt(i) ^ b.charCodeAt(i);
   }
   return acum === 0;
+}
+
+function obtenerIdCaptacion(c: ContextoIntegraciones): string {
+  return c.req.param("idCaptacion") ?? "";
 }
 
 export type BindingsIntegraciones = {
@@ -30,6 +38,10 @@ export type IntegracionesRouterDeps = {
   crearProcesarWhatsAppWebhook: (c: ContextoIntegraciones) => IProcesarWhatsAppWebhook;
   crearProcesarCaptacionEntrante: (c: ContextoIntegraciones) => IProcesarCaptacionEntrante;
   crearListarCaptacionesPendientes: (c: ContextoIntegraciones) => IListarCaptacionesPendientes;
+  crearRevisarCaptacionPendiente: (c: ContextoIntegraciones) => IRevisarCaptacionPendiente;
+  crearMarcarCaptacionDuplicada: (c: ContextoIntegraciones) => IMarcarCaptacionDuplicada;
+  crearRechazarCaptacionPendiente: (c: ContextoIntegraciones) => IRechazarCaptacionPendiente;
+  crearConvertirCaptacionPendiente: (c: ContextoIntegraciones) => IConvertirCaptacionPendiente;
 };
 
 type ContextoIntegraciones = Context<{
@@ -94,6 +106,115 @@ export class IntegracionesController {
       console.error("IntegracionesController.listarCaptacionesPendientes:", error);
       return c.json(
         { success: false, message: "Error listando captaciones", code: "CAPTACION_ERROR_INTERNO" },
+        500,
+      );
+    }
+  }
+
+  async revisarCaptacionPendiente(c: ContextoIntegraciones): Promise<Response> {
+    try {
+      const useCase = this.deps.crearRevisarCaptacionPendiente(c);
+      const resultado = await useCase.ejecutar({ idCaptacion: obtenerIdCaptacion(c) });
+
+      if (!resultado.esExito) {
+        return c.json(
+          { success: false, message: resultado.error.message, code: resultado.error.codigo },
+          400,
+        );
+      }
+
+      return c.json({ success: true, message: "Captacion revisada", data: resultado.valor });
+    } catch (error) {
+      console.error("IntegracionesController.revisarCaptacionPendiente:", error);
+      return c.json(
+        { success: false, message: "Error revisando captacion", code: "CAPTACION_ERROR_INTERNO" },
+        500,
+      );
+    }
+  }
+
+  async marcarCaptacionDuplicada(c: ContextoIntegraciones): Promise<Response> {
+    try {
+      const body = await c.req.json<{ razon?: string }>();
+      const useCase = this.deps.crearMarcarCaptacionDuplicada(c);
+      const resultado = await useCase.ejecutar({
+        idCaptacion: obtenerIdCaptacion(c),
+        razon: body.razon ?? "",
+      });
+
+      if (!resultado.esExito) {
+        return c.json(
+          { success: false, message: resultado.error.message, code: resultado.error.codigo },
+          400,
+        );
+      }
+
+      return c.json({
+        success: true,
+        message: "Captacion marcada como duplicada",
+        data: resultado.valor,
+      });
+    } catch (error) {
+      console.error("IntegracionesController.marcarCaptacionDuplicada:", error);
+      return c.json(
+        { success: false, message: "Error marcando captacion", code: "CAPTACION_ERROR_INTERNO" },
+        500,
+      );
+    }
+  }
+
+  async rechazarCaptacionPendiente(c: ContextoIntegraciones): Promise<Response> {
+    try {
+      const body = await c.req.json<{ razon?: string }>();
+      const useCase = this.deps.crearRechazarCaptacionPendiente(c);
+      const resultado = await useCase.ejecutar({
+        idCaptacion: obtenerIdCaptacion(c),
+        razon: body.razon,
+      });
+
+      if (!resultado.esExito) {
+        return c.json(
+          { success: false, message: resultado.error.message, code: resultado.error.codigo },
+          400,
+        );
+      }
+
+      return c.json({ success: true, message: "Captacion rechazada", data: resultado.valor });
+    } catch (error) {
+      console.error("IntegracionesController.rechazarCaptacionPendiente:", error);
+      return c.json(
+        { success: false, message: "Error rechazando captacion", code: "CAPTACION_ERROR_INTERNO" },
+        500,
+      );
+    }
+  }
+
+  async convertirCaptacionPendiente(c: ContextoIntegraciones): Promise<Response> {
+    try {
+      const body = await c.req.json<{ idAsesor?: string }>();
+      const authPayload = c.get("authPayload");
+      const useCase = this.deps.crearConvertirCaptacionPendiente(c);
+      const resultado = await useCase.ejecutar({
+        idCaptacion: obtenerIdCaptacion(c),
+        idAsesor: authPayload.rol === "ADMIN" ? body.idAsesor : authPayload.idUsuario,
+      });
+
+      if (!resultado.esExito) {
+        return c.json(
+          { success: false, message: resultado.error.message, code: resultado.error.codigo },
+          400,
+        );
+      }
+
+      return c.json({ success: true, message: "Captacion convertida", data: resultado.valor });
+    } catch (error) {
+      console.error("IntegracionesController.convertirCaptacionPendiente:", error);
+      return c.json(
+        {
+          success: false,
+          message: "Error convirtiendo captacion",
+          code: "CAPTACION_ERROR_INTERNO",
+        },
         500,
       );
     }

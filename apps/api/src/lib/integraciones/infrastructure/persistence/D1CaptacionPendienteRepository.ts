@@ -20,6 +20,15 @@ export class D1CaptacionPendienteRepository implements ICaptacionPendienteReposi
     });
   }
 
+  async obtenerPorId(id: string): Promise<CaptacionPendiente | null> {
+    const [row] = await this.drizzle()
+      .select()
+      .from(captacionesPendientesTable)
+      .where(eq(captacionesPendientesTable.id, id));
+
+    return row ? CaptacionPendienteMapper.aDominio(row as CaptacionPendienteRow) : null;
+  }
+
   async listarPendientes(): Promise<CaptacionPendiente[]> {
     const rows = await this.drizzle()
       .select()
