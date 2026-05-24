@@ -2,7 +2,7 @@ import { ErrorDeValidacion } from "../../../shared/domain";
 import { type IPasswordHasher } from "../../domain/ports";
 import { HashClave } from "../../domain/value-objects";
 
-const ITERACIONES_PBKDF2 = 120_000;
+const ITERACIONES_PBKDF2 = 100_000;
 const LARGO_HASH_BYTES = 32;
 const LARGO_SALT_BYTES = 16;
 
