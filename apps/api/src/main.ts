@@ -72,11 +72,4 @@ app.onError((error, c) => {
   );
 });
 
-// ── Dev / Seed ──────────────────────────────────────────────
-app.post("/dev/seed", async (c) => {
-  const { ejecutarSeed } = await import("./seed");
-  const log = await ejecutarSeed(c.env as never);
-  return c.json({ success: true, log });
-});
-
 export default app;
