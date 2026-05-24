@@ -31,8 +31,8 @@ jobs:
       matrix:
         app: [api, web]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: "24"
       - uses: oven-sh/setup-bun@v2
@@ -52,8 +52,8 @@ jobs:
       matrix:
         app: [api, web]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: "24"
       - uses: oven-sh/setup-bun@v2
@@ -68,8 +68,8 @@ jobs:
     needs: build
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: "24"
       - uses: oven-sh/setup-bun@v2
@@ -84,8 +84,8 @@ jobs:
     needs: api-unit-test
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: "24"
       - uses: oven-sh/setup-bun@v2
@@ -100,8 +100,8 @@ jobs:
     needs: api-integration-bdd
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: "24"
       - uses: oven-sh/setup-bun@v2
@@ -122,7 +122,7 @@ jobs:
               echo "No se encontro el reporte de coverage."
             fi
           } >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: api-coverage-report
@@ -135,8 +135,8 @@ jobs:
     needs: api-coverage
     timeout-minutes: 40
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: "24"
       - uses: oven-sh/setup-bun@v2
@@ -168,11 +168,12 @@ jobs:
               echo "Stryker dashboard upload: deshabilitado (falta secret)"
             fi
           } >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: stryker-report
           path: reports/mutation/
+          if-no-files-found: ignore
           retention-days: 90
 
   web-component-test:
@@ -181,8 +182,8 @@ jobs:
     needs: build
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: "24"
       - uses: oven-sh/setup-bun@v2
@@ -197,8 +198,8 @@ jobs:
     needs: web-component-test
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: "24"
       - uses: oven-sh/setup-bun@v2
@@ -208,11 +209,12 @@ jobs:
       - run: bunx playwright install --with-deps chromium
         working-directory: apps/web
       - run: bun run --cwd apps/web test:e2e
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: playwright-report
           path: apps/web/playwright-report/
+          if-no-files-found: ignore
           retention-days: 30
 
   web-coverage:
@@ -221,8 +223,8 @@ jobs:
     needs: web-e2e
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: "24"
       - uses: oven-sh/setup-bun@v2
@@ -230,7 +232,7 @@ jobs:
           bun-version: latest
       - run: bun install --frozen-lockfile
       - run: bun run --cwd apps/web coverage:components
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: web-coverage-report

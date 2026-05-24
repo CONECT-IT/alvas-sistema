@@ -18,7 +18,7 @@ const dashboardVersion = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_N
 export default {
   testRunner: "command",
   commandRunner: {
-    command: "bun test",
+    command: "bun --cwd apps/api test",
   },
   mutate: [
     "apps/api/src/lib/{auth,usuarios,ventas,integraciones,reportes,propiedades}/domain/**/*.ts",

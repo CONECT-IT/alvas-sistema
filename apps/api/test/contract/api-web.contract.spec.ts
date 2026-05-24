@@ -46,6 +46,33 @@ type PropiedadContract = Readonly<{
   asesorResponsableId?: string;
 }>;
 
+type CaptacionProcesadaContract = Readonly<{
+  idLead: string;
+  idPropiedadPreliminar?: string;
+}>;
+
+type ReporteGeneralContract = Readonly<{
+  fechaGeneracion: string;
+  metricas: Readonly<{
+    conversionRate: number;
+    leadsNuevosHoy: number;
+    citasPendientes: number;
+  }>;
+  actividadReciente: ReadonlyArray<{
+    idLead: string;
+    evento: string;
+    descripcion: string;
+    fecha: string;
+  }>;
+}>;
+
+type EstadisticasGlobalesContract = Readonly<{
+  totalLeads: number;
+  totalClientes: number;
+  leadsPorEstado: Readonly<Record<string, number>>;
+  asesoresActivos: number;
+}>;
+
 function esLeadPipelineContract(value: unknown): value is LeadPipelineContract {
   if (!value || typeof value !== "object") return false;
   const lead = value as Record<string, unknown>;
@@ -110,6 +137,62 @@ function esPropiedadContract(value: unknown): value is PropiedadContract {
     ["BORRADOR", "DISPONIBLE", "RESERVADA", "VENDIDA", "ARCHIVADA"].includes(
       String(propiedad.estado),
     )
+  );
+}
+
+function esCaptacionProcesadaContract(value: unknown): value is CaptacionProcesadaContract {
+  if (!value || typeof value !== "object") return false;
+  const captacion = value as Record<string, unknown>;
+  return (
+    Object.keys(captacion).every((key) => ["idLead", "idPropiedadPreliminar"].includes(key)) &&
+    typeof captacion.idLead === "string" &&
+    (captacion.idPropiedadPreliminar === undefined ||
+      typeof captacion.idPropiedadPreliminar === "string")
+  );
+}
+
+function esReporteGeneralContract(value: unknown): value is ReporteGeneralContract {
+  if (!value || typeof value !== "object") return false;
+  const reporte = value as Record<string, unknown>;
+  const metricas = reporte.metricas as Record<string, unknown> | undefined;
+  return (
+    Object.keys(reporte).every((key) =>
+      ["fechaGeneracion", "metricas", "actividadReciente"].includes(key),
+    ) &&
+    typeof reporte.fechaGeneracion === "string" &&
+    !Number.isNaN(Date.parse(reporte.fechaGeneracion)) &&
+    !!metricas &&
+    typeof metricas.conversionRate === "number" &&
+    typeof metricas.leadsNuevosHoy === "number" &&
+    typeof metricas.citasPendientes === "number" &&
+    Array.isArray(reporte.actividadReciente) &&
+    reporte.actividadReciente.every((item) => {
+      if (!item || typeof item !== "object") return false;
+      const actividad = item as Record<string, unknown>;
+      return (
+        typeof actividad.idLead === "string" &&
+        typeof actividad.evento === "string" &&
+        typeof actividad.descripcion === "string" &&
+        typeof actividad.fecha === "string" &&
+        !Number.isNaN(Date.parse(actividad.fecha))
+      );
+    })
+  );
+}
+
+function esEstadisticasGlobalesContract(value: unknown): value is EstadisticasGlobalesContract {
+  if (!value || typeof value !== "object") return false;
+  const estadisticas = value as Record<string, unknown>;
+  return (
+    Object.keys(estadisticas).every((key) =>
+      ["totalLeads", "totalClientes", "leadsPorEstado", "asesoresActivos"].includes(key),
+    ) &&
+    typeof estadisticas.totalLeads === "number" &&
+    typeof estadisticas.totalClientes === "number" &&
+    !!estadisticas.leadsPorEstado &&
+    typeof estadisticas.leadsPorEstado === "object" &&
+    Object.values(estadisticas.leadsPorEstado).every((valor) => typeof valor === "number") &&
+    typeof estadisticas.asesoresActivos === "number"
   );
 }
 
@@ -223,5 +306,59 @@ describe("contract / api-web", () => {
     };
 
     expect(esPropiedadContract(payload)).toBe(false);
+  });
+
+  it("mantiene estable el contrato serializado de captacion procesada", () => {
+    const payload = {
+      idLead: "lead-captacion-1",
+      idPropiedadPreliminar: "propiedad-preliminar-1",
+    };
+
+    expect(esCaptacionProcesadaContract(payload)).toBe(true);
+  });
+
+  it("rechaza captacion procesada si expone datos crudos de contacto", () => {
+    const payload = {
+      idLead: "lead-captacion-1",
+      telefono: "+59170000001",
+      email: "ana@example.com",
+    };
+
+    expect(esCaptacionProcesadaContract(payload)).toBe(false);
+  });
+
+  it("mantiene estable el contrato serializado de reporte general", () => {
+    const payload = {
+      fechaGeneracion: "2026-05-23T10:00:00.000Z",
+      metricas: {
+        conversionRate: 35,
+        leadsNuevosHoy: 4,
+        citasPendientes: 2,
+      },
+      actividadReciente: [
+        {
+          idLead: "lead-1",
+          evento: "CITA_AGENDADA",
+          descripcion: "Cita comercial agendada",
+          fecha: "2026-05-23T09:00:00.000Z",
+        },
+      ],
+    };
+
+    expect(esReporteGeneralContract(payload)).toBe(true);
+  });
+
+  it("mantiene estable el contrato serializado de estadisticas globales", () => {
+    const payload = {
+      totalLeads: 12,
+      totalClientes: 5,
+      leadsPorEstado: {
+        NUEVO: 4,
+        CONVERTIDO: 5,
+      },
+      asesoresActivos: 3,
+    };
+
+    expect(esEstadisticasGlobalesContract(payload)).toBe(true);
   });
 });
