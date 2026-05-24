@@ -77,7 +77,9 @@
 			aria-label="Columna {column}"
 		>
 			<div class="flex items-center justify-between px-2">
-				<h3 class="text-xs font-bold tracking-widest text-text-muted uppercase">{presentarEstadoLead(column).label}</h3>
+				<h3 class="text-xs font-bold tracking-widest text-text-muted uppercase">
+					{presentarEstadoLead(column).label}
+				</h3>
 				<span
 					class="rounded-full bg-surface-muted px-2 py-0.5 text-[10px] font-bold text-text-muted"
 				>
@@ -162,7 +164,9 @@
 						<button onclick={() => onLeadClick?.(lead)} class="w-full text-left">
 							<div class="flex items-start justify-between gap-2">
 								<p class="font-display text-sm font-bold text-text-main">{lead.nombre}</p>
-								<Badge tone={presentarTipoVenta(lead.tipo).tone}>{presentarTipoVenta(lead.tipo).label}</Badge>
+								<Badge tone={presentarTipoVenta(lead.tipo).tone}
+									>{presentarTipoVenta(lead.tipo).label}</Badge
+								>
 							</div>
 
 							<div class="mt-3 flex flex-col gap-2">

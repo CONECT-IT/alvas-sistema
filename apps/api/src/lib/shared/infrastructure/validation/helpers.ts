@@ -3,10 +3,12 @@ import { z } from "zod";
 export function parseBody<T>(schema: z.ZodSchema<T>, raw: unknown): T {
   const result = schema.safeParse(raw);
   if (!result.success) {
-    throw new ValidationError(result.error.issues.map((i) => ({
-      path: i.path.join("."),
-      message: i.message,
-    })));
+    throw new ValidationError(
+      result.error.issues.map((i) => ({
+        path: i.path.join("."),
+        message: i.message,
+      })),
+    );
   }
   return result.data;
 }
@@ -34,10 +36,13 @@ export function formatearValidacion(error: ValidationError) {
   };
 }
 
-export const fechaStringSchema = z.string().min(1, "Fecha requerida").transform((s) => {
-  const d = new Date(s);
-  if (Number.isNaN(d.getTime())) throw new Error("Fecha inválida");
-  return d;
-});
+export const fechaStringSchema = z
+  .string()
+  .min(1, "Fecha requerida")
+  .transform((s) => {
+    const d = new Date(s);
+    if (Number.isNaN(d.getTime())) throw new Error("Fecha inválida");
+    return d;
+  });
 
 export const uuidSchema = z.string().uuid();

@@ -10,10 +10,12 @@
 	let { propiedades }: Props = $props();
 
 	const disponibles = $derived(
-		propiedades.filter((propiedad) => presentarEstadoPropiedad(propiedad.estado).tone === 'success').length
+		propiedades.filter((propiedad) => presentarEstadoPropiedad(propiedad.estado).tone === 'success')
+			.length
 	);
 	const reservadas = $derived(
-		propiedades.filter((propiedad) => presentarEstadoPropiedad(propiedad.estado).tone === 'brand').length
+		propiedades.filter((propiedad) => presentarEstadoPropiedad(propiedad.estado).tone === 'brand')
+			.length
 	);
 	const valorInventario = $derived(
 		propiedades.reduce((total, propiedad) => total + propiedad.precio, 0)

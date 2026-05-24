@@ -181,10 +181,7 @@
 								<form class="grid gap-4" onsubmit={guardarCambios}>
 									<label class="label-field">
 										Usuario de acceso
-										<input
-											bind:value={editUsername}
-											class="input-field"
-										/>
+										<input bind:value={editUsername} class="input-field" />
 									</label>
 									<label class="label-field">
 										Nueva contraseña

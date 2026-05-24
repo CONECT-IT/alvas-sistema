@@ -4,25 +4,36 @@ import { type IVentasRepository } from "../../domain/ports/IVentasRepository";
 import { type IConsultaNombreAsesor } from "../../domain/ports/IConsultaNombreAsesor";
 import { ErrorDeDominio } from "../../../shared/domain";
 import { idUsuarioRef } from "../../../shared/domain/value-objects/IdUsuarioRef";
-import { type IListarPipeline, type ListarPipelineInput, type ListarPipelineOutput } from "../ports/in/IListarPipeline";
+import {
+  type IListarPipeline,
+  type ListarPipelineInput,
+  type ListarPipelineOutput,
+} from "../ports/in/IListarPipeline";
 
 export class ListarPipelineUseCase
-  implements CasoDeUso<ListarPipelineInput, Resultado<ListarPipelineOutput, ErrorDeDominio>>, IListarPipeline
+  implements
+    CasoDeUso<ListarPipelineInput, Resultado<ListarPipelineOutput, ErrorDeDominio>>,
+    IListarPipeline
 {
   constructor(
     private readonly ventasRepository: IVentasRepository,
     private readonly consultaNombreAsesor: IConsultaNombreAsesor,
   ) {}
 
-  async ejecutar(input: ListarPipelineInput): Promise<Resultado<ListarPipelineOutput, ErrorDeDominio>> {
+  async ejecutar(
+    input: ListarPipelineInput,
+  ): Promise<Resultado<ListarPipelineOutput, ErrorDeDominio>> {
     try {
-      const leads = input.rolEjecutor === "ADMIN"
-        ? await this.ventasRepository.listarLeads()
-        : await this.ventasRepository.listarLeadsPorAsesor(idUsuarioRef(input.idUsuarioEjecutor));
+      const leads =
+        input.rolEjecutor === "ADMIN"
+          ? await this.ventasRepository.listarLeads()
+          : await this.ventasRepository.listarLeadsPorAsesor(idUsuarioRef(input.idUsuarioEjecutor));
 
       const data = await Promise.all(
         leads.map(async (lead) => {
-          const nombreAsesor = await this.consultaNombreAsesor.obtenerNombre(lead.idAsesor as string);
+          const nombreAsesor = await this.consultaNombreAsesor.obtenerNombre(
+            lead.idAsesor as string,
+          );
 
           return {
             id: lead.id as string,

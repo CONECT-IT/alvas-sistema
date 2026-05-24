@@ -1,11 +1,11 @@
-export {
-	presentarEstadoLead,
-	ESTADOS_LEAD,
-	opcionesEstadoLead
-} from './estadoLead';
+export { presentarEstadoLead, ESTADOS_LEAD, opcionesEstadoLead } from './estadoLead';
 export type { PresentacionLead } from './estadoLead';
 
-export { presentarEstadoPropiedad, ESTADOS_PROPIEDAD, opcionesEstadoPropiedad } from './estadoPropiedad';
+export {
+	presentarEstadoPropiedad,
+	ESTADOS_PROPIEDAD,
+	opcionesEstadoPropiedad
+} from './estadoPropiedad';
 export type { PresentacionPropiedad } from './estadoPropiedad';
 
 export { presentarEstadoCita, opcionesEstadoCita } from './estadoCita';

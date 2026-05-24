@@ -160,25 +160,15 @@
 			<form class="grid gap-4" onsubmit={guardarCambios}>
 				<label class="label-field">
 					Nombre
-					<input
-						bind:value={editNombre}
-						class="input-field"
-					/>
+					<input bind:value={editNombre} class="input-field" />
 				</label>
 				<label class="label-field">
 					Email
-					<input
-						bind:value={editEmail}
-						type="email"
-						class="input-field"
-					/>
+					<input bind:value={editEmail} type="email" class="input-field" />
 				</label>
 				<label class="label-field">
 					Teléfono
-					<input
-						bind:value={editTelefono}
-						class="input-field"
-					/>
+					<input bind:value={editTelefono} class="input-field" />
 				</label>
 				{#if saveError}
 					<p class="error-alert">

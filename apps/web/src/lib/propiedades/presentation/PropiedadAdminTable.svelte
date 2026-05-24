@@ -50,7 +50,9 @@
 						{currencyFormatter.format(propiedad.precio)}
 					</td>
 					<td class="py-4 pr-6">
-						<Badge tone={presentarEstadoPropiedad(propiedad.estado).tone}>{presentarEstadoPropiedad(propiedad.estado).label}</Badge>
+						<Badge tone={presentarEstadoPropiedad(propiedad.estado).tone}
+							>{presentarEstadoPropiedad(propiedad.estado).label}</Badge
+						>
 					</td>
 					<td class="py-4 text-text-muted">
 						{propiedad.asesorResponsableId ?? 'Sin asignar'}

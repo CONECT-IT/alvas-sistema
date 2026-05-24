@@ -15,7 +15,6 @@
 	function formatearHora(iso: string): string {
 		return new Date(iso).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
 	}
-
 </script>
 
 <svelte:head>
@@ -34,9 +33,7 @@
 
 	<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
 		<Card>
-			<span class="stat-label"
-				>Mis Leads Activos</span
-			>
+			<span class="stat-label">Mis Leads Activos</span>
 			<h2 class="mt-1 font-display text-3xl font-bold text-text-main">{leadsActivos}</h2>
 			{#if leadsActivos > 0}
 				<div class="mt-2 flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
@@ -46,9 +43,7 @@
 		</Card>
 
 		<Card>
-			<span class="stat-label"
-				>Citas Pendientes</span
-			>
+			<span class="stat-label">Citas Pendientes</span>
 			<h2 class="mt-1 font-display text-3xl font-bold text-text-main">{citasPendientes}</h2>
 			{#if citasHoy.length > 0}
 				<div class="mt-2 flex items-center gap-1.5 text-xs font-semibold text-primary">
@@ -63,9 +58,7 @@
 		</Card>
 
 		<Card>
-			<span class="stat-label"
-				>Propiedades en Cartera</span
-			>
+			<span class="stat-label">Propiedades en Cartera</span>
 			<h2 class="mt-1 font-display text-3xl font-bold text-text-main">{portafolio}</h2>
 			{#if portafolio > 0}
 				<div class="mt-2 flex items-center gap-1.5 text-xs text-text-muted">

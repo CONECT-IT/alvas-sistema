@@ -1,11 +1,6 @@
 import { ErrorDeValidacion } from "../../../shared/domain";
 
-export const ESTADOS_CONTRATO = [
-  "BORRADOR",
-  "VIGENTE",
-  "FINALIZADO",
-  "CANCELADO",
-] as const;
+export const ESTADOS_CONTRATO = ["BORRADOR", "VIGENTE", "FINALIZADO", "CANCELADO"] as const;
 
 export type ValorEstadoContrato = (typeof ESTADOS_CONTRATO)[number];
 

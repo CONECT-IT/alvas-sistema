@@ -194,7 +194,7 @@
 	{#if panelMode === 'crear'}
 		<div class="space-y-4">
 			{#if accionError}
-				<div class="border-danger/20 bg-danger/10 text-danger rounded-lg border p-3 text-sm">
+				<div class="rounded-lg border border-danger/20 bg-danger/10 p-3 text-sm text-danger">
 					{accionError}
 				</div>
 			{/if}
@@ -203,9 +203,9 @@
 			<input class="input" placeholder="Email" type="email" bind:value={formLead.email} />
 			<input class="input" placeholder="Telefono" bind:value={formLead.telefono} />
 			<select class="input" bind:value={formLead.tipo}>
-{#each opcionesTipoVenta() as opt (opt.value)}
-				<option value={opt.value}>{opt.label}</option>
-			{/each}
+				{#each opcionesTipoVenta() as opt (opt.value)}
+					<option value={opt.value}>{opt.label}</option>
+				{/each}
 			</select>
 
 			{#if formLead.tipo === 'COMPRA'}

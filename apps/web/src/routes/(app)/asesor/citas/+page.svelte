@@ -215,10 +215,7 @@
 		<form class="grid gap-4" onsubmit={crearCita}>
 			<label class="label-field">
 				Lead
-				<select
-					bind:value={idLead}
-					class="input-field"
-				>
+				<select bind:value={idLead} class="input-field">
 					<option value="">Selecciona un lead</option>
 					{#each leads as lead (lead.id)}
 						<option value={lead.id}>{lead.nombre}</option>
@@ -228,40 +225,22 @@
 
 			<label class="label-field">
 				Propiedad (opcional)
-				<input
-					bind:value={idPropiedad}
-					class="input-field"
-					placeholder="ID de propiedad"
-				/>
+				<input bind:value={idPropiedad} class="input-field" placeholder="ID de propiedad" />
 			</label>
 
 			<label class="label-field">
 				Fecha y hora
-				<input
-					bind:value={fechaInicio}
-					type="datetime-local"
-					class="input-field"
-				/>
+				<input bind:value={fechaInicio} type="datetime-local" class="input-field" />
 			</label>
 
 			<label class="label-field">
 				Duración (minutos)
-				<input
-					bind:value={duracionMinutos}
-					type="number"
-					min="15"
-					step="15"
-					class="input-field"
-				/>
+				<input bind:value={duracionMinutos} type="number" min="15" step="15" class="input-field" />
 			</label>
 
 			<label class="label-field">
 				Observación
-				<textarea
-					bind:value={observacion}
-					rows="3"
-					class="resize-none input-field"
-				></textarea>
+				<textarea bind:value={observacion} rows="3" class="input-field resize-none"></textarea>
 			</label>
 
 			{#if createError}
@@ -284,11 +263,7 @@
 		<form class="grid gap-4" onsubmit={editarCita}>
 			<label class="label-field">
 				Fecha y hora
-				<input
-					bind:value={editFechaInicio}
-					type="datetime-local"
-					class="input-field"
-				/>
+				<input bind:value={editFechaInicio} type="datetime-local" class="input-field" />
 			</label>
 
 			<label class="label-field">
@@ -305,10 +280,7 @@
 
 			<label class="label-field">
 				Estado
-				<select
-					bind:value={editEstado}
-					class="input-field"
-				>
+				<select bind:value={editEstado} class="input-field">
 					<option value="">Sin cambio</option>
 					{#each opcionesEstadoCita() as opt (opt.value)}
 						<option value={opt.value}>{opt.label}</option>
@@ -321,7 +293,7 @@
 				<textarea
 					bind:value={editObservacion}
 					rows="3"
-					class="resize-none input-field"
+					class="input-field resize-none"
 					placeholder="Motivo de reprogramación, cierre de visita o cancelación."
 				></textarea>
 			</label>

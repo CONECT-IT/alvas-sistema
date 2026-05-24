@@ -97,20 +97,12 @@
 		<form class="grid gap-4" onsubmit={crearCliente}>
 			<label class="label-field">
 				Nombre
-				<input
-					bind:value={nombre}
-					class="input-field"
-					placeholder="Nombre del cliente"
-				/>
+				<input bind:value={nombre} class="input-field" placeholder="Nombre del cliente" />
 			</label>
 
 			<label class="label-field">
 				Teléfono
-				<input
-					bind:value={telefono}
-					class="input-field"
-					placeholder="Número de contacto"
-				/>
+				<input bind:value={telefono} class="input-field" placeholder="Número de contacto" />
 			</label>
 
 			<label class="label-field">

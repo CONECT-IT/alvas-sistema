@@ -70,9 +70,7 @@
 <div class="flex flex-col gap-6">
 	<div class="flex flex-wrap items-start justify-between gap-4">
 		<div>
-			<p class="section-label">
-				Captaciones WhatsApp
-			</p>
+			<p class="section-label">Captaciones WhatsApp</p>
 			<h1 class="page-heading">Bandeja de revisión</h1>
 			<p class="mt-2 max-w-2xl text-sm leading-relaxed text-text-muted">
 				Prospectos captados desde WhatsApp antes de convertirse en leads operativos.
@@ -121,7 +119,9 @@
 						<div class="min-w-0 flex-1">
 							<div class="flex flex-wrap items-center gap-2">
 								<h2 class="font-display text-xl font-bold text-text-main">{captacion.nombre}</h2>
-								<Badge tone={presentarEstadoCaptacion(captacion.estado).tone}>{presentarEstadoCaptacion(captacion.estado).label}</Badge>
+								<Badge tone={presentarEstadoCaptacion(captacion.estado).tone}
+									>{presentarEstadoCaptacion(captacion.estado).label}</Badge
+								>
 								<Badge tone={presentarTipoVenta(captacion.tipo).tone}>
 									{presentarTipoVenta(captacion.tipo).label}
 								</Badge>

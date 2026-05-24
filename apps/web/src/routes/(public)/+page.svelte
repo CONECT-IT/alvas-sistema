@@ -155,9 +155,7 @@
 <main class="flex-1 bg-bg-base">
 	<section class="mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-7xl items-center px-6 py-10">
 		<div class="max-w-3xl">
-			<p class="mb-4 section-label">
-				Terrenos y proyectos en Tacna
-			</p>
+			<p class="section-label mb-4">Terrenos y proyectos en Tacna</p>
 			<h1 class="font-display text-4xl leading-tight font-bold text-text-main sm:text-6xl">
 				Encuentra un terreno para construir, vivir o invertir con ALVAS.
 			</h1>
@@ -176,12 +174,8 @@
 		<div class="mx-auto max-w-7xl px-6">
 			<div class="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
 				<div>
-					<p class="section-label">
-						Proyectos activos
-					</p>
-					<h2 class="page-heading">
-						Propiedades disponibles para visitar
-					</h2>
+					<p class="section-label">Proyectos activos</p>
+					<h2 class="page-heading">Propiedades disponibles para visitar</h2>
 				</div>
 			</div>
 
@@ -221,12 +215,8 @@
 	<section id="asesores" class="mx-auto max-w-7xl px-6 py-16">
 		<div class="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
 			<div>
-				<p class="section-label">
-					Asesoría personalizada
-				</p>
-				<h2 class="page-heading">
-					Conversa con alguien que conoce la zona
-				</h2>
+				<p class="section-label">Asesoría personalizada</p>
+				<h2 class="page-heading">Conversa con alguien que conoce la zona</h2>
 				<p class="mt-4 leading-relaxed text-text-muted">
 					Nuestro equipo te orienta sobre disponibilidad, precios, visitas y condiciones de
 					separación según el proyecto que te interese.
@@ -255,12 +245,8 @@
 	<section id="contacto" class="border-t border-border-light bg-bg-card py-16">
 		<div class="mx-auto grid max-w-7xl gap-8 px-6 md:grid-cols-[1fr_0.9fr] md:items-center">
 			<div>
-				<p class="section-label">
-					Compra o venta asistida
-				</p>
-				<h2 class="page-heading">
-					¿Quieres vender una propiedad con ALVAS?
-				</h2>
+				<p class="section-label">Compra o venta asistida</p>
+				<h2 class="page-heading">¿Quieres vender una propiedad con ALVAS?</h2>
 				<p class="mt-4 max-w-2xl leading-relaxed text-text-muted">
 					Registra tus datos y una descripción inicial. La propiedad entra como captación
 					preliminar, no se publica ni se ofrece a compradores hasta que el equipo la valide.
@@ -271,11 +257,7 @@
 					<div class="grid gap-3 sm:grid-cols-2">
 						<label class="label-field">
 							Nombre
-							<input
-								bind:value={nombreVendedor}
-								class="input-field"
-								placeholder="Tu nombre"
-							/>
+							<input bind:value={nombreVendedor} class="input-field" placeholder="Tu nombre" />
 						</label>
 						<label class="label-field">
 							Teléfono
@@ -311,7 +293,7 @@
 						<textarea
 							bind:value={descripcionPropiedad}
 							rows="4"
-							class="resize-none input-field"
+							class="input-field resize-none"
 							placeholder="Zona, metraje aproximado, referencias y condiciones conocidas."
 						></textarea>
 					</label>

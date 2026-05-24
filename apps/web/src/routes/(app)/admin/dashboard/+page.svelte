@@ -63,8 +63,7 @@
 
 	<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
 		<Card>
-			<span class="stat-label">Propiedades</span
-			>
+			<span class="stat-label">Propiedades</span>
 			<h2 class="mt-1 font-display text-3xl font-bold text-text-main">{totalPropiedades}</h2>
 			<div class="mt-2 flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
 				{disponibles} disponibles
@@ -72,9 +71,7 @@
 		</Card>
 
 		<Card>
-			<span class="stat-label"
-				>Leads Totales</span
-			>
+			<span class="stat-label">Leads Totales</span>
 			<h2 class="mt-1 font-display text-3xl font-bold text-text-main">
 				{estadisticas?.totalLeads ?? '—'}
 			</h2>
@@ -84,9 +81,7 @@
 		</Card>
 
 		<Card>
-			<span class="stat-label"
-				>Tasa de Conversión</span
-			>
+			<span class="stat-label">Tasa de Conversión</span>
 			<h2 class="mt-1 font-display text-3xl font-bold text-text-main">
 				{reporte ? `${(reporte.metricas.conversionRate * 100).toFixed(1)}%` : '—'}
 			</h2>
@@ -96,9 +91,7 @@
 		</Card>
 
 		<Card>
-			<span class="stat-label"
-				>Asesores Activos</span
-			>
+			<span class="stat-label">Asesores Activos</span>
 			<h2 class="mt-1 font-display text-3xl font-bold text-text-main">
 				{estadisticas?.asesoresActivos ?? '—'}
 			</h2>

@@ -174,7 +174,7 @@
 <SidePanel isOpen={panelCrear} onClose={cerrarCrear} title="Nuevo lead">
 	<div class="space-y-4">
 		{#if accionError}
-			<div class="border-danger/20 bg-danger/10 text-danger rounded-lg border p-3 text-sm">
+			<div class="rounded-lg border border-danger/20 bg-danger/10 p-3 text-sm text-danger">
 				{accionError}
 			</div>
 		{/if}

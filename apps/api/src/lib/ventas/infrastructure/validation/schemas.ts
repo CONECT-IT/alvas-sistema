@@ -50,7 +50,11 @@ export const ActualizarCitaBodySchema = z.object({
 });
 
 export const CrearContratoSchema = z.object({
-  id: z.string().min(1).optional().default(() => crypto.randomUUID()),
+  id: z
+    .string()
+    .min(1)
+    .optional()
+    .default(() => crypto.randomUUID()),
   idLead: z.string().min(1, "idLead requerido"),
   idPropiedad: z.string().min(1, "idPropiedad requerido"),
   fechaInicio: fechaStringSchema.optional().default(() => new Date()),

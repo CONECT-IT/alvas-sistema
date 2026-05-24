@@ -18,7 +18,13 @@
 	import type { Propiedad } from '$lib/propiedades/domain/models/Propiedad';
 	import { obtenerPropiedad } from '$lib/propiedades/application/use-cases/obtenerPropiedad';
 	import { propiedadRepository } from '$lib/propiedades/infrastructure/propiedadRepository';
-	import { presentarEstadoLead, presentarTipoVenta, presentarEstadoCita, presentarEstadoPropiedad, opcionesEstadoLead } from '$lib/shared/presentation';
+	import {
+		presentarEstadoLead,
+		presentarTipoVenta,
+		presentarEstadoCita,
+		presentarEstadoPropiedad,
+		opcionesEstadoLead
+	} from '$lib/shared/presentation';
 
 	interface Props {
 		leadId: string;
@@ -241,8 +247,12 @@
 			<div>
 				<div class="flex flex-wrap items-center gap-3">
 					<h1 class="font-display text-3xl font-bold text-text-main">{lead.nombre}</h1>
-					<Badge tone={presentarEstadoLead(lead.estado).tone}>{presentarEstadoLead(lead.estado).label}</Badge>
-					<Badge tone={presentarTipoVenta(lead.tipo).tone}>{presentarTipoVenta(lead.tipo).label}</Badge>
+					<Badge tone={presentarEstadoLead(lead.estado).tone}
+						>{presentarEstadoLead(lead.estado).label}</Badge
+					>
+					<Badge tone={presentarTipoVenta(lead.tipo).tone}
+						>{presentarTipoVenta(lead.tipo).label}</Badge
+					>
 				</div>
 				<p class="mt-2 text-sm text-text-muted">
 					ID: {lead.id} &middot; Asesor: {lead.idAsesor}
@@ -343,7 +353,10 @@
 								<div class="mt-1 flex flex-wrap items-center gap-2">
 									<p class="font-mono text-xs text-text-muted">{idProp}</p>
 									{#if propiedadesPorId.get(idProp)?.estado}
-										<Badge tone={presentarEstadoPropiedad(propiedadesPorId.get(idProp)?.estado ?? '').tone}>
+										<Badge
+											tone={presentarEstadoPropiedad(propiedadesPorId.get(idProp)?.estado ?? '')
+												.tone}
+										>
 											{presentarEstadoPropiedad(propiedadesPorId.get(idProp)?.estado ?? '').label}
 										</Badge>
 									{/if}

@@ -132,27 +132,17 @@
 			<form class="grid gap-4" onsubmit={manejarActualizar}>
 				<label class="label-field">
 					Título
-					<input
-						bind:value={titulo}
-						class="input-field"
-					/>
+					<input bind:value={titulo} class="input-field" />
 				</label>
 
 				<label class="label-field">
 					Precio (USD)
-					<input
-						type="number"
-						bind:value={precio}
-						class="input-field"
-					/>
+					<input type="number" bind:value={precio} class="input-field" />
 				</label>
 
 				<label class="label-field">
 					Estado
-					<select
-						bind:value={estado}
-						class="input-field"
-					>
+					<select bind:value={estado} class="input-field">
 						{#each opcionesEstadoPropiedad() as opt (opt.value)}
 							<option value={opt.value}>{opt.label}</option>
 						{/each}
@@ -161,10 +151,7 @@
 
 				<label class="label-field">
 					Descripción
-					<textarea
-						bind:value={descripcion}
-						class="min-h-[120px] input-field"
-					></textarea>
+					<textarea bind:value={descripcion} class="input-field min-h-[120px]"></textarea>
 				</label>
 
 				{#if updateError}
@@ -189,7 +176,11 @@
 				<dd class="font-mono text-text-main">{propiedad.id}</dd>
 
 				<dt class="font-semibold text-text-muted">Estado</dt>
-				<dd><Badge tone={presentarEstadoPropiedad(propiedad.estado).tone}>{presentarEstadoPropiedad(propiedad.estado).label}</Badge></dd>
+				<dd>
+					<Badge tone={presentarEstadoPropiedad(propiedad.estado).tone}
+						>{presentarEstadoPropiedad(propiedad.estado).label}</Badge
+					>
+				</dd>
 
 				<dt class="font-semibold text-text-muted">Origen</dt>
 				<dd class="text-text-main">{propiedad.origen}</dd>

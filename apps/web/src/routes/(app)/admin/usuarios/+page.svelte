@@ -165,28 +165,17 @@
 		<form class="grid gap-4" onsubmit={registrarUsuario}>
 			<label class="label-field">
 				Usuario de acceso
-				<input
-					bind:value={username}
-					class="input-field"
-					placeholder="asesor.surco"
-				/>
+				<input bind:value={username} class="input-field" placeholder="asesor.surco" />
 			</label>
 
 			<label class="label-field">
 				Nombre
-				<input
-					bind:value={nombre}
-					class="input-field"
-					placeholder="Nombre completo"
-				/>
+				<input bind:value={nombre} class="input-field" placeholder="Nombre completo" />
 			</label>
 
 			<label class="label-field">
 				Rol
-				<select
-					bind:value={rol}
-					class="input-field"
-				>
+				<select bind:value={rol} class="input-field">
 					<option value="ASESOR">Asesor</option>
 					<option value="ADMIN">Administrador</option>
 				</select>
@@ -222,28 +211,17 @@
 		<form class="grid gap-4" onsubmit={guardarCambiosUsuario}>
 			<label class="label-field">
 				Usuario de acceso
-				<input
-					bind:value={editUsername}
-					class="input-field"
-					placeholder="Usuario de acceso"
-				/>
+				<input bind:value={editUsername} class="input-field" placeholder="Usuario de acceso" />
 			</label>
 
 			<label class="label-field">
 				Nombre visible
-				<input
-					bind:value={editNombre}
-					class="input-field"
-					placeholder="Nombre completo"
-				/>
+				<input bind:value={editNombre} class="input-field" placeholder="Nombre completo" />
 			</label>
 
 			<label class="label-field">
 				Rol
-				<select
-					bind:value={editRol}
-					class="input-field"
-				>
+				<select bind:value={editRol} class="input-field">
 					<option value="">Sin cambio</option>
 					<option value="ASESOR">Asesor</option>
 					<option value="ADMIN">Administrador</option>

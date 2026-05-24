@@ -150,11 +150,7 @@
 		<form class="grid gap-4" onsubmit={registrarPropiedad}>
 			<label class="label-field">
 				Título
-				<input
-					bind:value={titulo}
-					class="input-field"
-					placeholder="Terreno en zona residencial"
-				/>
+				<input bind:value={titulo} class="input-field" placeholder="Terreno en zona residencial" />
 			</label>
 
 			<label class="label-field">
@@ -174,17 +170,14 @@
 				<textarea
 					bind:value={descripcion}
 					rows="4"
-					class="resize-none input-field"
+					class="input-field resize-none"
 					placeholder="Ubicación, metraje, accesos y observaciones comerciales."
 				></textarea>
 			</label>
 
 			<label class="label-field">
 				Estado inicial
-				<select
-					bind:value={estado}
-					class="input-field"
-				>
+				<select bind:value={estado} class="input-field">
 					{#each estados as item (item)}
 						<option value={item}>{item}</option>
 					{/each}
@@ -257,13 +250,13 @@
 				</div>
 
 				{#if reviewSuccess}
-					<p class="mb-4 success-alert">
+					<p class="success-alert mb-4">
 						{reviewSuccess}
 					</p>
 				{/if}
 
 				{#if reviewError}
-					<p class="mb-4 error-alert">
+					<p class="error-alert mb-4">
 						{reviewError}
 					</p>
 				{/if}
