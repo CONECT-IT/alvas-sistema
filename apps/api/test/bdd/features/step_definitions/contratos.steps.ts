@@ -230,7 +230,7 @@ Then(
   async function (estado: string) {
     assert.strictEqual(resultadoFirmar.esExito, true);
     const contrato = await contratoRepository.buscarPorId(idContrato("cont-001"));
-    assert.strictEqual(contrato?.estado, estado);
+    assert.strictEqual(contrato?.estado.valor, estado);
     assert.strictEqual(contrato?.idCliente, idCliente("cliente-creado-001"));
     const cliente = await ventasRepository.obtenerClientePorId(idCliente("cliente-creado-001"));
     assert.notStrictEqual(cliente, null);
@@ -240,5 +240,5 @@ Then(
 Then("el contrato pasa a estado {string}", async function (estado: string) {
   assert.strictEqual(resultadoCancelar.esExito, true);
   const contrato = await contratoRepository.buscarPorId(idContrato("cont-001"));
-  assert.strictEqual(contrato?.estado, estado);
+  assert.strictEqual(contrato?.estado.valor, estado);
 });
