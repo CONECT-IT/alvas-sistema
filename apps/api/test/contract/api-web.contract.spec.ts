@@ -51,6 +51,22 @@ type CaptacionProcesadaContract = Readonly<{
   idPropiedadPreliminar?: string;
 }>;
 
+type CaptacionPendienteContract = Readonly<{
+  id: string;
+  canal: "WHATSAPP" | "FORMULARIO_WEB" | "LANDING" | "REFERIDO";
+  origen: string;
+  nombre: string;
+  telefono: string;
+  email: string;
+  tipo: "COMPRA" | "VENTA" | "CAPTACION";
+  estado: "PENDIENTE" | "REVISADA" | "DUPLICADA" | "CONVERTIDA" | "RECHAZADA";
+  idPropiedadInteres?: string;
+  metadata?: Readonly<Record<string, string>>;
+  razonDuplicado?: string;
+  creadoEn: string;
+  actualizadoEn: string;
+}>;
+
 type ReporteGeneralContract = Readonly<{
   fechaGeneracion: string;
   metricas: Readonly<{
@@ -148,6 +164,44 @@ function esCaptacionProcesadaContract(value: unknown): value is CaptacionProcesa
     typeof captacion.idLead === "string" &&
     (captacion.idPropiedadPreliminar === undefined ||
       typeof captacion.idPropiedadPreliminar === "string")
+  );
+}
+
+function esCaptacionPendienteContract(value: unknown): value is CaptacionPendienteContract {
+  if (!value || typeof value !== "object") return false;
+  const captacion = value as Record<string, unknown>;
+  const clavesPermitidas = [
+    "id",
+    "canal",
+    "origen",
+    "nombre",
+    "telefono",
+    "email",
+    "tipo",
+    "estado",
+    "idPropiedadInteres",
+    "metadata",
+    "razonDuplicado",
+    "creadoEn",
+    "actualizadoEn",
+  ];
+
+  return (
+    Object.keys(captacion).every((key) => clavesPermitidas.includes(key)) &&
+    typeof captacion.id === "string" &&
+    ["WHATSAPP", "FORMULARIO_WEB", "LANDING", "REFERIDO"].includes(String(captacion.canal)) &&
+    typeof captacion.origen === "string" &&
+    typeof captacion.nombre === "string" &&
+    typeof captacion.telefono === "string" &&
+    typeof captacion.email === "string" &&
+    ["COMPRA", "VENTA", "CAPTACION"].includes(String(captacion.tipo)) &&
+    ["PENDIENTE", "REVISADA", "DUPLICADA", "CONVERTIDA", "RECHAZADA"].includes(
+      String(captacion.estado),
+    ) &&
+    typeof captacion.creadoEn === "string" &&
+    !Number.isNaN(Date.parse(captacion.creadoEn)) &&
+    typeof captacion.actualizadoEn === "string" &&
+    !Number.isNaN(Date.parse(captacion.actualizadoEn))
   );
 }
 
@@ -347,6 +401,25 @@ describe("contract / api-web", () => {
     };
 
     expect(esCaptacionProcesadaContract(payload)).toBe(true);
+  });
+
+  it("mantiene estable el contrato serializado de captacion pendiente de WhatsApp", () => {
+    const payload = {
+      id: "captacion-1",
+      canal: "WHATSAPP",
+      origen: "whatsapp_webhook",
+      nombre: "Carlos Comprador",
+      telefono: "59170000002",
+      email: "59170000002@contacto.whatsapp.local",
+      tipo: "COMPRA",
+      estado: "PENDIENTE",
+      idPropiedadInteres: "propiedad-1",
+      metadata: { canal: "whatsapp" },
+      creadoEn: "2026-05-24T04:00:00.000Z",
+      actualizadoEn: "2026-05-24T04:00:00.000Z",
+    };
+
+    expect(esCaptacionPendienteContract(payload)).toBe(true);
   });
 
   it("rechaza captacion procesada si expone datos crudos de contacto", () => {

@@ -20,3 +20,19 @@ export type CaptacionProcesadaDTO = Readonly<{
   idLead: string;
   idPropiedadPreliminar?: string;
 }>;
+
+export type CaptacionPendienteDTO = Readonly<{
+  id: string;
+  canal: string;
+  origen: string;
+  nombre: string;
+  telefono: string;
+  email: string;
+  tipo: string;
+  estado: "PENDIENTE" | "REVISADA" | "DUPLICADA" | "CONVERTIDA" | "RECHAZADA";
+  idPropiedadInteres?: string;
+  metadata?: Readonly<Record<string, string>>;
+  razonDuplicado?: string;
+  creadoEn: string;
+  actualizadoEn: string;
+}>;

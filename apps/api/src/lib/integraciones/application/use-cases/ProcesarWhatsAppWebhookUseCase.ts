@@ -5,60 +5,39 @@ import {
   type Resultado,
 } from "../../../shared";
 import { ErrorDeDominio } from "../../../shared/domain";
-import { CaptacionWhatsApp } from "../../domain";
-import { type IRegistroLeadCaptacion } from "../../domain/ports/IRegistroLeadCaptacion";
-import { type IRegistroPropiedadCaptacion } from "../../domain/ports/IRegistroPropiedadCaptacion";
-import { type EntradaWhatsAppWebhookDTO, type CaptacionProcesadaDTO } from "../dto/CaptacionDTOs";
+import { type IGeneradorId } from "../../../shared/domain/ports/IGeneradorId";
+import {
+  CaptacionPendiente,
+  CaptacionWhatsApp,
+  type ICaptacionPendienteRepository,
+} from "../../domain";
+import { type CaptacionPendienteDTO, type EntradaWhatsAppWebhookDTO } from "../dto/CaptacionDTOs";
+import { captacionPendienteADTO } from "../mappers";
 import { type IProcesarWhatsAppWebhook } from "../ports/in";
 
 export class ProcesarWhatsAppWebhookUseCase
   implements
-    CasoDeUso<EntradaWhatsAppWebhookDTO, Resultado<CaptacionProcesadaDTO, ErrorDeDominio>>,
+    CasoDeUso<EntradaWhatsAppWebhookDTO, Resultado<CaptacionPendienteDTO, ErrorDeDominio>>,
     IProcesarWhatsAppWebhook
 {
   constructor(
-    private readonly registroLead: IRegistroLeadCaptacion,
-    private readonly registroPropiedad?: IRegistroPropiedadCaptacion,
+    private readonly captacionRepository: ICaptacionPendienteRepository,
+    private readonly generadorId: IGeneradorId,
   ) {}
 
   async ejecutar(
     input: EntradaWhatsAppWebhookDTO,
-  ): Promise<Resultado<CaptacionProcesadaDTO, ErrorDeDominio>> {
+  ): Promise<Resultado<CaptacionPendienteDTO, ErrorDeDominio>> {
     try {
       const captacion = CaptacionWhatsApp.crear(input).aCaptacion();
-      const resultado = await this.registroLead.registrar({
-        canal: captacion.canal.valor,
-        origen: captacion.origen.valor,
-        nombre: captacion.contacto.nombre,
-        email: captacion.emailDeContacto,
-        telefono: captacion.contacto.telefono,
-        tipo: captacion.tipo,
-        idPropiedadInteres: captacion.idPropiedadInteres,
-        metadata: captacion.metadata,
+      const pendiente = CaptacionPendiente.registrar({
+        id: this.generadorId.generar(),
+        captacion,
       });
 
-      if (!resultado.esExito) {
-        return resultadoFallido(resultado.error);
-      }
+      await this.captacionRepository.guardar(pendiente);
 
-      let idPropiedadPreliminar: string | undefined;
-      if (captacion.tipo === "VENTA" && this.registroPropiedad) {
-        const propiedad = await this.registroPropiedad.registrar({
-          idLeadOrigen: resultado.valor.id,
-          asesorCaptadorId: resultado.valor.idAsesor,
-          nombreContacto: captacion.contacto.nombre,
-          origen: captacion.origen.valor,
-          metadata: captacion.metadata,
-        });
-
-        if (!propiedad.esExito) {
-          return resultadoFallido(propiedad.error);
-        }
-
-        idPropiedadPreliminar = propiedad.valor.id;
-      }
-
-      return resultadoExitoso({ idLead: resultado.valor.id, idPropiedadPreliminar });
+      return resultadoExitoso(captacionPendienteADTO(pendiente));
     } catch (error) {
       if (error instanceof ErrorDeDominio) {
         return resultadoFallido(error);

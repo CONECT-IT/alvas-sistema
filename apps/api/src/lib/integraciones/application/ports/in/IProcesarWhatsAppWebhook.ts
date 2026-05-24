@@ -1,12 +1,12 @@
 import { type Resultado } from "../../../../shared";
 import { type ErrorDeDominio } from "../../../../shared/domain";
 import {
-  type CaptacionProcesadaDTO,
+  type CaptacionPendienteDTO,
   type EntradaWhatsAppWebhookDTO,
 } from "../../dto/CaptacionDTOs";
 
 export interface IProcesarWhatsAppWebhook {
   ejecutar(
     input: EntradaWhatsAppWebhookDTO,
-  ): Promise<Resultado<CaptacionProcesadaDTO, ErrorDeDominio>>;
+  ): Promise<Resultado<CaptacionPendienteDTO, ErrorDeDominio>>;
 }

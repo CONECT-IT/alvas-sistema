@@ -1,7 +1,13 @@
 import { describe, expect, test } from "bun:test";
 
+import { ListarCaptacionesPendientesUseCase } from "../../../src/lib/integraciones/application/use-cases/ListarCaptacionesPendientesUseCase";
 import { ProcesarCaptacionEntranteUseCase } from "../../../src/lib/integraciones/application/use-cases/ProcesarCaptacionEntranteUseCase";
 import { ProcesarWhatsAppWebhookUseCase } from "../../../src/lib/integraciones/application/use-cases/ProcesarWhatsAppWebhookUseCase";
+import { CaptacionPendiente } from "../../../src/lib/integraciones/domain/entities";
+import {
+  type ICaptacionPendienteRepository,
+  Captacion,
+} from "../../../src/lib/integraciones/domain";
 import {
   type IRegistroLeadCaptacion,
   type RegistroLeadCaptacionInput,
@@ -12,6 +18,7 @@ import {
 } from "../../../src/lib/integraciones/domain/ports/IRegistroPropiedadCaptacion";
 import { resultadoExitoso, resultadoFallido } from "../../../src/lib/shared";
 import { ErrorDeDominio } from "../../../src/lib/shared/domain";
+import { type IGeneradorId } from "../../../src/lib/shared/domain/ports/IGeneradorId";
 
 class FakeRegistroLead implements IRegistroLeadCaptacion {
   readonly entradas: RegistroLeadCaptacionInput[] = [];
@@ -42,6 +49,26 @@ class FakeRegistroPropiedad implements IRegistroPropiedadCaptacion {
     }
 
     return resultadoExitoso({ id: "propiedad-preliminar-001" });
+  }
+}
+
+class GeneradorIdFijo implements IGeneradorId {
+  constructor(private readonly id: string) {}
+
+  generar(): string {
+    return this.id;
+  }
+}
+
+class FakeCaptacionPendienteRepository implements ICaptacionPendienteRepository {
+  readonly captaciones: CaptacionPendiente[] = [];
+
+  async guardar(captacion: CaptacionPendiente): Promise<void> {
+    this.captaciones.push(captacion);
+  }
+
+  async listarPendientes(): Promise<CaptacionPendiente[]> {
+    return this.captaciones.filter((captacion) => captacion.estado.esPendiente());
   }
 }
 
@@ -160,13 +187,12 @@ describe("integraciones / use cases", () => {
     );
   });
 
-  test("ProcesarWhatsAppWebhookUseCase registra webhook y propiedad preliminar", async () => {
-    const registroLead = new FakeRegistroLead();
-    const registroPropiedad = new FakeRegistroPropiedad();
+  test("ProcesarWhatsAppWebhookUseCase registra captacion pendiente sin crear lead directo", async () => {
+    const captacionRepository = new FakeCaptacionPendienteRepository();
 
     const resultado = await new ProcesarWhatsAppWebhookUseCase(
-      registroLead,
-      registroPropiedad,
+      captacionRepository,
+      new GeneradorIdFijo("captacion-001"),
     ).ejecutar({
       wa_id: " 573001112233 ",
       wa_name: " Laura ",
@@ -175,11 +201,8 @@ describe("integraciones / use cases", () => {
     });
 
     expect(resultado.esExito).toBe(true);
-    expect(resultado.esExito ? resultado.valor : undefined).toEqual({
-      idLead: "lead-001",
-      idPropiedadPreliminar: "propiedad-preliminar-001",
-    });
-    expect(registroLead.entradas[0]).toEqual({
+    expect(resultado.esExito ? resultado.valor : undefined).toMatchObject({
+      id: "captacion-001",
       canal: "WHATSAPP",
       origen: "whatsapp_webhook",
       nombre: "Laura",
@@ -187,41 +210,57 @@ describe("integraciones / use cases", () => {
       telefono: "573001112233",
       tipo: "VENTA",
       idPropiedadInteres: "prop-456",
+      estado: "PENDIENTE",
       metadata: { canal: "whatsapp" },
     });
-    expect(registroPropiedad.entradas[0]).toEqual({
-      idLeadOrigen: "lead-001",
-      asesorCaptadorId: "asesor-001",
-      nombreContacto: "Laura",
-      origen: "whatsapp_webhook",
-      metadata: { canal: "whatsapp" },
-    });
+    expect(captacionRepository.captaciones).toHaveLength(1);
+    expect(captacionRepository.captaciones[0]?.captacion.contacto.telefono).toBe("573001112233");
   });
 
-  test("ProcesarWhatsAppWebhookUseCase propaga fallos y no crea propiedad para captacion", async () => {
-    const registroLead = new FakeRegistroLead();
-    const registroPropiedad = new FakeRegistroPropiedad();
+  test("ListarCaptacionesPendientesUseCase devuelve solo bandeja pendiente", async () => {
+    const captacionRepository = new FakeCaptacionPendienteRepository();
+    const pendiente = CaptacionPendiente.registrar({
+      id: "captacion-pendiente",
+      captacion: Captacion.registrar({
+        canal: "WHATSAPP",
+        origen: "whatsapp_webhook",
+        nombre: "Laura",
+        telefono: "573001112233",
+        tipo: "COMPRA",
+      }),
+    });
+    const duplicada = CaptacionPendiente.registrar({
+      id: "captacion-duplicada",
+      captacion: Captacion.registrar({
+        canal: "WHATSAPP",
+        origen: "whatsapp_webhook",
+        nombre: "Laura",
+        telefono: "573001112233",
+        tipo: "COMPRA",
+      }),
+    });
+    duplicada.marcarDuplicada("Telefono ya registrado");
+    await captacionRepository.guardar(pendiente);
+    await captacionRepository.guardar(duplicada);
 
+    const resultado = await new ListarCaptacionesPendientesUseCase(captacionRepository).ejecutar();
+
+    expect(resultado.esExito).toBe(true);
+    expect(resultado.esExito ? resultado.valor.map((item) => item.id) : []).toEqual([
+      "captacion-pendiente",
+    ]);
+  });
+
+  test("ProcesarWhatsAppWebhookUseCase captura errores de dominio de captacion", async () => {
     const captacion = await new ProcesarWhatsAppWebhookUseCase(
-      registroLead,
-      registroPropiedad,
+      new FakeCaptacionPendienteRepository(),
+      new GeneradorIdFijo("captacion-001"),
     ).ejecutar({
       wa_id: "573001112233",
-      wa_name: "Laura",
-    });
-    const fallo = await new ProcesarWhatsAppWebhookUseCase(
-      new FakeRegistroLead(new ErrorDeDominio("Lead rechazado", { codigo: "LEAD_RECHAZADO" })),
-      registroPropiedad,
-    ).ejecutar({
-      wa_id: "573001112233",
-      wa_name: "Laura",
+      wa_name: " ",
     });
 
-    expect(captacion.esExito).toBe(true);
-    expect(captacion.esExito ? captacion.valor.idPropiedadPreliminar : "x").toBeUndefined();
-    expect(registroPropiedad.entradas).toHaveLength(0);
-    expect(fallo.esExito).toBe(false);
-    expect(fallo.esExito ? undefined : fallo.error.codigo).toBe("LEAD_RECHAZADO");
+    expect(captacion.esExito).toBe(false);
   });
 
   test("propaga errores no dominio en ProcesarCaptacionEntranteUseCase", async () => {
@@ -255,11 +294,14 @@ describe("integraciones / use cases", () => {
   });
 
   test("propaga errores no dominio en ProcesarWhatsAppWebhookUseCase", async () => {
-    const registroLead = new FakeRegistroLead();
-    registroLead.registrar = () => Promise.reject(new Error("db error"));
+    const captacionRepository = new FakeCaptacionPendienteRepository();
+    captacionRepository.guardar = () => Promise.reject(new Error("db error"));
 
     await expect(
-      new ProcesarWhatsAppWebhookUseCase(registroLead).ejecutar({
+      new ProcesarWhatsAppWebhookUseCase(
+        captacionRepository,
+        new GeneradorIdFijo("captacion-001"),
+      ).ejecutar({
         wa_id: "573001112233",
         wa_name: "Laura",
       }),
@@ -267,10 +309,13 @@ describe("integraciones / use cases", () => {
   });
 
   test("captura ErrorDeDominio como resultadoFallido en ProcesarWhatsAppWebhookUseCase", async () => {
-    const registroLead = new FakeRegistroLead();
-    registroLead.registrar = () => Promise.reject(new ErrorDeDominio("error dominio"));
+    const captacionRepository = new FakeCaptacionPendienteRepository();
+    captacionRepository.guardar = () => Promise.reject(new ErrorDeDominio("error dominio"));
 
-    const resultado = await new ProcesarWhatsAppWebhookUseCase(registroLead).ejecutar({
+    const resultado = await new ProcesarWhatsAppWebhookUseCase(
+      captacionRepository,
+      new GeneradorIdFijo("captacion-001"),
+    ).ejecutar({
       wa_id: "573001112233",
       wa_name: "Laura",
     });
