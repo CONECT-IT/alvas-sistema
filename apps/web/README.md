@@ -14,7 +14,6 @@ npx sv create my-app
 To recreate this project with the same configuration:
 
 ```sh
-# recreate this project
 bun x sv@0.15.3 create --template demo --types ts --add prettier eslint tailwindcss="plugins:typography,forms" sveltekit-adapter="adapter:cloudflare+cfTarget:pages" --install bun web
 ```
 
