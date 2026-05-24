@@ -1071,7 +1071,7 @@ describe("ventas / use cases", () => {
     const contratoActualizado = await contratoRepo.buscarPorId(idContrato("cont-001"));
     const clienteCreado = await leadRepo.obtenerClientePorId(idCliente("cliente-001"));
     expect(resultado.esExito).toBe(true);
-    expect(contratoActualizado?.estado).toBe("VIGENTE");
+    expect(contratoActualizado?.estado.valor).toBe("VIGENTE");
     expect(contratoActualizado?.idCliente).toEqual(idCliente("cliente-001"));
     expect(clienteCreado).not.toBeNull();
     expect(clienteCreado?.nombre).toBe(lead.nombre);

@@ -27,8 +27,8 @@ export class ListarPipelineUseCase
           return {
             id: lead.id as string,
             nombre: lead.nombre,
-            estado: lead.estado?.valor ?? (lead.estado as unknown as string),
-            tipo: lead.tipo?.valor ?? (lead.tipo as unknown as string),
+            estado: lead.estado.valor,
+            tipo: lead.tipo.valor,
             idAsesor: lead.idAsesor as string,
             nombreAsesor,
             citasCount: lead.citas.length,
@@ -38,7 +38,7 @@ export class ListarPipelineUseCase
               idPropiedad: cita.idPropiedad,
               fechaInicio: cita.fechaInicio.toISOString(),
               fechaFin: cita.fechaFin.toISOString(),
-              estado: cita.estado?.valor ?? (cita.estado as unknown as string),
+              estado: cita.estado.valor,
               observacion: cita.observacion,
             })),
           };

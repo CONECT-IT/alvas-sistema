@@ -7,6 +7,7 @@ import {
   idContrato,
   idPropiedad,
 } from "../../../src/lib/ventas/domain/value-objects/Ids";
+import { EstadoContrato } from "../../../src/lib/ventas/domain/value-objects/EstadoContrato";
 
 describe("ventas / Contrato", () => {
   const fechaInicio = new Date("2026-06-01T00:00:00.000Z");
@@ -28,13 +29,13 @@ describe("ventas / Contrato", () => {
     expect(contrato.idPropiedad).toBe(idPropiedad("propiedad-001"));
     expect(contrato.fechaInicio).toEqual(fechaInicio);
     expect(contrato.fechaFin).toEqual(fechaFin);
-    expect(contrato.estado).toBe("BORRADOR");
+    expect(contrato.estado.valor).toBe("BORRADOR");
     expect(contrato.creadoEn).toBeInstanceOf(Date);
     expect(contrato.actualizadoEn).toBeInstanceOf(Date);
 
     contrato.firmar();
 
-    expect(contrato.estado).toBe("VIGENTE");
+    expect(contrato.estado.valor).toBe("VIGENTE");
     expect(() => contrato.firmar()).toThrow("Solo se pueden firmar contratos en estado borrador.");
   });
 
@@ -43,7 +44,7 @@ describe("ventas / Contrato", () => {
 
     contrato.finalizar();
 
-    expect(contrato.estado).toBe("FINALIZADO");
+    expect(contrato.estado.valor).toBe("FINALIZADO");
     expect(contrato.actualizadoEn).toBeInstanceOf(Date);
   });
 
@@ -56,7 +57,7 @@ describe("ventas / Contrato", () => {
       idPropiedad: idPropiedad("propiedad-002"),
       fechaInicio,
       fechaFin,
-      estado: "VIGENTE",
+      estado: EstadoContrato.vigente(),
       creadoEn,
       actualizadoEn,
     });
@@ -64,7 +65,7 @@ describe("ventas / Contrato", () => {
     expect(contrato.id).toBe(idContrato("contrato-002"));
     expect(contrato.idLead).toBe(idLead("lead-002"));
     expect(contrato.idPropiedad).toBe(idPropiedad("propiedad-002"));
-    expect(contrato.estado).toBe("VIGENTE");
+    expect(contrato.estado.valor).toBe("VIGENTE");
     expect(contrato.creadoEn).toEqual(creadoEn);
     expect(contrato.actualizadoEn).toEqual(actualizadoEn);
   });

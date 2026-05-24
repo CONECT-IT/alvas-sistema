@@ -5,9 +5,7 @@ import {
   type IdPropiedad,
 } from "../value-objects/Ids";
 import { ErrorDeValidacion } from "../../../shared/domain";
-
-export const ESTADOS_CONTRATO = ["BORRADOR", "VIGENTE", "FINALIZADO", "CANCELADO"] as const;
-export type ValorEstadoContrato = (typeof ESTADOS_CONTRATO)[number];
+import { EstadoContrato } from "../value-objects/EstadoContrato";
 
 export type PropsContrato = {
   id: IdContrato;
@@ -16,7 +14,7 @@ export type PropsContrato = {
   idPropiedad: IdPropiedad;
   fechaInicio: Date;
   fechaFin: Date;
-  estado: ValorEstadoContrato;
+  estado: EstadoContrato;
   creadoEn: Date;
   actualizadoEn: Date;
 };
@@ -40,7 +38,7 @@ export class Contrato {
       idPropiedad: params.idPropiedad,
       fechaInicio: params.fechaInicio,
       fechaFin: params.fechaFin,
-      estado: "BORRADOR",
+      estado: EstadoContrato.borrador(),
       creadoEn: ahora,
       actualizadoEn: ahora,
     });
@@ -68,7 +66,7 @@ export class Contrato {
   get fechaFin(): Date {
     return this.props.fechaFin;
   }
-  get estado(): ValorEstadoContrato {
+  get estado(): EstadoContrato {
     return this.props.estado;
   }
   get creadoEn(): Date {
@@ -87,26 +85,26 @@ export class Contrato {
   }
 
   firmar(): void {
-    if (this.props.estado !== "BORRADOR") {
+    if (!this.props.estado.esBorrador()) {
       throw new ErrorDeValidacion("Solo se pueden firmar contratos en estado borrador.");
     }
-    this.props.estado = "VIGENTE";
+    this.props.estado = EstadoContrato.vigente();
     this.props.actualizadoEn = new Date();
   }
 
   finalizar(): void {
-    this.props.estado = "FINALIZADO";
+    this.props.estado = EstadoContrato.finalizado();
     this.props.actualizadoEn = new Date();
   }
 
   cancelar(): void {
-    if (this.props.estado === "FINALIZADO") {
+    if (this.props.estado.esFinalizado()) {
       throw new ErrorDeValidacion("No se puede cancelar un contrato finalizado.");
     }
-    if (this.props.estado === "CANCELADO") {
+    if (this.props.estado.esCancelado()) {
       throw new ErrorDeValidacion("El contrato ya está cancelado.");
     }
-    this.props.estado = "CANCELADO";
+    this.props.estado = EstadoContrato.cancelado();
     this.props.actualizadoEn = new Date();
   }
 

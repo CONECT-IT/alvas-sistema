@@ -38,7 +38,7 @@ export class ListarContratosPorAsesorUseCase
           idAsesor: input.idAsesor,
           fechaInicio: contrato.fechaInicio.toISOString(),
           fechaFin: contrato.fechaFin.toISOString(),
-          estado: contrato.estado,
+          estado: contrato.estado.valor,
           creadoEn: contrato.creadoEn.toISOString(),
           actualizadoEn: contrato.actualizadoEn.toISOString(),
         })),

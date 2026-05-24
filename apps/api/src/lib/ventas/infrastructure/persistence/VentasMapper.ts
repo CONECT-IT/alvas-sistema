@@ -1,9 +1,10 @@
 import { Lead } from "../../domain/entities/Lead";
 import { Cita } from "../../domain/entities/Cita";
 import { Cliente } from "../../domain/entities/Cliente";
-import { Contrato, type ValorEstadoContrato } from "../../domain/entities/Contrato";
+import { Contrato } from "../../domain/entities/Contrato";
 import { EstadoLead } from "../../domain/value-objects/EstadoLead";
 import { EstadoCita } from "../../domain/value-objects/EstadoCita";
+import { EstadoContrato } from "../../domain/value-objects/EstadoContrato";
 import { TipoVenta } from "../../domain/value-objects/TipoVenta";
 import { idUsuarioRef } from "../../../shared/domain/value-objects/IdUsuarioRef";
 import { type LeadRow, type ClienteRow, type CitaVentaRow, type ContratoRow } from "./schema";
@@ -101,7 +102,7 @@ export class VentasMapper {
       idPropiedad: idPropiedad(row.idPropiedad),
       fechaInicio: new Date(row.fechaInicio),
       fechaFin: new Date(row.fechaFin),
-      estado: row.estado as ValorEstadoContrato,
+      estado: EstadoContrato.desde(row.estado),
       creadoEn: new Date(row.creadoEn),
       actualizadoEn: new Date(row.actualizadoEn),
     });
@@ -115,7 +116,7 @@ export class VentasMapper {
       idPropiedad: contrato.idPropiedad as string,
       fechaInicio: contrato.fechaInicio.toISOString(),
       fechaFin: contrato.fechaFin.toISOString(),
-      estado: contrato.estado as string,
+      estado: contrato.estado.valor,
       creadoEn: contrato.creadoEn.toISOString(),
       actualizadoEn: contrato.actualizadoEn.toISOString(),
     };
