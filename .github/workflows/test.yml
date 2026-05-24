@@ -64,8 +64,9 @@ jobs:
       - uses: actions/upload-artifact@v6
         if: matrix.app == 'web'
         with:
-          name: web-build-cloudflare
-          path: apps/web/.svelte-kit/cloudflare/
+          name: web-build-svelte-kit
+          path: apps/web/.svelte-kit/
+          include-hidden-files: true
           retention-days: 7
 
   api-unit-test:
@@ -214,8 +215,8 @@ jobs:
       - run: bun install --frozen-lockfile
       - uses: actions/download-artifact@v6
         with:
-          name: web-build-cloudflare
-          path: apps/web/.svelte-kit/cloudflare/
+          name: web-build-svelte-kit
+          path: apps/web/.svelte-kit/
       - run: bunx playwright install --with-deps chromium
         working-directory: apps/web
       - run: bun run --cwd apps/web test:e2e

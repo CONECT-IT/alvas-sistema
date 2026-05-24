@@ -15,7 +15,7 @@ const metrics =
   report.systemUnderTestMetrics?.metrics ??
   report.metrics ??
   report.projectMetrics?.metrics ??
-  report;
+  calcularMetricasDesdeMutantes(report);
 
 const score =
   metrics.mutationScore ?? metrics.mutationScoreBasedOnCoveredCode ?? metrics.score ?? 0;
@@ -36,3 +36,31 @@ console.log(`| Mutantes survived | ${survived} |`);
 console.log(`| Sin coverage | ${noCoverage} |`);
 console.log(`| Detectados | ${totalDetected} |`);
 console.log(`| No detectados | ${totalUndetected} |`);
+
+function calcularMetricasDesdeMutantes(report) {
+  const acumulado = {
+    mutationScore: 0,
+    killed: 0,
+    survived: 0,
+    timeout: 0,
+    noCoverage: 0,
+  };
+
+  const files = Object.values(report.files ?? {});
+  for (const file of files) {
+    for (const mutant of file.mutants ?? []) {
+      const status = String(mutant.status ?? "").toLowerCase();
+      if (status === "killed") acumulado.killed += 1;
+      if (status === "survived") acumulado.survived += 1;
+      if (status === "timeout") acumulado.timeout += 1;
+      if (status === "nocoverage" || status === "no coverage") acumulado.noCoverage += 1;
+    }
+  }
+
+  const detected = acumulado.killed + acumulado.timeout;
+  const undetected = acumulado.survived + acumulado.noCoverage;
+  const total = detected + undetected;
+  acumulado.mutationScore = total === 0 ? 0 : (detected / total) * 100;
+
+  return acumulado;
+}
