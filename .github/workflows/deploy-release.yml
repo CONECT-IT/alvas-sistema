@@ -32,6 +32,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           ref: ${{ inputs.ref || github.ref }}
+          fetch-depth: 0
       - uses: actions/setup-node@v6
         with:
           node-version: "24"
@@ -57,6 +58,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           ref: ${{ inputs.ref || github.ref }}
+          fetch-depth: 0
       - uses: actions/setup-node@v6
         with:
           node-version: "24"
@@ -74,6 +76,15 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: bun run --cwd apps/api wrangler deploy --env production
+      - name: Preparar version web production
+        run: |
+          SHORT_SHA="$(git rev-parse --short HEAD)"
+          VERSION="$(git describe --tags --exact-match 2>/dev/null || echo manual-${SHORT_SHA})"
+          {
+            echo "PUBLIC_APP_ENV=production"
+            echo "PUBLIC_APP_VERSION=${VERSION}"
+            echo "PUBLIC_APP_COMMIT=${SHORT_SHA}"
+          } >> "$GITHUB_ENV"
       - name: Build Web production
         run: bun run --cwd apps/web --bun build
       - name: Deploy Web production

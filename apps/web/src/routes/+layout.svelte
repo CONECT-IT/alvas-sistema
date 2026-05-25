@@ -1,6 +1,7 @@
 <script lang="ts">
 	import '$lib/shared/design-system/tokens.css';
 	import { navigating } from '$app/stores';
+	import AppVersionBadge from '$lib/shared/ui/AppVersionBadge.svelte';
 
 	let { children } = $props();
 
@@ -39,3 +40,5 @@
 <div class="min-h-screen bg-bg-base font-sans text-text-main">
 	{@render children()}
 </div>
+
+<AppVersionBadge />

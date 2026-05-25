@@ -25,6 +25,7 @@
     "test:mutation": "stryker run",
     "test:mutation:dry-run": "stryker run --dryRunOnly",
     "test:all": "bun run test:unit && bun run test:bdd && bun run test:web && bun run coverage:domain && bun run test:mutation",
+    "release": "bunx semantic-release",
     "lint:staged": "lint-staged",
     "typecheck": "tsc --noEmit -p apps/api/tsconfig.json && tsc --noEmit -p apps/web/tsconfig.json",
     "format": "prettier --write . && bun run --cwd apps/api format && bun run --cwd apps/web format",
