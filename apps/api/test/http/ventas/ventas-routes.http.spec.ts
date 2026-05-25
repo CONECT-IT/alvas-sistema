@@ -19,10 +19,26 @@ function crearDeps(capturadas: VentasEntradasCapturadas = crearCapturadas()): Ve
   const lead = {
     id: "lead-1",
     nombre: "Ana Vendedora",
+    email: "ana@example.com",
+    telefono: "999",
     estado: { valor: "NUEVO" },
     tipo: { valor: "VENTA" },
     idAsesor: "usuario-1",
-    citas: [],
+    idCliente: undefined,
+    idPropiedadInteres: "propiedad-1",
+    citas: [
+      {
+        id: "cita-1",
+        idLead: "lead-1",
+        idPropiedad: "propiedad-1",
+        fechaInicio: new Date("2026-06-01T14:00:00.000Z"),
+        fechaFin: new Date("2026-06-01T15:00:00.000Z"),
+        estado: { valor: "PENDIENTE" },
+        observacion: "Visita a propiedad",
+      },
+    ],
+    creadoEn: new Date("2026-05-01T10:00:00.000Z"),
+    actualizadoEn: new Date("2026-05-02T10:00:00.000Z"),
   };
 
   return {
@@ -177,6 +193,37 @@ describe("http / ventas routes", () => {
           nombreAsesor: "Luis Asesor",
         }),
       ],
+    });
+  });
+
+  it("serializa el detalle de lead sin filtrar value objects internos", async () => {
+    const app = new Hono();
+    app.route("/ventas", crearVentasRouter(crearDeps()));
+
+    const res = await app.request(
+      "/ventas/lead/lead-1",
+      {
+        headers: {
+          Authorization: await crearAuthHeader({ idUsuario: "usuario-1", rol: "ASESOR" }),
+        },
+      },
+      envConAuth,
+    );
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({
+      success: true,
+      data: expect.objectContaining({
+        id: "lead-1",
+        estado: "NUEVO",
+        tipo: "VENTA",
+        citas: [
+          expect.objectContaining({
+            id: "cita-1",
+            estado: "PENDIENTE",
+          }),
+        ],
+      }),
     });
   });
 

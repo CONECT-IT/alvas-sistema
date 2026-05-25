@@ -2,7 +2,7 @@ name: Version Release
 
 on:
   workflow_run:
-    workflows: ["Test & Quality Pipeline"]
+    workflows: ["E2E Pipeline"]
     types: [completed]
   workflow_dispatch:
 

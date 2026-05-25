@@ -15,8 +15,12 @@
 	import { captacionRepository } from '../infrastructure/captacionRepository';
 	import type { CaptacionPendiente } from '../domain/models/CaptacionPendiente';
 	import { presentarEstadoCaptacion, presentarTipoVenta } from '$lib/shared/presentation';
+	import type { Usuario } from '$lib/usuarios/domain/models/Usuario';
+	import { listarUsuarios } from '$lib/usuarios/application/use-cases/listarUsuarios';
+	import { usuarioRepository } from '$lib/usuarios/infrastructure/usuarioRepository';
 
 	let captaciones = $state<CaptacionPendiente[]>([]);
+	let asesores = $state<Usuario[]>([]);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 	let accionando = $state<string | null>(null);
@@ -31,7 +35,19 @@
 		loading = true;
 		error = null;
 		try {
-			captaciones = await listarCaptacionesPendientes(captacionRepository);
+			if (basePath === '/admin') {
+				const [captacionesResult, usuariosResult] = await Promise.all([
+					listarCaptacionesPendientes(captacionRepository),
+					listarUsuarios(usuarioRepository)
+				]);
+				captaciones = captacionesResult;
+				asesores = usuariosResult.filter(
+					(usuario) => usuario.rol === 'ASESOR' && usuario.estado.toUpperCase() === 'ACTIVO'
+				);
+			} else {
+				captaciones = await listarCaptacionesPendientes(captacionRepository);
+				asesores = [];
+			}
 		} catch (err) {
 			error = err instanceof HttpError ? err.message : 'No se pudieron cargar las captaciones.';
 		} finally {
@@ -186,16 +202,23 @@
 								</Button>
 							</div>
 
-							<input
-								class="rounded-lg border border-border-light bg-bg-card px-3 py-2 text-sm outline-none focus:border-primary"
-								placeholder="ID asesor opcional para admin"
-								value={idAsesorPorCaptacion[captacion.id] ?? ''}
-								oninput={(event) =>
-									(idAsesorPorCaptacion = {
-										...idAsesorPorCaptacion,
-										[captacion.id]: event.currentTarget.value
-									})}
-							/>
+							<label class="grid gap-1 text-xs font-semibold text-text-muted">
+								Asesor asignado
+								<select
+									class="rounded-lg border border-border-light bg-bg-card px-3 py-2 text-sm outline-none focus:border-primary"
+									value={idAsesorPorCaptacion[captacion.id] ?? ''}
+									onchange={(event) =>
+										(idAsesorPorCaptacion = {
+											...idAsesorPorCaptacion,
+											[captacion.id]: event.currentTarget.value
+										})}
+								>
+									<option value="">Usar asesor de sesión</option>
+									{#each asesores as asesor (asesor.id)}
+										<option value={asesor.id}>{asesor.nombre} ({asesor.username})</option>
+									{/each}
+								</select>
+							</label>
 
 							<textarea
 								class="min-h-20 rounded-lg border border-border-light bg-bg-card px-3 py-2 text-sm outline-none focus:border-primary"

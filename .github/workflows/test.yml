@@ -199,39 +199,10 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run --cwd apps/web test:unit
 
-  web-e2e:
-    name: "Stage 4b: Web E2E"
+  web-coverage:
+    name: "Stage 4b: Web Coverage"
     runs-on: ubuntu-latest
     needs: web-component-test
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "24"
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-      - run: bun install --frozen-lockfile
-      - uses: actions/download-artifact@v6
-        with:
-          name: web-build-svelte-kit
-          path: apps/web/.svelte-kit/
-      - run: bunx playwright install --with-deps chromium
-        working-directory: apps/web
-      - run: bun run --cwd apps/web test:e2e
-      - uses: actions/upload-artifact@v6
-        if: always()
-        with:
-          name: playwright-report
-          path: apps/web/playwright-report/
-          if-no-files-found: ignore
-          retention-days: 30
-
-  web-coverage:
-    name: "Stage 5b: Web Coverage"
-    runs-on: ubuntu-latest
-    needs: web-e2e
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
@@ -261,7 +232,6 @@ jobs:
       - api-coverage
       - api-mutation
       - web-component-test
-      - web-e2e
       - web-coverage
     if: always()
     steps:
@@ -274,7 +244,6 @@ jobs:
              [ "${{ needs.api-coverage.result }}" != "success" ] ||
              [ "${{ needs.api-mutation.result }}" != "success" ] ||
              [ "${{ needs.web-component-test.result }}" != "success" ] ||
-             [ "${{ needs.web-e2e.result }}" != "success" ] ||
              [ "${{ needs.web-coverage.result }}" != "success" ]; then
             echo "El pipeline fallo antes de cumplir todos los quality gates de API/Web."
             exit 1

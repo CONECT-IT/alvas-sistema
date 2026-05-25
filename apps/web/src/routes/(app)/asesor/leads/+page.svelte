@@ -6,6 +6,9 @@
 	import { opcionesTipoVenta } from '$lib/shared/presentation';
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import type { LeadPipeline } from '$lib/ventas/domain/models/LeadPipeline';
+	import type { Propiedad } from '$lib/propiedades/domain/models/Propiedad';
+	import { listarPropiedades } from '$lib/propiedades/application/use-cases/listarPropiedades';
+	import { propiedadRepository } from '$lib/propiedades/infrastructure/propiedadRepository';
 	import { listarPipeline } from '$lib/ventas/application/use-cases/listarPipeline';
 	import { registrarLead } from '$lib/ventas/application/use-cases/registrarLead';
 	import { ventasRepository } from '$lib/ventas/infrastructure/ventasRepository';
@@ -15,6 +18,7 @@
 	import ActividadLeadTimeline from '$lib/ventas/presentation/ActividadLeadTimeline.svelte';
 
 	let leads = $state<LeadPipeline[]>([]);
+	let propiedadesDisponibles = $state<Propiedad[]>([]);
 	let mostrarConvertidos = $state(false);
 	let vista = $state<'tabla' | 'kanban'>('kanban');
 	let loading = $state(true);
@@ -40,7 +44,14 @@
 		loading = true;
 		error = null;
 		try {
-			leads = await listarPipeline(ventasRepository);
+			const [leadsResult, propiedadesResult] = await Promise.all([
+				listarPipeline(ventasRepository),
+				listarPropiedades(propiedadRepository)
+			]);
+			leads = leadsResult;
+			propiedadesDisponibles = propiedadesResult.filter(
+				(propiedad) => propiedad.estado.toUpperCase() === 'DISPONIBLE'
+			);
 		} catch (err) {
 			error = err instanceof HttpError ? err.message : 'No se pudo cargar tus leads.';
 		} finally {
@@ -56,6 +67,10 @@
 		leads = leads.map((lead) =>
 			lead.id === idLead ? { ...lead, estado: nuevoEstado.toUpperCase() } : lead
 		);
+	}
+
+	function etiquetaPropiedad(propiedad: Propiedad): string {
+		return `${propiedad.titulo} - S/ ${propiedad.precio.toLocaleString('es-PE')}`;
 	}
 
 	// SidePanel state
@@ -219,11 +234,12 @@
 			</select>
 
 			{#if formLead.tipo === 'COMPRA'}
-				<input
-					class="input"
-					placeholder="ID propiedad de interes (opcional)"
-					bind:value={formLead.idPropiedadInteres}
-				/>
+				<select class="input" bind:value={formLead.idPropiedadInteres}>
+					<option value="">Sin propiedad de interés</option>
+					{#each propiedadesDisponibles as propiedad (propiedad.id)}
+						<option value={propiedad.id}>{etiquetaPropiedad(propiedad)}</option>
+					{/each}
+				</select>
 			{:else}
 				<input
 					class="input"

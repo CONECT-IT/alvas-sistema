@@ -11,8 +11,12 @@
 	import { propiedadRepository } from '$lib/propiedades/infrastructure/propiedadRepository';
 	import PropiedadAdminTable from '$lib/propiedades/presentation/PropiedadAdminTable.svelte';
 	import PropiedadStats from '$lib/propiedades/presentation/PropiedadStats.svelte';
+	import type { Usuario } from '$lib/usuarios/domain/models/Usuario';
+	import { listarUsuarios } from '$lib/usuarios/application/use-cases/listarUsuarios';
+	import { usuarioRepository } from '$lib/usuarios/infrastructure/usuarioRepository';
 
 	let propiedades = $state<Propiedad[]>([]);
+	let asesores = $state<Usuario[]>([]);
 	let loading = $state(true);
 	let creating = $state(false);
 	let updatingId = $state<string | null>(null);
@@ -39,7 +43,14 @@
 		error = null;
 
 		try {
-			propiedades = await listarPropiedades(propiedadRepository);
+			const [propiedadesResult, usuariosResult] = await Promise.all([
+				listarPropiedades(propiedadRepository),
+				listarUsuarios(usuarioRepository)
+			]);
+			propiedades = propiedadesResult;
+			asesores = usuariosResult.filter(
+				(usuario) => usuario.rol === 'ASESOR' && usuario.estado.toUpperCase() === 'ACTIVO'
+			);
 		} catch (err) {
 			if (err instanceof HttpError) {
 				error = err.message;
@@ -188,11 +199,12 @@
 
 			<label class="label-field">
 				Asesor responsable
-				<input
-					bind:value={asesorResponsableId}
-					class="input-field"
-					placeholder="ID del asesor, opcional"
-				/>
+				<select bind:value={asesorResponsableId} class="input-field">
+					<option value="">Sin asignar</option>
+					{#each asesores as asesor (asesor.id)}
+						<option value={asesor.id}>{asesor.nombre} ({asesor.username})</option>
+					{/each}
+				</select>
 			</label>
 
 			{#if createError}

@@ -3,10 +3,14 @@
 	import Badge from '$lib/shared/ui/Badge.svelte';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
+	import DateTimePicker from '$lib/shared/ui/DateTimePicker.svelte';
 	import SidePanel from '$lib/shared/ui/SidePanel.svelte';
 	import { presentarEstadoCita, opcionesEstadoCita } from '$lib/shared/presentation';
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import type { CitaPipeline, LeadPipeline } from '$lib/ventas/domain/models/LeadPipeline';
+	import type { Propiedad } from '$lib/propiedades/domain/models/Propiedad';
+	import { listarPropiedades } from '$lib/propiedades/application/use-cases/listarPropiedades';
+	import { propiedadRepository } from '$lib/propiedades/infrastructure/propiedadRepository';
 	import {
 		actualizarCita,
 		type EstadoCita
@@ -17,6 +21,7 @@
 	import LeadPipelineTable from '$lib/ventas/presentation/LeadPipelineTable.svelte';
 
 	let leads = $state<LeadPipeline[]>([]);
+	let propiedadesDisponibles = $state<Propiedad[]>([]);
 	let loading = $state(true);
 	let creating = $state(false);
 	let mostrarPanelCrear = $state(false);
@@ -27,14 +32,16 @@
 
 	let idLead = $state('');
 	let idPropiedad = $state('');
-	let fechaInicio = $state('');
-	let duracionMinutos = $state('60');
+	let fechaCita = $state('');
+	let horaCita = $state('');
+	let duracionMinutos = $state('');
 	let observacion = $state('');
 
 	let editKey = $state('');
 	let editLeadNombre = $state('');
 	let editIdLead = $state('');
-	let editFechaInicio = $state('');
+	let editFechaCita = $state('');
+	let editHoraCita = $state('');
 	let editDuracionMinutos = $state('');
 	let editEstado = $state<EstadoCita | ''>('');
 	let editObservacion = $state('');
@@ -56,7 +63,14 @@
 		error = null;
 
 		try {
-			leads = await listarPipeline(ventasRepository);
+			const [leadsResult, propiedadesResult] = await Promise.all([
+				listarPipeline(ventasRepository),
+				listarPropiedades(propiedadRepository)
+			]);
+			leads = leadsResult;
+			propiedadesDisponibles = propiedadesResult.filter(
+				(propiedad) => propiedad.estado.toUpperCase() === 'DISPONIBLE'
+			);
 		} catch (err) {
 			error = err instanceof HttpError ? err.message : 'No se pudo cargar la agenda.';
 		} finally {
@@ -67,8 +81,9 @@
 	function limpiarFormularioCita() {
 		idLead = '';
 		idPropiedad = '';
-		fechaInicio = '';
-		duracionMinutos = '60';
+		fechaCita = '';
+		horaCita = '';
+		duracionMinutos = '';
 		observacion = '';
 		mostrarPanelCrear = false;
 	}
@@ -77,7 +92,8 @@
 		editKey = '';
 		editLeadNombre = '';
 		editIdLead = '';
-		editFechaInicio = '';
+		editFechaCita = '';
+		editHoraCita = '';
 		editDuracionMinutos = '';
 		editEstado = '';
 		editObservacion = '';
@@ -90,7 +106,9 @@
 		editKey = cita.key;
 		editLeadNombre = cita.leadNombre;
 		editIdLead = cita.idLead;
-		editFechaInicio = cita.fechaInicio.slice(0, 16);
+		const fechaHora = obtenerFechaHoraLocal(cita.fechaInicio);
+		editFechaCita = fechaHora.fecha;
+		editHoraCita = fechaHora.hora;
 		editDuracionMinutos = String(
 			Math.round((new Date(cita.fechaFin).getTime() - new Date(cita.fechaInicio).getTime()) / 60000)
 		);
@@ -106,14 +124,35 @@
 		}).format(new Date(fechaIso));
 	}
 
+	function etiquetaPropiedad(propiedad: Propiedad): string {
+		return `${propiedad.titulo} - S/ ${propiedad.precio.toLocaleString('es-PE')}`;
+	}
+
+	function crearFechaHoraLocal(fecha: string, hora: string): Date | null {
+		if (!fecha || !hora) return null;
+		const date = new Date(`${fecha}T${hora}:00`);
+		return Number.isNaN(date.getTime()) ? null : date;
+	}
+
+	function obtenerFechaHoraLocal(iso: string): { fecha: string; hora: string } {
+		const date = new Date(iso);
+		const year = date.getFullYear();
+		const month = String(date.getMonth() + 1).padStart(2, '0');
+		const day = String(date.getDate()).padStart(2, '0');
+		const hours = String(date.getHours()).padStart(2, '0');
+		const minutes = String(date.getMinutes()).padStart(2, '0');
+		return { fecha: `${year}-${month}-${day}`, hora: `${hours}:${minutes}` };
+	}
+
 	async function crearCita(event: SubmitEvent) {
 		event.preventDefault();
 		createError = null;
 
 		const duracion = Number(duracionMinutos);
+		const fechaInicio = crearFechaHoraLocal(fechaCita, horaCita);
 
-		if (!idLead.trim() || !fechaInicio.trim() || Number.isNaN(duracion) || duracion <= 0) {
-			createError = 'Completa lead, fecha de inicio y duración válida.';
+		if (!idLead.trim() || !fechaInicio || Number.isNaN(duracion) || duracion <= 0) {
+			createError = 'Completa lead, fecha, hora y duración válida.';
 			return;
 		}
 
@@ -123,7 +162,7 @@
 			await agendarCita(ventasRepository, {
 				idLead: idLead.trim(),
 				idPropiedad: idPropiedad.trim() || undefined,
-				fechaInicio: new Date(fechaInicio).toISOString(),
+				fechaInicio: fechaInicio.toISOString(),
 				duracionMinutos: duracion,
 				observacion: observacion.trim() || undefined
 			});
@@ -148,7 +187,8 @@
 		}
 
 		if (
-			!editFechaInicio.trim() &&
+			!editFechaCita.trim() &&
+			!editHoraCita.trim() &&
 			!editDuracionMinutos.trim() &&
 			!editEstado &&
 			!editObservacion.trim()
@@ -165,10 +205,18 @@
 		updating = true;
 
 		try {
+			const fechaInicio =
+				editFechaCita && editHoraCita ? crearFechaHoraLocal(editFechaCita, editHoraCita) : null;
+
+			if ((editFechaCita || editHoraCita) && !fechaInicio) {
+				error = 'Selecciona fecha y hora para reprogramar la cita.';
+				return;
+			}
+
 			await actualizarCita(ventasRepository, {
 				idLead: editIdLead,
 				idCita: editKey.split('::')[1],
-				fechaInicio: editFechaInicio ? new Date(editFechaInicio).toISOString() : undefined,
+				fechaInicio: fechaInicio ? fechaInicio.toISOString() : undefined,
 				duracionMinutos: duracion,
 				estado: editEstado || undefined,
 				observacion: editObservacion.trim() || undefined
@@ -225,17 +273,26 @@
 
 			<label class="label-field">
 				Propiedad (opcional)
-				<input bind:value={idPropiedad} class="input-field" placeholder="ID de propiedad" />
+				<select bind:value={idPropiedad} class="input-field">
+					<option value="">Sin propiedad asociada</option>
+					{#each propiedadesDisponibles as propiedad (propiedad.id)}
+						<option value={propiedad.id}>{etiquetaPropiedad(propiedad)}</option>
+					{/each}
+				</select>
 			</label>
 
-			<label class="label-field">
-				Fecha y hora
-				<input bind:value={fechaInicio} type="datetime-local" class="input-field" />
-			</label>
+			<DateTimePicker bind:fecha={fechaCita} bind:hora={horaCita} required />
 
 			<label class="label-field">
-				Duración (minutos)
-				<input bind:value={duracionMinutos} type="number" min="15" step="15" class="input-field" />
+				Duración
+				<select bind:value={duracionMinutos} class="input-field" required>
+					<option value="">Selecciona duración</option>
+					<option value="30">30 minutos</option>
+					<option value="45">45 minutos</option>
+					<option value="60">1 hora</option>
+					<option value="90">1 hora 30 minutos</option>
+					<option value="120">2 horas</option>
+				</select>
 			</label>
 
 			<label class="label-field">
@@ -261,21 +318,18 @@
 		onClose={() => (mostrarPanelEditar = false)}
 	>
 		<form class="grid gap-4" onsubmit={editarCita}>
-			<label class="label-field">
-				Fecha y hora
-				<input bind:value={editFechaInicio} type="datetime-local" class="input-field" />
-			</label>
+			<DateTimePicker bind:fecha={editFechaCita} bind:hora={editHoraCita} />
 
 			<label class="label-field">
-				Duración (minutos)
-				<input
-					bind:value={editDuracionMinutos}
-					type="number"
-					min="15"
-					step="15"
-					class="input-field"
-					placeholder="Sin cambio"
-				/>
+				Duración
+				<select bind:value={editDuracionMinutos} class="input-field">
+					<option value="">Sin cambio</option>
+					<option value="30">30 minutos</option>
+					<option value="45">45 minutos</option>
+					<option value="60">1 hora</option>
+					<option value="90">1 hora 30 minutos</option>
+					<option value="120">2 horas</option>
+				</select>
 			</label>
 
 			<label class="label-field">

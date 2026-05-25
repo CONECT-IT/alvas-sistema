@@ -2,6 +2,7 @@
 	import Badge from '$lib/shared/ui/Badge.svelte';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
+	import DateTimePicker from '$lib/shared/ui/DateTimePicker.svelte';
 	import SidePanel from '$lib/shared/ui/SidePanel.svelte';
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import type { LeadDetalle } from '../domain/models/LeadDetalle';
@@ -16,6 +17,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import type { Propiedad } from '$lib/propiedades/domain/models/Propiedad';
+	import { listarPropiedades } from '$lib/propiedades/application/use-cases/listarPropiedades';
 	import { obtenerPropiedad } from '$lib/propiedades/application/use-cases/obtenerPropiedad';
 	import { propiedadRepository } from '$lib/propiedades/infrastructure/propiedadRepository';
 	import {
@@ -35,6 +37,7 @@
 	let lead = $state<LeadDetalle | null>(null);
 	let propiedadesRelacionadas = $state<string[]>([]);
 	let propiedadesDetalle = $state<Propiedad[]>([]);
+	let propiedadesDisponibles = $state<Propiedad[]>([]);
 	let propiedadInteres = $state<Propiedad | null>(null);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
@@ -49,8 +52,9 @@
 		idPropiedadInteres: ''
 	});
 	let formCita = $state({
-		fechaInicio: '',
-		duracionMinutos: 60,
+		fecha: '',
+		hora: '',
+		duracionMinutos: '',
 		observacion: '',
 		idPropiedad: ''
 	});
@@ -73,6 +77,12 @@
 		try {
 			lead = await obtenerLead(ventasRepository, leadId.trim());
 			if (lead) {
+				const catalogo = await listarPropiedades(propiedadRepository);
+				propiedadesDisponibles = catalogo.filter(
+					(propiedad) =>
+						propiedad.estado.toUpperCase() === 'DISPONIBLE' ||
+						propiedad.id === lead?.idPropiedadInteres
+				);
 				propiedadesRelacionadas = await listarPropiedadesPorCliente(ventasRepository, lead.id);
 				if (lead.idPropiedadInteres) {
 					try {
@@ -121,8 +131,9 @@
 
 	function abrirCita() {
 		formCita = {
-			fechaInicio: '',
-			duracionMinutos: 60,
+			fecha: '',
+			hora: '',
+			duracionMinutos: '',
 			observacion: '',
 			idPropiedad: lead?.idPropiedadInteres ?? ''
 		};
@@ -164,13 +175,21 @@
 
 	async function guardarCita() {
 		if (!lead) return;
+		const fechaInicio = crearFechaHoraLocal(formCita.fecha, formCita.hora);
+		const duracion = Number(formCita.duracionMinutos);
+
+		if (!fechaInicio || Number.isNaN(duracion) || duracion <= 0) {
+			accionError = 'Selecciona fecha, hora y duración de la cita.';
+			return;
+		}
+
 		guardando = true;
 		accionError = null;
 		try {
 			await agendarCita(ventasRepository, {
 				idLead: lead.id,
-				fechaInicio: new Date(formCita.fechaInicio).toISOString(),
-				duracionMinutos: Number(formCita.duracionMinutos),
+				fechaInicio: fechaInicio.toISOString(),
+				duracionMinutos: duracion,
 				observacion: formCita.observacion || undefined,
 				idPropiedad: formCita.idPropiedad || undefined
 			});
@@ -224,6 +243,26 @@
 			hour: '2-digit',
 			minute: '2-digit'
 		});
+	}
+
+	function etiquetaPropiedad(propiedad: Propiedad): string {
+		return `${propiedad.titulo} - S/ ${propiedad.precio.toLocaleString('es-PE')}`;
+	}
+
+	function crearFechaHoraLocal(fecha: string, hora: string): Date | null {
+		if (!fecha || !hora) return null;
+		const date = new Date(`${fecha}T${hora}:00`);
+		return Number.isNaN(date.getTime()) ? null : date;
+	}
+
+	function verPropiedadInteres() {
+		const id = lead?.idPropiedadInteres;
+		if (id) goto(`${basePath}/propiedades/${encodeURIComponent(id)}`);
+	}
+
+	function verCliente() {
+		const id = lead?.idCliente;
+		if (id) goto(`${basePath}/clientes/${encodeURIComponent(id)}`);
 	}
 
 	$effect(() => {
@@ -300,28 +339,14 @@
 								{propiedadInteres?.titulo ?? lead.idPropiedadInteres}
 							</span>
 							<span class="text-xs text-text-muted">{lead.idPropiedadInteres}</span>
-							<Button
-								variant="ghost"
-								onclick={() =>
-									goto(
-										`${basePath}/propiedades/${encodeURIComponent(lead.idPropiedadInteres ?? '')}`
-									)}
-							>
-								Ver propiedad
-							</Button>
+							<Button variant="ghost" onclick={verPropiedadInteres}>Ver propiedad</Button>
 						</dd>
 					{/if}
 					{#if lead.idCliente}
 						<dt class="font-semibold text-text-muted">Cliente vinculado</dt>
 						<dd class="flex flex-wrap items-center gap-2">
 							<span class="font-mono text-sm font-semibold text-text-main">{lead.idCliente}</span>
-							<Button
-								variant="ghost"
-								onclick={() =>
-									goto(`${basePath}/clientes/${encodeURIComponent(lead.idCliente ?? '')}`)}
-							>
-								Ver cliente
-							</Button>
+							<Button variant="ghost" onclick={verCliente}>Ver cliente</Button>
 						</dd>
 					{/if}
 				</dl>
@@ -444,11 +469,15 @@
 					<option value={opt.value}>{opt.label}</option>
 				{/each}
 			</select>
-			<input
+			<select
 				class="w-full rounded-lg border border-border-light px-3 py-2"
-				placeholder="ID propiedad de interés"
 				bind:value={formLead.idPropiedadInteres}
-			/>
+			>
+				<option value="">Sin propiedad de interés</option>
+				{#each propiedadesDisponibles as propiedad (propiedad.id)}
+					<option value={propiedad.id}>{etiquetaPropiedad(propiedad)}</option>
+				{/each}
+			</select>
 			<Button onclick={guardarLead} disabled={guardando}
 				>{guardando ? 'Guardando...' : 'Guardar'}</Button
 			>
@@ -457,23 +486,27 @@
 
 	<SidePanel isOpen={panel === 'cita'} title="Agendar cita" onClose={() => (panel = null)}>
 		<div class="space-y-4">
-			<input
-				type="datetime-local"
+			<DateTimePicker bind:fecha={formCita.fecha} bind:hora={formCita.hora} required />
+			<label class="label-field">
+				Duración
+				<select class="input-field" bind:value={formCita.duracionMinutos} required>
+					<option value="">Selecciona duración</option>
+					<option value="30">30 minutos</option>
+					<option value="45">45 minutos</option>
+					<option value="60">1 hora</option>
+					<option value="90">1 hora 30 minutos</option>
+					<option value="120">2 horas</option>
+				</select>
+			</label>
+			<select
 				class="w-full rounded-lg border border-border-light px-3 py-2"
-				bind:value={formCita.fechaInicio}
-			/>
-			<input
-				type="number"
-				min="15"
-				step="15"
-				class="w-full rounded-lg border border-border-light px-3 py-2"
-				bind:value={formCita.duracionMinutos}
-			/>
-			<input
-				class="w-full rounded-lg border border-border-light px-3 py-2"
-				placeholder="ID propiedad opcional"
 				bind:value={formCita.idPropiedad}
-			/>
+			>
+				<option value="">Sin propiedad asociada</option>
+				{#each propiedadesDisponibles as propiedad (propiedad.id)}
+					<option value={propiedad.id}>{etiquetaPropiedad(propiedad)}</option>
+				{/each}
+			</select>
 			<textarea
 				class="min-h-24 w-full rounded-lg border border-border-light px-3 py-2"
 				placeholder="Observación"
@@ -487,11 +520,15 @@
 
 	<SidePanel isOpen={panel === 'contrato'} title="Crear contrato" onClose={() => (panel = null)}>
 		<div class="space-y-4">
-			<input
+			<select
 				class="w-full rounded-lg border border-border-light px-3 py-2"
-				placeholder="ID propiedad"
 				bind:value={formContrato.idPropiedad}
-			/>
+			>
+				<option value="">Selecciona una propiedad</option>
+				{#each propiedadesDisponibles as propiedad (propiedad.id)}
+					<option value={propiedad.id}>{etiquetaPropiedad(propiedad)}</option>
+				{/each}
+			</select>
 			<input
 				type="date"
 				class="w-full rounded-lg border border-border-light px-3 py-2"
