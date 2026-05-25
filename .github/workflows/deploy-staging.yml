@@ -66,5 +66,5 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: >
           bunx wrangler pages deploy apps/web/.svelte-kit/cloudflare
-          --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT || 'alvas-web' }}
+          --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT_STAGING || 'alvas-web-staging' }}
           --branch=develop

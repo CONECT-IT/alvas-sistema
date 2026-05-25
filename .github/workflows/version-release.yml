@@ -1,9 +1,9 @@
 name: Version Release
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["Test & Quality Pipeline"]
+    types: [completed]
   workflow_dispatch:
 
 concurrency:
@@ -19,6 +19,9 @@ jobs:
   semantic-release:
     name: Crear version semantica
     runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
     timeout-minutes: 15
     permissions:
       contents: write
@@ -27,6 +30,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
           fetch-depth: 0
       - uses: actions/setup-node@v6
         with:

@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { env } from '$env/dynamic/public';
+	import { PUBLIC_APP_COMMIT, PUBLIC_APP_ENV, PUBLIC_APP_VERSION } from '$env/static/public';
 
-	const entorno = env.PUBLIC_APP_ENV || 'local';
-	const version = env.PUBLIC_APP_VERSION || 'dev';
-	const commit = env.PUBLIC_APP_COMMIT || '';
+	const entorno = PUBLIC_APP_ENV || 'local';
+	const version = PUBLIC_APP_VERSION || 'dev';
+	const commit = PUBLIC_APP_COMMIT || '';
 	const esProduccion = entorno === 'production';
 </script>
 
