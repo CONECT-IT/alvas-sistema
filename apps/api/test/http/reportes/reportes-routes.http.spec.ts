@@ -11,10 +11,12 @@ import { crearAuthHeader, envConAuth } from "../helpers/auth";
 
 const reporteGeneral = {
   fechaGeneracion: new Date("2026-05-23T10:00:00.000Z"),
-  metricas: {
-    conversionRate: 35,
-    leadsNuevosHoy: 4,
-    citasPendientes: 2,
+  resumenAcciones: {
+    acciones: [
+      { evento: "LEAD_CREADO", total: 4 },
+      { evento: "CITA_AGENDADA", total: 2 },
+    ],
+    totalAcciones: 6,
   },
   actividadReciente: [
     {
@@ -27,13 +29,11 @@ const reporteGeneral = {
 };
 
 const estadisticasGlobales = {
-  totalLeads: 12,
-  totalClientes: 5,
-  leadsPorEstado: {
-    NUEVO: 4,
-    CONVERTIDO: 5,
-  },
-  asesoresActivos: 3,
+  acciones: [
+    { evento: "LEAD_CREADO", total: 4 },
+    { evento: "CITA_AGENDADA", total: 2 },
+  ],
+  totalAcciones: 6,
 };
 
 function crearDeps(): ReportesRouterDeps {

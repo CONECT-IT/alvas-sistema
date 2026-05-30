@@ -1,26 +1,28 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import Badge from '$lib/shared/ui/Badge.svelte';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
 	import { presentarEstadoCita } from '$lib/shared/presentation';
-	import { httpClient, HttpError } from '$lib/shared/http/httpClient';
 	import type { PageData } from './$types';
 
 	type CitaAgenda = {
+		id: string;
 		idLead: string;
 		idPropiedad?: string;
+		nombrePropiedad?: string;
 		idAsesor: string;
+		nombreAsesor?: string;
 		fechaInicio: string;
 		fechaFin: string;
 		estado: string;
 		observacion?: string;
-		leadNombre: string;
+		nombreLead?: string;
 	};
 
 	let { data }: { data: PageData } = $props();
 
-	let citas = $state<CitaAgenda[]>(data.citas as unknown as CitaAgenda[]);
+	let citas = $derived((data?.citas as unknown as CitaAgenda[]) ?? []);
 	let loading = $state(false);
 	let error = $state<string | null>(null);
 
@@ -29,12 +31,9 @@
 		error = null;
 
 		try {
-			const res = await httpClient.get<{ success: boolean; data: CitaAgenda[] }>(
-				'/api/ventas/citas'
-			);
-			citas = res.data;
-		} catch (err) {
-			error = err instanceof HttpError ? err.message : 'No se pudieron cargar las citas.';
+			await invalidateAll();
+		} catch {
+			error = 'No se pudieron actualizar las citas.';
 		} finally {
 			loading = false;
 		}
@@ -96,23 +95,23 @@
 			</div>
 
 			<div class="grid gap-3">
-				{#each citas as cita (cita.idLead + cita.fechaInicio)}
+				{#each citas as cita (cita.id)}
 					<button
 						onclick={() => verLead(cita.idLead)}
 						class="grid w-full gap-3 rounded-2xl border border-border-light bg-bg-card px-4 py-3 text-left transition hover:border-primary/30 hover:shadow-md md:grid-cols-[1fr_0.8fr_0.8fr_auto]"
 					>
 						<div>
-							<p class="font-semibold text-text-main">{cita.leadNombre}</p>
+							<p class="font-semibold text-text-main">{cita.nombreLead ?? 'Prospecto'}</p>
 							<p class="mt-1 text-xs font-medium text-text-muted">Prospecto en agenda</p>
 						</div>
 						<div>
 							<p class="text-sm font-semibold text-text-main">Asesor</p>
-							<p class="mt-1 text-xs text-text-muted">{cita.idAsesor}</p>
+							<p class="mt-1 text-xs text-text-muted">{cita.nombreAsesor ?? 'Asesor asignado'}</p>
 						</div>
 						<div>
 							<p class="text-sm font-semibold text-text-main">{formatearFecha(cita.fechaInicio)}</p>
 							<p class="mt-1 text-xs text-text-muted">
-								{cita.observacion ?? 'Sin observación'}
+								{cita.observacion ?? cita.nombrePropiedad ?? 'Sin observación'}
 							</p>
 						</div>
 						<div class="flex items-center">

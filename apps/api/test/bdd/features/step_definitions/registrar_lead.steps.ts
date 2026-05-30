@@ -52,6 +52,10 @@ class FakeVentasRepository implements IVentasRepository {
     return [{ idAsesor: idUsuarioRef("asesor-1"), totalLeads: this.leads.size }];
   }
 
+  async contarAccionesPorTipo(): Promise<{ evento: string; total: number }[]> {
+    return [];
+  }
+
   async obtenerClientePorId(_id: IdCliente): Promise<Cliente | null> {
     return null;
   }

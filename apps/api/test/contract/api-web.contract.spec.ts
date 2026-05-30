@@ -305,7 +305,15 @@ type ErrorResponseContract = Readonly<{
 function esClienteContract(value: unknown): value is ClienteContract {
   if (!value || typeof value !== "object") return false;
   const cliente = value as Record<string, unknown>;
-  const clavesPermitidas = ["id", "nombre", "email", "telefono", "idAsesor", "creadoEn", "actualizadoEn"];
+  const clavesPermitidas = [
+    "id",
+    "nombre",
+    "email",
+    "telefono",
+    "idAsesor",
+    "creadoEn",
+    "actualizadoEn",
+  ];
   return (
     Object.keys(cliente).every((key) => clavesPermitidas.includes(key)) &&
     typeof cliente.id === "string" &&
@@ -324,9 +332,19 @@ function esContratoContract(value: unknown): value is ContratoContract {
   if (!value || typeof value !== "object") return false;
   const contrato = value as Record<string, unknown>;
   const clavesPermitidas = [
-    "id", "idLead", "nombreLead", "idCliente", "idPropiedad",
-    "nombrePropiedad", "idAsesor", "nombreAsesor",
-    "fechaInicio", "fechaFin", "estado", "creadoEn", "actualizadoEn",
+    "id",
+    "idLead",
+    "nombreLead",
+    "idCliente",
+    "idPropiedad",
+    "nombrePropiedad",
+    "idAsesor",
+    "nombreAsesor",
+    "fechaInicio",
+    "fechaFin",
+    "estado",
+    "creadoEn",
+    "actualizadoEn",
   ];
   return (
     Object.keys(contrato).every((key) => clavesPermitidas.includes(key)) &&

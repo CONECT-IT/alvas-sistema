@@ -16,6 +16,15 @@ module.exports = [
   },
   js.configs.recommended,
   {
+    files: ["test/benchmark/k6/**/*.js"],
+    languageOptions: {
+      globals: {
+        __ENV: "readonly",
+        __ITER: "readonly",
+      },
+    },
+  },
+  {
     files: ["**/*.ts"],
     languageOptions: {
       parser: tsParser,

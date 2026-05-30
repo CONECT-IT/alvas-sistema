@@ -2,18 +2,19 @@
 
 ## Bounded Contexts
 
-| Contexto | Lenguaje ubicuo | Aggregate Root(s) |
-|---|---|---|
-| `auth` | sesion, token, refresh, credenciales | Sesion |
-| `usuarios` | usuario, asesor, admin, username, rol, estado | Usuario |
-| `propiedades` | propiedad, catalogo, origen, estado, BORRADOR, DISPONIBLE | Propiedad |
-| `ventas` | lead, cita, cliente, contrato, pipeline, conversion | Lead, Cliente, Contrato |
-| `integraciones` | captacion, WhatsApp, webhook, normalizacion, deduplicacion | Captacion |
-| `reportes` | metrica, dashboard, estadistica, rendimiento, conversion | (lectura) |
+| Contexto        | Lenguaje ubicuo                                            | Aggregate Root(s)       |
+| --------------- | ---------------------------------------------------------- | ----------------------- |
+| `auth`          | sesion, token, refresh, credenciales                       | Sesion                  |
+| `usuarios`      | usuario, asesor, admin, username, rol, estado              | Usuario                 |
+| `propiedades`   | propiedad, catalogo, origen, estado, BORRADOR, DISPONIBLE  | Propiedad               |
+| `ventas`        | lead, cita, cliente, contrato, pipeline, conversion        | Lead, Cliente, Contrato |
+| `integraciones` | captacion, WhatsApp, webhook, normalizacion, deduplicacion | Captacion               |
+| `reportes`      | metrica, dashboard, estadistica, rendimiento, conversion   | (lectura)               |
 
 ## Relaciones
 
 ### `auth` `<<cliente>>` `usuarios`
+
 - **Patron:** ACL (Anti-Corruption Layer)
 - **Consumer:** `auth` define `IConsultaCredencialesUsuario` e `IVerificadorDeClave`
 - **Provider:** `usuarios` implementa `ConsultaCredencialesUsuarioAdapter` y `VerificadorDeClavePbkdf2Adapter`
@@ -21,6 +22,7 @@
 - **Autonomia:** `usuarios` puede cambiar su esquema interno sin afectar `auth` mientras cumpla el contrato.
 
 ### `ventas` `<<cliente>>` `propiedades`
+
 - **Patron:** ACL (Anti-Corruption Layer)
 - **Consumer:** `ventas` define `IConsultaPropiedadInteres`, `IRegistroPropiedadVendedor`, `IRegistroPropiedadCliente`
 - **Provider:** `propiedades` implementa `ConsultaPropiedadInteresVentasAdapter`, `RegistroPropiedadVendedorAdapter`, `RegistroPropiedadClienteAdapter`
@@ -28,6 +30,7 @@
 - **Autonomia:** `propiedades` puede evolucionar su modelo de inventario independientemente.
 
 ### `ventas` `<<cliente>>` `usuarios`
+
 - **Patron:** ACL (Anti-Corruption Layer) interno
 - **Consumer:** `ventas` define `IConsultaNombreAsesor`
 - **Provider:** `ventas/infrastructure` implementa `ConsultaNombreAsesorAdapter` que usa `IUsuarioRepository` de `usuarios`
@@ -35,6 +38,7 @@
 - **Autonomia:** el adapter vive en infraestructura de `ventas`, no hay contaminacion del dominio de `ventas`.
 
 ### `reportes` `<<cliente>>` `ventas`
+
 - **Patron:** ACL de lectura
 - **Consumer:** `reportes` define `IConsultaVentasParaReportes`
 - **Provider:** `ventas` implementa `ConsultaVentasParaReportesAdapter`
@@ -42,6 +46,7 @@
 - **Autonomia:** `ventas` puede cachear, agregar o materializar vistas sin afectar `reportes`.
 
 ### `integraciones` `<<cliente>>` `ventas`
+
 - **Patron:** ACL (Anti-Corruption Layer)
 - **Consumer:** `integraciones` define `IRegistroLeadCaptacion`
 - **Provider:** `ventas` implementa `RegistroLeadCaptacionVentasAdapter`
@@ -49,6 +54,7 @@
 - **Autonomia:** `ventas` puede cambiar reglas de creacion de leads sin afectar `integraciones`.
 
 ### `integraciones` `<<cliente>>` `propiedades`
+
 - **Patron:** ACL (Anti-Corruption Layer)
 - **Consumer:** `integraciones` define `IRegistroPropiedadCaptacion`
 - **Provider:** `propiedades` implementa `RegistroPropiedadCaptacionAdapter`

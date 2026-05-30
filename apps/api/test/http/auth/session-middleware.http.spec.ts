@@ -8,7 +8,10 @@ import { crearAuthHeader, crearEnvConAuth } from "../helpers/auth";
 describe("http / session middleware", () => {
   it("rechaza tokens validos cuando el usuario fue deshabilitado", async () => {
     const app = new Hono();
-    app.use("/protegida", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
+    app.use(
+      "/protegida",
+      verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+    );
     app.get("/protegida", (c) => c.json({ success: true }));
     app.onError((error, c) => {
       if (error instanceof ErrorDeDominio) {

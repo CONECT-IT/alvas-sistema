@@ -1,16 +1,18 @@
+export type AccionResumen = Readonly<{
+	evento: string;
+	total: number;
+}>;
+
 export type EstadisticasGlobales = Readonly<{
-	totalLeads: number;
-	totalClientes: number;
-	leadsPorEstado: Readonly<Record<string, number>>;
-	asesoresActivos: number;
+	acciones: ReadonlyArray<AccionResumen>;
+	totalAcciones: number;
 }>;
 
 export type ReporteGeneral = Readonly<{
 	fechaGeneracion: string;
-	metricas: {
-		conversionRate: number;
-		leadsNuevosHoy: number;
-		citasPendientes: number;
+	resumenAcciones: {
+		acciones: ReadonlyArray<AccionResumen>;
+		totalAcciones: number;
 	};
 	actividadReciente: ReadonlyArray<{
 		idLead: string;

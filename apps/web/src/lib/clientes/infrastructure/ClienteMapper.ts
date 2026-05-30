@@ -8,7 +8,9 @@ export function mapClienteFromDto(dto: ClienteDTO): Cliente {
 		email: dto.email,
 		telefono: dto.telefono,
 		idAsesor: dto.idAsesor,
+		nombreAsesor: dto.nombreAsesor,
 		idLeadOrigen: dto.idLeadOrigen,
+		nombreLead: dto.nombreLead,
 		creadoEn: dto.creadoEn,
 		actualizadoEn: dto.actualizadoEn
 	};

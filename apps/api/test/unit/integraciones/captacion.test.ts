@@ -7,6 +7,8 @@ import {
   OrigenCaptacion,
 } from "../../../src/lib/integraciones/domain/value-objects";
 import { DatosContactoCaptacion } from "../../../src/lib/integraciones/domain/value-objects/DatosContactoCaptacion";
+import { CaptacionPendienteMapper } from "../../../src/lib/integraciones/infrastructure/persistence/CaptacionPendienteMapper";
+import type { CaptacionPendienteRow } from "../../../src/lib/integraciones/infrastructure/persistence/schema";
 
 describe("integraciones / Captacion", () => {
   test("normaliza canal, origen y datos de contacto", () => {
@@ -103,5 +105,25 @@ describe("integraciones / Captacion", () => {
     expect(() => CaptacionWhatsApp.crear({ wa_id: "573001112233", wa_name: " " })).toThrow(
       "El webhook de WhatsApp requiere wa_name.",
     );
+  });
+
+  test("mapea captaciones heredadas de formulario al canal web soportado", () => {
+    const captacion = CaptacionPendienteMapper.aDominio({
+      id: "captacion-1",
+      canal: "FORMULARIO",
+      origen: "FACEBOOK",
+      nombre: "Elena Paz",
+      telefono: "977234567",
+      email: "elena@mail.com",
+      tipo: "VENTA",
+      estado: "PENDIENTE",
+      idPropiedadInteres: null,
+      metadataJson: null,
+      razonDuplicado: null,
+      creadoEn: "2026-05-30T22:55:35.079Z",
+      actualizadoEn: "2026-05-30T22:55:35.079Z",
+    } satisfies CaptacionPendienteRow);
+
+    expect(captacion.captacion.canal.valor).toBe("FORMULARIO_WEB");
   });
 });

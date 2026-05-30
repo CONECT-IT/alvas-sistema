@@ -78,6 +78,28 @@
 		});
 	}
 
+	function presentarCanal(canal: string): string {
+		const etiquetas: Record<string, string> = {
+			WHATSAPP: 'WhatsApp',
+			FORMULARIO_WEB: 'Formulario web',
+			META_ADS: 'Meta Ads',
+			PORTAL: 'Portal inmobiliario',
+			REFERIDO: 'Referido'
+		};
+		return etiquetas[canal] ?? 'Canal comercial';
+	}
+
+	function presentarOrigen(origen: string): string {
+		const etiquetas: Record<string, string> = {
+			WEB: 'Sitio web',
+			FACEBOOK: 'Facebook',
+			INSTAGRAM: 'Instagram',
+			PORTAL: 'Portal inmobiliario',
+			REFERIDO: 'Referido'
+		};
+		return etiquetas[origen] ?? origen;
+	}
+
 	$effect(() => {
 		cargar();
 	});
@@ -148,8 +170,14 @@
 									{captacion.telefono}
 								</p>
 								<p><span class="font-semibold text-text-main">Email:</span> {captacion.email}</p>
-								<p><span class="font-semibold text-text-main">Canal:</span> {captacion.canal}</p>
-								<p><span class="font-semibold text-text-main">Origen:</span> {captacion.origen}</p>
+								<p>
+									<span class="font-semibold text-text-main">Canal:</span>
+									{presentarCanal(captacion.canal)}
+								</p>
+								<p>
+									<span class="font-semibold text-text-main">Origen:</span>
+									{presentarOrigen(captacion.origen)}
+								</p>
 								<p>
 									<span class="font-semibold text-text-main">Captada:</span>
 									{formatearFecha(captacion.creadoEn)}
@@ -157,7 +185,7 @@
 								{#if captacion.idPropiedadInteres}
 									<p>
 										<span class="font-semibold text-text-main">Propiedad interés:</span>
-										{captacion.idPropiedadInteres}
+										Propiedad vinculada
 									</p>
 								{/if}
 							</div>

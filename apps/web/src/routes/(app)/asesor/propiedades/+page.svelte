@@ -1,18 +1,15 @@
 <script lang="ts">
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
-	import { HttpError } from '$lib/shared/http/httpClient';
 	import type { Propiedad } from '$lib/propiedades/domain/models/Propiedad';
-	import { listarPropiedades } from '$lib/propiedades/application/use-cases/listarPropiedades';
-	import { propiedadRepository } from '$lib/propiedades/infrastructure/propiedadRepository';
 	import PropiedadAdminTable from '$lib/propiedades/presentation/PropiedadAdminTable.svelte';
 	import PropiedadStats from '$lib/propiedades/presentation/PropiedadStats.svelte';
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
-	let propiedades = $state<Propiedad[]>(data.propiedades as unknown as Propiedad[]);
+	let propiedades = $derived((data?.propiedades as unknown as Propiedad[]) ?? []);
 	let loading = $state(false);
 	let error = $state<string | null>(null);
 	let mostrarSoloPublicadas = $state(false);
@@ -28,9 +25,9 @@
 		error = null;
 
 		try {
-			propiedades = await listarPropiedades(propiedadRepository);
-		} catch (err) {
-			error = err instanceof HttpError ? err.message : 'No se pudo cargar propiedades.';
+			await invalidateAll();
+		} catch {
+			error = 'No se pudieron actualizar las propiedades.';
 		} finally {
 			loading = false;
 		}

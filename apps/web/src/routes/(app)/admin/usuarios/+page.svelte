@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
 	import SidePanel from '$lib/shared/ui/SidePanel.svelte';
@@ -8,7 +8,6 @@
 	import type { Usuario } from '$lib/usuarios/domain/models/Usuario';
 	import { actualizarUsuario } from '$lib/usuarios/application/use-cases/actualizarUsuario';
 	import { crearUsuario } from '$lib/usuarios/application/use-cases/crearUsuario';
-	import { listarUsuarios } from '$lib/usuarios/application/use-cases/listarUsuarios';
 	import { usuarioRepository } from '$lib/usuarios/infrastructure/usuarioRepository';
 	import UsuarioAdminTable from '$lib/usuarios/presentation/UsuarioAdminTable.svelte';
 	import UsuarioStats from '$lib/usuarios/presentation/UsuarioStats.svelte';
@@ -16,7 +15,7 @@
 
 	let { data }: { data: PageData } = $props();
 
-	let usuarios = $state<Usuario[]>(data.usuarios as unknown as Usuario[]);
+	let usuarios = $derived((data?.usuarios as unknown as Usuario[]) ?? []);
 	let loading = $state(false);
 	let error = $state<string | null>(null);
 	let saving = $state(false);
@@ -40,9 +39,9 @@
 		error = null;
 
 		try {
-			usuarios = await listarUsuarios(usuarioRepository);
-		} catch (err) {
-			error = err instanceof HttpError ? err.message : 'No se pudo cargar la lista de usuarios.';
+			await invalidateAll();
+		} catch {
+			error = 'No se pudo actualizar la lista de usuarios.';
 		} finally {
 			loading = false;
 		}

@@ -65,6 +65,13 @@
 	});
 	let basePath = $derived($page.url.pathname.startsWith('/admin') ? '/admin' : '/asesor');
 	let propiedadesPorId = $derived(new Map(propiedadesDetalle.map((p) => [p.id, p])));
+	let catalogoPropiedadesPorId = $derived(
+		new Map(
+			[...propiedadesDisponibles, ...propiedadesDetalle, propiedadInteres]
+				.filter((p): p is Propiedad => p !== null)
+				.map((p) => [p.id, p])
+		)
+	);
 
 	async function cargar() {
 		if (!leadId.trim()) {
@@ -249,6 +256,11 @@
 		return `${propiedad.titulo} - S/ ${propiedad.precio.toLocaleString('es-PE')}`;
 	}
 
+	function nombrePropiedad(id?: string | null): string {
+		if (!id) return 'Sin propiedad asociada';
+		return catalogoPropiedadesPorId.get(id)?.titulo ?? 'Propiedad registrada';
+	}
+
 	function crearFechaHoraLocal(fecha: string, hora: string): Date | null {
 		if (!fecha || !hora) return null;
 		const date = new Date(`${fecha}T${hora}:00`);
@@ -294,9 +306,9 @@
 					>
 				</div>
 				<p class="mt-2 text-sm text-text-muted">
-					ID: {lead.id} &middot; Asesor: {lead.idAsesor}
+					Asesor: {lead.nombreAsesor ?? 'Sin asignar'}
 					{#if lead.idCliente}
-						&middot; Cliente vinculado: {lead.idCliente}
+						&middot; Cliente vinculado
 					{/if}
 				</p>
 			</div>
@@ -331,21 +343,22 @@
 					<dt class="font-semibold text-text-muted">Estado</dt>
 					<dd class="text-text-main">{lead.estado}</dd>
 					<dt class="font-semibold text-text-muted">Asesor asignado</dt>
-					<dd class="text-text-main">{lead.nombreAsesor || lead.idAsesor}</dd>
+					<dd class="text-text-main">{lead.nombreAsesor ?? 'Sin asignar'}</dd>
 					{#if lead.idPropiedadInteres}
 						<dt class="font-semibold text-text-muted">Propiedad de interés</dt>
 						<dd class="flex flex-wrap items-center gap-2">
-							<span class="font-mono text-sm font-semibold text-text-main">
-								{propiedadInteres?.titulo ?? lead.idPropiedadInteres}
+							<span class="text-sm font-semibold text-text-main">
+								{propiedadInteres?.titulo ?? 'Propiedad registrada'}
 							</span>
-							<span class="text-xs text-text-muted">{lead.idPropiedadInteres}</span>
 							<Button variant="ghost" onclick={verPropiedadInteres}>Ver propiedad</Button>
 						</dd>
 					{/if}
 					{#if lead.idCliente}
 						<dt class="font-semibold text-text-muted">Cliente vinculado</dt>
 						<dd class="flex flex-wrap items-center gap-2">
-							<span class="font-mono text-sm font-semibold text-text-main">{lead.idCliente}</span>
+							<span class="text-sm font-semibold text-text-main"
+								>Cliente creado desde este lead</span
+							>
 							<Button variant="ghost" onclick={verCliente}>Ver cliente</Button>
 						</dd>
 					{/if}
@@ -373,10 +386,9 @@
 						>
 							<div>
 								<p class="font-semibold text-text-main">
-									{propiedadesPorId.get(idProp)?.titulo ?? idProp}
+									{propiedadesPorId.get(idProp)?.titulo ?? 'Propiedad registrada'}
 								</p>
 								<div class="mt-1 flex flex-wrap items-center gap-2">
-									<p class="font-mono text-xs text-text-muted">{idProp}</p>
 									{#if propiedadesPorId.get(idProp)?.estado}
 										<Badge
 											tone={presentarEstadoPropiedad(propiedadesPorId.get(idProp)?.estado ?? '')
@@ -436,7 +448,9 @@
 								</Badge>
 							</div>
 							{#if cita.idPropiedad}
-								<p class="mt-2 text-xs text-text-muted">Propiedad: {cita.idPropiedad}</p>
+								<p class="mt-2 text-xs text-text-muted">
+									Propiedad: {nombrePropiedad(cita.idPropiedad)}
+								</p>
 							{/if}
 						</div>
 					{/each}

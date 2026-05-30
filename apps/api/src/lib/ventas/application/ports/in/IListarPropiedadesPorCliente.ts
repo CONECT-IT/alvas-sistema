@@ -6,7 +6,5 @@ export type ListarPropiedadesPorClienteQuery = Readonly<{
 }>;
 
 export interface IListarPropiedadesPorCliente {
-  ejecutar(
-    input: ListarPropiedadesPorClienteQuery,
-  ): Promise<Resultado<string[], ErrorDeDominio>>;
+  ejecutar(input: ListarPropiedadesPorClienteQuery): Promise<Resultado<string[], ErrorDeDominio>>;
 }

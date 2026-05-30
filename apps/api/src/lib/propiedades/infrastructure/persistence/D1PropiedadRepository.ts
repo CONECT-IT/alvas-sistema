@@ -32,9 +32,7 @@ export class D1PropiedadRepository implements IPropiedadRepository {
   }
 
   async eliminarPorId(id: string): Promise<void> {
-    await this.drizzle()
-      .delete(propiedadesTable)
-      .where(eq(propiedadesTable.id, id));
+    await this.drizzle().delete(propiedadesTable).where(eq(propiedadesTable.id, id));
   }
 
   async guardar(propiedad: Propiedad): Promise<void> {

@@ -150,9 +150,7 @@
 						{presentarEstadoUsuario(usuario.estado).label}
 					</Badge>
 				</div>
-				<p class="mt-2 text-sm text-text-muted">
-					Usuario: {usuario.username} &middot; ID: {usuario.id}
-				</p>
+				<p class="mt-2 text-sm text-text-muted">Usuario de acceso: {usuario.username}</p>
 			</div>
 			<div class="flex gap-3">
 				<Button variant="secondary" disabled={disabling} onclick={conmutarEstado}>

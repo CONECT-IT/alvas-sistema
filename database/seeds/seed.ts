@@ -1,31 +1,31 @@
 // Seed programático usando repositorios y entidades de dominio.
 // Útil para importar desde un wrangler entry point o tests.
 // Para seed vía SQL directo (recomendado), usar:
-//   npm run seed:generate    # genera apps/api/src/seed.sql
+//   npm run seed:generate    # genera database/seeds/seed.sql
 //   npm run seed:local       # ejecuta contra D1 local
 //   npm run db:recreate:local  # reset + migrate + seed
 
-import { Pbkdf2PasswordHasher } from "./lib/usuarios/infrastructure/security/Pbkdf2PasswordHasher";
-import { D1UsuarioRepository } from "./lib/usuarios/infrastructure";
-import { D1VentasRepository } from "./lib/ventas/infrastructure";
-import { D1ContratoRepository } from "./lib/ventas/infrastructure";
-import { D1PropiedadRepository } from "./lib/propiedades/infrastructure";
-import { Usuario } from "./lib/usuarios/domain/entities";
-import { Lead } from "./lib/ventas/domain/entities/Lead";
-import { Cliente } from "./lib/ventas/domain/entities/Cliente";
-import { Cita } from "./lib/ventas/domain/entities/Cita";
-import { Contrato } from "./lib/ventas/domain/entities/Contrato";
-import { Propiedad } from "./lib/propiedades/domain/entities";
-import { EstadoLead } from "./lib/ventas/domain/value-objects/EstadoLead";
-import { type D1DatabaseLike } from "./lib/shared/infrastructure";
+import { Pbkdf2PasswordHasher } from "../../apps/api/src/lib/usuarios/infrastructure/security/Pbkdf2PasswordHasher";
+import { D1UsuarioRepository } from "../../apps/api/src/lib/usuarios/infrastructure";
+import { D1VentasRepository } from "../../apps/api/src/lib/ventas/infrastructure";
+import { D1ContratoRepository } from "../../apps/api/src/lib/ventas/infrastructure";
+import { D1PropiedadRepository } from "../../apps/api/src/lib/propiedades/infrastructure";
+import { Usuario } from "../../apps/api/src/lib/usuarios/domain/entities";
+import { Lead } from "../../apps/api/src/lib/ventas/domain/entities/Lead";
+import { Cliente } from "../../apps/api/src/lib/ventas/domain/entities/Cliente";
+import { Cita } from "../../apps/api/src/lib/ventas/domain/entities/Cita";
+import { Contrato } from "../../apps/api/src/lib/ventas/domain/entities/Contrato";
+import { Propiedad } from "../../apps/api/src/lib/propiedades/domain/entities";
+import { EstadoLead } from "../../apps/api/src/lib/ventas/domain/value-objects/EstadoLead";
+import { type D1DatabaseLike } from "../../apps/api/src/lib/shared/infrastructure";
 import {
   idCita,
   idCliente,
   idContrato,
   idLead,
   idPropiedad,
-} from "./lib/ventas/domain/value-objects/Ids";
-import { idUsuarioRef } from "./lib/shared/domain/value-objects/IdUsuarioRef";
+} from "../../apps/api/src/lib/ventas/domain/value-objects/Ids";
+import { idUsuarioRef } from "../../apps/api/src/lib/shared/domain/value-objects/IdUsuarioRef";
 
 interface SeedEnv {
   DB: D1DatabaseLike;

@@ -1,17 +1,14 @@
 <script lang="ts">
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
-	import { goto } from '$app/navigation';
-	import { HttpError } from '$lib/shared/http/httpClient';
+	import { goto, invalidateAll } from '$app/navigation';
 	import type { Cliente } from '$lib/clientes/domain/models/Cliente';
-	import { listarClientes } from '$lib/clientes/application/use-cases/listarClientes';
-	import { clienteRepository } from '$lib/clientes/infrastructure/clienteRepository';
 	import ClienteTable from '$lib/clientes/presentation/ClienteTable.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
-	let clientes = $state<Cliente[]>(data.clientes as unknown as Cliente[]);
+	let clientes = $derived((data?.clientes as unknown as Cliente[]) ?? []);
 	let loading = $state(false);
 	let error = $state<string | null>(null);
 
@@ -24,9 +21,9 @@
 		error = null;
 
 		try {
-			clientes = await listarClientes(clienteRepository);
-		} catch (err) {
-			error = err instanceof HttpError ? err.message : 'No se pudieron cargar los clientes.';
+			await invalidateAll();
+		} catch {
+			error = 'No se pudieron actualizar los clientes.';
 		} finally {
 			loading = false;
 		}

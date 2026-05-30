@@ -5,7 +5,11 @@ type ApiResp<T> = { success: true; data: T } | { success: false };
 type CitaDto = {
 	id: string;
 	idLead: string;
+	nombreLead?: string;
 	idPropiedad?: string;
+	nombrePropiedad?: string;
+	idAsesor: string;
+	nombreAsesor?: string;
 	fechaInicio: string;
 	fechaFin: string;
 	estado: string;

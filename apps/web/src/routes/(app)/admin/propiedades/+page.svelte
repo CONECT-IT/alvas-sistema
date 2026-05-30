@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
 	import SidePanel from '$lib/shared/ui/SidePanel.svelte';
@@ -7,19 +7,16 @@
 	import type { Propiedad } from '$lib/propiedades/domain/models/Propiedad';
 	import { actualizarPropiedad } from '$lib/propiedades/application/use-cases/actualizarPropiedad';
 	import { crearPropiedad } from '$lib/propiedades/application/use-cases/crearPropiedad';
-	import { listarPropiedades } from '$lib/propiedades/application/use-cases/listarPropiedades';
 	import { propiedadRepository } from '$lib/propiedades/infrastructure/propiedadRepository';
 	import PropiedadAdminTable from '$lib/propiedades/presentation/PropiedadAdminTable.svelte';
 	import PropiedadStats from '$lib/propiedades/presentation/PropiedadStats.svelte';
 	import type { Usuario } from '$lib/usuarios/domain/models/Usuario';
-	import { listarUsuarios } from '$lib/usuarios/application/use-cases/listarUsuarios';
-	import { usuarioRepository } from '$lib/usuarios/infrastructure/usuarioRepository';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
-	let propiedades = $state<Propiedad[]>(data.propiedades as unknown as Propiedad[]);
-	let asesores = $state<Usuario[]>(data.asesores as unknown as Usuario[]);
+	let propiedades = $derived((data?.propiedades as Propiedad[]) ?? []);
+	let asesores = $derived((data?.asesores as Usuario[]) ?? []);
 	let loading = $state(false);
 	let creating = $state(false);
 	let updatingId = $state<string | null>(null);
@@ -46,20 +43,9 @@
 		error = null;
 
 		try {
-			const [propiedadesResult, usuariosResult] = await Promise.all([
-				listarPropiedades(propiedadRepository),
-				listarUsuarios(usuarioRepository)
-			]);
-			propiedades = propiedadesResult;
-			asesores = usuariosResult.filter(
-				(usuario) => usuario.rol === 'ASESOR' && usuario.estado.toUpperCase() === 'ACTIVO'
-			);
-		} catch (err) {
-			if (err instanceof HttpError) {
-				error = err.message;
-			} else {
-				error = 'No se pudo cargar el catálogo de propiedades.';
-			}
+			await invalidateAll();
+		} catch {
+			error = 'No se pudo actualizar el catálogo de propiedades.';
 		} finally {
 			loading = false;
 		}
@@ -76,9 +62,7 @@
 				estado: nuevoEstado
 			});
 			reviewSuccess = `${propiedad.titulo} pasó a ${nuevoEstado}.`;
-			propiedades = propiedades.map((item) =>
-				item.id === propiedad.id ? { ...item, estado: nuevoEstado.toUpperCase() } : item
-			);
+			await invalidateAll();
 		} catch (err) {
 			reviewError =
 				err instanceof HttpError ? err.message : 'No se pudo actualizar el estado de la propiedad.';
@@ -134,6 +118,11 @@
 
 	function verDetalle(propiedad: Propiedad) {
 		goto(`/admin/propiedades/${propiedad.id}`);
+	}
+
+	function nombreAsesor(id?: string | null): string {
+		if (!id) return 'Sin asignar';
+		return asesores.find((asesor) => asesor.id === id)?.nombre ?? 'Asesor asignado';
 	}
 </script>
 
@@ -300,9 +289,13 @@
 										{propiedad.descripcion}
 									</p>
 									<div class="mt-3 grid gap-2 text-xs text-text-muted sm:grid-cols-3">
-										<p>Lead origen: {propiedad.idLeadOrigen ?? 'Sin lead'}</p>
-										<p>Captada por: {propiedad.captadaPorAsesorId ?? 'Sin asesor'}</p>
-										<p>Responsable: {propiedad.asesorResponsableId ?? 'Sin asignar'}</p>
+										<p>
+											Origen comercial: {propiedad.idLeadOrigen
+												? 'Lead de captación'
+												: 'Registro directo'}
+										</p>
+										<p>Captada por: {nombreAsesor(propiedad.captadaPorAsesorId)}</p>
+										<p>Responsable: {nombreAsesor(propiedad.asesorResponsableId)}</p>
 									</div>
 								</div>
 

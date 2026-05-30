@@ -54,21 +54,11 @@ export class HmacTokenProvider implements ITokenProvider {
   }
 
   async generarAuthToken(payload: SessionClaims): Promise<string> {
-    return this.firmar(
-      payload,
-      this.params.authSecret,
-      "auth",
-      this.authTokenTtlSegundos,
-    );
+    return this.firmar(payload, this.params.authSecret, "auth", this.authTokenTtlSegundos);
   }
 
   async generarRefreshToken(payload: SessionClaims): Promise<string> {
-    return this.firmar(
-      payload,
-      this.refreshSecret,
-      "refresh",
-      this.refreshTokenTtlSegundos,
-    );
+    return this.firmar(payload, this.refreshSecret, "refresh", this.refreshTokenTtlSegundos);
   }
 
   async validarAuthToken(token: string): Promise<SessionClaims> {

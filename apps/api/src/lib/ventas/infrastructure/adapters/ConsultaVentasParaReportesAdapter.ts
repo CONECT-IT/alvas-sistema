@@ -1,4 +1,5 @@
 import {
+  type AccionResumenLectura,
   type ActividadRecienteLectura,
   type AsesorConTotalLeads,
   type ClienteLecturaParaReportes,
@@ -35,5 +36,9 @@ export class ConsultaVentasParaReportesAdapter implements IConsultaVentasParaRep
       idAsesor: r.idAsesor as string,
       totalLeads: r.totalLeads,
     }));
+  }
+
+  async contarAccionesPorTipo(): Promise<AccionResumenLectura[]> {
+    return this.ventas.contarAccionesPorTipo();
   }
 }

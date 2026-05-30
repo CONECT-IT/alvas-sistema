@@ -26,4 +26,5 @@ export interface IVentasRepository {
 
   // Estadísticas y Reportes
   listarAsesoresConLeads(): Promise<{ idAsesor: string; totalLeads: number }[]>;
+  contarAccionesPorTipo(): Promise<{ evento: string; total: number }[]>;
 }

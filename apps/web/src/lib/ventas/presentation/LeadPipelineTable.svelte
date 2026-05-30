@@ -109,7 +109,7 @@
 							></div>
 						{/if}
 					</td>
-					<td class="py-4 pr-6 text-text-muted">{lead.nombreAsesor || lead.idAsesor || '-'}</td>
+					<td class="py-4 pr-6 text-text-muted">{lead.nombreAsesor ?? 'Sin asignar'}</td>
 					<td class="py-4 text-text-muted">{lead.citasCount}</td>
 					<td class="py-4 pl-3">
 						{#if onEditClick}

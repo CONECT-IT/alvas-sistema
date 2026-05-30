@@ -25,9 +25,15 @@ export type AsesorConTotalLeads = Readonly<{
   totalLeads: number;
 }>;
 
+export type AccionResumenLectura = Readonly<{
+  evento: string;
+  total: number;
+}>;
+
 export interface IConsultaVentasParaReportes {
   listarLeadsParaReporte(): Promise<LeadLecturaParaReportes[]>;
   listarClientesParaReporte(): Promise<ClienteLecturaParaReportes[]>;
   obtenerActividadReciente(limite: number): Promise<ActividadRecienteLectura[]>;
   listarAsesoresConTotalesLeads(): Promise<AsesorConTotalLeads[]>;
+  contarAccionesPorTipo(): Promise<AccionResumenLectura[]>;
 }

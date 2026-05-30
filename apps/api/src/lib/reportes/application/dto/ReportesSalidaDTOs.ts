@@ -1,12 +1,16 @@
-export type MetricasReporteGeneralDTO = Readonly<{
-  conversionRate: number;
-  leadsNuevosHoy: number;
-  citasPendientes: number;
+export type AccionResumenDTO = Readonly<{
+  evento: string;
+  total: number;
+}>;
+
+export type ResumenAccionesOutput = Readonly<{
+  acciones: ReadonlyArray<AccionResumenDTO>;
+  totalAcciones: number;
 }>;
 
 export type ReporteGeneralOutput = Readonly<{
   fechaGeneracion: Date;
-  metricas: MetricasReporteGeneralDTO;
+  resumenAcciones: ResumenAccionesOutput;
   actividadReciente: ReadonlyArray<{
     idLead: string;
     evento: string;
@@ -15,9 +19,4 @@ export type ReporteGeneralOutput = Readonly<{
   }>;
 }>;
 
-export type EstadisticasGlobalesOutput = Readonly<{
-  totalLeads: number;
-  totalClientes: number;
-  leadsPorEstado: Readonly<Record<string, number>>;
-  asesoresActivos: number;
-}>;
+export type EstadisticasGlobalesOutput = ResumenAccionesOutput;

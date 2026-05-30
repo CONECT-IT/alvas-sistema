@@ -2,8 +2,6 @@ import { type IRepositorioEscritura, type IRepositorioLectura } from "../../../s
 import { Propiedad } from "../entities/Propiedad";
 
 export interface IPropiedadRepository
-  extends
-    IRepositorioLectura<Propiedad, string>,
-    IRepositorioEscritura<Propiedad, string> {
+  extends IRepositorioLectura<Propiedad, string>, IRepositorioEscritura<Propiedad, string> {
   listarTodas(): Promise<Propiedad[]>;
 }

@@ -42,12 +42,17 @@ export class ContratosController {
       const data = await Promise.all(
         (resultado.valor.contratos ?? []).map(async (ctr) => {
           let nombreLead: string | undefined;
+          let nombreCliente: string | undefined;
           let nombrePropiedad: string | undefined;
           let nombreAsesor: string | undefined;
 
           if (ctr.idLead) {
             const lead = await ventasRepo.obtenerLeadPorId(ctr.idLead);
             nombreLead = lead?.nombre;
+          }
+          if (ctr.idCliente) {
+            const cliente = await ventasRepo.obtenerClientePorId(ctr.idCliente);
+            nombreCliente = cliente?.nombre;
           }
           if (ctr.idPropiedad) {
             try {
@@ -66,11 +71,11 @@ export class ContratosController {
             }
           }
 
-          return { ...ctr, nombreLead, nombrePropiedad, nombreAsesor };
+          return { ...ctr, nombreLead, nombreCliente, nombrePropiedad, nombreAsesor };
         }),
       );
 
-      return c.json({ success: true, data });
+      return c.json({ success: true, data: { contratos: data } });
     } catch (error) {
       return responderErrorInterno(c, "ContratosController.listar:", error);
     }
@@ -94,12 +99,17 @@ export class ContratosController {
       const data = await Promise.all(
         (resultado.valor.contratos ?? []).map(async (ctr) => {
           let nombreLead: string | undefined;
+          let nombreCliente: string | undefined;
           let nombrePropiedad: string | undefined;
           let nombreAsesor: string | undefined;
 
           if (ctr.idLead) {
             const lead = await ventasRepo.obtenerLeadPorId(ctr.idLead);
             nombreLead = lead?.nombre;
+          }
+          if (ctr.idCliente) {
+            const cliente = await ventasRepo.obtenerClientePorId(ctr.idCliente);
+            nombreCliente = cliente?.nombre;
           }
           if (ctr.idPropiedad) {
             try {
@@ -118,11 +128,11 @@ export class ContratosController {
             }
           }
 
-          return { ...ctr, nombreLead, nombrePropiedad, nombreAsesor };
+          return { ...ctr, nombreLead, nombreCliente, nombrePropiedad, nombreAsesor };
         }),
       );
 
-      return c.json({ success: true, data });
+      return c.json({ success: true, data: { contratos: data } });
     } catch (error) {
       return responderErrorInterno(c, "ContratosController.listarPorAsesor:", error);
     }

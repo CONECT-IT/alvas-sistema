@@ -39,13 +39,18 @@ type AppVariables = {
 const app = new Hono<{ Bindings: AppBindings; Variables: AppVariables }>();
 
 // Security: CORS
-app.use("*", cors({
-  origin: (origin, c) => {
-    const allowed = (c.env.CORS_ORIGINS ?? "http://localhost:5173").split(",").map((s: string) => s.trim());
-    return allowed.includes(origin) ? origin : null;
-  },
-  credentials: true,
-}));
+app.use(
+  "*",
+  cors({
+    origin: (origin, c) => {
+      const allowed = (c.env.CORS_ORIGINS ?? "http://localhost:5173")
+        .split(",")
+        .map((s: string) => s.trim());
+      return allowed.includes(origin) ? origin : null;
+    },
+    credentials: true,
+  }),
+);
 
 // Security: headers
 app.use("*", async (c, next) => {
@@ -81,7 +86,11 @@ app.use("*", async (c, next) => {
 
   if (entry.count > RATE_LIMIT_MAX) {
     return c.json(
-      { success: false, message: "Demasiadas solicitudes. Intenta de nuevo en un minuto.", code: "RATE_LIMIT" },
+      {
+        success: false,
+        message: "Demasiadas solicitudes. Intenta de nuevo en un minuto.",
+        code: "RATE_LIMIT",
+      },
       429,
     );
   }
@@ -90,20 +99,61 @@ app.use("*", async (c, next) => {
 });
 
 app.get("/health", (c) => c.json({ status: "ok", service: "alvas-api" }));
+
+// Auth middleware applied at composition root - BEFORE mounting routes
+app.use(
+  "/usuarios",
+  verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+);
+app.use(
+  "/usuarios/*",
+  verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+);
+
+app.use(
+  "/propiedades",
+  verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+);
+app.use(
+  "/propiedades/*",
+  verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+);
+
+app.use(
+  "/ventas",
+  verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+);
+app.use(
+  "/ventas/*",
+  verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+);
+
+app.use(
+  "/reportes",
+  verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+);
+app.use(
+  "/reportes/*",
+  verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+);
+app.use("/reportes", requireRolesMiddleware(["ADMIN"]));
+app.use("/reportes/*", requireRolesMiddleware(["ADMIN"]));
+
+app.use(
+  "/integraciones/captaciones/pendientes",
+  verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+);
+app.use(
+  "/integraciones/captaciones/pendientes/*",
+  verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+);
+
 app.route("/usuarios", crearUsuarioRouter(crearUsuarioControllerDeps()));
 app.route("/auth", crearAuthRouter(crearAuthControllerDeps()));
 app.route("/propiedades", crearPropiedadRouter(crearPropiedadRouterDeps()));
 app.route("/ventas", crearVentasRouter(crearVentasControllerDeps()));
 app.route("/reportes", crearReportesRouter(crearReportesRouterDeps()));
 app.route("/integraciones", crearIntegracionesRouter(crearIntegracionesRouterDeps()));
-
-// Auth middleware applied at composition root
-app.use("/usuarios/*", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
-app.use("/propiedades/*", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
-app.use("/ventas/*", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
-app.use("/reportes/*", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
-app.use("/reportes/*", requireRolesMiddleware(["ADMIN"]));
-app.use("/integraciones/captaciones/pendientes/*", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
 
 // Audit logging for write operations
 const METODOS_ESCRITURA = new Set(["POST", "PUT", "PATCH", "DELETE"]);
@@ -136,13 +186,21 @@ app.onError((error, c) => {
 
   if (error instanceof ValidationError) {
     return c.json(
-      { success: false, message: "Error de validación", code: "VALIDATION_ERROR", detalles: error.details },
+      {
+        success: false,
+        message: "Error de validación",
+        code: "VALIDATION_ERROR",
+        detalles: error.details,
+      },
       400,
     );
   }
 
   console.error("Error no manejado:", error);
-  return c.json({ success: false, message: "Error interno del servidor.", code: "ERROR_INTERNO" }, 500);
+  return c.json(
+    { success: false, message: "Error interno del servidor.", code: "ERROR_INTERNO" },
+    500,
+  );
 });
 
 export default app;

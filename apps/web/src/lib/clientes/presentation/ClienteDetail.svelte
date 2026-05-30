@@ -145,7 +145,7 @@
 					<Badge tone="success">Cliente</Badge>
 				</div>
 				<p class="mt-2 text-sm text-text-muted">
-					ID: {cliente.id} &middot; Asesor: {cliente.idAsesor}
+					Asesor: {cliente.nombreAsesor ?? 'Sin asignar'}
 				</p>
 			</div>
 			<div class="flex gap-3">
@@ -204,7 +204,7 @@
 					<dt class="font-semibold text-text-muted">Estado del lead</dt>
 					<dd><Badge>{leadOrigen.estado}</Badge></dd>
 					<dt class="font-semibold text-text-muted">Asesor asignado</dt>
-					<dd class="text-text-main">{leadOrigen.nombreAsesor ?? leadOrigen.idAsesor}</dd>
+					<dd class="text-text-main">{leadOrigen.nombreAsesor ?? 'Sin asignar'}</dd>
 					{#if leadOrigen.citas.length > 0}
 						<dt class="font-semibold text-text-muted">Citas realizadas</dt>
 						<dd class="text-text-main">{leadOrigen.citas.length}</dd>
@@ -222,10 +222,10 @@
 					<dt class="font-semibold text-text-muted">Teléfono</dt>
 					<dd class="text-text-main">{cliente.telefono}</dd>
 					<dt class="font-semibold text-text-muted">Asesor asignado</dt>
-					<dd class="text-text-main">{cliente.idAsesor}</dd>
+					<dd class="text-text-main">{cliente.nombreAsesor ?? 'Sin asignar'}</dd>
 					{#if cliente.idLeadOrigen}
 						<dt class="font-semibold text-text-muted">Lead de origen</dt>
-						<dd class="text-text-main">{cliente.idLeadOrigen}</dd>
+						<dd class="text-text-main">{cliente.nombreLead ?? 'Prospecto convertido'}</dd>
 					{/if}
 				</dl>
 			</Card>
@@ -253,10 +253,12 @@
 							<div class="flex flex-wrap items-center justify-between gap-3">
 								<div>
 									<p class="font-semibold text-text-main">
-										{ctr.nombrePropiedad ?? ctr.idPropiedad}
+										{ctr.nombrePropiedad ?? 'Propiedad registrada'}
 									</p>
 									<p class="mt-0.5 text-xs text-text-muted">
-										{ctr.nombreLead ?? '—'} &middot; {formatearFecha(ctr.fechaInicio)}
+										{ctr.nombreLead ?? 'Prospecto asociado'} &middot; {formatearFecha(
+											ctr.fechaInicio
+										)}
 									</p>
 								</div>
 								<Badge tone={presentarEstadoContrato(ctr.estado).tone}>

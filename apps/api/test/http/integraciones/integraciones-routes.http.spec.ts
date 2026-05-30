@@ -1,7 +1,13 @@
 import { describe, expect, it } from "bun:test";
 import { Hono } from "hono";
 
+import { crearTokenProviderDesdeEnv } from "../../../src/lib/auth/infrastructure/security/TokenProviderFactory";
 import { resultadoExitoso, resultadoFallido } from "../../../src/lib/shared";
+import {
+  type D1DatabaseLike,
+  type SessionClaims,
+  verifySessionMiddleware,
+} from "../../../src/lib/shared/infrastructure";
 import { ErrorDeDominio } from "../../../src/lib/shared/domain";
 import {
   crearIntegracionesRouter,
@@ -53,6 +59,40 @@ const captacionConvertida = {
     estado: "CONVERTIDA",
   },
 } as const;
+
+type AppBindings = {
+  DB: D1DatabaseLike;
+  AUTH_SECRET: string;
+  AUTH_REFRESH_SECRET?: string;
+  AUTH_TOKEN_TTL_SEGUNDOS?: string;
+  REFRESH_TOKEN_TTL_SEGUNDOS?: string;
+  INTEGRACION_WHATSAPP_SECRETO?: string;
+};
+
+type AppVariables = {
+  authPayload: SessionClaims;
+};
+
+function crearAppIntegraciones(deps: IntegracionesRouterDeps) {
+  const app = new Hono<{ Bindings: AppBindings; Variables: AppVariables }>();
+  app.use(
+    "/integraciones/captaciones/pendientes",
+    verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+  );
+  app.use(
+    "/integraciones/captaciones/pendientes/*",
+    verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+  );
+  app.onError((error, c) => {
+    if (error instanceof ErrorDeDominio) {
+      return c.json({ success: false, message: error.message, code: error.codigo }, 401);
+    }
+
+    return c.json({ success: false, message: "Error interno del servidor." }, 500);
+  });
+  app.route("/integraciones", crearIntegracionesRouter(deps));
+  return app;
+}
 
 function crearDeps(): IntegracionesRouterDeps & {
   readonly ultimaCaptacionInput: unknown;
@@ -132,9 +172,8 @@ function crearDeps(): IntegracionesRouterDeps & {
 
 describe("http / integraciones routes", () => {
   it("registra captacion entrante sin levantar servidor real", async () => {
-    const app = new Hono();
     const deps = crearDeps();
-    app.route("/integraciones", crearIntegracionesRouter(deps));
+    const app = crearAppIntegraciones(deps);
 
     const res = await app.request("/integraciones/captaciones", {
       method: "POST",
@@ -169,8 +208,7 @@ describe("http / integraciones routes", () => {
   });
 
   it("rechaza webhook de WhatsApp con secreto invalido", async () => {
-    const app = new Hono();
-    app.route("/integraciones", crearIntegracionesRouter(crearDeps()));
+    const app = crearAppIntegraciones(crearDeps());
 
     const res = await app.request(
       "/integraciones/webhooks/whatsapp",
@@ -196,9 +234,8 @@ describe("http / integraciones routes", () => {
   });
 
   it("procesa webhook de WhatsApp autenticado por secreto", async () => {
-    const app = new Hono();
     const deps = crearDeps();
-    app.route("/integraciones", crearIntegracionesRouter(deps));
+    const app = crearAppIntegraciones(deps);
 
     const res = await app.request(
       "/integraciones/webhooks/whatsapp",
@@ -235,8 +272,7 @@ describe("http / integraciones routes", () => {
   });
 
   it("lista captaciones pendientes para revision operativa", async () => {
-    const app = new Hono();
-    app.route("/integraciones", crearIntegracionesRouter(crearDeps()));
+    const app = crearAppIntegraciones(crearDeps());
 
     const res = await app.request(
       "/integraciones/captaciones/pendientes",
@@ -256,15 +292,7 @@ describe("http / integraciones routes", () => {
   });
 
   it("protege la bandeja operativa de captaciones pendientes", async () => {
-    const app = new Hono();
-    app.onError((error, c) => {
-      if (error instanceof ErrorDeDominio) {
-        return c.json({ success: false, message: error.message, code: error.codigo }, 401);
-      }
-
-      return c.json({ success: false, message: "Error interno del servidor." }, 500);
-    });
-    app.route("/integraciones", crearIntegracionesRouter(crearDeps()));
+    const app = crearAppIntegraciones(crearDeps());
 
     const res = await app.request("/integraciones/captaciones/pendientes", undefined, envConAuth);
 
@@ -277,9 +305,8 @@ describe("http / integraciones routes", () => {
   });
 
   it("revisa captacion pendiente autenticada", async () => {
-    const app = new Hono();
     const deps = crearDeps();
-    app.route("/integraciones", crearIntegracionesRouter(deps));
+    const app = crearAppIntegraciones(deps);
 
     const res = await app.request(
       "/integraciones/captaciones/pendientes/captacion-1/revisar",
@@ -302,9 +329,8 @@ describe("http / integraciones routes", () => {
   });
 
   it("marca captacion pendiente como duplicada con razon", async () => {
-    const app = new Hono();
     const deps = crearDeps();
-    app.route("/integraciones", crearIntegracionesRouter(deps));
+    const app = crearAppIntegraciones(deps);
 
     const res = await app.request(
       "/integraciones/captaciones/pendientes/captacion-1/duplicada",
@@ -332,9 +358,8 @@ describe("http / integraciones routes", () => {
   });
 
   it("rechaza captacion pendiente con razon operativa", async () => {
-    const app = new Hono();
     const deps = crearDeps();
-    app.route("/integraciones", crearIntegracionesRouter(deps));
+    const app = crearAppIntegraciones(deps);
 
     const res = await app.request(
       "/integraciones/captaciones/pendientes/captacion-1/rechazar",
@@ -362,9 +387,8 @@ describe("http / integraciones routes", () => {
   });
 
   it("convierte captacion pendiente asignando asesor segun rol autenticado", async () => {
-    const app = new Hono();
     const deps = crearDeps();
-    app.route("/integraciones", crearIntegracionesRouter(deps));
+    const app = crearAppIntegraciones(deps);
 
     const res = await app.request(
       "/integraciones/captaciones/pendientes/captacion-1/convertir",
@@ -392,36 +416,32 @@ describe("http / integraciones routes", () => {
   });
 
   it("serializa errores de dominio de captacion con codigo de negocio", async () => {
-    const app = new Hono();
-    app.route(
-      "/integraciones",
-      crearIntegracionesRouter({
-        crearProcesarCaptacionEntrante: () => ({
-          ejecutar: async () =>
-            resultadoFallido(
-              new ErrorDeDominio("Captacion duplicada", { codigo: "CAPTACION_DUPLICADA" }),
-            ),
-        }),
-        crearProcesarWhatsAppWebhook: () => ({
-          ejecutar: async () => resultadoExitoso(captacionPendiente),
-        }),
-        crearListarCaptacionesPendientes: () => ({
-          ejecutar: async () => resultadoExitoso([]),
-        }),
-        crearRevisarCaptacionPendiente: () => ({
-          ejecutar: async () => resultadoExitoso(captacionRevisada),
-        }),
-        crearMarcarCaptacionDuplicada: () => ({
-          ejecutar: async () => resultadoExitoso(captacionDuplicada),
-        }),
-        crearRechazarCaptacionPendiente: () => ({
-          ejecutar: async () => resultadoExitoso(captacionRechazada),
-        }),
-        crearConvertirCaptacionPendiente: () => ({
-          ejecutar: async () => resultadoExitoso(captacionConvertida),
-        }),
+    const app = crearAppIntegraciones({
+      crearProcesarCaptacionEntrante: () => ({
+        ejecutar: async () =>
+          resultadoFallido(
+            new ErrorDeDominio("Captacion duplicada", { codigo: "CAPTACION_DUPLICADA" }),
+          ),
       }),
-    );
+      crearProcesarWhatsAppWebhook: () => ({
+        ejecutar: async () => resultadoExitoso(captacionPendiente),
+      }),
+      crearListarCaptacionesPendientes: () => ({
+        ejecutar: async () => resultadoExitoso([]),
+      }),
+      crearRevisarCaptacionPendiente: () => ({
+        ejecutar: async () => resultadoExitoso(captacionRevisada),
+      }),
+      crearMarcarCaptacionDuplicada: () => ({
+        ejecutar: async () => resultadoExitoso(captacionDuplicada),
+      }),
+      crearRechazarCaptacionPendiente: () => ({
+        ejecutar: async () => resultadoExitoso(captacionRechazada),
+      }),
+      crearConvertirCaptacionPendiente: () => ({
+        ejecutar: async () => resultadoExitoso(captacionConvertida),
+      }),
+    });
 
     const res = await app.request("/integraciones/captaciones", {
       method: "POST",

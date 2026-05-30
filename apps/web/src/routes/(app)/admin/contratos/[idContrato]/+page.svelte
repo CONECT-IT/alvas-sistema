@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import Badge from '$lib/shared/ui/Badge.svelte';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
@@ -17,6 +17,7 @@
 		idLead?: string;
 		nombreLead?: string;
 		idCliente?: string;
+		nombreCliente?: string;
 		idPropiedad: string;
 		nombrePropiedad?: string;
 		idAsesor?: string;
@@ -28,25 +29,20 @@
 		actualizadoEn: string;
 	};
 
-	let contrato = $state<ContratoDto | null>(data.contrato as ContratoDto | null);
-	let loading = $state(!data.contrato);
+	let contrato = $derived(data?.contrato as ContratoDto | null);
+	let loading = $state(false);
 	let error = $state<string | null>(null);
 	let accionando = $state(false);
 	let accionError = $state<string | null>(null);
 
 	async function cargar() {
-		if (!data.contrato?.id) return;
 		loading = true;
 		error = null;
 
 		try {
-			const res = await fetch(`/api/ventas/contratos/${data.contrato.id}`).then((r) =>
-				r.json<{ success: boolean; data: ContratoDto }>()
-			);
-			contrato = res.success ? res.data : null;
-			if (!res.success) error = 'Contrato no encontrado.';
-		} catch (err) {
-			error = err instanceof HttpError ? err.message : 'No se pudo cargar el contrato.';
+			await invalidateAll();
+		} catch {
+			error = 'No se pudo actualizar el contrato.';
 		} finally {
 			loading = false;
 		}
@@ -97,10 +93,16 @@
 		const est = (contrato as { estado: string })?.estado;
 		return est === 'BORRADOR' || est === 'VIGENTE';
 	}
+
+	function tituloContrato(): string {
+		return contrato?.nombrePropiedad
+			? `Contrato - ${contrato.nombrePropiedad}`
+			: 'Contrato comercial';
+	}
 </script>
 
 <svelte:head>
-	<title>Contrato {data.idContrato} | ALVAS</title>
+	<title>Detalle de contrato | ALVAS</title>
 </svelte:head>
 
 <div class="flex flex-col gap-6">
@@ -130,7 +132,7 @@
 		<Card>
 			<div class="mb-6 flex items-center justify-between">
 				<div>
-					<h2 class="font-display text-xl font-bold text-text-main">{contrato.id}</h2>
+					<h2 class="font-display text-xl font-bold text-text-main">{tituloContrato()}</h2>
 					<Badge tone={presentarEstadoContrato(contrato.estado).tone}>
 						{presentarEstadoContrato(contrato.estado).label}
 					</Badge>
@@ -153,18 +155,22 @@
 			<div class="grid gap-6 md:grid-cols-2">
 				<div>
 					<p class="stat-label">Propiedad</p>
-					<p class="mt-1 font-medium text-text-main">{contrato.idPropiedad}</p>
+					<p class="mt-1 font-medium text-text-main">
+						{contrato.nombrePropiedad ?? 'Propiedad registrada'}
+					</p>
 				</div>
 
 				<div>
 					<p class="stat-label">Lead origen</p>
-					<p class="mt-1 font-medium text-text-main">{contrato.idLead ?? 'Sin lead asociado'}</p>
+					<p class="mt-1 font-medium text-text-main">
+						{contrato.nombreLead ?? 'Prospecto asociado'}
+					</p>
 				</div>
 
 				<div>
 					<p class="stat-label">Cliente</p>
 					<p class="mt-1 font-medium text-text-main">
-						{contrato.idCliente ?? 'Por asignar en firma'}
+						{contrato.nombreCliente ?? 'Por asignar en firma'}
 					</p>
 				</div>
 

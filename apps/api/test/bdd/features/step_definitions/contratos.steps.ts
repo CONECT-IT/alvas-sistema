@@ -78,6 +78,10 @@ class FakeVentasRepository implements IVentasRepository {
     return [];
   }
 
+  async contarAccionesPorTipo(): Promise<{ evento: string; total: number }[]> {
+    return [];
+  }
+
   async obtenerClientePorId(id: IdCliente): Promise<Cliente | null> {
     return this.clientes.get(id) ?? null;
   }
@@ -191,7 +195,10 @@ Given("un contrato en estado {string} vinculado a un lead", async function (_est
 });
 
 When("el asesor crea un contrato para el lead", async function () {
-  resultadoCrear = await new CrearContratoUseCase(contratoRepository, new GeneradorIdCliente()).ejecutar({
+  resultadoCrear = await new CrearContratoUseCase(
+    contratoRepository,
+    new GeneradorIdCliente(),
+  ).ejecutar({
     id: "cont-001",
     idLead: "lead-001",
     idPropiedad: "prop-001",

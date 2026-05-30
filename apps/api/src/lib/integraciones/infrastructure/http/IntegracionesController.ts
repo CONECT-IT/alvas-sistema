@@ -9,10 +9,7 @@ import {
   type IRevisarCaptacionPendiente,
 } from "../../application";
 import { type D1DatabaseLike, type SessionClaims } from "../../../shared/infrastructure";
-import {
-  parseBody,
-  ValidationError,
-} from "../../../shared/infrastructure/validation/helpers";
+import { parseBody, ValidationError } from "../../../shared/infrastructure/validation/helpers";
 import {
   CaptacionEntranteSchema,
   WhatsAppWebhookSchema,

@@ -2,11 +2,17 @@ import type { ServerLoad } from '@sveltejs/kit';
 
 type ApiResp<T> = { success: true; data: T } | { success: false };
 
-type EstadisticasGlobales = {
-	totalLeads: number;
-	totalClientes: number;
-	asesoresActivos: number;
+type AccionResumen = {
+	evento: string;
+	total: number;
 };
+
+type ResumenAcciones = {
+	acciones: AccionResumen[];
+	totalAcciones: number;
+};
+
+type EstadisticasGlobales = ResumenAcciones;
 
 type PropiedadDto = {
 	id: string;
@@ -26,11 +32,7 @@ type ActividadDto = {
 
 type ReporteGeneral = {
 	fechaGeneracion: string;
-	metricas: {
-		conversionRate: number;
-		leadsNuevosHoy: number;
-		citasPendientes: number;
-	};
+	resumenAcciones: ResumenAcciones;
 	actividadReciente: ActividadDto[];
 };
 

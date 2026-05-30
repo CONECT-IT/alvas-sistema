@@ -73,7 +73,11 @@ describe("usuarios / CrearUsuarioUseCase", () => {
     const hashearSpy = mock(passwordHasher.hashear.bind(passwordHasher));
     passwordHasher.hashear = hashearSpy;
 
-    const resultado = await new CrearUsuarioUseCase(repo, passwordHasher, new FakeGeneradorId()).ejecutar({
+    const resultado = await new CrearUsuarioUseCase(
+      repo,
+      passwordHasher,
+      new FakeGeneradorId(),
+    ).ejecutar({
       username: "Asesor1",
       nombre: "Asesor Uno",
       clave: "secreto",
@@ -320,7 +324,11 @@ describe("usuarios / propaga errores no dominio", () => {
     const repo = new FakeUsuarioRepository();
     repo.guardar = () => Promise.reject(new ErrorDeDominio("error dominio"));
 
-    const resultado = await new CrearUsuarioUseCase(repo, new FakePasswordHasher(), new FakeGeneradorId()).ejecutar({
+    const resultado = await new CrearUsuarioUseCase(
+      repo,
+      new FakePasswordHasher(),
+      new FakeGeneradorId(),
+    ).ejecutar({
       username: "test",
       nombre: "Test",
       clave: "secreto",

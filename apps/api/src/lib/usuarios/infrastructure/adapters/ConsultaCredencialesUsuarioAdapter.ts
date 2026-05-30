@@ -21,7 +21,9 @@ export class ConsultaCredencialesUsuarioAdapter implements IConsultaCredenciales
         estado: usuario.estado.valor,
       };
     } catch {
-      console.warn(`ConsultaCredencialesUsuarioAdapter: Error al buscar usuario por id ${idUsuario}`);
+      console.warn(
+        `ConsultaCredencialesUsuarioAdapter: Error al buscar usuario por id ${idUsuario}`,
+      );
       return null;
     }
   }
@@ -42,7 +44,9 @@ export class ConsultaCredencialesUsuarioAdapter implements IConsultaCredenciales
         estado: usuario.estado.valor,
       };
     } catch {
-      console.warn(`ConsultaCredencialesUsuarioAdapter: Error al buscar usuario por username ${username}`);
+      console.warn(
+        `ConsultaCredencialesUsuarioAdapter: Error al buscar usuario por username ${username}`,
+      );
       return null;
     }
   }

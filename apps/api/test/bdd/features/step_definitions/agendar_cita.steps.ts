@@ -48,6 +48,10 @@ class FakeVentasRepository implements IVentasRepository {
     return [];
   }
 
+  async contarAccionesPorTipo(): Promise<{ evento: string; total: number }[]> {
+    return [];
+  }
+
   async obtenerClientePorId(): Promise<Cliente | null> {
     return null;
   }

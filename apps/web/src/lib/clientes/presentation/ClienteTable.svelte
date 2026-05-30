@@ -38,14 +38,17 @@
 				>
 					<td class="py-4 pr-6">
 						<p class="font-semibold text-text-main">{cliente.nombre}</p>
-						<p class="mt-1 text-xs text-text-muted">{cliente.id}</p>
+						<p class="mt-1 text-xs text-text-muted">
+							{cliente.nombreAsesor ? `Asesor: ${cliente.nombreAsesor}` : 'Sin asesor asignado'}
+						</p>
 					</td>
 					<td class="py-4 pr-6">
 						<p class="text-text-main">{cliente.telefono}</p>
 						<p class="mt-1 text-xs text-text-muted">{cliente.email}</p>
 					</td>
 					<td class="py-4 pr-6 text-text-muted">
-						{cliente.idLeadOrigen ?? 'Registro directo'}
+						{cliente.nombreLead ??
+							(cliente.idLeadOrigen ? 'Prospecto convertido' : 'Registro directo')}
 					</td>
 					<td class="py-4 text-text-muted">{formatearFecha(cliente.creadoEn)}</td>
 				</tr>

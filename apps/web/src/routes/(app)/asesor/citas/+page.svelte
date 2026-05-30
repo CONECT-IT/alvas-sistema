@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import Badge from '$lib/shared/ui/Badge.svelte';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
@@ -9,24 +9,19 @@
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import type { CitaPipeline, LeadPipeline } from '$lib/ventas/domain/models/LeadPipeline';
 	import type { Propiedad } from '$lib/propiedades/domain/models/Propiedad';
-	import { listarPropiedades } from '$lib/propiedades/application/use-cases/listarPropiedades';
-	import { propiedadRepository } from '$lib/propiedades/infrastructure/propiedadRepository';
 	import {
 		actualizarCita,
 		type EstadoCita
 	} from '$lib/ventas/application/use-cases/actualizarCita';
 	import { agendarCita } from '$lib/ventas/application/use-cases/agendarCita';
-	import { listarPipeline } from '$lib/ventas/application/use-cases/listarPipeline';
 	import { ventasRepository } from '$lib/ventas/infrastructure/ventasRepository';
 	import LeadPipelineTable from '$lib/ventas/presentation/LeadPipelineTable.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
-	let leads = $state<LeadPipeline[]>(data.leads as unknown as LeadPipeline[]);
-	let propiedadesDisponibles = $state<Propiedad[]>(
-		data.propiedadesDisponibles as unknown as Propiedad[]
-	);
+	let leads = $derived((data?.leads as LeadPipeline[]) ?? []);
+	let propiedadesDisponibles = $derived((data?.propiedadesDisponibles as Propiedad[]) ?? []);
 	let loading = $state(false);
 	let creating = $state(false);
 	let mostrarPanelCrear = $state(false);
@@ -68,16 +63,9 @@
 		error = null;
 
 		try {
-			const [leadsResult, propiedadesResult] = await Promise.all([
-				listarPipeline(ventasRepository),
-				listarPropiedades(propiedadRepository)
-			]);
-			leads = leadsResult;
-			propiedadesDisponibles = propiedadesResult.filter(
-				(propiedad) => propiedad.estado.toUpperCase() === 'DISPONIBLE'
-			);
-		} catch (err) {
-			error = err instanceof HttpError ? err.message : 'No se pudo cargar la agenda.';
+			await invalidateAll();
+		} catch {
+			error = 'No se pudo actualizar la agenda.';
 		} finally {
 			loading = false;
 		}

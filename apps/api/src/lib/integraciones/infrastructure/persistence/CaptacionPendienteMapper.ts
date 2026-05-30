@@ -10,12 +10,17 @@ function parsearMetadata(
   return parsed;
 }
 
+function normalizarCanalCaptacion(canal: string): string {
+  if (canal === "FORMULARIO") return "FORMULARIO_WEB";
+  return canal;
+}
+
 export class CaptacionPendienteMapper {
   static aDominio(row: CaptacionPendienteRow): CaptacionPendiente {
     return CaptacionPendiente.reconstituir({
       id: row.id,
       captacion: Captacion.registrar({
-        canal: row.canal,
+        canal: normalizarCanalCaptacion(row.canal),
         origen: row.origen,
         nombre: row.nombre,
         telefono: row.telefono,

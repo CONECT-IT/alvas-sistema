@@ -234,8 +234,9 @@
 
 {#if shellUser}
 	<div
-		class="flex min-h-screen bg-bg-base font-sans text-text-main {$authStore.layout === 'navbar'
-			? 'flex-col'
+		class="flex min-h-screen flex-col bg-bg-base font-sans text-text-main {$authStore.layout ===
+		'sidebar'
+			? 'md:flex-row'
 			: ''}"
 	>
 		<!-- Sidebar - Desktop (Only if layout is 'sidebar') -->
@@ -489,7 +490,9 @@
 		{/if}
 
 		<!-- Main content -->
-		<main class="min-h-screen min-w-0 flex-1 {$authStore.layout === 'sidebar' ? 'md:ml-28' : ''}">
+		<main
+			class="min-h-screen w-full min-w-0 flex-1 {$authStore.layout === 'sidebar' ? 'md:ml-28' : ''}"
+		>
 			<div class="mx-auto max-w-7xl p-4 md:p-8">
 				{@render children()}
 			</div>

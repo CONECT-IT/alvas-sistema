@@ -1,18 +1,15 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
-	import { HttpError } from '$lib/shared/http/httpClient';
 	import type { LeadPipeline } from '$lib/ventas/domain/models/LeadPipeline';
-	import { listarPipeline } from '$lib/ventas/application/use-cases/listarPipeline';
-	import { ventasRepository } from '$lib/ventas/infrastructure/ventasRepository';
 	import LeadPipelineTable from '$lib/ventas/presentation/LeadPipelineTable.svelte';
 	import PipelineStats from '$lib/ventas/presentation/PipelineStats.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
-	let leads = $state<LeadPipeline[]>(data.leads as unknown as LeadPipeline[]);
+	let leads = $derived((data?.leads as unknown as LeadPipeline[]) ?? []);
 	let loading = $state(false);
 	let error = $state<string | null>(null);
 
@@ -21,9 +18,9 @@
 		error = null;
 
 		try {
-			leads = await listarPipeline(ventasRepository);
-		} catch (err) {
-			error = err instanceof HttpError ? err.message : 'No se pudo cargar la cartera comercial.';
+			await invalidateAll();
+		} catch {
+			error = 'No se pudo actualizar la cartera comercial.';
 		} finally {
 			loading = false;
 		}

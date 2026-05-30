@@ -4,7 +4,9 @@ export type Cliente = Readonly<{
 	email: string;
 	telefono: string;
 	idAsesor: string;
+	nombreAsesor?: string;
 	idLeadOrigen?: string;
+	nombreLead?: string;
 	creadoEn: string;
 	actualizadoEn: string;
 }>;

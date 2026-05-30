@@ -3,27 +3,27 @@ name: External Benchmarks
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 6 * * 1'
+    - cron: "0 6 * * 1"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
-  CI: 'true'
+  CI: "true"
   NODE_ENV: test
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 jobs:
   benchmark-k6:
-    name: 'k6: API Load Test'
+    name: "k6: API Load Test"
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
-          node-version: '24'
+          node-version: "24"
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
@@ -40,14 +40,14 @@ jobs:
           flags: --env API_URL=http://127.0.0.1:3000
 
   benchmark-lighthouse:
-    name: 'Lighthouse: Web Perf Audit'
+    name: "Lighthouse: Web Perf Audit"
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
-          node-version: '24'
+          node-version: "24"
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest

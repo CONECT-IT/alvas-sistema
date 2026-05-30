@@ -1,5 +1,11 @@
 import { describe, expect, it } from "bun:test";
 import { Hono } from "hono";
+import { crearTokenProviderDesdeEnv } from "../../../src/lib/auth/infrastructure/security/TokenProviderFactory";
+import {
+  type D1DatabaseLike,
+  type SessionClaims,
+  verifySessionMiddleware,
+} from "../../../src/lib/shared/infrastructure";
 import { crearVentasRouter } from "../../../src/lib/ventas/infrastructure";
 import { resultadoExitoso, resultadoFallido } from "../../../src/lib/shared/application/Resultado";
 import type { VentasControllerDeps } from "../../../src/lib/ventas/infrastructure";
@@ -14,6 +20,32 @@ type VentasEntradasCapturadas = {
   firmarContrato: unknown[];
   asignarLead: unknown[];
 };
+
+type AppBindings = {
+  DB: D1DatabaseLike;
+  AUTH_SECRET: string;
+  AUTH_REFRESH_SECRET?: string;
+  AUTH_TOKEN_TTL_SEGUNDOS?: string;
+  REFRESH_TOKEN_TTL_SEGUNDOS?: string;
+};
+
+type AppVariables = {
+  authPayload: SessionClaims;
+};
+
+function crearAppVentas(deps: VentasControllerDeps) {
+  const app = new Hono<{ Bindings: AppBindings; Variables: AppVariables }>();
+  app.use(
+    "/ventas",
+    verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+  );
+  app.use(
+    "/ventas/*",
+    verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+  );
+  app.route("/ventas", crearVentasRouter(deps));
+  return app;
+}
 
 function crearDeps(capturadas: VentasEntradasCapturadas = crearCapturadas()): VentasControllerDeps {
   const lead = {
@@ -167,8 +199,7 @@ function crearCapturadas(): VentasEntradasCapturadas {
 
 describe("http / ventas routes", () => {
   it("lista pipeline para asesor autenticado con nombre de asesor resuelto", async () => {
-    const app = new Hono();
-    app.route("/ventas", crearVentasRouter(crearDeps()));
+    const app = crearAppVentas(crearDeps());
 
     const res = await app.request(
       "/ventas/pipeline",
@@ -197,8 +228,7 @@ describe("http / ventas routes", () => {
   });
 
   it("serializa el detalle de lead sin filtrar value objects internos", async () => {
-    const app = new Hono();
-    app.route("/ventas", crearVentasRouter(crearDeps()));
+    const app = crearAppVentas(crearDeps());
 
     const res = await app.request(
       "/ventas/lead/lead-1",
@@ -229,8 +259,7 @@ describe("http / ventas routes", () => {
 
   it("registra lead de asesor asignandolo al usuario autenticado aunque el body mande otro asesor", async () => {
     const capturadas = crearCapturadas();
-    const app = new Hono();
-    app.route("/ventas", crearVentasRouter(crearDeps(capturadas)));
+    const app = crearAppVentas(crearDeps(capturadas));
 
     const res = await app.request(
       "/ventas/lead",
@@ -265,8 +294,7 @@ describe("http / ventas routes", () => {
 
   it("permite que admin registre lead asignado a un asesor explicito", async () => {
     const capturadas = crearCapturadas();
-    const app = new Hono();
-    app.route("/ventas", crearVentasRouter(crearDeps(capturadas)));
+    const app = crearAppVentas(crearDeps(capturadas));
 
     const res = await app.request(
       "/ventas/lead",
@@ -298,8 +326,7 @@ describe("http / ventas routes", () => {
 
   it("actualiza lead pasando id de ruta y usuario autenticado al use case", async () => {
     const capturadas = crearCapturadas();
-    const app = new Hono();
-    app.route("/ventas", crearVentasRouter(crearDeps(capturadas)));
+    const app = crearAppVentas(crearDeps(capturadas));
 
     const res = await app.request(
       "/ventas/lead/lead-1",
@@ -327,8 +354,7 @@ describe("http / ventas routes", () => {
   });
 
   it("responde 403 cuando el asesor intenta actualizar lead ajeno", async () => {
-    const app = new Hono();
-    app.route("/ventas", crearVentasRouter(crearDepsSinPermisos()));
+    const app = crearAppVentas(crearDepsSinPermisos());
 
     const res = await app.request(
       "/ventas/lead/lead-ajeno",
@@ -353,8 +379,7 @@ describe("http / ventas routes", () => {
 
   it("reasigna lead preservando usuario admin autenticado", async () => {
     const capturadas = crearCapturadas();
-    const app = new Hono();
-    app.route("/ventas", crearVentasRouter(crearDeps(capturadas)));
+    const app = crearAppVentas(crearDeps(capturadas));
 
     const res = await app.request(
       "/ventas/lead/lead-1/asesor",
@@ -379,8 +404,7 @@ describe("http / ventas routes", () => {
   });
 
   it("responde 403 cuando asesor intenta reasignar lead", async () => {
-    const app = new Hono();
-    app.route("/ventas", crearVentasRouter(crearDepsSinPermisosReasignacion()));
+    const app = crearAppVentas(crearDepsSinPermisosReasignacion());
 
     const res = await app.request(
       "/ventas/lead/lead-1/asesor",
@@ -405,8 +429,7 @@ describe("http / ventas routes", () => {
 
   it("agenda cita convirtiendo fecha de entrada y preservando asesor autenticado", async () => {
     const capturadas = crearCapturadas();
-    const app = new Hono();
-    app.route("/ventas", crearVentasRouter(crearDeps(capturadas)));
+    const app = crearAppVentas(crearDeps(capturadas));
 
     const res = await app.request(
       "/ventas/cita",
@@ -439,8 +462,7 @@ describe("http / ventas routes", () => {
   });
 
   it("cancela contrato devolviendo mensaje de exito", async () => {
-    const app = new Hono();
-    app.route("/ventas", crearVentasRouter(crearDeps()));
+    const app = crearAppVentas(crearDeps());
 
     const res = await app.request(
       "/ventas/contratos/contrato-1/cancelar",
@@ -462,11 +484,12 @@ describe("http / ventas routes", () => {
       ...crearDeps(),
       crearFirmarContrato: () => ({
         ejecutar: async () =>
-          resultadoFallido(new ErrorDeDominio("El contrato con id contrato-inexistente no ha sido encontrado.")),
+          resultadoFallido(
+            new ErrorDeDominio("El contrato con id contrato-inexistente no ha sido encontrado."),
+          ),
       }),
     } as unknown as VentasControllerDeps;
-    const app = new Hono();
-    app.route("/ventas", crearVentasRouter(deps));
+    const app = crearAppVentas(deps);
 
     const res = await app.request(
       "/ventas/contratos/contrato-inexistente/firmar",
@@ -493,11 +516,12 @@ describe("http / ventas routes", () => {
       ...crearDeps(),
       crearCancelarContrato: () => ({
         ejecutar: async () =>
-          resultadoFallido(new ErrorDeDominio("El contrato con id contrato-inexistente no ha sido encontrado.")),
+          resultadoFallido(
+            new ErrorDeDominio("El contrato con id contrato-inexistente no ha sido encontrado."),
+          ),
       }),
     } as unknown as VentasControllerDeps;
-    const app = new Hono();
-    app.route("/ventas", crearVentasRouter(deps));
+    const app = crearAppVentas(deps);
 
     const res = await app.request(
       "/ventas/contratos/contrato-inexistente/cancelar",
@@ -520,8 +544,7 @@ describe("http / ventas routes", () => {
   });
 
   it("lista contratos vacio cuando no hay ninguno", async () => {
-    const app = new Hono();
-    app.route("/ventas", crearVentasRouter(crearDeps()));
+    const app = crearAppVentas(crearDeps());
 
     const res = await app.request(
       "/ventas/contratos",
@@ -534,12 +557,11 @@ describe("http / ventas routes", () => {
     );
 
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ success: true, data: [] });
+    expect(await res.json()).toEqual({ success: true, data: { contratos: [] } });
   });
 
   it("lista contratos por asesor vacio cuando no tiene ninguno", async () => {
-    const app = new Hono();
-    app.route("/ventas", crearVentasRouter(crearDeps()));
+    const app = crearAppVentas(crearDeps());
 
     const res = await app.request(
       "/ventas/contratos/mios",
@@ -552,7 +574,7 @@ describe("http / ventas routes", () => {
     );
 
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ success: true, data: [] });
+    expect(await res.json()).toEqual({ success: true, data: { contratos: [] } });
   });
 
   it("firma contrato con lead asociado crea cliente y vincula propiedad al firmar", async () => {
@@ -566,8 +588,7 @@ describe("http / ventas routes", () => {
         },
       }),
     };
-    const app = new Hono();
-    app.route("/ventas", crearVentasRouter(deps));
+    const app = crearAppVentas(deps);
 
     const crearRes = await app.request(
       "/ventas/contratos",
@@ -606,8 +627,7 @@ describe("http / ventas routes", () => {
 
   it("crea y firma contrato desde el adaptador HTTP", async () => {
     const capturadas = crearCapturadas();
-    const app = new Hono();
-    app.route("/ventas", crearVentasRouter(crearDeps(capturadas)));
+    const app = crearAppVentas(crearDeps(capturadas));
 
     const crearRes = await app.request(
       "/ventas/contratos",

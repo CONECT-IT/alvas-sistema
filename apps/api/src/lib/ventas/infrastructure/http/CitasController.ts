@@ -66,16 +66,54 @@ export class CitasController {
         return responderErrorDeDominio(c, resultado.error);
       }
 
-      const data = resultado.valor.map((cita) => ({
-        id: cita.id,
-        idLead: cita.idLead,
-        idPropiedad: cita.idPropiedad,
-        idAsesor: cita.idAsesor,
-        fechaInicio: cita.fechaInicio.toISOString(),
-        fechaFin: cita.fechaFin.toISOString(),
-        estado: cita.estado,
-        observacion: cita.observacion,
-      }));
+      const ventasRepo = this.deps.crearVentasRepo(c);
+      const propRepo = this.deps.crearPropiedadRepo(c);
+      const userRepo = this.deps.crearUsuarioRepo(c);
+
+      const data = await Promise.all(
+        resultado.valor.map(async (cita) => {
+          let nombreLead: string | undefined;
+          let nombrePropiedad: string | undefined;
+          let nombreAsesor: string | undefined;
+
+          try {
+            const lead = await ventasRepo.obtenerLeadPorId(cita.idLead);
+            nombreLead = lead?.nombre;
+          } catch {
+            console.warn(`CitasController: No se pudo obtener lead ${cita.idLead}`);
+          }
+
+          if (cita.idPropiedad) {
+            try {
+              const propiedad = await propRepo.obtenerPorId(cita.idPropiedad);
+              nombrePropiedad = propiedad?.titulo;
+            } catch {
+              console.warn(`CitasController: No se pudo obtener propiedad ${cita.idPropiedad}`);
+            }
+          }
+
+          try {
+            const asesor = await userRepo.obtenerPorId(cita.idAsesor);
+            nombreAsesor = asesor?.nombre?.valor;
+          } catch {
+            console.warn(`CitasController: No se pudo obtener asesor ${cita.idAsesor}`);
+          }
+
+          return {
+            id: cita.id,
+            idLead: cita.idLead,
+            nombreLead,
+            idPropiedad: cita.idPropiedad,
+            nombrePropiedad,
+            idAsesor: cita.idAsesor,
+            nombreAsesor,
+            fechaInicio: cita.fechaInicio.toISOString(),
+            fechaFin: cita.fechaFin.toISOString(),
+            estado: cita.estado,
+            observacion: cita.observacion,
+          };
+        }),
+      );
 
       return c.json({ success: true, data });
     } catch (error) {

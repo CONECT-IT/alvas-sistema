@@ -117,6 +117,10 @@ class FakeVentasRepository implements IVentasRepository {
   async listarAsesoresConLeads(): Promise<{ idAsesor: IdUsuarioRef; totalLeads: number }[]> {
     return [{ idAsesor: idUsuarioRef("asesor-1"), totalLeads: this.leads.size }];
   }
+
+  async contarAccionesPorTipo(): Promise<{ evento: string; total: number }[]> {
+    return [];
+  }
 }
 
 type ResultadoEvaluacion =
@@ -1037,7 +1041,10 @@ describe("ventas / use cases", () => {
   test("CrearContratoUseCase guarda contrato en repositorio", async () => {
     const repo = new FakeContratoRepository();
 
-    const resultado = await new CrearContratoUseCase(repo, new SecuenciaGeneradorId(["cont-001"])).ejecutar({
+    const resultado = await new CrearContratoUseCase(
+      repo,
+      new SecuenciaGeneradorId(["cont-001"]),
+    ).ejecutar({
       id: "cont-001",
       idLead: "lead-001",
       idPropiedad: "prop-001",
@@ -1278,7 +1285,10 @@ describe("ventas / use cases", () => {
     const repo = new FakeContratoRepository();
     repo.guardar = () => Promise.reject(new Error("db error"));
 
-    const resultado = new CrearContratoUseCase(repo, new SecuenciaGeneradorId(["cont-001"])).ejecutar({
+    const resultado = new CrearContratoUseCase(
+      repo,
+      new SecuenciaGeneradorId(["cont-001"]),
+    ).ejecutar({
       id: "cont-001",
       idLead: "lead-001",
       idPropiedad: "prop-001",
@@ -1482,7 +1492,10 @@ describe("ventas / use cases", () => {
     const repo = new FakeContratoRepository();
     repo.guardar = () => Promise.reject(new ErrorDeDominio("error dominio"));
 
-    const resultado = await new CrearContratoUseCase(repo, new SecuenciaGeneradorId(["cont-001"])).ejecutar({
+    const resultado = await new CrearContratoUseCase(
+      repo,
+      new SecuenciaGeneradorId(["cont-001"]),
+    ).ejecutar({
       id: "cont-001",
       idLead: "lead-001",
       idPropiedad: "prop-001",

@@ -1,11 +1,11 @@
 <script lang="ts">
+	import { invalidateAll } from '$app/navigation';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
 	import Badge from '$lib/shared/ui/Badge.svelte';
 	import SidePanel from '$lib/shared/ui/SidePanel.svelte';
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import { propiedadRepository } from '$lib/propiedades/infrastructure/propiedadRepository';
-	import { obtenerPropiedad } from '$lib/propiedades/application/use-cases/obtenerPropiedad';
 	import { actualizarPropiedad } from '$lib/propiedades/application/use-cases/actualizarPropiedad';
 	import type { Propiedad } from '$lib/propiedades/domain/models/Propiedad';
 	import { presentarEstadoPropiedad, opcionesEstadoPropiedad } from '$lib/shared/presentation';
@@ -13,33 +13,35 @@
 
 	let { data }: { data: PageData } = $props();
 
-	let propiedad = $state<Propiedad | null>(data.propiedad as unknown as Propiedad);
-	let loading = $state(!data.propiedad);
+	let propiedad = $derived(data?.propiedad as unknown as Propiedad);
+	let loading = $state(false);
 	let updating = $state(false);
 	let error = $state<string | null>(null);
 	let updateSuccess = $state<string | null>(null);
 	let updateError = $state<string | null>(null);
 	let editando = $state(false);
 
-	let titulo = $state(data.propiedad?.titulo ?? '');
-	let descripcion = $state(data.propiedad?.descripcion ?? '');
-	let precio = $state(data.propiedad?.precio ?? 0);
-	let estado = $state(data.propiedad?.estado ?? '');
+	let titulo = $state('');
+	let descripcion = $state('');
+	let precio = $state(0);
+	let estado = $state('');
+
+	$effect(() => {
+		if (propiedad) {
+			titulo = propiedad.titulo;
+			descripcion = propiedad.descripcion;
+			precio = propiedad.precio;
+			estado = propiedad.estado;
+		}
+	});
 
 	async function cargar() {
-		if (!propiedad?.id) return;
 		loading = true;
 		error = null;
 		try {
-			propiedad = await obtenerPropiedad(propiedadRepository, propiedad.id);
-			if (propiedad) {
-				titulo = propiedad.titulo;
-				descripcion = propiedad.descripcion;
-				precio = propiedad.precio;
-				estado = propiedad.estado;
-			}
-		} catch (err) {
-			error = err instanceof HttpError ? err.message : 'No se pudo cargar la propiedad.';
+			await invalidateAll();
+		} catch {
+			error = 'No se pudo actualizar la propiedad.';
 		} finally {
 			loading = false;
 		}
@@ -79,7 +81,7 @@
 			});
 			updateSuccess = 'Propiedad actualizada correctamente.';
 			editando = false;
-			await cargar();
+			await invalidateAll();
 		} catch (err) {
 			updateError = err instanceof HttpError ? err.message : 'No se pudo actualizar la propiedad.';
 		} finally {
@@ -89,7 +91,7 @@
 </script>
 
 <svelte:head>
-	<title>Propiedad {data.idPropiedad} | ALVAS</title>
+	<title>{propiedad?.titulo ?? 'Detalle de propiedad'} | ALVAS</title>
 </svelte:head>
 
 <div class="flex flex-col gap-6">
@@ -169,9 +171,6 @@
 		<Card>
 			<h2 class="card-title">Datos actuales</h2>
 			<dl class="dl-grid">
-				<dt class="font-semibold text-text-muted">ID</dt>
-				<dd class="font-mono text-text-main">{propiedad.id}</dd>
-
 				<dt class="font-semibold text-text-muted">Estado</dt>
 				<dd>
 					<Badge tone={presentarEstadoPropiedad(propiedad.estado).tone}
@@ -183,12 +182,14 @@
 				<dd class="text-text-main">{propiedad.origen}</dd>
 
 				{#if propiedad.idLeadOrigen}
-					<dt class="font-semibold text-text-muted">Lead Origen</dt>
-					<dd class="text-text-main">{propiedad.idLeadOrigen}</dd>
+					<dt class="font-semibold text-text-muted">Origen comercial</dt>
+					<dd class="text-text-main">Asociada a un lead de captación</dd>
 				{/if}
 
 				<dt class="font-semibold text-text-muted">Responsable</dt>
-				<dd class="text-text-main">{propiedad.asesorResponsableId ?? 'Sin asignar'}</dd>
+				<dd class="text-text-main">
+					{propiedad.asesorResponsableId ? 'Responsable asignado' : 'Sin asignar'}
+				</dd>
 			</dl>
 		</Card>
 	{/if}

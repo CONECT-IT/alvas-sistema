@@ -5,7 +5,7 @@ import {
   type Resultado,
 } from "../../../shared";
 import { ErrorDeDominio } from "../../../shared/domain/errors/ErrorDeDominio";
-import { EstadisticasGlobales } from "../../domain";
+import { ResumenAcciones } from "../../domain";
 import { type IConsultaVentasParaReportes } from "../../domain/ports/IConsultaVentasParaReportes";
 import { type EstadisticasGlobalesOutput } from "../dto/ReportesSalidaDTOs";
 import { type IObtenerEstadisticasGlobales } from "../ports/in";
@@ -19,28 +19,13 @@ export class ObtenerEstadisticasGlobalesUseCase
 
   async ejecutar(): Promise<Resultado<EstadisticasGlobalesOutput, ErrorDeDominio>> {
     try {
-      const leads = await this.consultaVentas.listarLeadsParaReporte();
-      const clientes = await this.consultaVentas.listarClientesParaReporte();
-      const asesores = await this.consultaVentas.listarAsesoresConTotalesLeads();
-
-      const leadsPorEstado: Record<string, number> = {};
-      leads.forEach((l) => {
-        const estado = l.estado;
-        leadsPorEstado[estado] = (leadsPorEstado[estado] || 0) + 1;
-      });
-
-      const estadisticas = new EstadisticasGlobales(
-        leads.length,
-        clientes.length,
-        leadsPorEstado,
-        asesores.length,
-      );
+      const acciones = await this.consultaVentas.contarAccionesPorTipo();
+      const totalAcciones = acciones.reduce((acc, a) => acc + a.total, 0);
+      const resumen = new ResumenAcciones(acciones, totalAcciones);
 
       return resultadoExitoso({
-        totalLeads: estadisticas.totalLeads,
-        totalClientes: estadisticas.totalClientes,
-        leadsPorEstado: estadisticas.leadsPorEstado,
-        asesoresActivos: estadisticas.asesoresActivos,
+        acciones: resumen.acciones,
+        totalAcciones: resumen.totalAcciones,
       });
     } catch (error) {
       if (error instanceof ErrorDeDominio) return resultadoFallido(error);

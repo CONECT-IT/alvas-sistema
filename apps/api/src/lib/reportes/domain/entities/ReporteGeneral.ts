@@ -1,3 +1,5 @@
+import { type ResumenAcciones } from "./ResumenAcciones";
+
 export type ActividadReporte = Readonly<{
   idLead: string;
   evento: string;
@@ -8,11 +10,7 @@ export type ActividadReporte = Readonly<{
 export class ReporteGeneral {
   constructor(
     readonly fechaGeneracion: Date,
-    readonly metricas: Readonly<{
-      conversionRate: number;
-      leadsNuevosHoy: number;
-      citasPendientes: number;
-    }>,
+    readonly resumenAcciones: ResumenAcciones,
     readonly actividadReciente: ReadonlyArray<ActividadReporte>,
   ) {}
 }

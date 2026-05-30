@@ -28,40 +28,76 @@ const escapeSql = (value) => {
   return `'${String(value).replaceAll("'", "''")}'`;
 };
 
-function main() {
+async function main() {
   const pepper =
     process.env.AUTH_PEPPER ?? "20fa23043ee3167d78a65ed110d9fccdf4b7478804f930c9965d0363bae3ecf2";
   const ahora = new Date();
   const ahoraIso = ahora.toISOString();
+  let actividadOffsetMs = 0;
 
-  // IDs are deterministic so seed relationships are predictable
-  // (auto-generation via UUID is for real users, seed data needs stable refs)
+  const siguienteFechaActividad = () => {
+    actividadOffsetMs += 1000;
+    return new Date(ahora.getTime() + actividadOffsetMs).toISOString();
+  };
+
+  // Deterministic UUIDs for seed data
   const IDS = {
-    USUARIO_ADMIN: "admin",
-    USUARIO_ASESOR1: "jramirez",
-    USUARIO_ASESOR2: "lmartinez",
-    PROPIEDADES: ["prop-001", "prop-002", "prop-003", "prop-004"],
-    PROPIEDAD_PREL: ["prop-prel-001", "prop-prel-002", "prop-prel-003"],
-    LEADS: [
-      "lead-001",
-      "lead-002",
-      "lead-003",
-      "lead-004",
-      "lead-005",
-      "lead-006",
-      "lead-007",
-      "lead-008",
-      "lead-009",
+    USUARIO_ADMIN: "00000000-0000-4000-a000-000000000001",
+    USUARIO_ASESOR1: "00000000-0000-4000-a000-000000000002",
+    USUARIO_ASESOR2: "00000000-0000-4000-a000-000000000003",
+    PROPIEDADES: [
+      "11111111-1111-4000-a000-000000000001",
+      "11111111-1111-4000-a000-000000000002",
+      "11111111-1111-4000-a000-000000000003",
+      "11111111-1111-4000-a000-000000000004",
     ],
-    CITAS: ["cita-001", "cita-002", "cita-003", "cita-004"],
-    CONTRATOS: ["contrato-001", "contrato-002", "contrato-003"],
-    CLIENTES: ["cliente-001", "cliente-002", "cliente-003"],
+    PROPIEDAD_PREL: [
+      "11111111-2222-4000-a000-000000000001",
+      "11111111-2222-4000-a000-000000000002",
+      "11111111-2222-4000-a000-000000000003",
+    ],
+    LEADS: [
+      "22222222-1111-4000-a000-000000000001",
+      "22222222-1111-4000-a000-000000000002",
+      "22222222-1111-4000-a000-000000000003",
+      "22222222-1111-4000-a000-000000000004",
+      "22222222-1111-4000-a000-000000000005",
+      "22222222-1111-4000-a000-000000000006",
+      "22222222-1111-4000-a000-000000000007",
+      "22222222-1111-4000-a000-000000000008",
+      "22222222-1111-4000-a000-000000000009",
+    ],
+    CITAS: [
+      "33333333-1111-4000-a000-000000000001",
+      "33333333-1111-4000-a000-000000000002",
+      "33333333-1111-4000-a000-000000000003",
+      "33333333-1111-4000-a000-000000000004",
+    ],
+    CONTRATOS: [
+      "44444444-1111-4000-a000-000000000001",
+      "44444444-1111-4000-a000-000000000002",
+      "44444444-1111-4000-a000-000000000003",
+    ],
+    CLIENTES: [
+      "55555555-1111-4000-a000-000000000001",
+      "55555555-1111-4000-a000-000000000002",
+      "55555555-1111-4000-a000-000000000003",
+    ],
+    CAPTACIONES: [
+      "66666666-1111-4000-a000-000000000001",
+      "66666666-1111-4000-a000-000000000002",
+      "66666666-1111-4000-a000-000000000003",
+    ],
   };
 
   const sqlLines = [];
 
   sqlLines.push(`-- Seed generado el ${ahoraIso}`);
-  sqlLines.push(`-- Usa IDs deterministicos para mantener referencias entre tablas`);
+  sqlLines.push(`-- Usa UUIDs v4 para alinearse con el dominio actual`);
+  sqlLines.push("");
+  sqlLines.push("-- Datos derivados del seed");
+  sqlLines.push("DELETE FROM integraciones_captaciones_pendientes;");
+  sqlLines.push("DELETE FROM ventas_actividad;");
   sqlLines.push("");
 
   // ── Usuarios ──
@@ -91,7 +127,7 @@ function main() {
 
   sqlLines.push("-- Usuarios");
   for (const u of usuariosSeed) {
-    const hash = hashearClave(u.clave, pepper);
+    const hash = await hashearClave(u.clave, pepper);
     sqlLines.push(
       `INSERT INTO usuarios (id, username, nombre, hash_clave, rol, estado, creado_en, actualizado_en)` +
         ` VALUES (${escapeSql(u.id)}, ${escapeSql(u.username)}, ${escapeSql(u.nombre)}, ${escapeSql(hash)}, ${escapeSql(u.rol)}, ${escapeSql("ACTIVO")}, ${escapeSql(ahoraIso)}, ${escapeSql(ahoraIso)})` +
@@ -134,6 +170,37 @@ function main() {
       `INSERT INTO propiedades (id, titulo, descripcion, precio, origen, estado, id_lead_origen, id_cliente_propietario, captada_por_asesor_id, asesor_responsable_id, creado_en, actualizado_en)` +
         ` VALUES (${escapeSql(p.id)}, ${escapeSql(p.titulo)}, ${escapeSql(p.descripcion)}, ${p.precio}, ${escapeSql("ALVAS")}, ${escapeSql("DISPONIBLE")}, NULL, NULL, NULL, NULL, ${escapeSql(ahoraIso)}, ${escapeSql(ahoraIso)})` +
         ` ON CONFLICT(id) DO UPDATE SET titulo=excluded.titulo, descripcion=excluded.descripcion, precio=excluded.precio, origen=excluded.origen, estado=excluded.estado, actualizado_en=excluded.actualizado_en;`,
+    );
+  }
+  sqlLines.push("");
+
+  // ── Captaciones Pendientes ──
+  const captacionesSeed = [
+    {
+      id: IDS.CAPTACIONES[0],
+      canal: "WHATSAPP",
+      origen: "WEB",
+      nombre: "Roberto Gomez",
+      telefono: "988123456",
+      email: "roberto@mail.com",
+      tipo: "COMPRA",
+    },
+    {
+      id: IDS.CAPTACIONES[1],
+      canal: "FORMULARIO_WEB",
+      origen: "FACEBOOK",
+      nombre: "Elena Paz",
+      telefono: "977234567",
+      email: "elena@mail.com",
+      tipo: "VENTA",
+    },
+  ];
+
+  sqlLines.push("-- Captaciones Pendientes");
+  for (const c of captacionesSeed) {
+    sqlLines.push(
+      `INSERT INTO integraciones_captaciones_pendientes (id, canal, origen, nombre, telefono, email, tipo, estado, creado_en, actualizado_en)` +
+        ` VALUES (${escapeSql(c.id)}, ${escapeSql(c.canal)}, ${escapeSql(c.origen)}, ${escapeSql(c.nombre)}, ${escapeSql(c.telefono)}, ${escapeSql(c.email)}, ${escapeSql(c.tipo)}, 'PENDIENTE', ${escapeSql(ahoraIso)}, ${escapeSql(ahoraIso)});`,
     );
   }
   sqlLines.push("");
@@ -188,43 +255,6 @@ function main() {
       idAsesor: IDS.USUARIO_ASESOR1,
       estadoOverride: "NUEVO",
     },
-    {
-      id: IDS.LEADS[5],
-      nombre: "Ricardo Mendoza",
-      email: "ricardo@example.com",
-      telefono: "999222333",
-      tipo: "COMPRA",
-      idAsesor: IDS.USUARIO_ASESOR1,
-      idPropiedadInteres: IDS.PROPIEDADES[0],
-      estadoOverride: "NUEVO",
-    },
-    {
-      id: IDS.LEADS[6],
-      nombre: "Carmen Flores",
-      email: "carmen@example.com",
-      telefono: "999444555",
-      tipo: "VENTA",
-      idAsesor: IDS.USUARIO_ASESOR2,
-      estadoOverride: "NUEVO",
-    },
-    {
-      id: IDS.LEADS[7],
-      nombre: "Diego Castillo",
-      email: "diego@example.com",
-      telefono: "999666777",
-      tipo: "COMPRA",
-      idAsesor: IDS.USUARIO_ASESOR1,
-      estadoOverride: "NUEVO",
-    },
-    {
-      id: IDS.LEADS[8],
-      nombre: "Valeria Ríos",
-      email: "valeria@example.com",
-      telefono: "999888999",
-      tipo: "VENTA",
-      idAsesor: IDS.USUARIO_ASESOR2,
-      estadoOverride: "PERDIDO",
-    },
   ];
 
   sqlLines.push("-- Leads");
@@ -234,15 +264,9 @@ function main() {
         ` VALUES (${escapeSql(l.id)}, ${escapeSql(l.nombre)}, ${escapeSql(l.email)}, ${escapeSql(l.telefono)}, ${escapeSql(l.tipo)}, ${escapeSql(l.estadoOverride)}, ${escapeSql(l.idAsesor)}, NULL, ${escapeSql(l.idPropiedadInteres)}, ${escapeSql(ahoraIso)}, ${escapeSql(ahoraIso)})` +
         ` ON CONFLICT(id) DO UPDATE SET nombre=excluded.nombre, email=excluded.email, telefono=excluded.telefono, tipo=excluded.tipo, estado=excluded.estado, id_asesor=excluded.id_asesor, id_propiedad_interes=excluded.id_propiedad_interes, actualizado_en=excluded.actualizado_en;`,
     );
-  }
-  sqlLines.push("");
-
-  // ── Actividades ──
-  sqlLines.push("-- Actividades de Leads");
-  for (const l of leadsSeed) {
     sqlLines.push(
       `INSERT INTO ventas_actividad (id_lead, evento, descripcion, fecha)` +
-        ` VALUES (${escapeSql(l.id)}, ${escapeSql("LEAD_CREADO")}, ${escapeSql("Lead registrado vía seed")}, ${escapeSql(ahoraIso)});`,
+        ` VALUES (${escapeSql(l.id)}, ${escapeSql("LEAD_CREADO")}, ${escapeSql(`Lead registrado: ${l.nombre}`)}, ${escapeSql(siguienteFechaActividad())});`,
     );
   }
   sqlLines.push("");
@@ -256,27 +280,13 @@ function main() {
       descripcion: "Casa de 4 dormitorios con amplio jardín",
       precio: 520000,
     },
-    {
-      id: IDS.PROPIEDAD_PREL[1],
-      idLead: IDS.LEADS[4],
-      titulo: "Departamento en Barranco (Venta - Sofía Díaz)",
-      descripcion: "Departamento de 3 dormitorios con terraza",
-      precio: 380000,
-    },
-    {
-      id: IDS.PROPIEDAD_PREL[2],
-      idLead: IDS.LEADS[6],
-      titulo: "Casa en Chorrillos (Venta - Carmen Flores)",
-      descripcion: "Casa de 2 dormitorios cerca al malecón",
-      precio: 250000,
-    },
   ];
 
   sqlLines.push("-- Propiedades preliminares (BORRADOR)");
   for (const p of preliminaresSeed) {
     sqlLines.push(
       `INSERT INTO propiedades (id, titulo, descripcion, precio, origen, estado, id_lead_origen, id_cliente_propietario, captada_por_asesor_id, asesor_responsable_id, creado_en, actualizado_en)` +
-        ` VALUES (${escapeSql(p.id)}, ${escapeSql(p.titulo)}, ${escapeSql(p.descripcion)}, ${p.precio}, ${escapeSql("ALVAS")}, ${escapeSql("BORRADOR")}, ${escapeSql(p.idLead)}, NULL, NULL, NULL, ${escapeSql(ahoraIso)}, ${escapeSql(ahoraIso)})` +
+        ` VALUES (${escapeSql(p.id)}, ${escapeSql(p.titulo)}, ${escapeSql(p.descripcion)}, ${p.precio}, ${escapeSql("CLIENTE")}, ${escapeSql("BORRADOR")}, ${escapeSql(p.idLead)}, NULL, NULL, ${escapeSql(IDS.USUARIO_ASESOR2)}, ${escapeSql(ahoraIso)}, ${escapeSql(ahoraIso)})` +
         ` ON CONFLICT(id) DO UPDATE SET titulo=excluded.titulo, descripcion=excluded.descripcion, precio=excluded.precio, origen=excluded.origen, estado=excluded.estado, id_lead_origen=excluded.id_lead_origen, actualizado_en=excluded.actualizado_en;`,
     );
   }
@@ -292,30 +302,6 @@ function main() {
       durationHours: 1,
       observacion: "Primera visita - Casa en Surco",
     },
-    {
-      id: IDS.CITAS[1],
-      idLead: IDS.LEADS[1],
-      idPropiedad: IDS.PROPIEDADES[1],
-      offsetDays: 2,
-      durationHours: 1,
-      observacion: "Segunda visita - Depto Miraflores",
-    },
-    {
-      id: IDS.CITAS[2],
-      idLead: IDS.LEADS[3],
-      idPropiedad: IDS.PROPIEDADES[3],
-      offsetDays: 3,
-      durationHours: 1,
-      observacion: "Primera visita - Local San Isidro",
-    },
-    {
-      id: IDS.CITAS[3],
-      idLead: IDS.LEADS[5],
-      idPropiedad: IDS.PROPIEDADES[0],
-      offsetDays: -1,
-      durationHours: 1,
-      observacion: "Visita realizada - Casa en Surco",
-    },
   ];
 
   sqlLines.push("-- Citas");
@@ -329,7 +315,7 @@ function main() {
     );
     sqlLines.push(
       `INSERT INTO ventas_actividad (id_lead, evento, descripcion, fecha)` +
-        ` VALUES (${escapeSql(c.idLead)}, ${escapeSql("CITA_AGENDADA")}, ${escapeSql(`Cita agendada: ${c.observacion}`)}, ${escapeSql(ahoraIso)});`,
+        ` VALUES (${escapeSql(c.idLead)}, ${escapeSql("CITA_AGENDADA")}, ${escapeSql(`Cita agendada para ${c.observacion}`)}, ${escapeSql(siguienteFechaActividad())});`,
     );
   }
   sqlLines.push("");
@@ -337,13 +323,11 @@ function main() {
   // ── Contratos ──
   const contratosSeed = [
     { id: IDS.CONTRATOS[0], idLead: IDS.LEADS[0], idPropiedad: IDS.PROPIEDADES[0], meses: 12 },
-    { id: IDS.CONTRATOS[1], idLead: IDS.LEADS[2], idPropiedad: IDS.PROPIEDADES[2], meses: 6 },
-    { id: IDS.CONTRATOS[2], idLead: IDS.LEADS[3], idPropiedad: IDS.PROPIEDADES[3], meses: 24 },
   ];
 
   sqlLines.push("-- Contratos");
   for (const c of contratosSeed) {
-    const fechaFin = new Date(ahora.getFullYear(), ahora.getMonth() + c.meses, ahora.getDate());
+    const fechaFin = new Date(ahora.getFullYear() + 1, ahora.getMonth(), ahora.getDate());
     sqlLines.push(
       `INSERT INTO ventas_contratos (id, id_lead, id_cliente, id_propiedad, fecha_inicio, fecha_fin, estado, creado_en, actualizado_en)` +
         ` VALUES (${escapeSql(c.id)}, ${escapeSql(c.idLead)}, NULL, ${escapeSql(c.idPropiedad)}, ${escapeSql(ahoraIso)}, ${escapeSql(fechaFin.toISOString())}, ${escapeSql("BORRADOR")}, ${escapeSql(ahoraIso)}, ${escapeSql(ahoraIso)})` +
@@ -351,7 +335,7 @@ function main() {
     );
     sqlLines.push(
       `INSERT INTO ventas_actividad (id_lead, evento, descripcion, fecha)` +
-        ` VALUES (${escapeSql(c.idLead)}, ${escapeSql("CONTRATO_CREADO")}, ${escapeSql(`Contrato ${c.id} creado vía seed`)}, ${escapeSql(ahoraIso)});`,
+        ` VALUES (${escapeSql(c.idLead)}, ${escapeSql("CONTRATO_CREADO")}, ${escapeSql("Contrato comercial creado para la propiedad seleccionada")}, ${escapeSql(siguienteFechaActividad())});`,
     );
   }
   sqlLines.push("");
@@ -366,22 +350,6 @@ function main() {
       idAsesor: IDS.USUARIO_ASESOR1,
       idLeadOrigen: IDS.LEADS[0],
     },
-    {
-      id: IDS.CLIENTES[1],
-      nombre: "Pedro Sánchez (Cliente)",
-      email: "pedro.cliente@example.com",
-      telefono: "999777888",
-      idAsesor: IDS.USUARIO_ASESOR2,
-      idLeadOrigen: IDS.LEADS[3],
-    },
-    {
-      id: IDS.CLIENTES[2],
-      nombre: "Ana García (Cliente)",
-      email: "ana.cliente@example.com",
-      telefono: "999555666",
-      idAsesor: IDS.USUARIO_ASESOR2,
-      idLeadOrigen: IDS.LEADS[2],
-    },
   ];
 
   sqlLines.push("-- Clientes");
@@ -391,13 +359,25 @@ function main() {
         ` VALUES (${escapeSql(cl.id)}, ${escapeSql(cl.nombre)}, ${escapeSql(cl.email)}, ${escapeSql(cl.telefono)}, ${escapeSql(cl.idAsesor)}, ${escapeSql(cl.idLeadOrigen)}, ${escapeSql(ahoraIso)}, ${escapeSql(ahoraIso)})` +
         ` ON CONFLICT(id) DO UPDATE SET nombre=excluded.nombre, email=excluded.email, telefono=excluded.telefono, id_asesor=excluded.id_asesor, id_lead_origen=excluded.id_lead_origen, actualizado_en=excluded.actualizado_en;`,
     );
+    sqlLines.push(
+      `INSERT INTO ventas_actividad (id_lead, evento, descripcion, fecha)` +
+        ` VALUES (${escapeSql(cl.idLeadOrigen)}, ${escapeSql("CLIENTE_CONVERTIDO")}, ${escapeSql(`Lead convertido a cliente: ${cl.nombre}`)}, ${escapeSql(siguienteFechaActividad())});`,
+    );
   }
   sqlLines.push("");
 
   const sqlContent = sqlLines.join("\n");
-  fs.writeFileSync(path.join(process.cwd(), "apps/api/src/seed.sql"), sqlContent);
-  fs.writeFileSync(path.join(process.cwd(), "seed.sql"), sqlContent);
-  console.log("SQL seed files generated successfully in apps/api/src/seed.sql and seed.sql");
+  const scriptDir = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Z]:)/, "$1"));
+  const projectRoot = path.join(scriptDir, "..");
+
+  const seedDir = path.join(projectRoot, "database/seeds");
+  const seedPath = path.join(seedDir, "seed.sql");
+  fs.mkdirSync(seedDir, { recursive: true });
+  fs.writeFileSync(seedPath, sqlContent);
+  console.log(`SQL seed file generated successfully in ${seedPath}`);
 }
 
-main();
+main().catch((err) => {
+  console.error("Error generating seed:", err);
+  process.exit(1);
+});

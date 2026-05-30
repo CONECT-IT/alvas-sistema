@@ -86,6 +86,7 @@ export type ContratoDTO = Readonly<{
 	idLead?: string;
 	nombreLead?: string;
 	idCliente?: string;
+	nombreCliente?: string;
 	idPropiedad: string;
 	nombrePropiedad?: string;
 	idAsesor?: string;

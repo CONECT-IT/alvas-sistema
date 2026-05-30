@@ -5,9 +5,8 @@ import {
   type Resultado,
 } from "../../../shared";
 import { ErrorDeDominio } from "../../../shared/domain/errors/ErrorDeDominio";
-import { ReporteGeneral } from "../../domain";
+import { ReporteGeneral, ResumenAcciones } from "../../domain";
 import { type IConsultaVentasParaReportes } from "../../domain/ports/IConsultaVentasParaReportes";
-import { PorcentajeConversion } from "../../domain/value-objects/PorcentajeConversion";
 import { type ReporteGeneralOutput } from "../dto/ReportesSalidaDTOs";
 import { type IObtenerReporteGeneral } from "../ports/in";
 
@@ -20,34 +19,22 @@ export class ObtenerReporteGeneralUseCase
 
   async ejecutar(): Promise<Resultado<ReporteGeneralOutput, ErrorDeDominio>> {
     try {
-      const leads = await this.consultaVentas.listarLeadsParaReporte();
-      const clientes = await this.consultaVentas.listarClientesParaReporte();
-      const actividadReciente = await this.consultaVentas.obtenerActividadReciente(10);
+      const [acciones, actividadReciente] = await Promise.all([
+        this.consultaVentas.contarAccionesPorTipo(),
+        this.consultaVentas.obtenerActividadReciente(10),
+      ]);
 
-      const hoy = new Date();
-      hoy.setHours(0, 0, 0, 0);
+      const totalAcciones = acciones.reduce((acc, a) => acc + a.total, 0);
+      const resumen = new ResumenAcciones(acciones, totalAcciones);
 
-      const leadsNuevosHoy = leads.filter((l) => l.creadoEn >= hoy).length;
-      const porcentaje = PorcentajeConversion.desdeLeadsYClientes(clientes.length, leads.length);
-
-      const citasPendientes = leads.reduce(
-        (acc, lead) => acc + lead.citas.filter((c) => c.estado === "PENDIENTE").length,
-        0,
-      );
-
-      const reporte = new ReporteGeneral(
-        new Date(),
-        {
-          conversionRate: porcentaje.valorNumerico,
-          leadsNuevosHoy,
-          citasPendientes,
-        },
-        actividadReciente,
-      );
+      const reporte = new ReporteGeneral(new Date(), resumen, actividadReciente);
 
       return resultadoExitoso({
         fechaGeneracion: reporte.fechaGeneracion,
-        metricas: reporte.metricas,
+        resumenAcciones: {
+          acciones: reporte.resumenAcciones.acciones,
+          totalAcciones: reporte.resumenAcciones.totalAcciones,
+        },
         actividadReciente: reporte.actividadReciente,
       });
     } catch (error) {

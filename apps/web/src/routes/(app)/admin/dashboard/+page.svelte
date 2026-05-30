@@ -7,29 +7,37 @@
 
 	let { data }: { data: PageData } = $props();
 
-	let estadisticas = $derived(data.estadisticas);
-	let propiedades = $derived(data.propiedades);
-	let reporte = $derived(data.reporte);
+	let propiedades = $derived(data?.propiedades ?? []);
+	let reporte = $derived(data?.reporte);
+
+	function buscarTotalAccion(evento: string): number {
+		return reporte?.resumenAcciones.acciones.find((a) => a.evento === evento)?.total ?? 0;
+	}
 
 	const labels: Record<string, string> = {
-		LEAD_REGISTRADO: 'Lead registrado',
+		LEAD_CREADO: 'Lead registrado',
 		LEAD_ACTUALIZADO: 'Lead actualizado',
 		CITA_AGENDADA: 'Cita agendada',
 		CITA_ACTUALIZADA: 'Cita reprogramada',
-		CONVERTIDO_A_CLIENTE: 'Lead convertido a cliente',
-		LEAD_ASIGNADO_A_ASESOR: 'Lead reasignado'
+		CLIENTE_CONVERTIDO: 'Lead convertido a cliente',
+		LEAD_ASIGNADO: 'Lead reasignado',
+		CONTRATO_CREADO: 'Contrato creado',
+		CONTRATO_FIRMADO: 'Contrato firmado'
 	};
 
 	const iconos: Record<string, string> = {
-		LEAD_REGISTRADO: '●',
+		LEAD_CREADO: '●',
 		LEAD_ACTUALIZADO: '✎',
 		CITA_AGENDADA: '◷',
 		CITA_ACTUALIZADA: '◷',
-		CONVERTIDO_A_CLIENTE: '✓',
-		LEAD_ASIGNADO_A_ASESOR: '→'
+		CLIENTE_CONVERTIDO: '✓',
+		LEAD_ASIGNADO: '→',
+		CONTRATO_CREADO: '▤',
+		CONTRATO_FIRMADO: '▤'
 	};
 
 	function tiempoRelativo(iso: string): string {
+		if (!iso) return '';
 		const diff = Date.now() - new Date(iso).getTime();
 		const mins = Math.floor(diff / 60000);
 		if (mins < 1) return 'Ahora';
@@ -57,7 +65,7 @@
 			Bienvenido, {$authStore.user?.username}
 		</h1>
 		<p class="text-sm text-text-muted">
-			Resumen del rendimiento inmobiliario general de ALVAS-Sistema.
+			Resumen de acciones y rendimiento comercial de ALVAS-Sistema.
 		</p>
 	</div>
 
@@ -71,33 +79,32 @@
 		</Card>
 
 		<Card>
-			<span class="stat-label">Leads Totales</span>
+			<span class="stat-label">Leads Creados</span>
 			<h2 class="mt-1 font-display text-3xl font-bold text-text-main">
-				{estadisticas?.totalLeads ?? '—'}
-			</h2>
-			<div class="mt-2 flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
-				{reporte?.metricas.leadsNuevosHoy ?? 0} nuevos hoy
-			</div>
-		</Card>
-
-		<Card>
-			<span class="stat-label">Tasa de Conversión</span>
-			<h2 class="mt-1 font-display text-3xl font-bold text-text-main">
-				{reporte ? `${(reporte.metricas.conversionRate * 100).toFixed(1)}%` : '—'}
-			</h2>
-			<div class="mt-2 flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
-				{estadisticas?.totalClientes ?? 0} clientes
-			</div>
-		</Card>
-
-		<Card>
-			<span class="stat-label">Asesores Activos</span>
-			<h2 class="mt-1 font-display text-3xl font-bold text-text-main">
-				{estadisticas?.asesoresActivos ?? '—'}
+				{buscarTotalAccion('LEAD_CREADO')}
 			</h2>
 			<div class="mt-2 flex items-center gap-1.5 text-xs font-semibold text-text-muted">
-				<span class="h-2 w-2 rounded-full bg-emerald-500"></span>
-				En línea ahora
+				Total histórico registrado
+			</div>
+		</Card>
+
+		<Card>
+			<span class="stat-label">Citas Agendadas</span>
+			<h2 class="mt-1 font-display text-3xl font-bold text-text-main">
+				{buscarTotalAccion('CITA_AGENDADA')}
+			</h2>
+			<div class="mt-2 flex items-center gap-1.5 text-xs font-semibold text-primary">
+				{buscarTotalAccion('CITA_ACTUALIZADA')} reprogramadas
+			</div>
+		</Card>
+
+		<Card>
+			<span class="stat-label">Clientes Finales</span>
+			<h2 class="mt-1 font-display text-3xl font-bold text-text-main">
+				{buscarTotalAccion('CLIENTE_CONVERTIDO')}
+			</h2>
+			<div class="mt-2 flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
+				{buscarTotalAccion('CONTRATO_FIRMADO')} contratos firmados
 			</div>
 		</Card>
 	</div>
@@ -152,7 +159,7 @@
 				<p class="text-sm text-text-muted">No hay actividad registrada aún.</p>
 			{:else}
 				<div class="flex flex-col gap-4">
-					{#each actividadReciente as act (act.idLead + act.fecha)}
+					{#each actividadReciente as act, index (`${act.idLead}:${act.fecha}:${index}`)}
 						<div
 							class="flex items-center gap-3 border-b border-border-light pb-3 last:border-0 last:pb-0"
 						>

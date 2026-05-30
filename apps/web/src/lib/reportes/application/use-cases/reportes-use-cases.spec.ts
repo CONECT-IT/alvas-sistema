@@ -6,26 +6,23 @@ describe('reportes / application use cases', () => {
 	it('consulta estadisticas y reporte general en paralelo desde el puerto', async () => {
 		const repository: ReporteRepository = {
 			obtenerEstadisticasGlobales: vi.fn().mockResolvedValue({
-				totalLeads: 10,
-				totalClientes: 4,
-				leadsPorEstado: { NUEVO: 3 },
-				asesoresActivos: 2
+				acciones: [{ evento: 'LEAD_CREADO', total: 10 }],
+				totalAcciones: 10
 			}),
 			obtenerReporteGeneral: vi.fn().mockResolvedValue({
 				fechaGeneracion: '2026-05-23T00:00:00.000Z',
-				metricas: {
-					conversionRate: 40,
-					leadsNuevosHoy: 2,
-					citasPendientes: 1
+				resumenAcciones: {
+					acciones: [{ evento: 'LEAD_CREADO', total: 10 }],
+					totalAcciones: 10
 				},
 				actividadReciente: []
 			})
 		};
 
 		await expect(obtenerReportes(repository)).resolves.toEqual({
-			estadisticas: expect.objectContaining({ totalLeads: 10 }),
+			estadisticas: expect.objectContaining({ totalAcciones: 10 }),
 			reporte: expect.objectContaining({
-				metricas: expect.objectContaining({ conversionRate: 40 })
+				resumenAcciones: expect.objectContaining({ totalAcciones: 10 })
 			})
 		});
 

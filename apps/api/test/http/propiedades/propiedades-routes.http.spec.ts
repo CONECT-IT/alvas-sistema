@@ -19,12 +19,20 @@ function conManejadorError(app: Hono): Hono {
     }
     if (error instanceof ValidationError) {
       return c.json(
-        { success: false, message: "Error de validación", code: "VALIDATION_ERROR", detalles: error.details },
+        {
+          success: false,
+          message: "Error de validación",
+          code: "VALIDATION_ERROR",
+          detalles: error.details,
+        },
         400,
       );
     }
     console.error("Error no manejado:", error);
-    return c.json({ success: false, message: "Error interno del servidor.", code: "ERROR_INTERNO" }, 500);
+    return c.json(
+      { success: false, message: "Error interno del servidor.", code: "ERROR_INTERNO" },
+      500,
+    );
   });
   return app;
 }
@@ -324,7 +332,9 @@ describe("http / propiedades routes", () => {
         ...deps.controllerDeps,
         crearActualizarPropiedad: () => ({
           ejecutar: async () =>
-            resultadoFallido(new ErrorDeDominio("Propiedad no encontrada.", { codigo: "PROPIEDAD_NO_ENCONTRADA" })),
+            resultadoFallido(
+              new ErrorDeDominio("Propiedad no encontrada.", { codigo: "PROPIEDAD_NO_ENCONTRADA" }),
+            ),
         }),
       },
     };
@@ -361,7 +371,9 @@ describe("http / propiedades routes", () => {
         ...deps.controllerDeps,
         crearEliminarPropiedad: () => ({
           ejecutar: async () =>
-            resultadoFallido(new ErrorDeDominio("Propiedad no encontrada.", { codigo: "PROPIEDAD_NO_ENCONTRADA" })),
+            resultadoFallido(
+              new ErrorDeDominio("Propiedad no encontrada.", { codigo: "PROPIEDAD_NO_ENCONTRADA" }),
+            ),
         }),
       },
     };

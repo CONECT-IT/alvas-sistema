@@ -1,9 +1,7 @@
 <script lang="ts">
+	import { invalidateAll } from '$app/navigation';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
-	import { HttpError } from '$lib/shared/http/httpClient';
-	import { obtenerReportes } from '$lib/reportes/application/use-cases/obtenerReportes';
-	import { reporteRepository } from '$lib/reportes/infrastructure/reporteRepository';
 	import type {
 		EstadisticasGlobales,
 		ReporteGeneral
@@ -14,10 +12,8 @@
 
 	let { data }: { data: PageData } = $props();
 
-	let estadisticas = $state<EstadisticasGlobales | null>(
-		data.estadisticas as unknown as EstadisticasGlobales
-	);
-	let reporte = $state<ReporteGeneral | null>(data.reporte as unknown as ReporteGeneral);
+	let estadisticas = $derived(data?.estadisticas as unknown as EstadisticasGlobales);
+	let reporte = $derived(data?.reporte as unknown as ReporteGeneral);
 	let loading = $state(false);
 	let error = $state<string | null>(null);
 
@@ -26,11 +22,9 @@
 		error = null;
 
 		try {
-			const resultado = await obtenerReportes(reporteRepository);
-			estadisticas = resultado.estadisticas;
-			reporte = resultado.reporte;
-		} catch (err) {
-			error = err instanceof HttpError ? err.message : 'No se pudo cargar reportes.';
+			await invalidateAll();
+		} catch {
+			error = 'No se pudo actualizar los reportes.';
 		} finally {
 			loading = false;
 		}
@@ -47,7 +41,7 @@
 			<p class="section-label">Reportes</p>
 			<h1 class="page-heading">Resumen comercial</h1>
 			<p class="mt-2 max-w-2xl text-sm leading-relaxed text-text-muted">
-				Consulta métricas globales, conversión, leads recientes y actividad comercial del sistema.
+				Resumen de acciones comerciales: eventos recientes y actividad del sistema.
 			</p>
 		</div>
 

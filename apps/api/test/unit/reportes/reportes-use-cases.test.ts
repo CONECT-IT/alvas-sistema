@@ -3,6 +3,7 @@ import { describe, expect, test } from "bun:test";
 import { ObtenerEstadisticasGlobalesUseCase } from "../../../src/lib/reportes/application/use-cases/ObtenerEstadisticasGlobalesUseCase";
 import { ObtenerReporteGeneralUseCase } from "../../../src/lib/reportes/application/use-cases/ObtenerReporteGeneralUseCase";
 import {
+  type AccionResumenLectura,
   type ActividadRecienteLectura,
   type AsesorConTotalLeads,
   type ClienteLecturaParaReportes,
@@ -39,14 +40,15 @@ class FakeConsultaVentasParaReportes implements IConsultaVentasParaReportes {
   async listarAsesoresConTotalesLeads(): Promise<AsesorConTotalLeads[]> {
     return this.asesores;
   }
+
+  async contarAccionesPorTipo(): Promise<AccionResumenLectura[]> {
+    if (this.error) throw this.error;
+    return [];
+  }
 }
 
 describe("reportes / use cases", () => {
-  test("ObtenerReporteGeneralUseCase calcula conversion, leads de hoy y citas pendientes", async () => {
-    const hoy = new Date();
-    hoy.setHours(10, 0, 0, 0);
-    const ayer = new Date(hoy);
-    ayer.setDate(ayer.getDate() - 1);
+  test("ObtenerReporteGeneralUseCase arma resumenAcciones y actividadReciente", async () => {
     const actividad = [
       {
         idLead: "lead-001",
@@ -55,33 +57,22 @@ describe("reportes / use cases", () => {
         fecha: "2026-05-21T10:00:00.000Z",
       },
     ];
-    const consulta = new FakeConsultaVentasParaReportes(
-      [
-        {
-          id: "lead-001",
-          estado: "NUEVO",
-          creadoEn: hoy,
-          citas: [{ estado: "PENDIENTE" }, { estado: "REALIZADA" }],
-        },
-        {
-          id: "lead-002",
-          estado: "CONVERTIDO",
-          creadoEn: ayer,
-          citas: [{ estado: "PENDIENTE" }],
-        },
-      ],
-      [{ id: "cliente-001" }],
-      actividad,
-    );
+    const consulta = new FakeConsultaVentasParaReportes([], [], actividad);
+    consulta.contarAccionesPorTipo = async () => [
+      { evento: "LEAD_CREADO", total: 2 },
+      { evento: "CITA_AGENDADA", total: 1 },
+    ];
 
     const resultado = await new ObtenerReporteGeneralUseCase(consulta).ejecutar();
 
     expect(resultado.esExito).toBe(true);
     if (resultado.esExito) {
-      expect(resultado.valor.metricas).toEqual({
-        conversionRate: 50,
-        leadsNuevosHoy: 1,
-        citasPendientes: 2,
+      expect(resultado.valor.resumenAcciones).toEqual({
+        acciones: [
+          { evento: "LEAD_CREADO", total: 2 },
+          { evento: "CITA_AGENDADA", total: 1 },
+        ],
+        totalAcciones: 3,
       });
       expect(resultado.valor.actividadReciente).toEqual(actividad);
       expect(resultado.valor.fechaGeneracion).toBeInstanceOf(Date);
@@ -89,29 +80,24 @@ describe("reportes / use cases", () => {
     expect(consulta.limitesActividad).toEqual([10]);
   });
 
-  test("ObtenerEstadisticasGlobalesUseCase agrupa leads por estado y asesores activos", async () => {
-    const consulta = new FakeConsultaVentasParaReportes(
-      [
-        { id: "lead-001", estado: "NUEVO", creadoEn: new Date(), citas: [] },
-        { id: "lead-002", estado: "NUEVO", creadoEn: new Date(), citas: [] },
-        { id: "lead-003", estado: "CONVERTIDO", creadoEn: new Date(), citas: [] },
-      ],
-      [{ id: "cliente-001" }, { id: "cliente-002" }],
-      [],
-      [
-        { idAsesor: "asesor-1", totalLeads: 2 },
-        { idAsesor: "asesor-2", totalLeads: 1 },
-      ],
-    );
+  test("ObtenerEstadisticasGlobalesUseCase devuelve resumen de acciones por tipo", async () => {
+    const consulta = new FakeConsultaVentasParaReportes();
+    consulta.contarAccionesPorTipo = async () => [
+      { evento: "LEAD_CREADO", total: 5 },
+      { evento: "CITA_AGENDADA", total: 3 },
+      { evento: "CLIENTE_CONVERTIDO", total: 2 },
+    ];
 
     const resultado = await new ObtenerEstadisticasGlobalesUseCase(consulta).ejecutar();
 
     expect(resultado.esExito).toBe(true);
     expect(resultado.esExito ? resultado.valor : undefined).toEqual({
-      totalLeads: 3,
-      totalClientes: 2,
-      leadsPorEstado: { NUEVO: 2, CONVERTIDO: 1 },
-      asesoresActivos: 2,
+      acciones: [
+        { evento: "LEAD_CREADO", total: 5 },
+        { evento: "CITA_AGENDADA", total: 3 },
+        { evento: "CLIENTE_CONVERTIDO", total: 2 },
+      ],
+      totalAcciones: 10,
     });
   });
 
@@ -137,31 +123,35 @@ describe("reportes / use cases", () => {
 
   test("propaga errores no dominico en ObtenerReporteGeneralUseCase", async () => {
     const consulta = new FakeConsultaVentasParaReportes();
-    consulta.listarLeadsParaReporte = () => Promise.reject(new Error("db error"));
+    consulta.contarAccionesPorTipo = () => Promise.reject(new Error("db error"));
 
     await expect(new ObtenerReporteGeneralUseCase(consulta).ejecutar()).rejects.toThrow("db error");
   });
 
   test("propaga errores no dominico en ObtenerEstadisticasGlobalesUseCase", async () => {
     const consulta = new FakeConsultaVentasParaReportes();
-    consulta.listarLeadsParaReporte = () => Promise.reject(new Error("db error"));
+    consulta.contarAccionesPorTipo = () => Promise.reject(new Error("db error"));
 
     await expect(new ObtenerEstadisticasGlobalesUseCase(consulta).ejecutar()).rejects.toThrow(
       "db error",
     );
   });
 
-  test("PorcentajeConversion con 0 clientes produce 0%", async () => {
-    const consulta = new FakeConsultaVentasParaReportes(
-      [{ id: "lead-001", estado: "NUEVO", creadoEn: new Date(), citas: [] }],
-      [],
-    );
+  test("resumen de acciones vacio cuando no hay actividad", async () => {
+    const consulta = new FakeConsultaVentasParaReportes();
+    consulta.contarAccionesPorTipo = async () => [];
 
-    const resultado = await new ObtenerReporteGeneralUseCase(consulta).ejecutar();
+    const reporte = await new ObtenerReporteGeneralUseCase(consulta).ejecutar();
+    const estadisticas = await new ObtenerEstadisticasGlobalesUseCase(consulta).ejecutar();
 
-    expect(resultado.esExito).toBe(true);
-    if (resultado.esExito) {
-      expect(resultado.valor.metricas.conversionRate).toBe(0);
+    expect(reporte.esExito).toBe(true);
+    expect(estadisticas.esExito).toBe(true);
+    if (reporte.esExito) {
+      expect(reporte.valor.resumenAcciones.totalAcciones).toBe(0);
+      expect(reporte.valor.resumenAcciones.acciones).toEqual([]);
+    }
+    if (estadisticas.esExito) {
+      expect(estadisticas.valor.totalAcciones).toBe(0);
     }
   });
 });

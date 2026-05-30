@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { type D1DatabaseLike } from "../../../shared/infrastructure";
 import { obtenerDb } from "../../../shared/infrastructure/persistence/drizzle";
 import { Lead } from "../../domain/entities/Lead";
@@ -148,14 +148,12 @@ export class D1VentasRepository implements IVentasRepository {
   // --- ACTIVIDAD ---
 
   async registrarActividad(idLead: string, evento: string, descripcion: string): Promise<void> {
-    await this.drizzle()
-      .insert(actividadVentasTable)
-      .values({
-        idLead,
-        evento,
-        descripcion,
-        fecha: new Date().toISOString(),
-      });
+    await this.drizzle().insert(actividadVentasTable).values({
+      idLead,
+      evento,
+      descripcion,
+      fecha: new Date().toISOString(),
+    });
   }
 
   async obtenerActividadReciente(
@@ -211,5 +209,18 @@ export class D1VentasRepository implements IVentasRepository {
       idAsesor,
       totalLeads,
     }));
+  }
+
+  async contarAccionesPorTipo(): Promise<{ evento: string; total: number }[]> {
+    const rows = await this.drizzle()
+      .select({
+        evento: actividadVentasTable.evento,
+        total: sql<number>`cast(count(*) as int)`,
+      })
+      .from(actividadVentasTable)
+      .groupBy(actividadVentasTable.evento)
+      .all();
+
+    return rows.map((r) => ({ evento: r.evento, total: r.total }));
   }
 }

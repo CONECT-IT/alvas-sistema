@@ -82,6 +82,10 @@ class MockVentasRepository implements IVentasRepository {
   async listarAsesoresConLeads(): Promise<{ idAsesor: IdUsuarioRef; totalLeads: number }[]> {
     return []; // Para simular que no hay asesores
   }
+
+  async contarAccionesPorTipo(): Promise<{ evento: string; total: number }[]> {
+    return [];
+  }
 }
 
 class MockGeneradorId {

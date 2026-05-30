@@ -7,6 +7,7 @@ type ContratoDto = {
 	idLead?: string;
 	nombreLead?: string;
 	idCliente?: string;
+	nombreCliente?: string;
 	idPropiedad: string;
 	nombrePropiedad?: string;
 	idAsesor?: string;
@@ -18,13 +19,18 @@ type ContratoDto = {
 	actualizadoEn: string;
 };
 
+type ListarContratosResp = {
+	contratos: ContratoDto[];
+};
+
 export const load: ServerLoad = async ({ fetch, params }) => {
-	const res = await fetch(`/api/ventas/contratos/${params.idContrato}`).then((r) =>
-		r.json<ApiResp<ContratoDto>>()
+	const res = await fetch('/api/ventas/contratos').then((r) =>
+		r.json<ApiResp<ListarContratosResp>>()
 	);
 
 	return {
-		contrato: res.success ? res.data : null,
-		idContrato: params.idContrato
+		contrato: res.success
+			? (res.data.contratos.find((contrato) => contrato.id === params.idContrato) ?? null)
+			: null
 	};
 };

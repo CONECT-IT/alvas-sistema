@@ -3,19 +3,21 @@ export type ApiSuccessResponse<T> = Readonly<{
 	data: T;
 }>;
 
+export type AccionResumenDTO = Readonly<{
+	evento: string;
+	total: number;
+}>;
+
 export type EstadisticasGlobalesDTO = Readonly<{
-	totalLeads: number;
-	totalClientes: number;
-	leadsPorEstado: Readonly<Record<string, number>>;
-	asesoresActivos: number;
+	acciones: ReadonlyArray<AccionResumenDTO>;
+	totalAcciones: number;
 }>;
 
 export type ReporteGeneralDTO = Readonly<{
 	fechaGeneracion: string;
-	metricas: {
-		conversionRate: number;
-		leadsNuevosHoy: number;
-		citasPendientes: number;
+	resumenAcciones: {
+		acciones: ReadonlyArray<AccionResumenDTO>;
+		totalAcciones: number;
 	};
 	actividadReciente: ReadonlyArray<{
 		idLead: string;

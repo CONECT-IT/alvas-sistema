@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
 	import Select from '$lib/shared/ui/Select.svelte';
@@ -10,12 +10,7 @@
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import type { LeadPipeline } from '$lib/ventas/domain/models/LeadPipeline';
 	import type { Propiedad } from '$lib/propiedades/domain/models/Propiedad';
-	import { listarPropiedades } from '$lib/propiedades/application/use-cases/listarPropiedades';
-	import { propiedadRepository } from '$lib/propiedades/infrastructure/propiedadRepository';
 	import type { Usuario } from '$lib/usuarios/domain/models/Usuario';
-	import { listarUsuarios } from '$lib/usuarios/application/use-cases/listarUsuarios';
-	import { usuarioRepository } from '$lib/usuarios/infrastructure/usuarioRepository';
-	import { listarPipeline } from '$lib/ventas/application/use-cases/listarPipeline';
 	import { registrarLead } from '$lib/ventas/application/use-cases/registrarLead';
 	import { ventasRepository } from '$lib/ventas/infrastructure/ventasRepository';
 	import LeadPipelineTable from '$lib/ventas/presentation/LeadPipelineTable.svelte';
@@ -25,11 +20,9 @@
 
 	let { data }: { data: PageData } = $props();
 
-	let leads = $state<LeadPipeline[]>(data.leads);
-	let propiedadesDisponibles = $state<Propiedad[]>(
-		data.propiedadesDisponibles as unknown as Propiedad[]
-	);
-	let asesores = $state<Usuario[]>(data.asesores as unknown as Usuario[]);
+	let leads = $derived((data?.leads as LeadPipeline[]) ?? []);
+	let propiedadesDisponibles = $derived((data?.propiedadesDisponibles as Propiedad[]) ?? []);
+	let asesores = $derived((data?.asesores as Usuario[]) ?? []);
 	let mostrarConvertidos = $state(false);
 	let vista = $state<'tabla' | 'kanban'>('kanban');
 	let loading = $state(false);
@@ -58,20 +51,9 @@
 		error = null;
 
 		try {
-			const [leadsResult, propiedadesResult, usuariosResult] = await Promise.all([
-				listarPipeline(ventasRepository),
-				listarPropiedades(propiedadRepository),
-				listarUsuarios(usuarioRepository)
-			]);
-			leads = leadsResult;
-			propiedadesDisponibles = propiedadesResult.filter(
-				(propiedad) => propiedad.estado.toUpperCase() === 'DISPONIBLE'
-			);
-			asesores = usuariosResult.filter(
-				(usuario) => usuario.rol === 'ASESOR' && usuario.estado.toUpperCase() === 'ACTIVO'
-			);
-		} catch (err) {
-			error = err instanceof HttpError ? err.message : 'No se pudieron cargar los leads.';
+			await invalidateAll();
+		} catch {
+			error = 'No se pudieron actualizar los leads.';
 		} finally {
 			loading = false;
 		}

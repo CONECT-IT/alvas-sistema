@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import Badge from '$lib/shared/ui/Badge.svelte';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
 	import { presentarEstadoContrato } from '$lib/shared/presentation';
-	import { httpClient, HttpError } from '$lib/shared/http/httpClient';
+	import { HttpError } from '$lib/shared/http/httpClient';
 	import { firmarContrato } from '$lib/ventas/application/use-cases/firmarContrato';
 	import { cancelarContrato } from '$lib/ventas/application/use-cases/cancelarContrato';
 	import { ventasRepository } from '$lib/ventas/infrastructure/ventasRepository';
@@ -12,13 +12,14 @@
 
 	let { data }: { data: PageData } = $props();
 
-	let contratos = $state<ContratoDto[]>(data.contratos as unknown as ContratoDto[]);
+	let contratos = $derived((data?.contratos as unknown as ContratoDto[]) ?? []);
 
 	type ContratoDto = {
 		id: string;
 		idLead?: string;
 		nombreLead?: string;
 		idCliente?: string;
+		nombreCliente?: string;
 		idPropiedad: string;
 		nombrePropiedad?: string;
 		idAsesor?: string;
@@ -38,12 +39,9 @@
 		loading = true;
 		error = null;
 		try {
-			const res = await httpClient.get<{ success: boolean; data: ContratoDto[] }>(
-				'/api/ventas/contratos'
-			);
-			contratos = res.data;
-		} catch (err) {
-			error = err instanceof HttpError ? err.message : 'No se pudieron cargar los contratos.';
+			await invalidateAll();
+		} catch {
+			error = 'No se pudieron actualizar los contratos.';
 		} finally {
 			loading = false;
 		}
@@ -71,6 +69,12 @@
 		} finally {
 			cancelando = null;
 		}
+	}
+
+	function tituloContrato(contrato: ContratoDto): string {
+		return contrato.nombrePropiedad
+			? `Contrato - ${contrato.nombrePropiedad}`
+			: 'Contrato comercial';
 	}
 </script>
 
@@ -121,11 +125,11 @@
 									<h3
 										class="font-display text-lg font-bold text-text-main transition-colors hover:text-primary"
 									>
-										Contrato {contrato.id.slice(0, 8)}...
+										{tituloContrato(contrato)}
 									</h3>
 								</button>
 								<p class="mt-1 text-sm text-text-muted">
-									Propiedad: {contrato.nombrePropiedad || contrato.idPropiedad}
+									Propiedad: {contrato.nombrePropiedad ?? 'Propiedad registrada'}
 								</p>
 							</div>
 							<Badge tone={presentarEstadoContrato(contrato.estado).tone} class="uppercase">
@@ -137,18 +141,20 @@
 							<div>
 								<span class="font-semibold text-text-main">Lead:</span>
 								<span class="ml-1 text-text-muted"
-									>{contrato.nombreLead || contrato.idLead || '—'}</span
+									>{contrato.nombreLead ?? 'Prospecto asociado'}</span
 								>
 							</div>
 							<div>
 								<span class="font-semibold text-text-main">Asesor:</span>
 								<span class="ml-1 text-text-muted"
-									>{contrato.nombreAsesor || contrato.idAsesor || '—'}</span
+									>{contrato.nombreAsesor ?? 'Asesor asignado'}</span
 								>
 							</div>
 							<div>
 								<span class="font-semibold text-text-main">Cliente:</span>
-								<span class="ml-1 text-text-muted">{contrato.idCliente ?? '—'}</span>
+								<span class="ml-1 text-text-muted"
+									>{contrato.nombreCliente ?? 'Pendiente de firma'}</span
+								>
 							</div>
 							<div>
 								<span class="font-semibold text-text-main">Inicio:</span>
