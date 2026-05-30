@@ -16,12 +16,14 @@
 		"lint": "bun run format:check && eslint .",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
-		"gen": "wrangler types"
+		"gen": "wrangler types",
+		"test:benchmark:lighthouse": "lhci autorun"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^2.0.4",
 		"@eslint/js": "^10.0.1",
 		"@fontsource/fira-mono": "^5.2.7",
+		"@lhci/cli": "^0.15.1",
 		"@neoconfetti/svelte": "^2.2.2",
 		"@playwright/test": "^1.47.0",
 		"@sveltejs/adapter-cloudflare": "^7.2.8",
@@ -39,6 +41,7 @@
 		"eslint-plugin-svelte": "^3.17.0",
 		"globals": "^17.4.0",
 		"jsdom": "^25.0.0",
+		"lighthouse": "^13.3.0",
 		"prettier": "^3.8.1",
 		"prettier-plugin-svelte": "^3.5.1",
 		"prettier-plugin-tailwindcss": "^0.7.2",

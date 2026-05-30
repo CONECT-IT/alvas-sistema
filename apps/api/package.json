@@ -8,6 +8,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "bun test",
+    "test:security": "bun test test/security/",
+    "test:benchmark:k6": "k6 run test/benchmark/k6/api-smoke.js",
+    "test:contract": "bun test test/contract/",
     "test:bdd": "cross-env NODE_OPTIONS=\"--import tsx\" cucumber-js \"test/bdd/features/**/*.feature\" --import \"test/bdd/features/**/*.ts\"",
     "build": "echo 'No build step needed for Wrangler'"
   },

@@ -1,0 +1,66 @@
+name: External Benchmarks
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 1'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: 'true'
+  NODE_ENV: test
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+jobs:
+  benchmark-k6:
+    name: 'k6: API Load Test'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - name: Start API server
+        run: |
+          bun run --cwd apps/api dev &
+          sleep 3
+          curl --retry 10 --retry-delay 2 --retry-connrefused http://127.0.0.1:3000/api/ventas/pipeline
+      - name: Run k6 smoke test
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: apps/api/test/benchmark/k6/api-smoke.js
+          flags: --env API_URL=http://127.0.0.1:3000
+
+  benchmark-lighthouse:
+    name: 'Lighthouse: Web Perf Audit'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - name: Build web app
+        run: bun run --cwd apps/web build
+      - name: Run Lighthouse CI
+        run: |
+          bun run --cwd apps/web test:benchmark:lighthouse
+        continue-on-error: true
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: lighthouse-reports
+          path: apps/web/test/benchmark/lighthouse/reports/
+          retention-days: 60

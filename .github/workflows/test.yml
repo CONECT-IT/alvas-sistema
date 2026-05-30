@@ -136,10 +136,27 @@ jobs:
           path: apps/api/coverage/
           retention-days: 60
 
+  api-security:
+    name: "Stage 5b: API Security Audit"
+    runs-on: ubuntu-latest
+    needs: api-coverage
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - name: Verificar que DTOs no exponen datos sensibles
+        run: bun run --cwd apps/api test:security
+
   api-mutation:
     name: "Stage 6a: API Mutation Test"
     runs-on: ubuntu-latest
-    needs: api-coverage
+    needs: [api-coverage, api-security]
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v6
@@ -230,6 +247,7 @@ jobs:
       - api-unit-test
       - api-integration-bdd
       - api-coverage
+      - api-security
       - api-mutation
       - web-component-test
       - web-coverage
@@ -242,6 +260,7 @@ jobs:
              [ "${{ needs.api-unit-test.result }}" != "success" ] ||
              [ "${{ needs.api-integration-bdd.result }}" != "success" ] ||
              [ "${{ needs.api-coverage.result }}" != "success" ] ||
+             [ "${{ needs.api-security.result }}" != "success" ] ||
              [ "${{ needs.api-mutation.result }}" != "success" ] ||
              [ "${{ needs.web-component-test.result }}" != "success" ] ||
              [ "${{ needs.web-coverage.result }}" != "success" ]; then
