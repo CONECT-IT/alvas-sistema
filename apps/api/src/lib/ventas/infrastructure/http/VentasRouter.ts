@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { type SessionClaims, verifySessionMiddleware } from "../../../shared/infrastructure";
+import { type SessionClaims } from "../../../shared/infrastructure";
 import { CitasController } from "./CitasController";
 import { ClientesController } from "./ClientesController";
 import { ContratosController } from "./ContratosController";
@@ -17,8 +17,6 @@ export function crearVentasRouter(deps: VentasControllerDeps) {
   const clientes = new ClientesController(deps);
   const contratos = new ContratosController(deps);
   const pipeline = new PipelineController(deps);
-
-  ventasRouter.use("*", verifySessionMiddleware());
 
   ventasRouter.get("/pipeline", (c) => pipeline.listar(c));
   ventasRouter.post("/lead", (c) => leads.registrar(c));

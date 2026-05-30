@@ -10,6 +10,7 @@ import {
   type IPasswordHasher,
   type IUsuarioRepository,
 } from "../../../src/lib/usuarios/domain/ports";
+import { type IGeneradorId } from "../../../src/lib/shared/domain/ports";
 import { HashClave, IdUsuario, Username } from "../../../src/lib/usuarios/domain/value-objects";
 
 class FakeUsuarioRepository implements IUsuarioRepository {
@@ -57,6 +58,14 @@ class FakePasswordHasher implements IPasswordHasher {
   }
 }
 
+class FakeGeneradorId implements IGeneradorId {
+  private contador = 0;
+  generar(): string {
+    this.contador++;
+    return `user-${String(this.contador).padStart(3, "0")}`;
+  }
+}
+
 describe("usuarios / CrearUsuarioUseCase", () => {
   test("guarda usuario con hash generado", async () => {
     const repo = new FakeUsuarioRepository();
@@ -64,8 +73,7 @@ describe("usuarios / CrearUsuarioUseCase", () => {
     const hashearSpy = mock(passwordHasher.hashear.bind(passwordHasher));
     passwordHasher.hashear = hashearSpy;
 
-    const resultado = await new CrearUsuarioUseCase(repo, passwordHasher).ejecutar({
-      idUsuario: "user-001",
+    const resultado = await new CrearUsuarioUseCase(repo, passwordHasher, new FakeGeneradorId()).ejecutar({
       username: "Asesor1",
       nombre: "Asesor Uno",
       clave: "secreto",
@@ -83,17 +91,15 @@ describe("usuarios / CrearUsuarioUseCase", () => {
 
   test("rechaza usernames duplicados", async () => {
     const repo = new FakeUsuarioRepository();
-    const useCase = new CrearUsuarioUseCase(repo, new FakePasswordHasher());
+    const useCase = new CrearUsuarioUseCase(repo, new FakePasswordHasher(), new FakeGeneradorId());
 
     await useCase.ejecutar({
-      idUsuario: "user-001",
       username: "asesor1",
       nombre: "Asesor Uno",
       clave: "secreto",
       rol: "ASESOR",
     });
     const duplicado = await useCase.ejecutar({
-      idUsuario: "user-002",
       username: "asesor1",
       nombre: "Asesor Dos",
       clave: "secreto",
@@ -268,8 +274,7 @@ describe("usuarios / propaga errores no dominio", () => {
     repo.guardar = () => Promise.reject(new Error("db error"));
 
     await expect(
-      new CrearUsuarioUseCase(repo, new FakePasswordHasher()).ejecutar({
-        idUsuario: "user-001",
+      new CrearUsuarioUseCase(repo, new FakePasswordHasher(), new FakeGeneradorId()).ejecutar({
         username: "test",
         nombre: "Test",
         clave: "secreto",
@@ -315,8 +320,7 @@ describe("usuarios / propaga errores no dominio", () => {
     const repo = new FakeUsuarioRepository();
     repo.guardar = () => Promise.reject(new ErrorDeDominio("error dominio"));
 
-    const resultado = await new CrearUsuarioUseCase(repo, new FakePasswordHasher()).ejecutar({
-      idUsuario: "user-001",
+    const resultado = await new CrearUsuarioUseCase(repo, new FakePasswordHasher(), new FakeGeneradorId()).ejecutar({
       username: "test",
       nombre: "Test",
       clave: "secreto",

@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { type SessionClaims, verifySessionMiddleware } from "../../../shared/infrastructure";
+import { type SessionClaims } from "../../../shared/infrastructure";
 import { type IAutorizadorPropiedades } from "../../domain/ports";
 import {
   PropiedadController,
@@ -19,7 +19,6 @@ export function crearPropiedadRouter(deps: PropiedadRouterDeps) {
   }>();
   const controller = new PropiedadController(deps.autorizador, deps.controllerDeps);
 
-  router.use("*", verifySessionMiddleware());
   router.get("/", (c) => controller.listar(c));
   router.post("/", (c) => controller.crear(c));
   router.put("/:idPropiedad", (c) => controller.actualizar(c));

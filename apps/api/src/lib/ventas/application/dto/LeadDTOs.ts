@@ -34,14 +34,6 @@ export interface ActualizarLeadBodyDTO {
   estado?: string;
 }
 
-export interface CrearContratoInputDTO {
-  id: string;
-  idLead: string;
-  idPropiedad: string;
-  fechaInicio: Date;
-  fechaFin: Date;
-}
-
 export interface AsignarLeadAAsesorInputDTO {
   idLead: string;
   idAsesor: string;

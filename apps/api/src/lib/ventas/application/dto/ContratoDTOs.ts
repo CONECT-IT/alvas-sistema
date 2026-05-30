@@ -1,5 +1,5 @@
 export interface CrearContratoInputDTO {
-  id: string;
+  id?: string;
   idLead: string;
   idPropiedad: string;
   fechaInicio: Date;

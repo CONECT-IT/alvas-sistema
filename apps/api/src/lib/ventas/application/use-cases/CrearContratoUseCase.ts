@@ -5,6 +5,7 @@ import {
   type Resultado,
 } from "../../../shared";
 import { ErrorDeDominio } from "../../../shared/domain/errors/ErrorDeDominio";
+import { type IGeneradorId } from "../../../shared/domain/ports";
 import { type IContratoRepository } from "../../domain/ports/IContratoRepository";
 import { Contrato } from "../../domain/entities/Contrato";
 import { type CrearContratoInputDTO } from "../dto/ContratoDTOs";
@@ -20,14 +21,17 @@ export class CrearContratoUseCase
     CasoDeUso<CrearContratoInput, Resultado<CrearContratoOutput, ErrorDeDominio>>,
     ICrearContrato
 {
-  constructor(private readonly repository: IContratoRepository) {}
+  constructor(
+    private readonly repository: IContratoRepository,
+    private readonly generadorId: IGeneradorId,
+  ) {}
 
   async ejecutar(
     input: CrearContratoInput,
   ): Promise<Resultado<CrearContratoOutput, ErrorDeDominio>> {
     try {
       const contrato = Contrato.crear({
-        id: idContrato(input.id),
+        id: idContrato(input.id ?? this.generadorId.generar()),
         idLead: idLead(input.idLead),
         idPropiedad: idPropiedad(input.idPropiedad),
         fechaInicio: input.fechaInicio,

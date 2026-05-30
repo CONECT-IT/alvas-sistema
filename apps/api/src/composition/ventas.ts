@@ -96,7 +96,7 @@ export function crearVentasControllerDeps(): VentasControllerDeps {
     crearListarLeadsPorAsesor: (c) =>
       new ListarLeadsPorAsesorUseCase(new D1VentasRepository(c.env.DB)),
     crearListarClientes: (c) => new ListarClientesUseCase(new D1VentasRepository(c.env.DB)),
-    crearCrearContrato: (c) => new CrearContratoUseCase(new D1ContratoRepository(c.env.DB)),
+    crearCrearContrato: (c) => new CrearContratoUseCase(new D1ContratoRepository(c.env.DB), new UuidGeneradorId()),
     crearListarContratos: (c) =>
       new ListarContratosUseCase(
         new D1ContratoRepository(c.env.DB),

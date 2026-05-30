@@ -11,6 +11,7 @@ import { IdUsuario, Username } from "../../domain/value-objects";
 import { UsuarioYaExisteError } from "../../domain/errors";
 import { type CrearUsuarioDTO } from "../dto/UsuarioDTOs";
 import { type ICrearUsuario } from "../ports/in";
+import { type IGeneradorId } from "../../../shared/domain/ports";
 
 export class CrearUsuarioUseCase
   implements CasoDeUso<CrearUsuarioDTO, Resultado<Usuario, ErrorDeDominio>>, ICrearUsuario
@@ -18,17 +19,15 @@ export class CrearUsuarioUseCase
   constructor(
     private readonly usuarioRepository: IUsuarioRepository,
     private readonly passwordHasher: IPasswordHasher,
+    private readonly generadorId: IGeneradorId,
   ) {}
 
   async ejecutar(dto: CrearUsuarioDTO): Promise<Resultado<Usuario, ErrorDeDominio>> {
     try {
-      const idUsuario = new IdUsuario(dto.idUsuario);
+      const idUsuario = new IdUsuario(this.generadorId.generar());
       const username = new Username(dto.username);
 
-      if (
-        (await this.usuarioRepository.existePorId(idUsuario)) ||
-        (await this.usuarioRepository.existePorUsername(username))
-      ) {
+      if (await this.usuarioRepository.existePorUsername(username)) {
         return resultadoFallido(new UsuarioYaExisteError(username.valor));
       }
 

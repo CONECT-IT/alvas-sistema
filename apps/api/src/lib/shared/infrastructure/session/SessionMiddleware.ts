@@ -2,11 +2,11 @@ import { type MiddlewareHandler } from "hono";
 import { ErrorDeDominio } from "../../domain";
 import { AuthTokenInvalidoError } from "../../../auth/domain";
 import { AuthToken } from "../../../auth/domain/value-objects";
-import { crearTokenProviderDesdeEnv } from "../../../auth/infrastructure/security/TokenProviderFactory";
+import { type ITokenProvider } from "../../../auth/domain/ports";
 import { type SessionClaims } from "./SessionClaims";
 import { type D1DatabaseLike } from "../persistence/D1DatabaseLike";
 
-type SessionBindings = {
+type SessionEnvBindings = {
   DB: D1DatabaseLike;
   AUTH_SECRET: string;
   AUTH_REFRESH_SECRET?: string;
@@ -15,13 +15,15 @@ type SessionBindings = {
 };
 
 type SessionEnv = {
-  Bindings: SessionBindings;
+  Bindings: SessionEnvBindings;
   Variables: {
     authPayload: SessionClaims;
   };
 };
 
-export const verifySessionMiddleware = (): MiddlewareHandler<SessionEnv> => {
+export const verifySessionMiddleware = (
+  createTokenProvider: (bindings: SessionEnvBindings) => ITokenProvider,
+): MiddlewareHandler<SessionEnv> => {
   return async (c, next) => {
     const authHeader = c.req.header("authorization");
     const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7).trim() : "";
@@ -30,7 +32,7 @@ export const verifySessionMiddleware = (): MiddlewareHandler<SessionEnv> => {
       throw new AuthTokenInvalidoError();
     }
 
-    const tokenProvider = crearTokenProviderDesdeEnv(c.env);
+    const tokenProvider = createTokenProvider(c.env);
     const payload = await tokenProvider.validarAuthToken(new AuthToken(token));
 
     const usuarioActivo = await usuarioEstaActivo(c.env.DB, payload.idUsuario);

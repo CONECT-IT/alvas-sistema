@@ -1,5 +1,4 @@
 export interface CrearUsuarioDTO {
-  idUsuario: string;
   username: string;
   nombre: string;
   clave: string;

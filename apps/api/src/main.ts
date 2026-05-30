@@ -1,7 +1,10 @@
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { ErrorDeDominio } from "./lib/shared/domain";
 import { mapErrorDeDominioAStatus } from "./lib/shared/infrastructure/http/responses";
 import { ValidationError } from "./lib/shared/infrastructure/validation/helpers";
+import { verifySessionMiddleware, requireRolesMiddleware } from "./lib/shared/infrastructure";
+import { crearTokenProviderDesdeEnv } from "./lib/auth/infrastructure/security/TokenProviderFactory";
 import { crearAuthRouter } from "./lib/auth/infrastructure";
 import { crearUsuarioRouter } from "./lib/usuarios/infrastructure";
 import { crearPropiedadRouter } from "./lib/propiedades/infrastructure";
@@ -26,6 +29,7 @@ type AppBindings = {
   REFRESH_TOKEN_TTL_SEGUNDOS?: string;
   AUTH_PEPPER?: string;
   INTEGRACION_WHATSAPP_SECRETO?: string;
+  CORS_ORIGINS?: string;
 };
 
 type AppVariables = {
@@ -34,6 +38,57 @@ type AppVariables = {
 
 const app = new Hono<{ Bindings: AppBindings; Variables: AppVariables }>();
 
+// Security: CORS
+app.use("*", cors({
+  origin: (origin, c) => {
+    const allowed = (c.env.CORS_ORIGINS ?? "http://localhost:5173").split(",").map((s: string) => s.trim());
+    return allowed.includes(origin) ? origin : null;
+  },
+  credentials: true,
+}));
+
+// Security: headers
+app.use("*", async (c, next) => {
+  await next();
+  c.res.headers.set("X-Content-Type-Options", "nosniff");
+  c.res.headers.set("X-Frame-Options", "DENY");
+  c.res.headers.set("X-XSS-Protection", "1; mode=block");
+  c.res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+});
+
+// Security: rate limiting (in-memory, resets per cold start)
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX = 100;
+const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
+app.use("*", async (c, next) => {
+  const clientIp = c.req.header("cf-connecting-ip") ?? "unknown";
+  const now = Date.now();
+  const entry = rateLimitStore.get(clientIp);
+
+  if (!entry || now > entry.resetAt) {
+    rateLimitStore.set(clientIp, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    c.res.headers.set("X-RateLimit-Limit", String(RATE_LIMIT_MAX));
+    c.res.headers.set("X-RateLimit-Remaining", String(RATE_LIMIT_MAX - 1));
+    c.res.headers.set("X-RateLimit-Reset", String(Math.ceil((now + RATE_LIMIT_WINDOW_MS) / 1000)));
+    await next();
+    return;
+  }
+
+  entry.count++;
+  c.res.headers.set("X-RateLimit-Limit", String(RATE_LIMIT_MAX));
+  c.res.headers.set("X-RateLimit-Remaining", String(Math.max(0, RATE_LIMIT_MAX - entry.count)));
+  c.res.headers.set("X-RateLimit-Reset", String(Math.ceil(entry.resetAt / 1000)));
+
+  if (entry.count > RATE_LIMIT_MAX) {
+    return c.json(
+      { success: false, message: "Demasiadas solicitudes. Intenta de nuevo en un minuto.", code: "RATE_LIMIT" },
+      429,
+    );
+  }
+
+  await next();
+});
+
 app.get("/health", (c) => c.json({ status: "ok", service: "alvas-api" }));
 app.route("/usuarios", crearUsuarioRouter(crearUsuarioControllerDeps()));
 app.route("/auth", crearAuthRouter(crearAuthControllerDeps()));
@@ -41,6 +96,35 @@ app.route("/propiedades", crearPropiedadRouter(crearPropiedadRouterDeps()));
 app.route("/ventas", crearVentasRouter(crearVentasControllerDeps()));
 app.route("/reportes", crearReportesRouter(crearReportesRouterDeps()));
 app.route("/integraciones", crearIntegracionesRouter(crearIntegracionesRouterDeps()));
+
+// Auth middleware applied at composition root
+app.use("/usuarios/*", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
+app.use("/propiedades/*", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
+app.use("/ventas/*", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
+app.use("/reportes/*", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
+app.use("/reportes/*", requireRolesMiddleware(["ADMIN"]));
+app.use("/integraciones/captaciones/pendientes/*", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
+
+// Audit logging for write operations
+const METODOS_ESCRITURA = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+app.use("*", async (c, next) => {
+  await next();
+
+  if (c.res.status < 400 && METODOS_ESCRITURA.has(c.req.method)) {
+    const payload = c.get("authPayload");
+    console.log(
+      JSON.stringify({
+        tipo: "AUDIT",
+        timestamp: new Date().toISOString(),
+        usuario: payload?.idUsuario ?? "anonimo",
+        rol: payload?.rol ?? "PUBLICO",
+        metodo: c.req.method,
+        path: c.req.path,
+        status: c.res.status,
+      }),
+    );
+  }
+});
 
 app.onError((error, c) => {
   if (error instanceof ErrorDeDominio) {
