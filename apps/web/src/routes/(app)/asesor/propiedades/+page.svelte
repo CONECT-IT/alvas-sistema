@@ -8,9 +8,12 @@
 	import PropiedadAdminTable from '$lib/propiedades/presentation/PropiedadAdminTable.svelte';
 	import PropiedadStats from '$lib/propiedades/presentation/PropiedadStats.svelte';
 	import { goto } from '$app/navigation';
+	import type { PageData } from './$types';
 
-	let propiedades = $state<Propiedad[]>([]);
-	let loading = $state(true);
+	let { data }: { data: PageData } = $props();
+
+	let propiedades = $state<Propiedad[]>(data.propiedades as unknown as Propiedad[]);
+	let loading = $state(false);
 	let error = $state<string | null>(null);
 	let mostrarSoloPublicadas = $state(false);
 
@@ -36,10 +39,6 @@
 	function irAPropiedad(p: Propiedad) {
 		goto(`/asesor/propiedades/${encodeURIComponent(p.id)}`);
 	}
-
-	$effect(() => {
-		cargarPropiedades();
-	});
 </script>
 
 <svelte:head>

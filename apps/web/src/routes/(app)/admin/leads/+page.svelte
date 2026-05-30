@@ -18,13 +18,16 @@
 	import LeadPipelineTable from '$lib/ventas/presentation/LeadPipelineTable.svelte';
 	import LeadKanban from '$lib/ventas/presentation/LeadKanban.svelte';
 	import PipelineStats from '$lib/ventas/presentation/PipelineStats.svelte';
+	import type { PageData } from './$types';
 
-	let leads = $state<LeadPipeline[]>([]);
-	let propiedadesDisponibles = $state<Propiedad[]>([]);
-	let asesores = $state<Usuario[]>([]);
+	let { data }: { data: PageData } = $props();
+
+	let leads = $state<LeadPipeline[]>(data.leads);
+	let propiedadesDisponibles = $state<Propiedad[]>(data.propiedadesDisponibles);
+	let asesores = $state<Usuario[]>(data.asesores as unknown as Usuario[]);
 	let mostrarConvertidos = $state(false);
 	let vista = $state<'tabla' | 'kanban'>('kanban');
-	let loading = $state(true);
+	let loading = $state(false);
 	let error = $state<string | null>(null);
 	let panelCrear = $state(false);
 	let guardando = $state(false);
@@ -120,10 +123,6 @@
 			guardando = false;
 		}
 	}
-
-	$effect(() => {
-		cargar();
-	});
 </script>
 
 <svelte:head>

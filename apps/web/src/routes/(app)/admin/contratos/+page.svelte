@@ -5,13 +5,15 @@
 	import Card from '$lib/shared/ui/Card.svelte';
 	import { presentarEstadoContrato } from '$lib/shared/presentation';
 	import { httpClient, HttpError } from '$lib/shared/http/httpClient';
-	import type { ContratoDTO } from '$lib/ventas/infrastructure/dto/VentasDTOs';
 	import { firmarContrato } from '$lib/ventas/application/use-cases/firmarContrato';
 	import { cancelarContrato } from '$lib/ventas/application/use-cases/cancelarContrato';
 	import { ventasRepository } from '$lib/ventas/infrastructure/ventasRepository';
+	import type { PageData } from './$types';
 
-	let contratos = $state<ContratoDTO[]>([]);
-	let loading = $state(true);
+	let { data }: { data: PageData } = $props();
+
+	let contratos = $state<unknown[]>(data.contratos);
+	let loading = $state(false);
 	let error = $state<string | null>(null);
 	let firmando = $state<string | null>(null);
 	let cancelando = $state<string | null>(null);
@@ -20,7 +22,7 @@
 		loading = true;
 		error = null;
 		try {
-			const res = await httpClient.get<{ success: boolean; data: ContratoDTO[] }>(
+			const res = await httpClient.get<{ success: boolean; data: unknown[] }>(
 				'/api/ventas/contratos'
 			);
 			contratos = res.data;
@@ -54,10 +56,6 @@
 			cancelando = null;
 		}
 	}
-
-	$effect(() => {
-		cargar();
-	});
 </script>
 
 <svelte:head>

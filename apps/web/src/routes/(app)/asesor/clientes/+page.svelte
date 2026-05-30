@@ -9,9 +9,12 @@
 	import { registrarCliente } from '$lib/clientes/application/use-cases/registrarCliente';
 	import { clienteRepository } from '$lib/clientes/infrastructure/clienteRepository';
 	import ClienteTable from '$lib/clientes/presentation/ClienteTable.svelte';
+	import type { PageData } from './$types';
 
-	let clientes = $state<Cliente[]>([]);
-	let loading = $state(true);
+	let { data }: { data: PageData } = $props();
+
+	let clientes = $state<Cliente[]>(data.clientes as unknown as Cliente[]);
+	let loading = $state(false);
 	let creating = $state(false);
 	let error = $state<string | null>(null);
 
@@ -70,10 +73,6 @@
 		}
 	}
 
-	$effect(() => {
-		cargarClientes();
-	});
-</script>
 
 <svelte:head>
 	<title>Clientes | ALVAS</title>

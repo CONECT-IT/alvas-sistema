@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import Badge from '$lib/shared/ui/Badge.svelte';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
@@ -10,27 +9,29 @@
 	import { actualizarPropiedad } from '$lib/propiedades/application/use-cases/actualizarPropiedad';
 	import type { Propiedad } from '$lib/propiedades/domain/models/Propiedad';
 	import { presentarEstadoPropiedad, opcionesEstadoPropiedad } from '$lib/shared/presentation';
+	import type { PageData } from './$types';
 
-	let propiedadId = $derived($page.params.idPropiedad ?? '');
-	let propiedad = $state<Propiedad | null>(null);
-	let loading = $state(true);
+	let { data }: { data: PageData } = $props();
+
+	let propiedad = $state<Propiedad | null>(data.propiedad as unknown as Propiedad);
+	let loading = $state(!data.propiedad);
 	let updating = $state(false);
 	let error = $state<string | null>(null);
 	let updateSuccess = $state<string | null>(null);
 	let updateError = $state<string | null>(null);
 	let editando = $state(false);
 
-	let titulo = $state('');
-	let descripcion = $state('');
-	let precio = $state(0);
-	let estado = $state('');
+	let titulo = $state(data.propiedad?.titulo ?? '');
+	let descripcion = $state(data.propiedad?.descripcion ?? '');
+	let precio = $state(data.propiedad?.precio ?? 0);
+	let estado = $state(data.propiedad?.estado ?? '');
 
 	async function cargar() {
-		if (!propiedadId) return;
+		if (!propiedad?.id) return;
 		loading = true;
 		error = null;
 		try {
-			propiedad = await obtenerPropiedad(propiedadRepository, propiedadId);
+			propiedad = await obtenerPropiedad(propiedadRepository, propiedad.id);
 			if (propiedad) {
 				titulo = propiedad.titulo;
 				descripcion = propiedad.descripcion;
@@ -85,9 +86,6 @@
 		updateError = null;
 	}
 
-	$effect(() => {
-		cargar();
-	});
 </script>
 
 <svelte:head>

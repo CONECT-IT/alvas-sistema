@@ -5,14 +5,16 @@
 	import Button from '$lib/shared/ui/Button.svelte';
 	import { presentarEstadoContrato } from '$lib/shared/presentation';
 	import { HttpError } from '$lib/shared/http/httpClient';
-	import type { ContratoDTO } from '$lib/ventas/infrastructure/dto/VentasDTOs';
 	import { listarContratos } from '$lib/ventas/application/use-cases/listarContratos';
 	import { firmarContrato } from '$lib/ventas/application/use-cases/firmarContrato';
 	import { cancelarContrato } from '$lib/ventas/application/use-cases/cancelarContrato';
 	import { ventasRepository } from '$lib/ventas/infrastructure/ventasRepository';
+	import type { PageData } from './$types';
 
-	let contratos = $state<ContratoDTO[]>([]);
-	let loading = $state(true);
+	let { data }: { data: PageData } = $props();
+
+	let contratos = $state<unknown[]>(data.contratos);
+	let loading = $state(false);
 	let error = $state<string | null>(null);
 	let firmando = $state<string | null>(null);
 	let cancelando = $state<string | null>(null);
@@ -53,10 +55,6 @@
 		}
 	}
 
-	$effect(() => {
-		cargar();
-	});
-</script>
 
 <svelte:head>
 	<title>Mis Contratos | ALVAS</title>

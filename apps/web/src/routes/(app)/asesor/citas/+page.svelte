@@ -19,10 +19,13 @@
 	import { listarPipeline } from '$lib/ventas/application/use-cases/listarPipeline';
 	import { ventasRepository } from '$lib/ventas/infrastructure/ventasRepository';
 	import LeadPipelineTable from '$lib/ventas/presentation/LeadPipelineTable.svelte';
+	import type { PageData } from './$types';
 
-	let leads = $state<LeadPipeline[]>([]);
-	let propiedadesDisponibles = $state<Propiedad[]>([]);
-	let loading = $state(true);
+	let { data }: { data: PageData } = $props();
+
+	let leads = $state<LeadPipeline[]>(data.leads as unknown as LeadPipeline[]);
+	let propiedadesDisponibles = $state<Propiedad[]>(data.propiedadesDisponibles as unknown as Propiedad[]);
+	let loading = $state(false);
 	let creating = $state(false);
 	let mostrarPanelCrear = $state(false);
 	let mostrarPanelEditar = $state(false);
@@ -233,10 +236,6 @@
 	function verDetalle(lead: LeadPipeline) {
 		goto(`/asesor/leads/${lead.id}`);
 	}
-
-	$effect(() => {
-		cargarCitas();
-	});
 </script>
 
 <svelte:head>

@@ -7,9 +7,12 @@
 	import { listarClientes } from '$lib/clientes/application/use-cases/listarClientes';
 	import { clienteRepository } from '$lib/clientes/infrastructure/clienteRepository';
 	import ClienteTable from '$lib/clientes/presentation/ClienteTable.svelte';
+	import type { PageData } from './$types';
 
-	let clientes = $state<Cliente[]>([]);
-	let loading = $state(true);
+	let { data }: { data: PageData } = $props();
+
+	let clientes = $state<Cliente[]>(data.clientes as unknown as Cliente[]);
+	let loading = $state(false);
 	let error = $state<string | null>(null);
 
 	function irACliente(c: Cliente) {
@@ -28,10 +31,6 @@
 			loading = false;
 		}
 	}
-
-	$effect(() => {
-		cargar();
-	});
 </script>
 
 <svelte:head>

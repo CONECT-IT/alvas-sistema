@@ -8,9 +8,12 @@
 	import { ventasRepository } from '$lib/ventas/infrastructure/ventasRepository';
 	import LeadPipelineTable from '$lib/ventas/presentation/LeadPipelineTable.svelte';
 	import PipelineStats from '$lib/ventas/presentation/PipelineStats.svelte';
+	import type { PageData } from './$types';
 
-	let leads = $state<LeadPipeline[]>([]);
-	let loading = $state(true);
+	let { data }: { data: PageData } = $props();
+
+	let leads = $state<LeadPipeline[]>(data.leads as unknown as LeadPipeline[]);
+	let loading = $state(false);
 	let error = $state<string | null>(null);
 
 	async function cargarPipeline() {
@@ -29,10 +32,6 @@
 	function verDetalle(lead: LeadPipeline) {
 		goto(`/admin/leads/${lead.id}`);
 	}
-
-	$effect(() => {
-		cargarPipeline();
-	});
 </script>
 
 <svelte:head>

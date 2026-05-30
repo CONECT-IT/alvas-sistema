@@ -5,6 +5,7 @@
 	import Card from '$lib/shared/ui/Card.svelte';
 	import { presentarEstadoCita } from '$lib/shared/presentation';
 	import { httpClient, HttpError } from '$lib/shared/http/httpClient';
+	import type { PageData } from './$types';
 
 	type CitaAgenda = {
 		idLead: string;
@@ -17,8 +18,10 @@
 		leadNombre: string;
 	};
 
-	let citas = $state<CitaAgenda[]>([]);
-	let loading = $state(true);
+	let { data }: { data: PageData } = $props();
+
+	let citas = $state<CitaAgenda[]>(data.citas as unknown as CitaAgenda[]);
+	let loading = $state(false);
 	let error = $state<string | null>(null);
 
 	async function cargar() {
@@ -47,10 +50,6 @@
 	function verLead(idLead: string) {
 		goto(`/admin/leads/${encodeURIComponent(idLead)}`);
 	}
-
-	$effect(() => {
-		cargar();
-	});
 </script>
 
 <svelte:head>

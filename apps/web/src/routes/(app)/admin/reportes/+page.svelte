@@ -10,10 +10,13 @@
 	} from '$lib/reportes/domain/models/ReporteGeneral';
 	import ReporteResumen from '$lib/reportes/presentation/ReporteResumen.svelte';
 	import ActividadReciente from '$lib/reportes/presentation/ActividadReciente.svelte';
+	import type { PageData } from './$types';
 
-	let estadisticas = $state<EstadisticasGlobales | null>(null);
-	let reporte = $state<ReporteGeneral | null>(null);
-	let loading = $state(true);
+	let { data }: { data: PageData } = $props();
+
+	let estadisticas = $state<EstadisticasGlobales | null>(data.estadisticas as unknown as EstadisticasGlobales);
+	let reporte = $state<ReporteGeneral | null>(data.reporte as unknown as ReporteGeneral);
+	let loading = $state(false);
 	let error = $state<string | null>(null);
 
 	async function cargarReportes() {
@@ -30,10 +33,6 @@
 			loading = false;
 		}
 	}
-
-	$effect(() => {
-		cargarReportes();
-	});
 </script>
 
 <svelte:head>

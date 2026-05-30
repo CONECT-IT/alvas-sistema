@@ -14,10 +14,13 @@
 	import type { Usuario } from '$lib/usuarios/domain/models/Usuario';
 	import { listarUsuarios } from '$lib/usuarios/application/use-cases/listarUsuarios';
 	import { usuarioRepository } from '$lib/usuarios/infrastructure/usuarioRepository';
+	import type { PageData } from './$types';
 
-	let propiedades = $state<Propiedad[]>([]);
-	let asesores = $state<Usuario[]>([]);
-	let loading = $state(true);
+	let { data }: { data: PageData } = $props();
+
+	let propiedades = $state<Propiedad[]>(data.propiedades as unknown as Propiedad[]);
+	let asesores = $state<Usuario[]>(data.asesores as unknown as Usuario[]);
+	let loading = $state(false);
 	let creating = $state(false);
 	let updatingId = $state<string | null>(null);
 	let error = $state<string | null>(null);
@@ -132,10 +135,6 @@
 	function verDetalle(propiedad: Propiedad) {
 		goto(`/admin/propiedades/${propiedad.id}`);
 	}
-
-	$effect(() => {
-		cargarPropiedades();
-	});
 </script>
 
 <svelte:head>

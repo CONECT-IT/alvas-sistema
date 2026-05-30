@@ -12,9 +12,12 @@
 	import { usuarioRepository } from '$lib/usuarios/infrastructure/usuarioRepository';
 	import UsuarioAdminTable from '$lib/usuarios/presentation/UsuarioAdminTable.svelte';
 	import UsuarioStats from '$lib/usuarios/presentation/UsuarioStats.svelte';
+	import type { PageData } from './$types';
 
-	let usuarios = $state<Usuario[]>([]);
-	let loading = $state(true);
+	let { data }: { data: PageData } = $props();
+
+	let usuarios = $state<Usuario[]>(data.usuarios as unknown as Usuario[]);
+	let loading = $state(false);
 	let error = $state<string | null>(null);
 	let saving = $state(false);
 	let formError = $state<string | null>(null);
@@ -133,10 +136,6 @@
 			saving = false;
 		}
 	}
-
-	$effect(() => {
-		cargarUsuarios();
-	});
 </script>
 
 <svelte:head>

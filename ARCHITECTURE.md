@@ -38,6 +38,10 @@ ACLs actuales:
 - `reportes <- ventas`: `reportes` define `IConsultaVentasParaReportes`; `ventas` provee `ConsultaVentasParaReportesAdapter`.
 - `integraciones <- ventas`: `integraciones` define `IRegistroLeadCaptacion`; `ventas` provee `RegistroLeadCaptacionVentasAdapter`.
 - `ventas <- propiedades`: `ventas` define `IRegistroPropiedadCliente`; `propiedades` provee `RegistroPropiedadClienteAdapter` para vincular una propiedad al cliente vendedor cuando se firma contrato.
+- `ventas <- propiedades`: `ventas` define `IRegistroPropiedadVendedor`; `propiedades` provee `RegistroPropiedadVendedorAdapter` para registrar propiedades preliminares de un lead vendedor.
+- `ventas <- propiedades`: `ventas` define `IConsultaPropiedadInteres`; `propiedades` provee `ConsultaPropiedadInteresVentasAdapter` para validar disponibilidad de propiedad para compradores.
+- `integraciones <- propiedades`: `integraciones` define `IRegistroPropiedadCaptacion`; `propiedades` provee `RegistroPropiedadCaptacionAdapter` para registrar propiedades desde captacion.
+- `ventas <- usuarios` (puente interno): `ventas` define `IConsultaNombreAsesor`; `ventas/infrastructure` implementa `ConsultaNombreAsesorAdapter` que usa `IUsuarioRepository` de `usuarios`.
 
 Esto es una ACL pragmatica: cumple la proteccion de modelos y dependencias sin crear una capa ceremonial adicional. Si una integracion crece en complejidad, el siguiente paso es mover esos adapters a carpetas nombradas explicitamente como `acl` y agregar mappers/modelos de traduccion dedicados.
 

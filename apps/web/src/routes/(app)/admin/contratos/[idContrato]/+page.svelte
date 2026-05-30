@@ -1,49 +1,32 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import Badge from '$lib/shared/ui/Badge.svelte';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
 	import { presentarEstadoContrato } from '$lib/shared/presentation';
-	import { httpClient, HttpError } from '$lib/shared/http/httpClient';
+	import { HttpError } from '$lib/shared/http/httpClient';
 	import { firmarContrato } from '$lib/ventas/application/use-cases/firmarContrato';
 	import { cancelarContrato } from '$lib/ventas/application/use-cases/cancelarContrato';
 	import { ventasRepository } from '$lib/ventas/infrastructure/ventasRepository';
+	import type { PageData } from './$types';
 
-	type ContratoDetalle = {
-		id: string;
-		idLead?: string;
-		idCliente?: string;
-		idPropiedad: string;
-		fechaInicio: string;
-		fechaFin: string;
-		estado: string;
-		creadoEn: string;
-		actualizadoEn: string;
-	};
+	let { data }: { data: PageData } = $props();
 
-	let contrato = $state<ContratoDetalle | null>(null);
-	let loading = $state(true);
+	let contrato = $state(data.contrato);
+	let loading = $state(!data.contrato);
 	let error = $state<string | null>(null);
 	let accionando = $state(false);
 	let accionError = $state<string | null>(null);
 
-	const idContrato = $derived($page.params.idContrato);
-
 	async function cargar() {
+		if (!data.contrato?.id) return;
 		loading = true;
 		error = null;
 
 		try {
-			const res = await httpClient.get<{
-				success: boolean;
-				data: { contratos: ContratoDetalle[] };
-			}>('/api/ventas/contratos');
-			const encontrado = res.data.contratos.find((c) => c.id === idContrato);
-			if (!encontrado) {
-				error = 'Contrato no encontrado.';
-			}
-			contrato = encontrado ?? null;
+			const res = await fetch(`/api/ventas/contratos/${data.contrato.id}`).then((r) => r.json<{ success: boolean; data: unknown }>());
+			contrato = res.success ? res.data : null;
+			if (!res.success) error = 'Contrato no encontrado.';
 		} catch (err) {
 			error = err instanceof HttpError ? err.message : 'No se pudo cargar el contrato.';
 		} finally {
@@ -57,7 +40,7 @@
 		accionError = null;
 
 		try {
-			await firmarContrato(ventasRepository, contrato.id);
+			await firmarContrato(ventasRepository, (contrato as { id: string }).id);
 			await cargar();
 		} catch (err) {
 			accionError = err instanceof HttpError ? err.message : 'Error al firmar.';
@@ -72,7 +55,7 @@
 		accionError = null;
 
 		try {
-			await cancelarContrato(ventasRepository, contrato.id);
+			await cancelarContrato(ventasRepository, (contrato as { id: string }).id);
 			await cargar();
 		} catch (err) {
 			accionError = err instanceof HttpError ? err.message : 'Error al cancelar.';
@@ -89,16 +72,13 @@
 	}
 
 	function puedeFirmar(): boolean {
-		return contrato?.estado === 'BORRADOR';
+		return (contrato as { estado: string })?.estado === 'BORRADOR';
 	}
 
 	function puedeCancelar(): boolean {
-		return contrato?.estado === 'BORRADOR' || contrato?.estado === 'VIGENTE';
+		const est = (contrato as { estado: string })?.estado;
+		return est === 'BORRADOR' || est === 'VIGENTE';
 	}
-
-	$effect(() => {
-		if (idContrato) cargar();
-	});
 </script>
 
 <svelte:head>
