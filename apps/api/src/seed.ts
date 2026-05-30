@@ -1,3 +1,10 @@
+// Seed programático usando repositorios y entidades de dominio.
+// Útil para importar desde un wrangler entry point o tests.
+// Para seed vía SQL directo (recomendado), usar:
+//   npm run seed:generate    # genera apps/api/src/seed.sql
+//   npm run seed:local       # ejecuta contra D1 local
+//   npm run db:recreate:local  # reset + migrate + seed
+
 import { Pbkdf2PasswordHasher } from "./lib/usuarios/infrastructure/security/Pbkdf2PasswordHasher";
 import { D1UsuarioRepository } from "./lib/usuarios/infrastructure";
 import { D1VentasRepository } from "./lib/ventas/infrastructure";
