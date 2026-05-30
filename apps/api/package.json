@@ -13,12 +13,9 @@
     "test:contract": "bun test test/contract/",
     "test:bdd": "cross-env NODE_OPTIONS=\"--import tsx\" cucumber-js \"test/bdd/features/**/*.feature\" --import \"test/bdd/features/**/*.ts\"",
     "build": "echo 'No build step needed for Wrangler'",
-    "seed:generate": "node ../../scripts/generate-seed-sql.mjs",
+    "seed:generate": "bun ../../scripts/generate-seed-sql.mjs",
     "seed:local": "wrangler d1 execute alvas-dev --local --file src/seed.sql",
-    "seed:staging": "wrangler d1 execute alvas-staging --remote --env staging --file src/seed.sql",
-    "db:migrate:local": "wrangler d1 migrations apply alvas-dev --local",
-    "db:reset:local": "wrangler d1 migrations apply alvas-dev --local -t 0",
-    "db:recreate:local": "npm run db:reset:local && npm run db:migrate:local && npm run seed:local"
+    "seed:staging": "wrangler d1 execute alvas-staging --remote --env staging --file src/seed.sql"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260503.1",
