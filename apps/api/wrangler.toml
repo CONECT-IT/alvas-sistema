@@ -30,6 +30,7 @@ name = "alvas-api-staging"
 [env.staging.vars]
 AUTH_TOKEN_TTL_SEGUNDOS = "900"
 REFRESH_TOKEN_TTL_SEGUNDOS = "604800"
+CORS_ORIGINS = "https://alvas-sistema-btj.pages.dev,https://alvas-sistema.pages.dev"
 
 [[env.staging.d1_databases]]
 binding = "DB"
@@ -43,6 +44,7 @@ name = "alvas-api"
 [env.production.vars]
 AUTH_TOKEN_TTL_SEGUNDOS = "900"
 REFRESH_TOKEN_TTL_SEGUNDOS = "604800"
+CORS_ORIGINS = "https://alvas-sistema.pages.dev"
 
 [[env.production.d1_databases]]
 binding = "DB"
