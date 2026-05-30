@@ -4,11 +4,7 @@ import {
   responderErrorInterno,
   type VentasControllerDeps,
 } from "./VentasHttp";
-import {
-  parseBody,
-  esValidationError,
-  formatearValidacion,
-} from "../../../shared/infrastructure/validation/helpers";
+import { parseBody } from "../../../shared/infrastructure/validation/helpers";
 import {
   RegistrarLeadSchema,
   ActualizarLeadSchema,
@@ -37,7 +33,6 @@ export class LeadsController {
 
       return c.json({ success: true, data: { id: resultado.valor.id as string } }, 201);
     } catch (error) {
-      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
       return responderErrorInterno(c, "LeadsController.registrar:", error);
     }
   }
@@ -61,7 +56,6 @@ export class LeadsController {
 
       return c.json({ success: true, message: "Lead actualizado" });
     } catch (error) {
-      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
       return responderErrorInterno(c, "LeadsController.actualizar:", error);
     }
   }
@@ -82,7 +76,6 @@ export class LeadsController {
 
       return c.json({ success: true, data: { idCliente: resultado.valor.id as string } });
     } catch (error) {
-      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
       return responderErrorInterno(c, "LeadsController.convertirACliente:", error);
     }
   }
@@ -203,7 +196,6 @@ export class LeadsController {
 
       return c.json({ success: true, message: "Lead reasignado" });
     } catch (error) {
-      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
       return responderErrorInterno(c, "LeadsController.asignarAsesor:", error);
     }
   }

@@ -1,11 +1,11 @@
 import { type Context } from "hono";
 import { type D1DatabaseLike } from "../../../shared/infrastructure";
 import { type IIniciarSesion, type IRenovarSesion } from "../../application";
+import { parseBody } from "../../../shared/infrastructure/validation/helpers";
 import {
-  parseBody,
-  esValidationError,
-  formatearValidacion,
-} from "../../../shared/infrastructure/validation/helpers";
+  responderErrorDeDominio,
+  responderErrorInterno,
+} from "../../../shared/infrastructure/http/responses";
 import { IniciarSesionSchema, RenovarSesionSchema } from "../validation/schemas";
 
 export type BindingsAuth = {
@@ -34,32 +34,12 @@ export class AuthController {
       const resultado = await useCase.ejecutar(body);
 
       if (!resultado.esExito) {
-        return c.json(
-          {
-            success: false,
-            message: resultado.error.message,
-            code: resultado.error.codigo,
-          },
-          401,
-        );
+        return responderErrorDeDominio(c, resultado.error);
       }
 
-      return c.json({
-        success: true,
-        data: resultado.valor,
-      });
+      return c.json({ success: true, data: resultado.valor });
     } catch (error) {
-      if (esValidationError(error)) {
-        return c.json(formatearValidacion(error), 400);
-      }
-      console.error("Error inesperado en AuthController.iniciarSesion:", error);
-      return c.json(
-        {
-          success: false,
-          message: "Error interno del servidor",
-        },
-        500,
-      );
+      return responderErrorInterno(c, "AuthController.iniciarSesion:", error);
     }
   }
 
@@ -70,32 +50,12 @@ export class AuthController {
       const resultado = await useCase.ejecutar(body);
 
       if (!resultado.esExito) {
-        return c.json(
-          {
-            success: false,
-            message: resultado.error.message,
-            code: resultado.error.codigo,
-          },
-          401,
-        );
+        return responderErrorDeDominio(c, resultado.error);
       }
 
-      return c.json({
-        success: true,
-        data: resultado.valor,
-      });
+      return c.json({ success: true, data: resultado.valor });
     } catch (error) {
-      if (esValidationError(error)) {
-        return c.json(formatearValidacion(error), 400);
-      }
-      console.error("Error inesperado en AuthController.renovarSesion:", error);
-      return c.json(
-        {
-          success: false,
-          message: "Error interno del servidor",
-        },
-        500,
-      );
+      return responderErrorInterno(c, "AuthController.renovarSesion:", error);
     }
   }
 }

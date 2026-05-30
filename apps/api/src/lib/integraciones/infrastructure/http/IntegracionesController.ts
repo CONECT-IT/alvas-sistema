@@ -11,8 +11,7 @@ import {
 import { type D1DatabaseLike, type SessionClaims } from "../../../shared/infrastructure";
 import {
   parseBody,
-  esValidationError,
-  formatearValidacion,
+  ValidationError,
 } from "../../../shared/infrastructure/validation/helpers";
 import {
   CaptacionEntranteSchema,
@@ -91,7 +90,7 @@ export class IntegracionesController {
         201,
       );
     } catch (error) {
-      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
+      if (error instanceof ValidationError) throw error;
       console.error("IntegracionesController.recibirWhatsAppLead:", error);
       return c.json(
         { success: false, message: "Error procesando webhook", code: "WEBHOOK_ERROR_INTERNO" },
@@ -166,7 +165,7 @@ export class IntegracionesController {
         data: resultado.valor,
       });
     } catch (error) {
-      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
+      if (error instanceof ValidationError) throw error;
       console.error("IntegracionesController.marcarCaptacionDuplicada:", error);
       return c.json(
         { success: false, message: "Error marcando captacion", code: "CAPTACION_ERROR_INTERNO" },
@@ -193,7 +192,7 @@ export class IntegracionesController {
 
       return c.json({ success: true, message: "Captacion rechazada", data: resultado.valor });
     } catch (error) {
-      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
+      if (error instanceof ValidationError) throw error;
       console.error("IntegracionesController.rechazarCaptacionPendiente:", error);
       return c.json(
         { success: false, message: "Error rechazando captacion", code: "CAPTACION_ERROR_INTERNO" },
@@ -221,7 +220,7 @@ export class IntegracionesController {
 
       return c.json({ success: true, message: "Captacion convertida", data: resultado.valor });
     } catch (error) {
-      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
+      if (error instanceof ValidationError) throw error;
       console.error("IntegracionesController.convertirCaptacionPendiente:", error);
       return c.json(
         {
@@ -252,7 +251,7 @@ export class IntegracionesController {
         201,
       );
     } catch (error) {
-      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
+      if (error instanceof ValidationError) throw error;
       console.error("IntegracionesController.recibirCaptacion:", error);
       return c.json(
         { success: false, message: "Error procesando captacion", code: "CAPTACION_ERROR_INTERNO" },

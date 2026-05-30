@@ -5,11 +5,7 @@ import {
   type VentasControllerDeps,
 } from "./VentasHttp";
 import { idLead, idPropiedad } from "../../domain/value-objects/Ids";
-import {
-  parseBody,
-  esValidationError,
-  formatearValidacion,
-} from "../../../shared/infrastructure/validation/helpers";
+import { parseBody } from "../../../shared/infrastructure/validation/helpers";
 import { CrearContratoSchema } from "../validation/schemas";
 
 export class ContratosController {
@@ -27,7 +23,6 @@ export class ContratosController {
 
       return c.json({ success: true, data: resultado.valor }, 201);
     } catch (error) {
-      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
       return responderErrorInterno(c, "ContratosController.crear:", error);
     }
   }

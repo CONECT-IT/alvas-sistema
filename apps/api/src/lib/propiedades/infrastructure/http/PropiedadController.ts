@@ -8,11 +8,7 @@ import {
   type PropiedadRespuestaDTO,
 } from "../../application";
 import { type IAutorizadorPropiedades } from "../../domain/ports";
-import {
-  parseBody,
-  esValidationError,
-  formatearValidacion,
-} from "../../../shared/infrastructure/validation/helpers";
+import { parseBody } from "../../../shared/infrastructure/validation/helpers";
 import {
   responderErrorDeDominio,
   responderErrorInterno,
@@ -59,7 +55,6 @@ export class PropiedadController {
 
       return c.json({ success: true, data: { id: resultado.valor.id as string } }, 201);
     } catch (error) {
-      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
       return responderErrorInterno(c, "PropiedadController.crear", error);
     }
   }
@@ -124,7 +119,6 @@ export class PropiedadController {
 
       return c.json({ success: true, message: "Propiedad actualizada" });
     } catch (error) {
-      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
       return responderErrorInterno(c, "PropiedadController.actualizar", error);
     }
   }

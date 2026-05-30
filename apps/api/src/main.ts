@@ -1,5 +1,7 @@
 import { Hono } from "hono";
 import { ErrorDeDominio } from "./lib/shared/domain";
+import { mapErrorDeDominioAStatus } from "./lib/shared/infrastructure/http/responses";
+import { ValidationError } from "./lib/shared/infrastructure/validation/helpers";
 import { crearAuthRouter } from "./lib/auth/infrastructure";
 import { crearUsuarioRouter } from "./lib/usuarios/infrastructure";
 import { crearPropiedadRouter } from "./lib/propiedades/infrastructure";
@@ -42,34 +44,21 @@ app.route("/integraciones", crearIntegracionesRouter(crearIntegracionesRouterDep
 
 app.onError((error, c) => {
   if (error instanceof ErrorDeDominio) {
-    const status =
-      error.codigo === "USUARIO_YA_EXISTE"
-        ? 409
-        : error.codigo === "AUTH_TOKEN_INVALIDO" ||
-            error.codigo === "REFRESH_TOKEN_INVALIDO" ||
-            error.codigo === "CREDENCIALES_INVALIDAS"
-          ? 401
-          : error.codigo === "ROL_NO_PERMITIDO"
-            ? 403
-            : 400;
-
     return c.json(
-      {
-        success: false,
-        message: error.message,
-        code: error.codigo,
-      },
-      status,
+      { success: false, message: error.message, code: error.codigo },
+      mapErrorDeDominioAStatus(error) as Parameters<typeof c.json>[1],
     );
   }
 
-  return c.json(
-    {
-      success: false,
-      message: "Error interno del servidor.",
-    },
-    500,
-  );
+  if (error instanceof ValidationError) {
+    return c.json(
+      { success: false, message: "Error de validación", code: "VALIDATION_ERROR", detalles: error.details },
+      400,
+    );
+  }
+
+  console.error("Error no manejado:", error);
+  return c.json({ success: false, message: "Error interno del servidor.", code: "ERROR_INTERNO" }, 500);
 });
 
 export default app;

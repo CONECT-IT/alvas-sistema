@@ -4,11 +4,7 @@ import {
   responderErrorInterno,
   type VentasControllerDeps,
 } from "./VentasHttp";
-import {
-  parseBody,
-  esValidationError,
-  formatearValidacion,
-} from "../../../shared/infrastructure/validation/helpers";
+import { parseBody } from "../../../shared/infrastructure/validation/helpers";
 import { RegistrarClienteDirectoSchema, ActualizarClienteSchema } from "../validation/schemas";
 
 export class ClientesController {
@@ -31,7 +27,6 @@ export class ClientesController {
 
       return c.json({ success: true, data: { id: resultado.valor.id as string } }, 201);
     } catch (error) {
-      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
       return responderErrorInterno(c, "ClientesController.registrarDirecto:", error);
     }
   }
@@ -110,7 +105,6 @@ export class ClientesController {
 
       return c.json({ success: true, data: resultado.valor });
     } catch (error) {
-      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
       return responderErrorInterno(c, "ClientesController.actualizar:", error);
     }
   }

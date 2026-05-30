@@ -4,11 +4,7 @@ import {
   responderErrorInterno,
   type VentasControllerDeps,
 } from "./VentasHttp";
-import {
-  parseBody,
-  esValidationError,
-  formatearValidacion,
-} from "../../../shared/infrastructure/validation/helpers";
+import { parseBody } from "../../../shared/infrastructure/validation/helpers";
 import { AgendarCitaSchema, ActualizarCitaBodySchema } from "../validation/schemas";
 
 export class CitasController {
@@ -31,7 +27,6 @@ export class CitasController {
 
       return c.json({ success: true, message: "Cita agendada" });
     } catch (error) {
-      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
       return responderErrorInterno(c, "CitasController.agendar:", error);
     }
   }
@@ -58,7 +53,6 @@ export class CitasController {
 
       return c.json({ success: true, message: "Cita actualizada" });
     } catch (error) {
-      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
       return responderErrorInterno(c, "CitasController.actualizar:", error);
     }
   }

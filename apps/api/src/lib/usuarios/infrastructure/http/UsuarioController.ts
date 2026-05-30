@@ -7,11 +7,7 @@ import {
   type IObtenerUsuario,
 } from "../../application";
 import { UsuarioMapper } from "../persistence/UsuarioMapper";
-import {
-  parseBody,
-  esValidationError,
-  formatearValidacion,
-} from "../../../shared/infrastructure/validation/helpers";
+import { parseBody } from "../../../shared/infrastructure/validation/helpers";
 import {
   responderErrorDeDominio,
   responderErrorInterno,
@@ -53,7 +49,6 @@ export class UsuarioController {
         201,
       );
     } catch (error) {
-      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
       return responderErrorInterno(c, "UsuarioController.crear", error);
     }
   }
@@ -103,7 +98,6 @@ export class UsuarioController {
 
       return c.json({ success: true, data: resultado.valor });
     } catch (error) {
-      if (esValidationError(error)) return c.json(formatearValidacion(error), 400);
       return responderErrorInterno(c, "UsuarioController.actualizar", error);
     }
   }
