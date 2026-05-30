@@ -270,6 +270,90 @@ function esEstadisticasGlobalesContract(value: unknown): value is EstadisticasGl
   );
 }
 
+type ClienteContract = Readonly<{
+  id: string;
+  nombre: string;
+  email: string;
+  telefono: string;
+  idAsesor: string;
+  creadoEn: string;
+  actualizadoEn: string;
+}>;
+
+type ContratoContract = Readonly<{
+  id: string;
+  idLead?: string;
+  nombreLead?: string;
+  idCliente?: string;
+  idPropiedad: string;
+  nombrePropiedad?: string;
+  idAsesor?: string;
+  nombreAsesor?: string;
+  fechaInicio: string;
+  fechaFin: string;
+  estado: string;
+  creadoEn: string;
+  actualizadoEn: string;
+}>;
+
+type ErrorResponseContract = Readonly<{
+  success: false;
+  message: string;
+  code: string;
+}>;
+
+function esClienteContract(value: unknown): value is ClienteContract {
+  if (!value || typeof value !== "object") return false;
+  const cliente = value as Record<string, unknown>;
+  const clavesPermitidas = ["id", "nombre", "email", "telefono", "idAsesor", "creadoEn", "actualizadoEn"];
+  return (
+    Object.keys(cliente).every((key) => clavesPermitidas.includes(key)) &&
+    typeof cliente.id === "string" &&
+    typeof cliente.nombre === "string" &&
+    typeof cliente.email === "string" &&
+    typeof cliente.telefono === "string" &&
+    typeof cliente.idAsesor === "string" &&
+    typeof cliente.creadoEn === "string" &&
+    !Number.isNaN(Date.parse(cliente.creadoEn as string)) &&
+    typeof cliente.actualizadoEn === "string" &&
+    !Number.isNaN(Date.parse(cliente.actualizadoEn as string))
+  );
+}
+
+function esContratoContract(value: unknown): value is ContratoContract {
+  if (!value || typeof value !== "object") return false;
+  const contrato = value as Record<string, unknown>;
+  const clavesPermitidas = [
+    "id", "idLead", "nombreLead", "idCliente", "idPropiedad",
+    "nombrePropiedad", "idAsesor", "nombreAsesor",
+    "fechaInicio", "fechaFin", "estado", "creadoEn", "actualizadoEn",
+  ];
+  return (
+    Object.keys(contrato).every((key) => clavesPermitidas.includes(key)) &&
+    typeof contrato.id === "string" &&
+    typeof contrato.idPropiedad === "string" &&
+    typeof contrato.fechaInicio === "string" &&
+    !Number.isNaN(Date.parse(contrato.fechaInicio as string)) &&
+    typeof contrato.fechaFin === "string" &&
+    !Number.isNaN(Date.parse(contrato.fechaFin as string)) &&
+    typeof contrato.estado === "string" &&
+    typeof contrato.creadoEn === "string" &&
+    typeof contrato.actualizadoEn === "string"
+  );
+}
+
+function esErrorResponseContract(value: unknown): value is ErrorResponseContract {
+  if (!value || typeof value !== "object") return false;
+  const error = value as Record<string, unknown>;
+  return (
+    Object.keys(error).length === 3 &&
+    Object.keys(error).every((key) => ["success", "message", "code"].includes(key)) &&
+    error.success === false &&
+    typeof error.message === "string" &&
+    typeof error.code === "string"
+  );
+}
+
 describe("contract / api-web", () => {
   it("mantiene estable el contrato serializado de sesion auth", () => {
     const payload = {
@@ -536,5 +620,97 @@ describe("contract / api-web", () => {
     };
 
     expect(esEstadisticasGlobalesContract(payload)).toBe(true);
+  });
+
+  it("mantiene estable el contrato serializado de cliente", () => {
+    const payload = {
+      id: "cliente-1",
+      nombre: "Ana Vendedora",
+      email: "ana@example.com",
+      telefono: "70000001",
+      idAsesor: "asesor-1",
+      creadoEn: "2026-05-23T10:00:00.000Z",
+      actualizadoEn: "2026-05-23T10:00:00.000Z",
+    };
+
+    expect(esClienteContract(payload)).toBe(true);
+  });
+
+  it("rechaza cliente si expira datos internos", () => {
+    const payload = {
+      id: "cliente-1",
+      nombre: "Ana",
+      email: "ana@example.com",
+      telefono: "70000001",
+      idAsesor: "asesor-1",
+      creadoEn: "2026-05-23T10:00:00.000Z",
+      actualizadoEn: "2026-05-23T10:00:00.000Z",
+      hashClave: "no-debe-salir",
+    };
+
+    expect(esClienteContract(payload)).toBe(false);
+  });
+
+  it("mantiene estable el contrato serializado de contrato", () => {
+    const payload = {
+      id: "contrato-1",
+      idLead: "lead-1",
+      nombreLead: "Ana Vendedora",
+      idPropiedad: "propiedad-1",
+      nombrePropiedad: "Casa Centro",
+      idAsesor: "asesor-1",
+      nombreAsesor: "Luis Asesor",
+      fechaInicio: "2026-06-01T00:00:00.000Z",
+      fechaFin: "2026-12-31T00:00:00.000Z",
+      estado: "BORRADOR",
+      creadoEn: "2026-05-23T10:00:00.000Z",
+      actualizadoEn: "2026-05-23T10:00:00.000Z",
+    };
+
+    expect(esContratoContract(payload)).toBe(true);
+  });
+
+  it("rechaza contrato si falta idPropiedad obligatorio", () => {
+    const payload = {
+      id: "contrato-1",
+      fechaInicio: "2026-06-01T00:00:00.000Z",
+      fechaFin: "2026-12-31T00:00:00.000Z",
+      estado: "BORRADOR",
+      creadoEn: "2026-05-23T10:00:00.000Z",
+      actualizadoEn: "2026-05-23T10:00:00.000Z",
+    };
+
+    expect(esContratoContract(payload)).toBe(false);
+  });
+
+  it("mantiene estable el contrato serializado de error de dominio", () => {
+    const payload = {
+      success: false,
+      message: "Lead no encontrado",
+      code: "LEAD_NO_ENCONTRADO",
+    };
+
+    expect(esErrorResponseContract(payload)).toBe(true);
+  });
+
+  it("rechaza error de dominio con success true", () => {
+    const payload = {
+      success: true,
+      message: "Operacion completada",
+      code: "OK",
+    };
+
+    expect(esErrorResponseContract(payload)).toBe(false);
+  });
+
+  it("rechaza error de dominio con campos extras", () => {
+    const payload = {
+      success: false,
+      message: "Error",
+      code: "ERROR",
+      stack: "no debe aparecer",
+    };
+
+    expect(esErrorResponseContract(payload)).toBe(false);
   });
 });
