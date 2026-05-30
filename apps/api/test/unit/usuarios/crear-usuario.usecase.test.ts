@@ -11,25 +11,25 @@ import {
   type IUsuarioRepository,
 } from "../../../src/lib/usuarios/domain/ports";
 import { type IGeneradorId } from "../../../src/lib/shared/domain/ports";
-import { HashClave, IdUsuario, Username } from "../../../src/lib/usuarios/domain/value-objects";
+import { HashClave, Username } from "../../../src/lib/usuarios/domain/value-objects";
 
 class FakeUsuarioRepository implements IUsuarioRepository {
   readonly usuarios = new Map<string, Usuario>();
 
-  async obtenerPorId(id: IdUsuario): Promise<Usuario | null> {
-    return this.usuarios.get(id.valor) ?? null;
+  async obtenerPorId(id: string): Promise<Usuario | null> {
+    return this.usuarios.get(id) ?? null;
   }
 
-  async existePorId(id: IdUsuario): Promise<boolean> {
-    return this.usuarios.has(id.valor);
+  async existePorId(id: string): Promise<boolean> {
+    return this.usuarios.has(id);
   }
 
   async guardar(usuario: Usuario): Promise<void> {
     this.usuarios.set(usuario.id.valor, usuario);
   }
 
-  async eliminarPorId(id: IdUsuario): Promise<void> {
-    this.usuarios.delete(id.valor);
+  async eliminarPorId(id: string): Promise<void> {
+    this.usuarios.delete(id);
   }
 
   async listar(): Promise<Usuario[]> {

@@ -3,9 +3,7 @@ import { type D1DatabaseLike } from "../../../shared/infrastructure";
 import { obtenerDb } from "../../../shared/infrastructure/persistence/drizzle";
 import { Lead } from "../../domain/entities/Lead";
 import { Cliente } from "../../domain/entities/Cliente";
-import { type IdLead, type IdCliente } from "../../domain/value-objects/Ids";
 import { type IVentasRepository } from "../../domain/ports/IVentasRepository";
-import { type IdUsuarioRef } from "../../../shared/domain/value-objects/IdUsuarioRef";
 import {
   leadsTable,
   clientesTable,
@@ -26,11 +24,11 @@ export class D1VentasRepository implements IVentasRepository {
 
   // --- LEADS ---
 
-  async obtenerLeadPorId(id: IdLead): Promise<Lead | null> {
+  async obtenerLeadPorId(id: string): Promise<Lead | null> {
     const leadRow = await this.drizzle()
       .select()
       .from(leadsTable)
-      .where(eq(leadsTable.id, id as string))
+      .where(eq(leadsTable.id, id))
       .get();
 
     if (!leadRow) return null;
@@ -38,7 +36,7 @@ export class D1VentasRepository implements IVentasRepository {
     const citasRows = await this.drizzle()
       .select()
       .from(citasVentasTable)
-      .where(eq(citasVentasTable.idLead, id as string))
+      .where(eq(citasVentasTable.idLead, id))
       .all();
 
     return VentasMapper.leadADominio(leadRow as LeadRow, citasRows as CitaVentaRow[]);
@@ -76,11 +74,11 @@ export class D1VentasRepository implements IVentasRepository {
     return result;
   }
 
-  async listarLeadsPorAsesor(idAsesor: IdUsuarioRef): Promise<Lead[]> {
+  async listarLeadsPorAsesor(idAsesor: string): Promise<Lead[]> {
     const rows = await this.drizzle()
       .select()
       .from(leadsTable)
-      .where(eq(leadsTable.idAsesor, idAsesor as string))
+      .where(eq(leadsTable.idAsesor, idAsesor))
       .all();
 
     const result: Lead[] = [];
@@ -116,11 +114,11 @@ export class D1VentasRepository implements IVentasRepository {
 
   // --- CLIENTES ---
 
-  async obtenerClientePorId(id: IdCliente): Promise<Cliente | null> {
+  async obtenerClientePorId(id: string): Promise<Cliente | null> {
     const row = await this.drizzle()
       .select()
       .from(clientesTable)
-      .where(eq(clientesTable.id, id as string))
+      .where(eq(clientesTable.id, id))
       .get();
     return row ? VentasMapper.clienteADominio(row as ClienteRow) : null;
   }
@@ -138,22 +136,22 @@ export class D1VentasRepository implements IVentasRepository {
     return rows.map((row) => VentasMapper.clienteADominio(row as ClienteRow));
   }
 
-  async listarClientesPorAsesor(idAsesor: IdUsuarioRef): Promise<Cliente[]> {
+  async listarClientesPorAsesor(idAsesor: string): Promise<Cliente[]> {
     const rows = await this.drizzle()
       .select()
       .from(clientesTable)
-      .where(eq(clientesTable.idAsesor, idAsesor as string))
+      .where(eq(clientesTable.idAsesor, idAsesor))
       .all();
     return rows.map((row) => VentasMapper.clienteADominio(row as ClienteRow));
   }
 
   // --- ACTIVIDAD ---
 
-  async registrarActividad(idLead: IdLead, evento: string, descripcion: string): Promise<void> {
+  async registrarActividad(idLead: string, evento: string, descripcion: string): Promise<void> {
     await this.drizzle()
       .insert(actividadVentasTable)
       .values({
-        idLead: idLead as string,
+        idLead,
         evento,
         descripcion,
         fecha: new Date().toISOString(),
@@ -180,12 +178,12 @@ export class D1VentasRepository implements IVentasRepository {
   }
 
   async obtenerActividadPorLead(
-    idLead: IdLead,
+    idLead: string,
   ): Promise<{ id: number; idLead: string; evento: string; descripcion: string; fecha: string }[]> {
     const rows = await this.drizzle()
       .select()
       .from(actividadVentasTable)
-      .where(eq(actividadVentasTable.idLead, idLead as string))
+      .where(eq(actividadVentasTable.idLead, idLead))
       .orderBy(actividadVentasTable.fecha)
       .all();
 
@@ -200,7 +198,7 @@ export class D1VentasRepository implements IVentasRepository {
 
   // --- ESTADÍSTICAS ---
 
-  async listarAsesoresConLeads(): Promise<{ idAsesor: IdUsuarioRef; totalLeads: number }[]> {
+  async listarAsesoresConLeads(): Promise<{ idAsesor: string; totalLeads: number }[]> {
     const rows = await this.drizzle().select().from(leadsTable).all();
 
     const counts = new Map<string, number>();
@@ -210,7 +208,7 @@ export class D1VentasRepository implements IVentasRepository {
     }
 
     return Array.from(counts.entries()).map(([idAsesor, totalLeads]) => ({
-      idAsesor: idAsesor as IdUsuarioRef,
+      idAsesor,
       totalLeads,
     }));
   }

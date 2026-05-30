@@ -1,12 +1,11 @@
 import type { CasoDeUso } from "../../../shared/application/CasoDeUso";
 import { resultadoExitoso, resultadoFallido, type Resultado } from "../../../shared";
 import { type IVentasRepository } from "../../domain/ports/IVentasRepository";
-import { type IdUsuarioRef } from "../../../shared/domain/value-objects/IdUsuarioRef";
 import { ErrorDeDominio } from "../../../shared/domain";
 import { type IListarAsesoresConLeads } from "../ports/in";
 
 export type ListarAsesoresConLeadsOutput = {
-  idAsesor: IdUsuarioRef;
+  idAsesor: string;
   totalLeads: number;
 }[];
 

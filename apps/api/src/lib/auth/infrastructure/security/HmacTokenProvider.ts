@@ -1,6 +1,5 @@
 import { type ITokenProvider } from "../../domain/ports";
 import { AuthTokenInvalidoError, RefreshTokenInvalidoError } from "../../domain";
-import { AuthToken, RefreshToken } from "../../domain/value-objects";
 import { type SessionClaims } from "../../../shared/infrastructure/session";
 
 type TipoToken = "auth" | "refresh";
@@ -54,32 +53,30 @@ export class HmacTokenProvider implements ITokenProvider {
     this.refreshTokenTtlSegundos = params.refreshTokenTtlSegundos ?? 60 * 60 * 24 * 7;
   }
 
-  async generarAuthToken(payload: SessionClaims): Promise<AuthToken> {
-    const token = await this.firmar(
+  async generarAuthToken(payload: SessionClaims): Promise<string> {
+    return this.firmar(
       payload,
       this.params.authSecret,
       "auth",
       this.authTokenTtlSegundos,
     );
-    return new AuthToken(token);
   }
 
-  async generarRefreshToken(payload: SessionClaims): Promise<RefreshToken> {
-    const token = await this.firmar(
+  async generarRefreshToken(payload: SessionClaims): Promise<string> {
+    return this.firmar(
       payload,
       this.refreshSecret,
       "refresh",
       this.refreshTokenTtlSegundos,
     );
-    return new RefreshToken(token);
   }
 
-  async validarAuthToken(token: AuthToken): Promise<SessionClaims> {
-    return this.validar(token.valor, this.params.authSecret, "auth");
+  async validarAuthToken(token: string): Promise<SessionClaims> {
+    return this.validar(token, this.params.authSecret, "auth");
   }
 
-  async validarRefreshToken(token: RefreshToken): Promise<SessionClaims> {
-    return this.validar(token.valor, this.refreshSecret, "refresh");
+  async validarRefreshToken(token: string): Promise<SessionClaims> {
+    return this.validar(token, this.refreshSecret, "refresh");
   }
 
   private async firmar(

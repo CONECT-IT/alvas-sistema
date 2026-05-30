@@ -1,13 +1,13 @@
 import { type IConsultaCredencialesUsuario } from "../../../auth/domain";
 import { type IUsuarioRepository } from "../../domain/ports";
-import { IdUsuario, Username } from "../../domain/value-objects";
+import { Username } from "../../domain/value-objects";
 
 export class ConsultaCredencialesUsuarioAdapter implements IConsultaCredencialesUsuario {
   constructor(private readonly usuarioRepo: IUsuarioRepository) {}
 
   async buscarPorId(idUsuario: string) {
     try {
-      const usuario = await this.usuarioRepo.obtenerPorId(new IdUsuario(idUsuario));
+      const usuario = await this.usuarioRepo.obtenerPorId(idUsuario);
 
       if (!usuario) {
         return null;
@@ -21,6 +21,7 @@ export class ConsultaCredencialesUsuarioAdapter implements IConsultaCredenciales
         estado: usuario.estado.valor,
       };
     } catch {
+      console.warn(`ConsultaCredencialesUsuarioAdapter: Error al buscar usuario por id ${idUsuario}`);
       return null;
     }
   }
@@ -41,6 +42,7 @@ export class ConsultaCredencialesUsuarioAdapter implements IConsultaCredenciales
         estado: usuario.estado.valor,
       };
     } catch {
+      console.warn(`ConsultaCredencialesUsuarioAdapter: Error al buscar usuario por username ${username}`);
       return null;
     }
   }

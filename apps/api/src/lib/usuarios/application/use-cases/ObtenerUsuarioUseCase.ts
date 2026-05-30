@@ -6,7 +6,6 @@ import {
 } from "../../../shared";
 import { ErrorDeDominio } from "../../../shared/domain/errors/ErrorDeDominio";
 import { type IUsuarioRepository } from "../../domain/ports/IUsuarioRepository";
-import { IdUsuario } from "../../domain/value-objects";
 import { UsuarioNoEncontradoError } from "../../domain/errors/UsuarioNoEncontradoError";
 import { type UsuarioOutputDTO } from "../dto/UsuarioActualizacionDTOs";
 import { type IObtenerUsuario } from "../ports/in";
@@ -27,7 +26,7 @@ export class ObtenerUsuarioUseCase
     input: ObtenerUsuarioInput,
   ): Promise<Resultado<ObtenerUsuarioOutput, ErrorDeDominio>> {
     try {
-      const usuario = await this.usuarioRepository.obtenerPorId(new IdUsuario(input.idUsuario));
+      const usuario = await this.usuarioRepository.obtenerPorId(input.idUsuario);
       if (!usuario) {
         return resultadoFallido(new UsuarioNoEncontradoError(undefined, input.idUsuario));
       }

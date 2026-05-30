@@ -6,7 +6,6 @@ import {
 } from "../../../shared";
 import { ErrorDeDominio } from "../../../shared/domain/errors/ErrorDeDominio";
 import { type IPasswordHasher, type IUsuarioRepository } from "../../domain/ports";
-import { IdUsuario } from "../../domain/value-objects";
 import { type ActualizarUsuarioInputDTO } from "../dto/UsuarioActualizacionDTOs";
 import { type UsuarioOutputDTO } from "../dto/UsuarioActualizacionDTOs";
 import { type IActualizarUsuario } from "../ports/in";
@@ -28,7 +27,7 @@ export class ActualizarUsuarioUseCase
     input: ActualizarUsuarioInput,
   ): Promise<Resultado<ActualizarUsuarioOutput, ErrorDeDominio>> {
     try {
-      const usuario = await this.usuarioRepository.obtenerPorId(new IdUsuario(input.idUsuario));
+      const usuario = await this.usuarioRepository.obtenerPorId(input.idUsuario);
       if (!usuario) {
         return resultadoFallido(
           new ErrorDeDominio("Usuario no encontrado", { codigo: "USER_NOT_FOUND" }),

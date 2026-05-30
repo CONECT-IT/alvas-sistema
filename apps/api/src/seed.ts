@@ -26,7 +26,6 @@ import {
   idPropiedad,
 } from "./lib/ventas/domain/value-objects/Ids";
 import { idUsuarioRef } from "./lib/shared/domain/value-objects/IdUsuarioRef";
-import { IdUsuario } from "./lib/usuarios/domain/value-objects";
 
 interface SeedEnv {
   DB: D1DatabaseLike;
@@ -63,7 +62,7 @@ export async function ejecutarSeed(env: SeedEnv): Promise<string[]> {
   ];
 
   for (const u of usuariosSeed) {
-    const existe = await usuarioRepo.existePorId(new IdUsuario(u.id));
+    const existe = await usuarioRepo.existePorId(u.id);
     if (existe) {
       push(`  ↺ Usuario ${u.id} ya existe, se omite`);
       continue;

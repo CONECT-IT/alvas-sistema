@@ -3,7 +3,6 @@ import { type D1DatabaseLike } from "../../../shared/infrastructure";
 import { obtenerDb } from "../../../shared/infrastructure/persistence/drizzle";
 import { Contrato } from "../../domain/entities/Contrato";
 import { type IContratoRepository } from "../../domain/ports/IContratoRepository";
-import { type IdCliente, type IdContrato, type IdLead } from "../../domain/value-objects/Ids";
 import { contratosTable, type ContratoRow } from "./schema";
 import { VentasMapper } from "./VentasMapper";
 
@@ -14,11 +13,11 @@ export class D1ContratoRepository implements IContratoRepository {
     return obtenerDb(this.db);
   }
 
-  async buscarPorId(id: IdContrato): Promise<Contrato | null> {
+  async buscarPorId(id: string): Promise<Contrato | null> {
     const row = await this.drizzle()
       .select()
       .from(contratosTable)
-      .where(eq(contratosTable.id, id as string))
+      .where(eq(contratosTable.id, id))
       .get();
 
     return row ? VentasMapper.contratoADominio(row as ContratoRow) : null;
@@ -38,29 +37,29 @@ export class D1ContratoRepository implements IContratoRepository {
     return rows.map((row) => VentasMapper.contratoADominio(row as ContratoRow));
   }
 
-  async listarPorCliente(idCliente: IdCliente): Promise<Contrato[]> {
+  async listarPorCliente(idCliente: string): Promise<Contrato[]> {
     const rows = await this.drizzle()
       .select()
       .from(contratosTable)
-      .where(eq(contratosTable.idCliente, idCliente as string))
+      .where(eq(contratosTable.idCliente, idCliente))
       .all();
 
     return rows.map((row) => VentasMapper.contratoADominio(row as ContratoRow));
   }
 
-  async listarPorLead(idLead: IdLead): Promise<Contrato[]> {
+  async listarPorLead(idLead: string): Promise<Contrato[]> {
     const rows = await this.drizzle()
       .select()
       .from(contratosTable)
-      .where(eq(contratosTable.idLead, idLead as string))
+      .where(eq(contratosTable.idLead, idLead))
       .all();
 
     return rows.map((row) => VentasMapper.contratoADominio(row as ContratoRow));
   }
 
-  async listarPorIdsLead(ids: IdLead[]): Promise<Contrato[]> {
+  async listarPorIdsLead(ids: string[]): Promise<Contrato[]> {
     if (ids.length === 0) return [];
-    const idsStr = ids.map((id) => id as string);
+    const idsStr = ids;
 
     const rows = await this.drizzle()
       .select()

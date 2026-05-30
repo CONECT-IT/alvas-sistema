@@ -32,6 +32,7 @@ function decodeCookieJson<T>(value: string | undefined): T | null {
 	try {
 		return JSON.parse(decodeURIComponent(value)) as T;
 	} catch {
+		console.warn('session: Error al decodificar cookie JSON');
 		return null;
 	}
 }

@@ -30,7 +30,7 @@ class HttpClient {
 			try {
 				errorData = await response.json();
 			} catch {
-				// Ignorar si la respuesta no es JSON
+				console.warn('httpClient: Respuesta no es JSON válido');
 			}
 
 			const message = errorData.message || 'Error en la petición.';

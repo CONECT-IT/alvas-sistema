@@ -8,7 +8,6 @@ import {
   type ITokenProvider,
   type IVerificadorDeClave,
 } from "../../../src/lib/auth/domain/ports";
-import { AuthToken, RefreshToken } from "../../../src/lib/auth/domain/value-objects";
 import { type SessionClaims } from "../../../src/lib/shared/infrastructure/session";
 import { ErrorDeDominio } from "../../../src/lib/shared/domain/errors/ErrorDeDominio";
 
@@ -33,12 +32,12 @@ class FakeVerificadorDeClave implements IVerificadorDeClave {
 }
 
 class FakeTokenProvider implements ITokenProvider {
-  generarAuthToken(): AuthToken {
-    return new AuthToken("auth-token");
+  generarAuthToken(): string {
+    return "auth-token";
   }
 
-  generarRefreshToken(): RefreshToken {
-    return new RefreshToken("refresh-token");
+  generarRefreshToken(): string {
+    return "refresh-token";
   }
 
   validarAuthToken(): SessionClaims {

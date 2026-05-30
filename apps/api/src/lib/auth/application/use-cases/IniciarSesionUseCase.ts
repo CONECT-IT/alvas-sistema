@@ -60,8 +60,8 @@ export class IniciarSesionUseCase
       const authToken = await this.tokenProvider.generarAuthToken(payload);
       const refreshToken = await this.tokenProvider.generarRefreshToken(payload);
       const sesion = Sesion.abrir({
-        authToken: authToken.valor,
-        refreshToken: refreshToken.valor,
+        authToken,
+        refreshToken,
         idUsuario: usuario.idUsuario,
         username: usuario.username,
         rol: usuario.rol,

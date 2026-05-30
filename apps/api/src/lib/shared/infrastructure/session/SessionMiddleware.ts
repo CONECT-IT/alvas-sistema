@@ -1,8 +1,5 @@
 import { type MiddlewareHandler } from "hono";
 import { ErrorDeDominio } from "../../domain";
-import { AuthTokenInvalidoError } from "../../../auth/domain";
-import { AuthToken } from "../../../auth/domain/value-objects";
-import { type ITokenProvider } from "../../../auth/domain/ports";
 import { type SessionClaims } from "./SessionClaims";
 import { type D1DatabaseLike } from "../persistence/D1DatabaseLike";
 
@@ -22,22 +19,24 @@ type SessionEnv = {
 };
 
 export const verifySessionMiddleware = (
-  createTokenProvider: (bindings: SessionEnvBindings) => ITokenProvider,
+  createTokenProvider: (bindings: SessionEnvBindings) => {
+    validarAuthToken(token: string): Promise<SessionClaims> | SessionClaims;
+  },
 ): MiddlewareHandler<SessionEnv> => {
   return async (c, next) => {
     const authHeader = c.req.header("authorization");
     const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7).trim() : "";
 
     if (!token) {
-      throw new AuthTokenInvalidoError();
+      throw new ErrorDeDominio("El auth token es invalido.", { codigo: "AUTH_TOKEN_INVALIDO" });
     }
 
     const tokenProvider = createTokenProvider(c.env);
-    const payload = await tokenProvider.validarAuthToken(new AuthToken(token));
+    const payload = await tokenProvider.validarAuthToken(token);
 
     const usuarioActivo = await usuarioEstaActivo(c.env.DB, payload.idUsuario);
     if (!usuarioActivo) {
-      throw new AuthTokenInvalidoError();
+      throw new ErrorDeDominio("El auth token es invalido.", { codigo: "AUTH_TOKEN_INVALIDO" });
     }
 
     c.set("authPayload", payload);

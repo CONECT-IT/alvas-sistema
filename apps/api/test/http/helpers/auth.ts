@@ -71,5 +71,5 @@ export async function crearAuthHeader(
     rol: params.rol ?? "ADMIN",
   });
 
-  return `Bearer ${token.valor}`;
+  return `Bearer ${token}`;
 }

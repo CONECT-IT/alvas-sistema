@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { type D1DatabaseLike } from "../../../shared/infrastructure";
 import { Usuario } from "../../domain/entities";
 import { type IUsuarioRepository } from "../../domain/ports";
-import { IdUsuario, Username } from "../../domain/value-objects";
+import { Username } from "../../domain/value-objects";
 import { obtenerDb } from "../../../shared/infrastructure/persistence/drizzle";
 import { usuariosTable, type UsuarioRow } from "./schema";
 import { UsuarioMapper } from "./UsuarioMapper";
@@ -14,12 +14,12 @@ export class D1UsuarioRepository implements IUsuarioRepository {
     return obtenerDb(this.db);
   }
 
-  async obtenerPorId(id: IdUsuario): Promise<Usuario | null> {
+  async obtenerPorId(id: string): Promise<Usuario | null> {
     try {
       const row = await this.drizzle()
         .select()
         .from(usuariosTable)
-        .where(eq(usuariosTable.id, id.valor))
+        .where(eq(usuariosTable.id, id))
         .get();
 
       if (!row) {
@@ -28,22 +28,22 @@ export class D1UsuarioRepository implements IUsuarioRepository {
 
       return UsuarioMapper.aDominio(row as UsuarioRow);
     } catch (error) {
-      console.error(`Error obtenerPorId(${id.valor}):`, error);
+      console.error(`Error obtenerPorId(${id}):`, error);
       throw error;
     }
   }
 
-  async existePorId(id: IdUsuario): Promise<boolean> {
+  async existePorId(id: string): Promise<boolean> {
     try {
       const row = await this.drizzle()
         .select({ id: usuariosTable.id })
         .from(usuariosTable)
-        .where(eq(usuariosTable.id, id.valor))
+        .where(eq(usuariosTable.id, id))
         .get();
 
       return !!row;
     } catch (error) {
-      console.error(`Error existePorId(${id.valor}):`, error);
+      console.error(`Error existePorId(${id}):`, error);
       throw error;
     }
   }
@@ -111,16 +111,16 @@ export class D1UsuarioRepository implements IUsuarioRepository {
           },
         });
     } catch (error) {
-      console.error(`Error guardar usuario(${usuario.id.valor}):`, error);
+      console.error(`Error guardar usuario(${usuario.id}):`, error);
       throw error;
     }
   }
 
-  async eliminarPorId(id: IdUsuario): Promise<void> {
+  async eliminarPorId(id: string): Promise<void> {
     try {
-      await this.drizzle().delete(usuariosTable).where(eq(usuariosTable.id, id.valor));
+      await this.drizzle().delete(usuariosTable).where(eq(usuariosTable.id, id));
     } catch (error) {
-      console.error(`Error eliminarPorId(${id.valor}):`, error);
+      console.error(`Error eliminarPorId(${id}):`, error);
       throw error;
     }
   }
@@ -136,7 +136,7 @@ export class D1UsuarioRepository implements IUsuarioRepository {
     }
   }
 
-  async deshabilitarPorId(id: IdUsuario): Promise<void> {
+  async deshabilitarPorId(id: string): Promise<void> {
     try {
       const usuario = await this.obtenerPorId(id);
 
@@ -147,12 +147,12 @@ export class D1UsuarioRepository implements IUsuarioRepository {
       usuario.deshabilitar();
       await this.guardar(usuario);
     } catch (error) {
-      console.error(`Error deshabilitarPorId(${id.valor}):`, error);
+      console.error(`Error deshabilitarPorId(${id}):`, error);
       throw error;
     }
   }
 
-  async actualizarRol(id: IdUsuario, nuevoRol: string): Promise<void> {
+  async actualizarRol(id: string, nuevoRol: string): Promise<void> {
     try {
       const usuario = await this.obtenerPorId(id);
 
@@ -163,12 +163,12 @@ export class D1UsuarioRepository implements IUsuarioRepository {
       usuario.cambiarRol(nuevoRol);
       await this.guardar(usuario);
     } catch (error) {
-      console.error(`Error actualizarRol(${id.valor}):`, error);
+      console.error(`Error actualizarRol(${id}):`, error);
       throw error;
     }
   }
 
-  async actualizarHashClave(id: IdUsuario, nuevoHash: string): Promise<void> {
+  async actualizarHashClave(id: string, nuevoHash: string): Promise<void> {
     try {
       const usuario = await this.obtenerPorId(id);
 
@@ -179,7 +179,7 @@ export class D1UsuarioRepository implements IUsuarioRepository {
       usuario.cambiarHashClave(nuevoHash);
       await this.guardar(usuario);
     } catch (error) {
-      console.error(`Error actualizarHashClave(${id.valor}):`, error);
+      console.error(`Error actualizarHashClave(${id}):`, error);
       throw error;
     }
   }

@@ -5,7 +5,7 @@ import {
   type Resultado,
 } from "../../../shared";
 import { ErrorDeDominio } from "../../../shared/domain";
-import { CredencialesInvalidasError, RefreshToken, Sesion } from "../../domain";
+import { CredencialesInvalidasError, Sesion } from "../../domain";
 import { type SesionAutenticadaDTO } from "../dto";
 import { type IRenovarSesion } from "../ports/in";
 import { type IConsultaCredencialesUsuario, type ITokenProvider } from "../../domain/ports";
@@ -28,8 +28,7 @@ export class RenovarSesionUseCase
     input: RenovarSesionInput,
   ): Promise<Resultado<SesionAutenticadaDTO, ErrorDeDominio>> {
     try {
-      const refreshToken = new RefreshToken(input.refreshToken);
-      const payloadRefresh = await this.tokenProvider.validarRefreshToken(refreshToken);
+      const payloadRefresh = await this.tokenProvider.validarRefreshToken(input.refreshToken);
       const usuario = await this.consultaCredenciales.buscarPorId(payloadRefresh.idUsuario);
 
       if (!usuario || usuario.estado !== "ACTIVO") {
@@ -43,8 +42,8 @@ export class RenovarSesionUseCase
       const authToken = await this.tokenProvider.generarAuthToken(payload);
       const nuevoRefreshToken = await this.tokenProvider.generarRefreshToken(payload);
       const sesion = Sesion.abrir({
-        authToken: authToken.valor,
-        refreshToken: nuevoRefreshToken.valor,
+        authToken,
+        refreshToken: nuevoRefreshToken,
         idUsuario: usuario.idUsuario,
         username: usuario.username,
         rol: usuario.rol,

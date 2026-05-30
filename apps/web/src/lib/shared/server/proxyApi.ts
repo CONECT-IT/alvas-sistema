@@ -44,6 +44,7 @@ export async function proxyPublicApiPost(
 			body: JSON.stringify(body)
 		});
 	} catch {
+		console.warn('proxyApi: No se pudo conectar con el API');
 		return json(
 			{ success: false, message: 'No se pudo conectar con el API.', code: 'API_UNREACHABLE' },
 			{ status: 502 }
@@ -54,6 +55,7 @@ export async function proxyPublicApiPost(
 	try {
 		payload = await response.json();
 	} catch {
+		console.warn('proxyApi: Respuesta inválida del API');
 		payload = {
 			success: false,
 			message: 'Respuesta inválida del API.',
@@ -88,6 +90,7 @@ async function proxyApiRequest(
 			body: body ? JSON.stringify(body) : undefined
 		});
 	} catch {
+		console.warn('proxyApi: No se pudo conectar con el API');
 		return json(
 			{ success: false, message: 'No se pudo conectar con el API.', code: 'API_UNREACHABLE' },
 			{ status: 502 }
@@ -98,6 +101,7 @@ async function proxyApiRequest(
 	try {
 		payload = await response.json();
 	} catch {
+		console.warn('proxyApi: Respuesta inválida del API');
 		payload = {
 			success: false,
 			message: 'Respuesta inválida del API.',
