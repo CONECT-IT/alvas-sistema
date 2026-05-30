@@ -72,7 +72,7 @@
 			creating = false;
 		}
 	}
-
+</script>
 
 <svelte:head>
 	<title>Clientes | ALVAS</title>

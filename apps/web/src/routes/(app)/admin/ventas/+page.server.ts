@@ -26,6 +26,6 @@ export const load: ServerLoad = async ({ fetch }) => {
 	const res = await fetch('/api/ventas/pipeline').then((r) => r.json<ApiResp<LeadPipeline[]>>());
 
 	return {
-		leads: res.success ? res.data : [],
+		leads: res.success ? res.data : []
 	};
 };

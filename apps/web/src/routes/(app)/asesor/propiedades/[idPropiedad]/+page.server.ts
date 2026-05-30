@@ -16,9 +16,12 @@ type PropiedadDto = {
 };
 
 export const load: ServerLoad = async ({ fetch, params }) => {
-	const res = await fetch(`/api/propiedades/${params.idPropiedad}`).then((r) => r.json<ApiResp<PropiedadDto>>());
+	const res = await fetch(`/api/propiedades/${params.idPropiedad}`).then((r) =>
+		r.json<ApiResp<PropiedadDto>>()
+	);
 
 	return {
 		propiedad: res.success ? res.data : null,
+		idPropiedad: params.idPropiedad
 	};
 };

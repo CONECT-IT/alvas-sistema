@@ -16,6 +16,6 @@ export const load: ServerLoad = async ({ fetch }) => {
 	const res = await fetch('/api/ventas/citas').then((r) => r.json<ApiResp<CitaDto[]>>());
 
 	return {
-		citas: res.success ? res.data : [],
+		citas: res.success ? res.data : []
 	};
 };

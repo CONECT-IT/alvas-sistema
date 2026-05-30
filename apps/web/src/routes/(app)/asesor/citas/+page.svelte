@@ -24,7 +24,9 @@
 	let { data }: { data: PageData } = $props();
 
 	let leads = $state<LeadPipeline[]>(data.leads as unknown as LeadPipeline[]);
-	let propiedadesDisponibles = $state<Propiedad[]>(data.propiedadesDisponibles as unknown as Propiedad[]);
+	let propiedadesDisponibles = $state<Propiedad[]>(
+		data.propiedadesDisponibles as unknown as Propiedad[]
+	);
 	let loading = $state(false);
 	let creating = $state(false);
 	let mostrarPanelCrear = $state(false);

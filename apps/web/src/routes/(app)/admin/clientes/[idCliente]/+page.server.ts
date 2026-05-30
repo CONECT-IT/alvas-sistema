@@ -15,11 +15,13 @@ type ClienteDto = {
 export const load: ServerLoad = async ({ fetch, params }) => {
 	const [clienteRes, propiedadesRes] = await Promise.all([
 		fetch(`/api/ventas/cliente/${params.idCliente}`).then((r) => r.json<ApiResp<ClienteDto>>()),
-		fetch(`/api/ventas/cliente/${params.idCliente}/propiedades`).then((r) => r.json<ApiResp<unknown[]>>()),
+		fetch(`/api/ventas/cliente/${params.idCliente}/propiedades`).then((r) =>
+			r.json<ApiResp<unknown[]>>()
+		)
 	]);
 
 	return {
 		cliente: clienteRes.success ? clienteRes.data : null,
-		propiedades: propiedadesRes.success ? propiedadesRes.data : [],
+		propiedades: propiedadesRes.success ? propiedadesRes.data : []
 	};
 };

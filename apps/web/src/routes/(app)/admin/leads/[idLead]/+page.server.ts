@@ -29,11 +29,11 @@ type LeadDetalle = {
 export const load: ServerLoad = async ({ fetch, params }) => {
 	const [leadRes, actividadRes] = await Promise.all([
 		fetch(`/api/ventas/lead/${params.idLead}`).then((r) => r.json<ApiResp<LeadDetalle>>()),
-		fetch(`/api/ventas/lead/${params.idLead}/actividad`).then((r) => r.json<ApiResp<unknown[]>>()),
+		fetch(`/api/ventas/lead/${params.idLead}/actividad`).then((r) => r.json<ApiResp<unknown[]>>())
 	]);
 
 	return {
 		lead: leadRes.success ? leadRes.data : null,
-		actividad: actividadRes.success ? actividadRes.data : [],
+		actividad: actividadRes.success ? actividadRes.data : []
 	};
 };

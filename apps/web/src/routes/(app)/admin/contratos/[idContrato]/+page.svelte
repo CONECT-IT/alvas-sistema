@@ -12,7 +12,23 @@
 
 	let { data }: { data: PageData } = $props();
 
-	let contrato = $state(data.contrato);
+	type ContratoDto = {
+		id: string;
+		idLead?: string;
+		nombreLead?: string;
+		idCliente?: string;
+		idPropiedad: string;
+		nombrePropiedad?: string;
+		idAsesor?: string;
+		nombreAsesor?: string;
+		fechaInicio: string;
+		fechaFin: string;
+		estado: string;
+		creadoEn: string;
+		actualizadoEn: string;
+	};
+
+	let contrato = $state<ContratoDto | null>(data.contrato as ContratoDto | null);
 	let loading = $state(!data.contrato);
 	let error = $state<string | null>(null);
 	let accionando = $state(false);
@@ -24,7 +40,9 @@
 		error = null;
 
 		try {
-			const res = await fetch(`/api/ventas/contratos/${data.contrato.id}`).then((r) => r.json<{ success: boolean; data: unknown }>());
+			const res = await fetch(`/api/ventas/contratos/${data.contrato.id}`).then((r) =>
+				r.json<{ success: boolean; data: ContratoDto }>()
+			);
 			contrato = res.success ? res.data : null;
 			if (!res.success) error = 'Contrato no encontrado.';
 		} catch (err) {
@@ -82,7 +100,7 @@
 </script>
 
 <svelte:head>
-	<title>Contrato {idContrato} | ALVAS</title>
+	<title>Contrato {data.idContrato} | ALVAS</title>
 </svelte:head>
 
 <div class="flex flex-col gap-6">

@@ -1,5 +1,7 @@
 <script lang="ts">
 	import Button from '$lib/shared/ui/Button.svelte';
+	import TextInput from '$lib/shared/ui/TextInput.svelte';
+	import Textarea from '$lib/shared/ui/Textarea.svelte';
 	import { authStore } from '$lib/auth/infrastructure/authStore';
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import { registrarCaptacionVendedor } from '$lib/captaciones/application/use-cases/registrarCaptacionVendedor';
@@ -255,60 +257,43 @@
 			<div class="rounded-2xl border border-border-light bg-bg-base p-6 shadow-sm">
 				<form class="grid gap-4" onsubmit={enviarCaptacionVendedor}>
 					<div class="grid gap-3 sm:grid-cols-2">
-						<label class="label-field">
-							Nombre
-							<input bind:value={nombreVendedor} class="input-field" placeholder="Tu nombre" />
-						</label>
-						<label class="label-field">
-							Teléfono
-							<input
-								bind:value={telefonoVendedor}
-								class="input-field"
-								placeholder="Número de contacto"
-							/>
-						</label>
+						<TextInput label="Nombre" bind:value={nombreVendedor} placeholder="Tu nombre" />
+						<TextInput
+							label="Teléfono"
+							bind:value={telefonoVendedor}
+							placeholder="Número de contacto"
+						/>
 					</div>
 
-					<label class="label-field">
-						Correo opcional
-						<input
-							bind:value={emailVendedor}
-							type="email"
-							class="input-field"
-							placeholder="correo@ejemplo.com"
-						/>
-					</label>
+					<TextInput
+						label="Correo opcional"
+						type="email"
+						bind:value={emailVendedor}
+						placeholder="correo@ejemplo.com"
+					/>
 
-					<label class="label-field">
-						Propiedad
-						<input
-							bind:value={tituloPropiedad}
-							class="input-field"
-							placeholder="Terreno, casa, local o predio"
-						/>
-					</label>
+					<TextInput
+						label="Propiedad"
+						bind:value={tituloPropiedad}
+						placeholder="Terreno, casa, local o predio"
+					/>
 
-					<label class="label-field">
-						Descripción inicial
-						<textarea
-							bind:value={descripcionPropiedad}
-							rows="4"
-							class="input-field resize-none"
-							placeholder="Zona, metraje aproximado, referencias y condiciones conocidas."
-						></textarea>
-					</label>
+					<Textarea
+						label="Descripción inicial"
+						bind:value={descripcionPropiedad}
+						rows={4}
+						placeholder="Zona, metraje aproximado, referencias y condiciones conocidas."
+						resize={false}
+					/>
 
-					<label class="label-field">
-						Precio estimado opcional
-						<input
-							bind:value={precioEstimado}
-							type="number"
-							min="0"
-							step="0.01"
-							class="input-field"
-							placeholder="Monto referencial"
-						/>
-					</label>
+					<TextInput
+						label="Precio estimado opcional"
+						type="number"
+						bind:value={precioEstimado}
+						min={0}
+						step={0.01}
+						placeholder="Monto referencial"
+					/>
 
 					{#if captacionOk}
 						<p class="success-alert">

@@ -12,7 +12,23 @@
 
 	let { data }: { data: PageData } = $props();
 
-	let contratos = $state<unknown[]>(data.contratos);
+	let contratos = $state<ContratoDto[]>(data.contratos as unknown as ContratoDto[]);
+
+	type ContratoDto = {
+		id: string;
+		idLead?: string;
+		nombreLead?: string;
+		idCliente?: string;
+		idPropiedad: string;
+		nombrePropiedad?: string;
+		idAsesor?: string;
+		nombreAsesor?: string;
+		fechaInicio: string;
+		fechaFin: string;
+		estado: string;
+		creadoEn: string;
+		actualizadoEn: string;
+	};
 	let loading = $state(false);
 	let error = $state<string | null>(null);
 	let firmando = $state<string | null>(null);
@@ -22,7 +38,7 @@
 		loading = true;
 		error = null;
 		try {
-			const res = await httpClient.get<{ success: boolean; data: unknown[] }>(
+			const res = await httpClient.get<{ success: boolean; data: ContratoDto[] }>(
 				'/api/ventas/contratos'
 			);
 			contratos = res.data;

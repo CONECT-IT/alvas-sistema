@@ -19,6 +19,6 @@ export const load: ServerLoad = async ({ fetch }) => {
 	const res = await fetch('/api/propiedades').then((r) => r.json<ApiResp<PropiedadDto[]>>());
 
 	return {
-		propiedades: res.success ? res.data : [],
+		propiedades: res.success ? res.data : []
 	};
 };

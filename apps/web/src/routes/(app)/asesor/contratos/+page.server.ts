@@ -23,9 +23,11 @@ type ListarContratosResp = {
 };
 
 export const load: ServerLoad = async ({ fetch }) => {
-	const res = await fetch('/api/ventas/contratos/mios').then((r) => r.json<ApiResp<ListarContratosResp>>());
+	const res = await fetch('/api/ventas/contratos/mios').then((r) =>
+		r.json<ApiResp<ListarContratosResp>>()
+	);
 
 	return {
-		contratos: res.success ? res.data.contratos : [],
+		contratos: res.success ? res.data.contratos : []
 	};
 };

@@ -14,6 +14,6 @@ export const load: ServerLoad = async ({ fetch }) => {
 	const res = await fetch('/api/usuarios').then((r) => r.json<ApiResp<UsuarioDto[]>>());
 
 	return {
-		usuarios: res.success ? res.data : [],
+		usuarios: res.success ? res.data : []
 	};
 };

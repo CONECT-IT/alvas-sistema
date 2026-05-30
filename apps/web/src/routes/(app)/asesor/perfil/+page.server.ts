@@ -14,9 +14,11 @@ export const load: ServerLoad = async ({ fetch, locals }) => {
 	const payload = locals.authPayload;
 	if (!payload) return { usuario: null };
 
-	const res = await fetch(`/api/usuarios/${payload.idUsuario}`).then((r) => r.json<ApiResp<UsuarioDto>>());
+	const res = await fetch(`/api/usuarios/${payload.idUsuario}`).then((r) =>
+		r.json<ApiResp<UsuarioDto>>()
+	);
 
 	return {
-		usuario: res.success ? res.data : null,
+		usuario: res.success ? res.data : null
 	};
 };

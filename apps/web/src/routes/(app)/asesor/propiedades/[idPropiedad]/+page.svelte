@@ -86,11 +86,10 @@
 			updating = false;
 		}
 	}
-
 </script>
 
 <svelte:head>
-	<title>Propiedad {propiedadId} | ALVAS</title>
+	<title>Propiedad {data.idPropiedad} | ALVAS</title>
 </svelte:head>
 
 <div class="flex flex-col gap-6">

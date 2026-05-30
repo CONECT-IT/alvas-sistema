@@ -14,7 +14,9 @@
 
 	let { data }: { data: PageData } = $props();
 
-	let estadisticas = $state<EstadisticasGlobales | null>(data.estadisticas as unknown as EstadisticasGlobales);
+	let estadisticas = $state<EstadisticasGlobales | null>(
+		data.estadisticas as unknown as EstadisticasGlobales
+	);
 	let reporte = $state<ReporteGeneral | null>(data.reporte as unknown as ReporteGeneral);
 	let loading = $state(false);
 	let error = $state<string | null>(null);

@@ -2,7 +2,10 @@
 	import { goto } from '$app/navigation';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
+	import Select from '$lib/shared/ui/Select.svelte';
 	import SidePanel from '$lib/shared/ui/SidePanel.svelte';
+	import Textarea from '$lib/shared/ui/Textarea.svelte';
+	import TextInput from '$lib/shared/ui/TextInput.svelte';
 	import { opcionesTipoVenta } from '$lib/shared/presentation';
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import type { LeadPipeline } from '$lib/ventas/domain/models/LeadPipeline';
@@ -23,7 +26,9 @@
 	let { data }: { data: PageData } = $props();
 
 	let leads = $state<LeadPipeline[]>(data.leads);
-	let propiedadesDisponibles = $state<Propiedad[]>(data.propiedadesDisponibles);
+	let propiedadesDisponibles = $state<Propiedad[]>(
+		data.propiedadesDisponibles as unknown as Propiedad[]
+	);
 	let asesores = $state<Usuario[]>(data.asesores as unknown as Usuario[]);
 	let mostrarConvertidos = $state(false);
 	let vista = $state<'tabla' | 'kanban'>('kanban');
@@ -215,46 +220,42 @@
 			</div>
 		{/if}
 
-		<input class="input" placeholder="Nombre" bind:value={formLead.nombre} />
-		<input class="input" placeholder="Email" type="email" bind:value={formLead.email} />
-		<input class="input" placeholder="Telefono" bind:value={formLead.telefono} />
-		<select class="input" bind:value={formLead.tipo}>
+		<TextInput placeholder="Nombre" bind:value={formLead.nombre} />
+		<TextInput placeholder="Email" type="email" bind:value={formLead.email} />
+		<TextInput placeholder="Telefono" bind:value={formLead.telefono} />
+		<Select bind:value={formLead.tipo}>
 			{#each opcionesTipoVenta() as opt (opt.value)}
 				<option value={opt.value}>{opt.label}</option>
 			{/each}
-		</select>
-		<label class="label-field">
-			Asesor asignado
-			<select class="input" bind:value={formLead.idAsesor}>
-				<option value="">Sin asignar</option>
-				{#each asesores as asesor (asesor.id)}
-					<option value={asesor.id}>{asesor.nombre} ({asesor.username})</option>
-				{/each}
-			</select>
-		</label>
+		</Select>
+		<Select label="Asesor asignado" bind:value={formLead.idAsesor}>
+			<option value="">Sin asignar</option>
+			{#each asesores as asesor (asesor.id)}
+				<option value={asesor.id}>{asesor.nombre} ({asesor.username})</option>
+			{/each}
+		</Select>
 
 		{#if formLead.tipo === 'COMPRA'}
-			<select class="input" bind:value={formLead.idPropiedadInteres}>
+			<Select bind:value={formLead.idPropiedadInteres}>
 				<option value="">Sin propiedad de interés</option>
 				{#each propiedadesDisponibles as propiedad (propiedad.id)}
 					<option value={propiedad.id}>{etiquetaPropiedad(propiedad)}</option>
 				{/each}
-			</select>
+			</Select>
 		{:else}
-			<input
-				class="input"
+			<TextInput
 				placeholder="Titulo de propiedad en borrador"
 				bind:value={formLead.propiedadTitulo}
 			/>
-			<textarea
-				class="input min-h-24"
+			<Textarea
 				placeholder="Descripcion de la propiedad"
 				bind:value={formLead.propiedadDescripcion}
-			></textarea>
-			<input
-				class="input"
+				rows={4}
+				resize={false}
+			/>
+			<TextInput
 				type="number"
-				min="0"
+				min={0}
 				placeholder="Precio esperado"
 				bind:value={formLead.propiedadPrecio}
 			/>

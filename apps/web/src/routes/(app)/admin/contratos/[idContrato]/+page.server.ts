@@ -19,9 +19,12 @@ type ContratoDto = {
 };
 
 export const load: ServerLoad = async ({ fetch, params }) => {
-	const res = await fetch(`/api/ventas/contratos/${params.idContrato}`).then((r) => r.json<ApiResp<ContratoDto>>());
+	const res = await fetch(`/api/ventas/contratos/${params.idContrato}`).then((r) =>
+		r.json<ApiResp<ContratoDto>>()
+	);
 
 	return {
 		contrato: res.success ? res.data : null,
+		idContrato: params.idContrato
 	};
 };

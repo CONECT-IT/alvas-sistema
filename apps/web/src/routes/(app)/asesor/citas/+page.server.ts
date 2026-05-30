@@ -32,13 +32,13 @@ type PropiedadDto = {
 export const load: ServerLoad = async ({ fetch }) => {
 	const [pipelineRes, propiedadesRes] = await Promise.all([
 		fetch('/api/ventas/pipeline').then((r) => r.json<ApiResp<LeadPipeline[]>>()),
-		fetch('/api/propiedades').then((r) => r.json<ApiResp<PropiedadDto[]>>()),
+		fetch('/api/propiedades').then((r) => r.json<ApiResp<PropiedadDto[]>>())
 	]);
 
 	return {
 		leads: pipelineRes.success ? pipelineRes.data : [],
 		propiedadesDisponibles: propiedadesRes.success
 			? propiedadesRes.data.filter((p) => p.estado.toUpperCase() === 'DISPONIBLE')
-			: [],
+			: []
 	};
 };

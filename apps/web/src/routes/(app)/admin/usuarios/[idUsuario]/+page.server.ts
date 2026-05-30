@@ -11,9 +11,11 @@ type UsuarioDto = {
 };
 
 export const load: ServerLoad = async ({ fetch, params }) => {
-	const res = await fetch(`/api/usuarios/${params.idUsuario}`).then((r) => r.json<ApiResp<UsuarioDto>>());
+	const res = await fetch(`/api/usuarios/${params.idUsuario}`).then((r) =>
+		r.json<ApiResp<UsuarioDto>>()
+	);
 
 	return {
-		usuario: res.success ? res.data : null,
+		usuario: res.success ? res.data : null
 	};
 };

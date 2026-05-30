@@ -29,11 +29,13 @@ type EstadisticasGlobales = {
 export const load: ServerLoad = async ({ fetch }) => {
 	const [reporteRes, estadisticasRes] = await Promise.all([
 		fetch('/api/reportes/general').then((r) => r.json<ApiResp<ReporteGeneral>>()),
-		fetch('/api/reportes/estadisticas-globales').then((r) => r.json<ApiResp<EstadisticasGlobales>>()),
+		fetch('/api/reportes/estadisticas-globales').then((r) =>
+			r.json<ApiResp<EstadisticasGlobales>>()
+		)
 	]);
 
 	return {
 		reporte: reporteRes.success ? reporteRes.data : null,
-		estadisticas: estadisticasRes.success ? estadisticasRes.data : null,
+		estadisticas: estadisticasRes.success ? estadisticasRes.data : null
 	};
 };

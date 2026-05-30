@@ -17,9 +17,11 @@ type CaptacionPendiente = {
 };
 
 export const load: ServerLoad = async ({ fetch }) => {
-	const res = await fetch('/api/captaciones/pendientes').then((r) => r.json<ApiResp<CaptacionPendiente[]>>());
+	const res = await fetch('/api/captaciones/pendientes').then((r) =>
+		r.json<ApiResp<CaptacionPendiente[]>>()
+	);
 
 	return {
-		captaciones: res.success ? res.data : [],
+		captaciones: res.success ? res.data : []
 	};
 };

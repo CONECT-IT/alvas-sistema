@@ -16,6 +16,6 @@ export const load: ServerLoad = async ({ fetch }) => {
 	const res = await fetch('/api/ventas/clientes').then((r) => r.json<ApiResp<ClienteDto[]>>());
 
 	return {
-		clientes: res.success ? res.data : [],
+		clientes: res.success ? res.data : []
 	};
 };

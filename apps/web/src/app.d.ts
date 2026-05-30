@@ -10,7 +10,12 @@ declare global {
 		}
 
 		// interface Error {}
-		// interface Locals {}
+		interface Locals {
+			authPayload?: {
+				idUsuario: string;
+				rol: string;
+			};
+		}
 		// interface PageData {}
 		// interface PageState {}
 	}
