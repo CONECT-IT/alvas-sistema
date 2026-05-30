@@ -5,7 +5,29 @@ import { Propiedad } from "../../../src/lib/propiedades/domain/entities/Propieda
 import { resultadoExitoso, resultadoFallido } from "../../../src/lib/shared/application/Resultado";
 import type { PropiedadRouterDeps } from "../../../src/lib/propiedades/infrastructure/http/PropiedadRouter";
 import { ErrorDeDominio } from "../../../src/lib/shared/domain";
+import { ValidationError } from "../../../src/lib/shared/infrastructure/validation/helpers";
+import { mapErrorDeDominioAStatus } from "../../../src/lib/shared/infrastructure/http/responses";
 import { crearAuthHeader, envConAuth } from "../helpers/auth";
+
+function conManejadorError(app: Hono): Hono {
+  app.onError((error, c) => {
+    if (error instanceof ErrorDeDominio) {
+      return c.json(
+        { success: false, message: error.message, code: error.codigo },
+        mapErrorDeDominioAStatus(error) as Parameters<typeof c.json>[1],
+      );
+    }
+    if (error instanceof ValidationError) {
+      return c.json(
+        { success: false, message: "Error de validación", code: "VALIDATION_ERROR", detalles: error.details },
+        400,
+      );
+    }
+    console.error("Error no manejado:", error);
+    return c.json({ success: false, message: "Error interno del servidor.", code: "ERROR_INTERNO" }, 500);
+  });
+  return app;
+}
 
 type PropiedadesEntradasCapturadas = {
   crearPropiedad: unknown[];
@@ -95,7 +117,7 @@ function crearCapturadas(): PropiedadesEntradasCapturadas {
 
 describe("http / propiedades routes", () => {
   it("lista propiedades autenticadas y permite filtrar por lead vendedor", async () => {
-    const app = new Hono();
+    const app = conManejadorError(new Hono());
     app.route("/propiedades", crearPropiedadRouter(crearDeps()));
 
     const res = await app.request(
@@ -124,7 +146,7 @@ describe("http / propiedades routes", () => {
 
   it("crea propiedad con usuario autenticado del adapter HTTP", async () => {
     const capturadas = crearCapturadas();
-    const app = new Hono();
+    const app = conManejadorError(new Hono());
     app.route("/propiedades", crearPropiedadRouter(crearDeps(capturadas)));
 
     const res = await app.request(
@@ -160,7 +182,7 @@ describe("http / propiedades routes", () => {
 
   it("actualiza propiedad pasando id de ruta y usuario autenticado", async () => {
     const capturadas = crearCapturadas();
-    const app = new Hono();
+    const app = conManejadorError(new Hono());
     app.route("/propiedades", crearPropiedadRouter(crearDeps(capturadas)));
 
     const res = await app.request(
@@ -224,7 +246,7 @@ describe("http / propiedades routes", () => {
   });
 
   it("responde 403 cuando el use case rechaza permisos de propiedad", async () => {
-    const app = new Hono();
+    const app = conManejadorError(new Hono());
     app.route("/propiedades", crearPropiedadRouter(crearDepsSinPermisos()));
 
     const res = await app.request(
@@ -250,7 +272,7 @@ describe("http / propiedades routes", () => {
 
   it("elimina propiedad desde ruta autenticada", async () => {
     const capturadas = crearCapturadas();
-    const app = new Hono();
+    const app = conManejadorError(new Hono());
     app.route("/propiedades", crearPropiedadRouter(crearDeps(capturadas)));
 
     const res = await app.request(
@@ -270,5 +292,149 @@ describe("http / propiedades routes", () => {
       idPropiedad: "propiedad-1",
       usuarioAutenticado: { id: "admin-1", rol: "ADMIN" },
     });
+  });
+
+  it("lista todas las propiedades sin filtro", async () => {
+    const app = conManejadorError(new Hono());
+    app.route("/propiedades", crearPropiedadRouter(crearDeps()));
+
+    const res = await app.request(
+      "/propiedades",
+      {
+        headers: {
+          Authorization: await crearAuthHeader({ rol: "ADMIN" }),
+        },
+      },
+      envConAuth,
+    );
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.success).toBe(true);
+    expect(body.data).toHaveLength(2);
+    expect(body.data[0]).toMatchObject({ id: "propiedad-1", estado: "DISPONIBLE" });
+    expect(body.data[1]).toMatchObject({ id: "propiedad-2", estado: "BORRADOR" });
+  });
+
+  it("responde error si la propiedad a actualizar no existe", async () => {
+    const deps = crearDeps();
+    const conError = {
+      ...deps,
+      controllerDeps: {
+        ...deps.controllerDeps,
+        crearActualizarPropiedad: () => ({
+          ejecutar: async () =>
+            resultadoFallido(new ErrorDeDominio("Propiedad no encontrada.", { codigo: "PROPIEDAD_NO_ENCONTRADA" })),
+        }),
+      },
+    };
+    const app = new Hono();
+    app.route("/propiedades", crearPropiedadRouter(conError));
+
+    const res = await app.request(
+      "/propiedades/propiedad-inexistente",
+      {
+        method: "PUT",
+        headers: {
+          Authorization: await crearAuthHeader({ idUsuario: "admin-1", rol: "ADMIN" }),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ precio: 99999 }),
+      },
+      envConAuth,
+    );
+
+    expect(res.status).toBe(404);
+    const body = await res.json();
+    expect(body).toEqual({
+      success: false,
+      message: "Propiedad no encontrada.",
+      code: "PROPIEDAD_NO_ENCONTRADA",
+    });
+  });
+
+  it("responde error si la propiedad a eliminar no existe", async () => {
+    const deps = crearDeps();
+    const conError = {
+      ...deps,
+      controllerDeps: {
+        ...deps.controllerDeps,
+        crearEliminarPropiedad: () => ({
+          ejecutar: async () =>
+            resultadoFallido(new ErrorDeDominio("Propiedad no encontrada.", { codigo: "PROPIEDAD_NO_ENCONTRADA" })),
+        }),
+      },
+    };
+    const app = new Hono();
+    app.route("/propiedades", crearPropiedadRouter(conError));
+
+    const res = await app.request(
+      "/propiedades/propiedad-inexistente",
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: await crearAuthHeader({ idUsuario: "admin-1", rol: "ADMIN" }),
+        },
+      },
+      envConAuth,
+    );
+
+    expect(res.status).toBe(404);
+    const body = await res.json();
+    expect(body).toEqual({
+      success: false,
+      message: "Propiedad no encontrada.",
+      code: "PROPIEDAD_NO_ENCONTRADA",
+    });
+  });
+
+  it("rechaza crear propiedad con body invalido (precio negativo)", async () => {
+    const app = conManejadorError(new Hono());
+    app.route("/propiedades", crearPropiedadRouter(crearDeps()));
+
+    const res = await app.request(
+      "/propiedades",
+      {
+        method: "POST",
+        headers: {
+          Authorization: await crearAuthHeader({ idUsuario: "admin-1", rol: "ADMIN" }),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          titulo: "Casa",
+          descripcion: "Test",
+          precio: -100,
+        }),
+      },
+      envConAuth,
+    );
+
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.success).toBe(false);
+    expect(body.code).toBe("VALIDATION_ERROR");
+  });
+
+  it("rechaza actualizar propiedad con body invalido (precio cero)", async () => {
+    const app = conManejadorError(new Hono());
+    app.route("/propiedades", crearPropiedadRouter(crearDeps()));
+
+    const res = await app.request(
+      "/propiedades/propiedad-1",
+      {
+        method: "PUT",
+        headers: {
+          Authorization: await crearAuthHeader({ idUsuario: "admin-1", rol: "ADMIN" }),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ precio: 0 }),
+      },
+      envConAuth,
+    );
+
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.success).toBe(false);
+    expect(body.code).toBe("VALIDATION_ERROR");
   });
 });

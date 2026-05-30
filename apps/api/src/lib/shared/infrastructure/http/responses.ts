@@ -16,7 +16,8 @@ export function mapErrorDeDominioAStatus(error: ErrorDeDominio): number {
 	) return 403;
 	if (
 		error.codigo.includes("NOT_FOUND") ||
-		error.codigo.includes("NO_ENCONTRADO")
+		error.codigo.includes("NO_ENCONTRADO") ||
+		error.codigo.includes("NO_ENCONTRADA")
 	) return 404;
 	return 400;
 }
