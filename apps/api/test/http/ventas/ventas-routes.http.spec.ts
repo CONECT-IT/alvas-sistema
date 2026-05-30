@@ -438,6 +438,172 @@ describe("http / ventas routes", () => {
     );
   });
 
+  it("cancela contrato devolviendo mensaje de exito", async () => {
+    const app = new Hono();
+    app.route("/ventas", crearVentasRouter(crearDeps()));
+
+    const res = await app.request(
+      "/ventas/contratos/contrato-1/cancelar",
+      {
+        method: "POST",
+        headers: {
+          Authorization: await crearAuthHeader({ idUsuario: "admin-1", rol: "ADMIN" }),
+        },
+      },
+      envConAuth,
+    );
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ success: true, message: "Contrato cancelado" });
+  });
+
+  it("responde error si el contrato a firmar no existe", async () => {
+    const deps = {
+      ...crearDeps(),
+      crearFirmarContrato: () => ({
+        ejecutar: async () =>
+          resultadoFallido(new ErrorDeDominio("El contrato con id contrato-inexistente no ha sido encontrado.")),
+      }),
+    } as unknown as VentasControllerDeps;
+    const app = new Hono();
+    app.route("/ventas", crearVentasRouter(deps));
+
+    const res = await app.request(
+      "/ventas/contratos/contrato-inexistente/firmar",
+      {
+        method: "POST",
+        headers: {
+          Authorization: await crearAuthHeader({ idUsuario: "admin-1", rol: "ADMIN" }),
+        },
+      },
+      envConAuth,
+    );
+
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body).toEqual({
+      success: false,
+      message: "El contrato con id contrato-inexistente no ha sido encontrado.",
+      code: "ERROR_DE_DOMINIO",
+    });
+  });
+
+  it("responde error si el contrato a cancelar no existe", async () => {
+    const deps = {
+      ...crearDeps(),
+      crearCancelarContrato: () => ({
+        ejecutar: async () =>
+          resultadoFallido(new ErrorDeDominio("El contrato con id contrato-inexistente no ha sido encontrado.")),
+      }),
+    } as unknown as VentasControllerDeps;
+    const app = new Hono();
+    app.route("/ventas", crearVentasRouter(deps));
+
+    const res = await app.request(
+      "/ventas/contratos/contrato-inexistente/cancelar",
+      {
+        method: "POST",
+        headers: {
+          Authorization: await crearAuthHeader({ idUsuario: "admin-1", rol: "ADMIN" }),
+        },
+      },
+      envConAuth,
+    );
+
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body).toEqual({
+      success: false,
+      message: "El contrato con id contrato-inexistente no ha sido encontrado.",
+      code: "ERROR_DE_DOMINIO",
+    });
+  });
+
+  it("lista contratos vacio cuando no hay ninguno", async () => {
+    const app = new Hono();
+    app.route("/ventas", crearVentasRouter(crearDeps()));
+
+    const res = await app.request(
+      "/ventas/contratos",
+      {
+        headers: {
+          Authorization: await crearAuthHeader({ idUsuario: "admin-1", rol: "ADMIN" }),
+        },
+      },
+      envConAuth,
+    );
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ success: true, data: [] });
+  });
+
+  it("lista contratos por asesor vacio cuando no tiene ninguno", async () => {
+    const app = new Hono();
+    app.route("/ventas", crearVentasRouter(crearDeps()));
+
+    const res = await app.request(
+      "/ventas/contratos/mios",
+      {
+        headers: {
+          Authorization: await crearAuthHeader({ idUsuario: "asesor-1", rol: "ASESOR" }),
+        },
+      },
+      envConAuth,
+    );
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ success: true, data: [] });
+  });
+
+  it("firma contrato con lead asociado crea cliente y vincula propiedad al firmar", async () => {
+    const capturadas = crearCapturadas();
+    const deps = {
+      ...crearDeps(capturadas),
+      crearFirmarContrato: () => ({
+        ejecutar: async (input: unknown) => {
+          capturadas.firmarContrato.push(input);
+          return resultadoExitoso(undefined);
+        },
+      }),
+    };
+    const app = new Hono();
+    app.route("/ventas", crearVentasRouter(deps));
+
+    const crearRes = await app.request(
+      "/ventas/contratos",
+      {
+        method: "POST",
+        headers: {
+          Authorization: await crearAuthHeader({ idUsuario: "admin-1", rol: "ADMIN" }),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          idLead: "lead-1",
+          idPropiedad: "propiedad-1",
+          fechaInicio: "2026-06-01T00:00:00.000Z",
+          fechaFin: "2026-12-01T00:00:00.000Z",
+        }),
+      },
+      envConAuth,
+    );
+
+    const firmarRes = await app.request(
+      "/ventas/contratos/contrato-1/firmar",
+      {
+        method: "POST",
+        headers: {
+          Authorization: await crearAuthHeader({ idUsuario: "admin-1", rol: "ADMIN" }),
+        },
+      },
+      envConAuth,
+    );
+
+    expect(crearRes.status).toBe(201);
+    expect(firmarRes.status).toBe(200);
+    expect(await firmarRes.json()).toEqual({ success: true, message: "Contrato firmado" });
+    expect(capturadas.firmarContrato[0]).toEqual({ idContrato: "contrato-1" });
+  });
+
   it("crea y firma contrato desde el adaptador HTTP", async () => {
     const capturadas = crearCapturadas();
     const app = new Hono();
