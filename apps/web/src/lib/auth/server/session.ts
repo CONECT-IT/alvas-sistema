@@ -19,7 +19,7 @@ const AUTH_COOKIE = 'alvas_auth_token';
 const REFRESH_COOKIE = 'alvas_refresh_token';
 const USER_COOKIE = 'alvas_session_user';
 
-const AUTH_MAX_AGE_SECONDS = 60 * 15;
+const AUTH_MAX_AGE_SECONDS = 60 * 60 * 4;
 const REFRESH_MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
 
 function encodeCookieJson(value: unknown): string {
@@ -110,6 +110,28 @@ export function getSession(cookies: Cookies): SessionData | null {
 
 	return {
 		authToken,
+		refreshToken,
+		user
+	};
+}
+
+export function getRefreshSession(
+	cookies: Cookies
+): Pick<SessionData, 'refreshToken' | 'user'> | null {
+	const refreshToken = cookies.get(REFRESH_COOKIE);
+	const userCookie = decodeCookieJson<SessionUser>(cookies.get(USER_COOKIE));
+
+	if (!refreshToken || !userCookie) {
+		return null;
+	}
+
+	const user = toSessionUser(userCookie);
+
+	if (!user) {
+		return null;
+	}
+
+	return {
 		refreshToken,
 		user
 	};

@@ -2,6 +2,7 @@
 	import Badge from '$lib/shared/ui/Badge.svelte';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
+	import FloatingTextInput from '$lib/shared/ui/FloatingTextInput.svelte';
 	import SidePanel from '$lib/shared/ui/SidePanel.svelte';
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import type { UserRol } from '$lib/auth/domain/models/User';
@@ -24,6 +25,7 @@
 	let editando = $state(false);
 	let editUsername = $state('');
 	let editNombre = $state('');
+	let editClave = $state('');
 	let editRol = $state<UserRol | ''>('');
 	let saving = $state(false);
 	let saveError = $state<string | null>(null);
@@ -53,6 +55,7 @@
 		if (!usuario) return;
 		editUsername = usuario.username;
 		editNombre = usuario.nombre;
+		editClave = '';
 		editRol = usuario.rol;
 		saveError = null;
 		saveSuccess = null;
@@ -83,6 +86,7 @@
 				idUsuario: usuario.id,
 				username: editUsername.trim() || undefined,
 				nombre: editNombre.trim() || undefined,
+				clave: editClave.trim() || undefined,
 				rol: editRol || undefined
 			});
 			usuario = actualizado;
@@ -169,14 +173,9 @@
 
 		<SidePanel isOpen={editando} title="Editar usuario" onClose={cancelarEdicion}>
 			<form class="grid gap-4" onsubmit={guardarCambios}>
-				<label class="label-field">
-					Usuario de acceso
-					<input bind:value={editUsername} class="input-field" />
-				</label>
-				<label class="label-field">
-					Nombre visible
-					<input bind:value={editNombre} class="input-field" />
-				</label>
+				<FloatingTextInput label="Usuario de acceso" bind:value={editUsername} />
+				<FloatingTextInput label="Nombre visible" bind:value={editNombre} />
+				<FloatingTextInput label="Clave temporal" type="password" bind:value={editClave} />
 				<label class="label-field">
 					Rol
 					<select bind:value={editRol} class="input-field">
@@ -199,7 +198,27 @@
 			</form>
 		</SidePanel>
 
-		<div class="grid gap-6 xl:grid-cols-2">
+		<div class="grid gap-5 lg:grid-cols-3">
+			<Card tilt>
+				<p class="stat-label">Rol</p>
+				<p class="mt-3 font-display text-2xl font-bold text-text-main">{usuario.rol}</p>
+				<p class="mt-1 text-sm text-text-muted">Permisos activos para navegación y API.</p>
+			</Card>
+			<Card tilt>
+				<p class="stat-label">Estado</p>
+				<p class="mt-3 font-display text-2xl font-bold text-text-main">
+					{presentarEstadoUsuario(usuario.estado).label}
+				</p>
+				<p class="mt-1 text-sm text-text-muted">Controla si puede iniciar sesión.</p>
+			</Card>
+			<Card tilt>
+				<p class="stat-label">Acceso</p>
+				<p class="mt-3 font-display text-2xl font-bold text-text-main">@{usuario.username}</p>
+				<p class="mt-1 text-sm text-text-muted">Identificador de login.</p>
+			</Card>
+		</div>
+
+		<div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
 			<Card>
 				<h2 class="card-title">Información</h2>
 				<dl class="dl-grid">
@@ -216,6 +235,23 @@
 						</Badge>
 					</dd>
 				</dl>
+			</Card>
+
+			<Card>
+				<h2 class="card-title">Acceso y seguridad</h2>
+				<div class="grid gap-3 text-sm">
+					<div class="rounded-xl bg-surface-muted p-4">
+						<p class="font-semibold text-text-main">Contraseña</p>
+						<p class="mt-1 text-text-muted">
+							No se muestra: se almacena como hash seguro. Desde editar puedes reemplazarla por una
+							clave temporal.
+						</p>
+					</div>
+					<div class="rounded-xl bg-surface-muted p-4">
+						<p class="font-semibold text-text-main">ID interno</p>
+						<p class="mt-1 break-all text-text-muted">{usuario.id}</p>
+					</div>
+				</div>
 			</Card>
 		</div>
 	</div>

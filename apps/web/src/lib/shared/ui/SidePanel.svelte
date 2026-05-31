@@ -7,29 +7,45 @@
 		title: string;
 		children?: import('svelte').Snippet;
 		onClose: () => void;
+		sourceRect?: DOMRect | null;
 	}
 
-	let { isOpen, title, children, onClose }: Props = $props();
+	let { isOpen, title, children, onClose, sourceRect = null }: Props = $props();
 	let panelRef: HTMLDivElement | undefined = $state();
 
 	$effect(() => {
 		if (!isOpen || !panelRef) return;
 
+		const target = panelRef.getBoundingClientRect();
+		const startX = sourceRect
+			? sourceRect.left + sourceRect.width / 2 - (target.left + target.width / 2)
+			: 48;
+		const startY = sourceRect
+			? sourceRect.top + sourceRect.height / 2 - (target.top + target.height / 2)
+			: 16;
+		const scaleX = sourceRect ? Math.max(sourceRect.width / target.width, 0.08) : 0.88;
+		const scaleY = sourceRect ? Math.max(sourceRect.height / target.height, 0.08) : 0.88;
+
 		gsap.fromTo(
 			panelRef,
 			{
 				opacity: 0,
-				x: 48,
-				scale: 0.88,
-				borderRadius: '999px'
+				x: startX,
+				y: startY,
+				scaleX,
+				scaleY,
+				borderRadius: sourceRect ? `${Math.max(sourceRect.height / 2, 16)}px` : '999px'
 			},
 			{
 				opacity: 1,
 				x: 0,
+				y: 0,
 				scale: 1,
+				scaleX: 1,
+				scaleY: 1,
 				borderRadius: '1.5rem',
-				duration: 0.42,
-				ease: 'elastic.out(1, 0.78)',
+				duration: 0.52,
+				ease: 'power3.out',
 				clearProps: 'transform,borderRadius'
 			}
 		);
@@ -51,7 +67,7 @@
 		<!-- Panel -->
 		<div
 			bind:this={panelRef}
-			class="relative z-50 h-full w-full max-w-lg origin-bottom-right overflow-y-auto rounded-3xl border border-border-light bg-bg-card p-6 shadow-floating"
+			class="relative z-50 h-full w-full max-w-lg origin-center overflow-y-auto rounded-3xl border border-border-light bg-bg-card p-6 shadow-floating"
 		>
 			<div class="mb-6 flex items-center justify-between border-b border-border-light pb-4">
 				<h2 class="font-display text-xl font-bold text-text-main">{title}</h2>

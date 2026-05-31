@@ -32,6 +32,7 @@
 	let loading = $state(false);
 	let error = $state<string | null>(null);
 	let panelCrear = $state(false);
+	let panelOrigen = $state<DOMRect | null>(null);
 	let guardando = $state(false);
 	let accionError = $state<string | null>(null);
 	let formLead = $state({
@@ -125,6 +126,12 @@
 	function cerrarCrear() {
 		panelCrear = false;
 		accionError = null;
+		panelOrigen = null;
+	}
+
+	function abrirCrear(event: MouseEvent) {
+		panelOrigen = (event.currentTarget as HTMLElement).getBoundingClientRect();
+		panelCrear = true;
 	}
 
 	function etiquetaPropiedad(propiedad: Propiedad): string {
@@ -196,7 +203,7 @@
 
 		<div class="flex gap-2">
 			<Button variant="secondary" onclick={cargar}>Actualizar</Button>
-			<Button onclick={() => (panelCrear = true)}>Nuevo lead</Button>
+			<Button onclick={abrirCrear}>Nuevo lead</Button>
 		</div>
 	</div>
 
@@ -350,7 +357,7 @@
 	{/if}
 </div>
 
-<SidePanel isOpen={panelCrear} onClose={cerrarCrear} title="Nuevo lead">
+<SidePanel isOpen={panelCrear} onClose={cerrarCrear} title="Nuevo lead" sourceRect={panelOrigen}>
 	<div class="space-y-4">
 		{#if accionError}
 			<div class="rounded-lg border border-danger/20 bg-danger/10 p-3 text-sm text-danger">

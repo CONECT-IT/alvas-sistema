@@ -27,15 +27,31 @@ type LoginApiResponse =
 			code?: string;
 	  };
 
-export const load: ServerLoad = ({ cookies }) => {
+function destinoSeguro(redirectTo: string | null, rol: string): string {
+	if (!redirectTo?.startsWith('/') || redirectTo.startsWith('//')) {
+		return rol === 'ADMIN' ? '/admin/dashboard' : '/asesor/dashboard';
+	}
+
+	if (rol === 'ADMIN' && redirectTo.startsWith('/admin')) {
+		return redirectTo;
+	}
+
+	if (rol === 'ASESOR' && redirectTo.startsWith('/asesor')) {
+		return redirectTo;
+	}
+
+	return rol === 'ADMIN' ? '/admin/dashboard' : '/asesor/dashboard';
+}
+
+export const load: ServerLoad = ({ cookies, url }) => {
 	const session = getSession(cookies);
 
 	if (session?.user.rol === 'ADMIN') {
-		redirect(303, '/admin/dashboard');
+		redirect(303, destinoSeguro(url.searchParams.get('redirectTo'), session.user.rol));
 	}
 
 	if (session?.user.rol === 'ASESOR') {
-		redirect(303, '/asesor/dashboard');
+		redirect(303, destinoSeguro(url.searchParams.get('redirectTo'), session.user.rol));
 	}
 };
 
@@ -82,6 +98,6 @@ export const actions = {
 
 		setSessionCookies(cookies, session, url.protocol === 'https:');
 
-		redirect(303, session.user.rol === 'ADMIN' ? '/admin/dashboard' : '/asesor/dashboard');
+		redirect(303, destinoSeguro(url.searchParams.get('redirectTo'), session.user.rol));
 	}
 };

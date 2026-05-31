@@ -32,6 +32,7 @@
 	let error = $state<string | null>(null);
 	let guardando = $state(false);
 	let accionError = $state<string | null>(null);
+	let panelOrigen = $state<DOMRect | null>(null);
 	let formLead = $state({
 		nombre: '',
 		email: '',
@@ -139,8 +140,13 @@
 	let panelMode = $state<'crear' | 'editar' | 'contrato' | 'actividad' | null>(null);
 	let actividadLeadId = $state('');
 
-	function abrirPanel(modo: 'crear' | 'editar' | 'contrato' | 'actividad', lead?: LeadPipeline) {
+	function abrirPanel(
+		modo: 'crear' | 'editar' | 'contrato' | 'actividad',
+		lead?: LeadPipeline,
+		event?: MouseEvent
+	) {
 		panelMode = modo;
+		panelOrigen = event ? (event.currentTarget as HTMLElement).getBoundingClientRect() : null;
 		if (modo === 'actividad' && lead) {
 			actividadLeadId = lead.id;
 		}
@@ -151,6 +157,7 @@
 		panelOpen = false;
 		panelMode = null;
 		accionError = null;
+		panelOrigen = null;
 	}
 
 	async function crearLead() {
@@ -202,7 +209,7 @@
 		</div>
 		<div class="flex gap-2">
 			<Button variant="secondary" onclick={cargarLeads}>Actualizar</Button>
-			<Button onclick={() => abrirPanel('crear')}>Nuevo lead</Button>
+			<Button onclick={(event) => abrirPanel('crear', undefined, event)}>Nuevo lead</Button>
 		</div>
 	</div>
 
@@ -361,6 +368,7 @@
 	isOpen={panelOpen}
 	onClose={cerrarPanel}
 	title={panelMode === 'crear' ? 'Nuevo lead' : 'Actividad del lead'}
+	sourceRect={panelOrigen}
 >
 	{#if panelMode === 'crear'}
 		<div class="space-y-4">

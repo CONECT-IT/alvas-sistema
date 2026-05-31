@@ -1,5 +1,6 @@
 import { json, type Cookies } from '@sveltejs/kit';
 import { getSession } from '$lib/auth/server/session';
+import { refreshSession } from '$lib/auth/server/refreshSession';
 import { getApiBaseUrl } from './api';
 
 type ServerFetch = typeof globalThis.fetch;
@@ -73,7 +74,11 @@ async function proxyApiRequest(
 	method: 'GET' | 'POST' | 'PUT',
 	body?: ProxyBody
 ): Promise<Response> {
-	const session = getSession(cookies);
+	let session = getSession(cookies);
+
+	if (!session) {
+		session = await refreshSession(cookies, fetch, true);
+	}
 
 	if (!session) {
 		return json({ success: false, message: 'Sesión no iniciada.' }, { status: 401 });
@@ -81,14 +86,13 @@ async function proxyApiRequest(
 
 	let response: Response;
 	try {
-		response = await fetch(`${getApiBaseUrl()}${path}`, {
-			method,
-			headers: {
-				Authorization: `Bearer ${session.authToken}`,
-				...(body ? { 'Content-Type': 'application/json' } : {})
-			},
-			body: body ? JSON.stringify(body) : undefined
-		});
+		response = await enviarApi(fetch, path, method, session.authToken, body);
+		if (response.status === 401) {
+			const renovada = await refreshSession(cookies, fetch, true);
+			if (renovada) {
+				response = await enviarApi(fetch, path, method, renovada.authToken, body);
+			}
+		}
 	} catch {
 		console.warn(`proxyApi: No se pudo conectar con el API — ruta=${path}`);
 		return json(
@@ -113,4 +117,21 @@ async function proxyApiRequest(
 	}
 
 	return json(payload, { status: response.status });
+}
+
+function enviarApi(
+	fetch: ServerFetch,
+	path: string,
+	method: 'GET' | 'POST' | 'PUT',
+	authToken: string,
+	body?: ProxyBody
+): Promise<Response> {
+	return fetch(`${getApiBaseUrl()}${path}`, {
+		method,
+		headers: {
+			Authorization: `Bearer ${authToken}`,
+			...(body ? { 'Content-Type': 'application/json' } : {})
+		},
+		body: body ? JSON.stringify(body) : undefined
+	});
 }

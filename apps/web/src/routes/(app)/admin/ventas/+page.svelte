@@ -24,6 +24,7 @@
 	type FiltroLeads = 'todos' | 'conCitas' | 'nuevos';
 	let filtro = $state<FiltroLeads>('todos');
 	let panelCrear = $state(false);
+	let panelOrigen = $state<DOMRect | null>(null);
 	let formLead = $state({
 		nombre: '',
 		email: '',
@@ -71,12 +72,14 @@
 		filtro = key;
 	}
 
-	function abrirNuevoLead() {
+	function abrirNuevoLead(event: MouseEvent) {
+		panelOrigen = (event.currentTarget as HTMLElement).getBoundingClientRect();
 		panelCrear = true;
 	}
 
 	function cerrarNuevoLead() {
 		panelCrear = false;
+		panelOrigen = null;
 	}
 
 	async function cargarPipeline() {
@@ -154,7 +157,12 @@
 	{/if}
 </div>
 
-<SidePanel isOpen={panelCrear} onClose={cerrarNuevoLead} title="Nuevo lead">
+<SidePanel
+	isOpen={panelCrear}
+	onClose={cerrarNuevoLead}
+	title="Nuevo lead"
+	sourceRect={panelOrigen}
+>
 	<div class="space-y-4">
 		<FloatingTextInput label="Nombre" bind:value={formLead.nombre} />
 		<FloatingTextInput label="Email" type="email" bind:value={formLead.email} />
