@@ -157,11 +157,11 @@ export class HttpVentasRepository implements VentasRepository {
 	}
 
 	async listarContratos(): Promise<ContratoDTO[]> {
-		const response = await httpClient.get<ApiSuccessResponse<ContratoDTO[]>>(
+		const response = await httpClient.get<ApiSuccessResponse<{ contratos: ContratoDTO[] }>>(
 			`${this.apiBaseUrl}/ventas/contratos/mios`
 		);
 
-		return response.data;
+		return response.data.contratos;
 	}
 
 	async listarPropiedadesPorCliente(idLead: string): Promise<string[]> {

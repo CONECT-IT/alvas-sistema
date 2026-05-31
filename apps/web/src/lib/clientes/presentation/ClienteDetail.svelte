@@ -14,6 +14,7 @@
 	import { ventasRepository } from '$lib/ventas/infrastructure/ventasRepository';
 	import type { ContratoDTO } from '$lib/ventas/infrastructure/dto/VentasDTOs';
 	import type { LeadDetalle } from '$lib/ventas/domain/models/LeadDetalle';
+	import { onMount } from 'svelte';
 
 	interface Props {
 		clienteId: string;
@@ -121,7 +122,7 @@
 		});
 	}
 
-	$effect(() => {
+	onMount(() => {
 		cargar();
 	});
 </script>

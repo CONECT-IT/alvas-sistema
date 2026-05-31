@@ -21,6 +21,7 @@ export function crearPropiedadRouter(deps: PropiedadRouterDeps) {
 
   router.get("/", (c) => controller.listar(c));
   router.post("/", (c) => controller.crear(c));
+  router.get("/:idPropiedad", (c) => controller.obtener(c));
   router.put("/:idPropiedad", (c) => controller.actualizar(c));
   router.delete("/:idPropiedad", (c) => controller.eliminar(c));
 

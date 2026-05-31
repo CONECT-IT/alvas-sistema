@@ -3,7 +3,7 @@ import app from "../../src/main";
 
 describe("http / health", () => {
   it("responde estado operativo sin levantar un servidor real", async () => {
-    const res = await app.request("/health");
+    const res = await app.request("/health", undefined, { CORS_ORIGINS: "http://localhost:5173" });
 
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({

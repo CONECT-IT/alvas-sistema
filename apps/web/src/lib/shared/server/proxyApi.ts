@@ -90,7 +90,7 @@ async function proxyApiRequest(
 			body: body ? JSON.stringify(body) : undefined
 		});
 	} catch {
-		console.warn('proxyApi: No se pudo conectar con el API');
+		console.warn(`proxyApi: No se pudo conectar con el API — ruta=${path}`);
 		return json(
 			{ success: false, message: 'No se pudo conectar con el API.', code: 'API_UNREACHABLE' },
 			{ status: 502 }
@@ -101,7 +101,10 @@ async function proxyApiRequest(
 	try {
 		payload = await response.json();
 	} catch {
-		console.warn('proxyApi: Respuesta inválida del API');
+		const text = await response.text().catch(() => '(no se pudo leer body)');
+		console.warn(
+			`proxyApi: Respuesta inválida del API — ruta=${path}, status=${response.status}, body="${text.slice(0, 300)}"`,
+		);
 		payload = {
 			success: false,
 			message: 'Respuesta inválida del API.',

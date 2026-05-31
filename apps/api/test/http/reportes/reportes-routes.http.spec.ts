@@ -8,6 +8,8 @@ import {
   type ReportesRouterDeps,
 } from "../../../src/lib/reportes/infrastructure";
 import { crearAuthHeader, envConAuth } from "../helpers/auth";
+import { crearTokenProviderDesdeEnv } from "../../../src/lib/auth/infrastructure/security/TokenProviderFactory";
+import { verifySessionMiddleware, requireRolesMiddleware } from "../../../src/lib/shared/infrastructure";
 
 const reporteGeneral = {
   fechaGeneracion: new Date("2026-05-23T10:00:00.000Z"),
@@ -49,6 +51,10 @@ function crearDeps(): ReportesRouterDeps {
 
 function crearAppReportes(deps: ReportesRouterDeps) {
   const app = new Hono();
+  app.use("/reportes", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
+  app.use("/reportes/*", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
+  app.use("/reportes", requireRolesMiddleware(["ADMIN"]));
+  app.use("/reportes/*", requireRolesMiddleware(["ADMIN"]));
   app.route("/reportes", crearReportesRouter(deps));
   app.onError((error, c) => {
     if (error instanceof ErrorDeDominio) {

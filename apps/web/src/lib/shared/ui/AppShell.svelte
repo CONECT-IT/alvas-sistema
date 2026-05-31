@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import type { Snippet } from 'svelte';
 	import { authStore } from '$lib/auth/infrastructure/authStore';
+	import AlvasLogo from './AlvasLogo.svelte';
 
 	interface Props {
 		children: Snippet;
@@ -249,10 +250,7 @@
 					href={shellUser.esAdmin ? '/admin/dashboard' : '/asesor/dashboard'}
 					class="mb-6 flex h-10 w-10 items-center justify-center"
 				>
-					<span
-						class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-sm font-bold text-white shadow-lg shadow-amber-500/20"
-						>A</span
-					>
+					<AlvasLogo variant="isotype" size="lg" />
 				</a>
 
 				<!-- Navigation items with blur balls -->
@@ -348,11 +346,7 @@
 						href={shellUser.esAdmin ? '/admin/dashboard' : '/asesor/dashboard'}
 						class="flex items-center gap-2"
 					>
-						<span
-							class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-xs font-bold text-white shadow-md shadow-amber-500/10"
-							>A</span
-						>
-						<span class="font-display text-lg font-bold tracking-tight">ALVAS</span>
+						<AlvasLogo variant="full" size="md" />
 					</a>
 
 					<nav class="flex items-center gap-1">
@@ -425,12 +419,8 @@
 					/></svg
 				>
 			</button>
-			<span class="flex items-center gap-2 font-display text-lg font-bold">
-				<span
-					class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-xs font-bold text-white"
-					>A</span
-				>
-				ALVAS
+			<span class="flex items-center gap-2">
+				<AlvasLogo variant="full" size="sm" />
 			</span>
 			<div
 				class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-xs font-bold text-white"
@@ -452,11 +442,7 @@
 				class="fixed top-0 left-0 z-50 flex h-full w-64 flex-col gap-2 bg-bg-card p-6 shadow-2xl md:hidden"
 			>
 				<div class="mb-6 flex items-center gap-3">
-					<span
-						class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-sm font-bold text-white"
-						>A</span
-					>
-					<span class="font-display text-lg font-bold">ALVAS</span>
+					<AlvasLogo variant="full" size="lg" />
 				</div>
 				<nav class="flex flex-1 flex-col gap-1">
 					{#each sidebarItems as item (item.href)}

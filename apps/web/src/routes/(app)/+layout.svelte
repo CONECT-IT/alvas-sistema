@@ -1,6 +1,8 @@
 <script lang="ts">
 	import AppShell from '$lib/shared/ui/AppShell.svelte';
 	import { authStore } from '$lib/auth/infrastructure/authStore';
+	import { page } from '$app/stores';
+	import { pageTransition } from '$lib/shared/actions/gsapPageTransition';
 
 	let { data, children } = $props();
 
@@ -14,5 +16,9 @@
 </svelte:head>
 
 <AppShell>
-	{@render children()}
+	{#key $page.url.pathname}
+		<div use:pageTransition>
+			{@render children()}
+		</div>
+	{/key}
 </AppShell>

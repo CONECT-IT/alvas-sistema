@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import { pressEffect, ripple } from '$lib/shared/actions/microInteractions';
 
 	type ButtonVariant = 'primary' | 'secondary' | 'ghost';
 
@@ -31,7 +32,7 @@
 	};
 
 	const baseClass =
-		'inline-flex items-center justify-center rounded-xl px-5 py-3 font-display font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2';
+		'relative overflow-hidden inline-flex items-center justify-center rounded-xl px-5 py-3 font-display font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2';
 </script>
 
 {#if href}
@@ -39,7 +40,14 @@
 		{@render children()}
 	</a>
 {:else}
-	<button {type} {disabled} {onclick} class={`${baseClass} ${variants[variant]} ${className}`}>
+	<button
+		{type}
+		{disabled}
+		{onclick}
+		use:pressEffect
+		use:ripple
+		class={`${baseClass} ${variants[variant]} ${className}`}
+	>
 		{@render children()}
 	</button>
 {/if}

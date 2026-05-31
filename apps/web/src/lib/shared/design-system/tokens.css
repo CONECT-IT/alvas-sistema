@@ -176,3 +176,11 @@ option {
 		background-color: var(--color-surface-muted);
 	}
 }
+
+/* Micro-interaction keyframes */
+@keyframes ripple-expand {
+	to {
+		transform: scale(1);
+		opacity: 0;
+	}
+}

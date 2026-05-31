@@ -1,5 +1,6 @@
 export { default as AppShell } from './AppShell.svelte';
 export { default as AppVersionBadge } from './AppVersionBadge.svelte';
+export { default as AlvasLogo } from './AlvasLogo.svelte';
 export { default as Badge } from './Badge.svelte';
 export { default as Button } from './Button.svelte';
 export { default as Card } from './Card.svelte';
@@ -7,6 +8,7 @@ export { default as Checkbox } from './Checkbox.svelte';
 export { default as DateTimePicker } from './DateTimePicker.svelte';
 export { default as FloatingTextInput } from './FloatingTextInput.svelte';
 export { default as FormField } from './FormField.svelte';
+export { default as Modal } from './Modal.svelte';
 export { default as Select } from './Select.svelte';
 export { default as SidePanel } from './SidePanel.svelte';
 export { default as Textarea } from './Textarea.svelte';

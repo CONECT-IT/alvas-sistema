@@ -3,6 +3,7 @@ import {
   CrearPropiedadUseCase,
   EliminarPropiedadUseCase,
   ListarPropiedadesUseCase,
+  ObtenerPropiedadUseCase,
 } from "../lib/propiedades/application";
 import {
   AutorizadorPropiedadesAdapter,
@@ -37,6 +38,8 @@ export function crearPropiedadRouterDeps(): PropiedadRouterDeps {
           autorizador,
           crearConsultaRelacionPropiedad(c.env.DB),
         ),
+      crearObtenerPropiedad: (c) =>
+        new ObtenerPropiedadUseCase(new D1PropiedadRepository(c.env.DB), autorizador),
       crearEliminarPropiedad: (c) =>
         new EliminarPropiedadUseCase(new D1PropiedadRepository(c.env.DB), autorizador),
     },

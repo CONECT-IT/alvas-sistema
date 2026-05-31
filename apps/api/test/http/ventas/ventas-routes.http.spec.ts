@@ -1,4 +1,14 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it, beforeAll, afterAll } from "bun:test";
+
+const originalWarn = globalThis.console.warn;
+
+beforeAll(() => {
+  globalThis.console.warn = () => {};
+});
+
+afterAll(() => {
+  globalThis.console.warn = originalWarn;
+});
 import { Hono } from "hono";
 import { crearTokenProviderDesdeEnv } from "../../../src/lib/auth/infrastructure/security/TokenProviderFactory";
 import {

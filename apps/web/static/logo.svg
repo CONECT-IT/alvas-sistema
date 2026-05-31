@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 48" fill="none">
+  <defs>
+    <linearGradient id="alvas-grad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FBBF24"/>
+      <stop offset="100%" stop-color="#EA580C"/>
+    </linearGradient>
+  </defs>
+  <!-- Isotype: stylized "A" as a rooftop/mountain -->
+  <path d="M24 4L4 40h8l4-8h16l4 8h8L24 4zm0 12l6 12H18l6-12z" fill="url(#alvas-grad)"/>
+  <!-- Wordmark -->
+  <text x="56" y="36" font-family="'Outfit','Inter',system-ui,sans-serif" font-size="28" font-weight="700" letter-spacing="2" fill="currentColor">ALVAS</text>
+</svg>

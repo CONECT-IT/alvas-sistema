@@ -5,6 +5,7 @@ import {
   type ICrearPropiedad,
   type IEliminarPropiedad,
   type IListarPropiedades,
+  type IObtenerPropiedad,
   type PropiedadRespuestaDTO,
 } from "../../application";
 import { type IAutorizadorPropiedades } from "../../domain/ports";
@@ -28,6 +29,7 @@ type ContextoPropiedades = Context<{ Bindings: BindingsPropiedades; Variables: A
 export type PropiedadControllerDeps = Readonly<{
   crearCrearPropiedad: (c: ContextoPropiedades) => ICrearPropiedad;
   crearListarPropiedades: (c: ContextoPropiedades) => IListarPropiedades;
+  crearObtenerPropiedad: (c: ContextoPropiedades) => IObtenerPropiedad;
   crearActualizarPropiedad: (c: ContextoPropiedades) => IActualizarPropiedad;
   crearEliminarPropiedad: (c: ContextoPropiedades) => IEliminarPropiedad;
 }>;
@@ -98,6 +100,40 @@ export class PropiedadController {
       });
     } catch (error) {
       return responderErrorInterno(c, "PropiedadController.listar", error);
+    }
+  }
+
+  async obtener(c: ContextoPropiedades): Promise<Response> {
+    try {
+      const authPayload = c.get("authPayload");
+      const useCase = this.deps.crearObtenerPropiedad(c);
+
+      const resultado = await useCase.ejecutar({
+        idPropiedad: c.req.param("idPropiedad") ?? "",
+        usuarioAutenticado: { id: authPayload.idUsuario, rol: authPayload.rol },
+      });
+
+      if (!resultado.esExito) {
+        return responderErrorDeDominio(c, resultado.error);
+      }
+
+      const p = resultado.valor;
+      const respuesta: PropiedadRespuestaDTO = {
+        id: p.id as string,
+        titulo: p.titulo,
+        descripcion: p.descripcion,
+        precio: p.precio,
+        origen: p.origen as string,
+        estado: p.estado.valor,
+        idLeadOrigen: p.idLeadOrigen,
+        idClientePropietario: p.idClientePropietario,
+        captadaPorAsesorId: p.captadaPorAsesorId as string | undefined,
+        asesorResponsableId: p.asesorResponsableId as string | undefined,
+      };
+
+      return c.json({ success: true, data: respuesta });
+    } catch (error) {
+      return responderErrorInterno(c, "PropiedadController.obtener", error);
     }
   }
 
