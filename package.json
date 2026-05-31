@@ -14,6 +14,8 @@
     "db:migrate:production": "bun run --cwd apps/api wrangler d1 migrations apply alvas-main --remote --env production",
     "db:usuario:sql": "bun scripts/generate-user-sql.mjs",
     "db:reset": "bun run --cwd apps/api wrangler d1 execute alvas-dev --local --file ../../scripts/clean-dev-db.sql && bun run db:migrate:local",
+    "db:reset:staging": "bun run --cwd apps/api wrangler d1 execute alvas-staging --remote --env staging --file ../../scripts/clean-dev-db.sql && bun run db:migrate:staging",
+    "db:reset:production": "bun run --cwd apps/api wrangler d1 execute alvas-main --remote --env production --file ../../scripts/clean-dev-db.sql && bun run db:migrate:production",
     "seed:local": "bun run --cwd apps/api seed:generate && bun run --cwd apps/api seed:local",
     "seed:staging": "bun run --cwd apps/api seed:generate && bun run --cwd apps/api seed:staging",
     "build": "bun run --cwd apps/api build && bun run --cwd apps/web build",

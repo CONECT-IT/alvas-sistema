@@ -15,7 +15,8 @@
     "build": "echo 'No build step needed for Wrangler'",
     "seed:generate": "bun ../../scripts/generate-seed-sql.mjs",
     "seed:local": "wrangler d1 execute alvas-dev --local --file ../../database/seeds/seed.sql",
-    "seed:staging": "wrangler d1 execute alvas-staging --remote --env staging --file ../../database/seeds/seed.sql"
+    "seed:staging": "wrangler d1 execute alvas-staging --remote --env staging --file ../../database/seeds/seed.sql",
+    "seed:production": "wrangler d1 execute alvas-main --remote --env production --file ../../database/seeds/seed.sql"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260503.1",
