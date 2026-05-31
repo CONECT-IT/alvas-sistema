@@ -13,6 +13,12 @@
 			dateStyle: 'medium'
 		}).format(new Date(fechaIso));
 	}
+
+	function etiquetaAsesor(cliente: Cliente): string {
+		if (cliente.nombreAsesor) return `Asesor: ${cliente.nombreAsesor}`;
+		if (cliente.idAsesor) return 'Asesor asignado';
+		return 'Sin asesor asignado';
+	}
 </script>
 
 <div class="overflow-x-auto">
@@ -38,9 +44,7 @@
 				>
 					<td class="py-4 pr-6">
 						<p class="font-semibold text-text-main">{cliente.nombre}</p>
-						<p class="mt-1 text-xs text-text-muted">
-							{cliente.nombreAsesor ? `Asesor: ${cliente.nombreAsesor}` : 'Sin asesor asignado'}
-						</p>
+						<p class="mt-1 text-xs text-text-muted">{etiquetaAsesor(cliente)}</p>
 					</td>
 					<td class="py-4 pr-6">
 						<p class="text-text-main">{cliente.telefono}</p>

@@ -8,8 +8,7 @@
 	import {
 		convertirCaptacion,
 		marcarCaptacionDuplicada,
-		rechazarCaptacion,
-		revisarCaptacion
+		rechazarCaptacion
 	} from '../application/use-cases/gestionarCaptacionPendiente';
 	import { listarCaptacionesPendientes } from '../application/use-cases/listarCaptacionesPendientes';
 	import { captacionRepository } from '../infrastructure/captacionRepository';
@@ -29,7 +28,9 @@
 	const basePath = $derived($page.url.pathname.startsWith('/admin') ? '/admin' : '/asesor');
 
 	const pendientes = $derived(captaciones.filter((captacion) => captacion.estado === 'PENDIENTE'));
-	const revisadas = $derived(captaciones.filter((captacion) => captacion.estado === 'REVISADA'));
+	const conTelefono = $derived(
+		captaciones.filter((captacion) => captacion.telefono.trim().length > 0)
+	);
 
 	async function cargar() {
 		loading = true;
@@ -108,10 +109,10 @@
 <div class="flex flex-col gap-6">
 	<div class="flex flex-wrap items-start justify-between gap-4">
 		<div>
-			<p class="section-label">Captaciones WhatsApp</p>
+			<p class="section-label">Captaciones</p>
 			<h1 class="page-heading">Bandeja de revisión</h1>
 			<p class="mt-2 max-w-2xl text-sm leading-relaxed text-text-muted">
-				Prospectos captados desde WhatsApp antes de convertirse en leads operativos.
+				Entradas comerciales desde WhatsApp e integraciones antes de confirmarse como leads.
 			</p>
 		</div>
 		<Button onclick={cargar} disabled={loading}>{loading ? 'Cargando...' : 'Actualizar'}</Button>
@@ -123,8 +124,8 @@
 			<p class="page-heading">{pendientes.length}</p>
 		</Card>
 		<Card>
-			<p class="stat-label">Revisadas</p>
-			<p class="page-heading">{revisadas.length}</p>
+			<p class="stat-label">Con teléfono</p>
+			<p class="page-heading">{conTelefono.length}</p>
 		</Card>
 		<Card>
 			<p class="stat-label">Total visible</p>
@@ -206,17 +207,8 @@
 							<p class="text-xs font-semibold tracking-[0.14em] text-primary uppercase">Acciones</p>
 							<div class="grid grid-cols-2 gap-1.5">
 								<Button
-									variant="ghost"
 									disabled={accionando === captacion.id}
-									onclick={() =>
-										ejecutar(captacion.id, () =>
-											revisarCaptacion(captacionRepository, captacion.id)
-										)}
-								>
-									Revisar
-								</Button>
-								<Button
-									disabled={accionando === captacion.id}
+									class="col-span-2"
 									onclick={() =>
 										ejecutar(captacion.id, async () => {
 											const resultado = await convertirCaptacion(
@@ -227,7 +219,7 @@
 											await goto(`${basePath}/leads/${encodeURIComponent(resultado.idLead)}`);
 										})}
 								>
-									Convertir
+									Confirmar lead
 								</Button>
 							</div>
 
@@ -242,7 +234,9 @@
 											[captacion.id]: event.currentTarget.value
 										})}
 								>
-									<option value="">Usar asesor de sesión</option>
+									<option value="">
+										{basePath === '/admin' ? 'Autoasignar asesor' : 'Asignarme'}
+									</option>
 									{#each asesores as asesor (asesor.id)}
 										<option value={asesor.id}>{asesor.nombre} ({asesor.username})</option>
 									{/each}

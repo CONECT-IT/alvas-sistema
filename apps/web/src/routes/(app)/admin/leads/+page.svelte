@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { goto, invalidateAll } from '$app/navigation';
+	import { flip } from 'svelte/animate';
+	import { fly, scale } from 'svelte/transition';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
 	import Checkbox from '$lib/shared/ui/Checkbox.svelte';
@@ -29,6 +31,7 @@
 	let busqueda = $state('');
 	type FiltroLeads = 'todos' | 'conCitas' | 'nuevos';
 	let filtro = $state<FiltroLeads>('todos');
+	let diaSeleccionado = $state(fechaClave(Date.now()));
 	let loading = $state(false);
 	let error = $state<string | null>(null);
 	let panelCrear = $state(false);
@@ -78,9 +81,16 @@
 			.sort((a, b) => new Date(a.fechaInicio).getTime() - new Date(b.fechaInicio).getTime())
 	);
 	let citasPendientes = $derived(citas.filter((cita) => cita.estado !== 'CANCELADA'));
-	let proximasCitas = $derived(citasPendientes.slice(0, 5));
 	let citasHoy = $derived(
 		citasPendientes.filter((cita) => fechaClave(cita.fechaInicio) === fechaClave(Date.now()))
+	);
+	let citasSeleccionadas = $derived(
+		citasPendientes.filter((cita) => fechaClave(cita.fechaInicio) === diaSeleccionado).slice(0, 5)
+	);
+	let etiquetaDiaSeleccionado = $derived(
+		new Intl.DateTimeFormat('es-PE', { weekday: 'long', day: 'numeric', month: 'short' }).format(
+			Date.parse(`${diaSeleccionado}T00:00:00`)
+		)
 	);
 	const diasCalendario = $derived(
 		Array.from({ length: 7 }, (_, index) => {
@@ -218,28 +228,32 @@
 			<Button class="mt-5" onclick={cargar}>Intentar nuevamente</Button>
 		</Card>
 	{:else}
-		<div class="flex w-full min-w-0 flex-col items-start gap-5 xl:flex-row">
-			<div class="grid min-w-0 flex-1 basis-0 gap-5">
+		<div
+			class="grid w-full min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(24rem,28rem)]"
+		>
+			<div class="grid min-w-0 gap-5">
 				<PipelineStats leads={leadsBase} {filtro} onFilter={aplicarFiltroLead} />
 
-				<Card class="min-w-0 overflow-hidden">
-					<div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-						<div>
-							<p class="text-xs font-semibold tracking-[0.14em] text-primary uppercase">
-								Inbox de captación
-							</p>
-							<h2 class="mt-2 font-display text-xl font-bold text-text-main">
-								WhatsApp y solicitudes por revisar
-							</h2>
-							<p class="mt-1 max-w-2xl text-sm text-text-muted">
-								Las captaciones entrantes se revisan antes de convertirse en leads o propiedades.
-							</p>
+				<div transition:scale={{ duration: 180, start: 0.98 }}>
+					<Card class="min-w-0 overflow-hidden">
+						<div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+							<div>
+								<p class="text-xs font-semibold tracking-[0.14em] text-primary uppercase">
+									Inbox de captación
+								</p>
+								<h2 class="mt-2 font-display text-xl font-bold text-text-main">
+									WhatsApp y solicitudes por revisar
+								</h2>
+								<p class="mt-1 max-w-2xl text-sm text-text-muted">
+									Las captaciones entrantes se revisan antes de convertirse en leads o propiedades.
+								</p>
+							</div>
+							<Button href="/admin/captaciones" variant="secondary" class="shrink-0">
+								Abrir bandeja
+							</Button>
 						</div>
-						<Button href="/admin/captaciones" variant="secondary" class="shrink-0">
-							Abrir bandeja
-						</Button>
-					</div>
-				</Card>
+					</Card>
+				</div>
 
 				<Card>
 					<div class="mb-5 flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
@@ -293,7 +307,7 @@
 				</Card>
 			</div>
 
-			<aside class="grid w-full gap-5 self-start xl:w-80 xl:shrink-0">
+			<aside class="grid w-full min-w-0 gap-5 self-start">
 				<Card class="min-w-0">
 					<div class="flex items-start justify-between gap-4">
 						<div>
@@ -309,18 +323,20 @@
 					</div>
 					<div class="mt-5 grid grid-cols-7 gap-2">
 						{#each diasCalendario as dia (dia.clave)}
-							<div
-								class="rounded-xl border border-border-light bg-bg-base p-2 text-center {dia.total >
+							<button
+								type="button"
+								onclick={() => (diaSeleccionado = dia.clave)}
+								class="rounded-xl border border-border-light bg-bg-base p-2 text-center transition hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-sm {dia.total >
 								0
 									? 'border-primary/40 bg-primary-light/40'
-									: ''}"
+									: ''} {diaSeleccionado === dia.clave ? 'ring-2 ring-primary/20' : ''}"
 							>
 								<p class="text-[10px] font-semibold text-text-muted uppercase">
 									{dia.diaSemana}
 								</p>
 								<p class="mt-1 font-display text-lg font-bold text-text-main">{dia.diaMes}</p>
 								<p class="text-[10px] font-semibold text-primary">{dia.total || ''}</p>
-							</div>
+							</button>
 						{/each}
 					</div>
 				</Card>
@@ -329,18 +345,20 @@
 					<div class="mb-4 flex items-center justify-between gap-3">
 						<div>
 							<h2 class="font-display text-xl font-bold text-text-main">Citas</h2>
-							<p class="mt-1 text-sm text-text-muted">Próximos seguimientos del pipeline.</p>
+							<p class="mt-1 text-sm text-text-muted capitalize">{etiquetaDiaSeleccionado}</p>
 						</div>
 					</div>
 
-					{#if proximasCitas.length === 0}
+					{#if citasSeleccionadas.length === 0}
 						<p class="rounded-xl bg-surface-muted p-4 text-sm text-text-muted">
-							No hay citas pendientes.
+							No hay citas para este día.
 						</p>
 					{:else}
 						<div class="grid gap-3">
-							{#each proximasCitas as cita (`${cita.id}-${cita.idLead}`)}
+							{#each citasSeleccionadas as cita (`${cita.id}-${cita.idLead}`)}
 								<a
+									animate:flip={{ duration: 180 }}
+									transition:fly={{ y: 8, duration: 180 }}
 									href={`/admin/leads/${encodeURIComponent(cita.idLead)}`}
 									class="rounded-xl border border-border-light bg-bg-base p-3 transition hover:border-primary/40"
 								>
