@@ -19,6 +19,9 @@
 	let { children }: Props = $props();
 	let showMobileSidebar = $state(false);
 	const shellUser = $derived($authStore.user);
+	const mainLayoutClass = $derived(
+		$authStore.layout === 'sidebar' ? 'md:ml-28 md:w-[calc(100%-7rem)]' : 'w-full'
+	);
 
 	const sidebarItems = $derived.by<SidebarItem[]>(() => {
 		if (!shellUser) return [];
@@ -436,11 +439,7 @@
 		{/if}
 
 		<!-- Main content -->
-		<main
-			class="min-h-screen w-full min-w-0 flex-1 overflow-x-hidden {$authStore.layout === 'sidebar'
-				? 'md:ml-28'
-				: ''}"
-		>
+		<main class="min-h-screen min-w-0 flex-1 overflow-x-hidden {mainLayoutClass}">
 			<div class="mx-auto max-w-7xl min-w-0 p-4 md:p-8">
 				{@render children()}
 			</div>

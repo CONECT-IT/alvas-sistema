@@ -44,7 +44,7 @@
 </script>
 
 <div class="overflow-x-auto">
-	<table class="w-full min-w-[720px] border-collapse text-left">
+	<table class="w-full min-w-[640px] border-collapse text-left">
 		<thead>
 			<tr class="border-b border-border-light text-xs font-semibold text-text-muted uppercase">
 				<th class="pb-3">Lead</th>

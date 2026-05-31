@@ -2,11 +2,12 @@
 	import { goto, invalidateAll } from '$app/navigation';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
+	import Checkbox from '$lib/shared/ui/Checkbox.svelte';
 	import FloatingTextInput from '$lib/shared/ui/FloatingTextInput.svelte';
 	import Select from '$lib/shared/ui/Select.svelte';
 	import SidePanel from '$lib/shared/ui/SidePanel.svelte';
 	import Textarea from '$lib/shared/ui/Textarea.svelte';
-	import { opcionesTipoVenta } from '$lib/shared/presentation';
+	import { opcionesTipoVenta, presentarEstadoLead } from '$lib/shared/presentation';
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import type { LeadPipeline } from '$lib/ventas/domain/models/LeadPipeline';
 	import type { Propiedad } from '$lib/propiedades/domain/models/Propiedad';
@@ -25,6 +26,8 @@
 	let mostrarConvertidos = $state(false);
 	let vista = $state<'tabla' | 'kanban'>('tabla');
 	let busqueda = $state('');
+	type FiltroLeads = 'todos' | 'conCitas' | 'nuevos';
+	let filtro = $state<FiltroLeads>('todos');
 	let loading = $state(false);
 	let error = $state<string | null>(null);
 	let guardando = $state(false);
@@ -40,8 +43,15 @@
 		propiedadPrecio: ''
 	});
 
+	let leadsBase = $derived(
+		mostrarConvertidos ? leads : leads.filter((lead) => lead.estado !== 'CONVERTIDO')
+	);
 	let leadsFiltrados = $derived(
-		mostrarConvertidos ? leads : leads.filter((l) => l.estado !== 'CONVERTIDO')
+		leadsBase.filter((lead) => {
+			if (filtro === 'conCitas') return (lead.citasCount ?? 0) > 0;
+			if (filtro === 'nuevos') return presentarEstadoLead(lead.estado).tone === 'warning';
+			return true;
+		})
 	);
 	let leadsVisibles = $derived(
 		leadsFiltrados.filter((lead) => {
@@ -99,6 +109,10 @@
 		leads = leads.map((lead) =>
 			lead.id === idLead ? { ...lead, estado: nuevoEstado.toUpperCase() } : lead
 		);
+	}
+
+	function aplicarFiltroLead(key: FiltroLeads) {
+		filtro = key;
 	}
 
 	function etiquetaPropiedad(propiedad: Propiedad): string {
@@ -204,9 +218,9 @@
 			<Button class="mt-5" onclick={cargarLeads}>Intentar nuevamente</Button>
 		</Card>
 	{:else}
-		<div class="flex w-full flex-col items-start gap-5 lg:flex-row">
+		<div class="flex w-full min-w-0 flex-col items-start gap-5 xl:flex-row">
 			<div class="grid min-w-0 flex-1 basis-0 gap-5">
-				<PipelineStats leads={leadsFiltrados} />
+				<PipelineStats leads={leadsBase} {filtro} onFilter={aplicarFiltroLead} />
 
 				<Card class="min-w-0 overflow-hidden">
 					<div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -255,10 +269,7 @@
 									Kanban
 								</button>
 							</div>
-							<label class="flex cursor-pointer items-center gap-2 text-sm text-text-muted">
-								<input type="checkbox" bind:checked={mostrarConvertidos} class="accent-primary" />
-								Convertidos
-							</label>
+							<Checkbox bind:checked={mostrarConvertidos} label="Convertidos" />
 						</div>
 					</div>
 
@@ -282,7 +293,7 @@
 				</Card>
 			</div>
 
-			<aside class="grid w-full min-w-0 shrink-0 gap-5 self-start lg:w-96">
+			<aside class="grid w-full gap-5 self-start xl:w-80 xl:shrink-0">
 				<Card class="min-w-0">
 					<div class="flex items-start justify-between gap-4">
 						<div>
