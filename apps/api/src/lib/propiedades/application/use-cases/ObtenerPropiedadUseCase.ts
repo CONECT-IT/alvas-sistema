@@ -48,14 +48,7 @@ export class ObtenerPropiedadUseCase
         return resultadoExitoso(propiedad);
       }
 
-      // ASESOR: solo ve propiedades públicas o asociadas a él
-      const esPublica =
-        propiedad.estado.esDisponible() ||
-        propiedad.estado.esReservada() ||
-        propiedad.estado.esVendida();
-
-      if (esPublica) return resultadoExitoso(propiedad);
-
+      // ASESOR: solo ve propiedades donde participa como captador o responsable.
       const esAsociado =
         (propiedad.captadaPorAsesorId as string | undefined) === usuarioAutenticado.id ||
         (propiedad.asesorResponsableId as string | undefined) === usuarioAutenticado.id;

@@ -45,12 +45,8 @@ export class ListarPropiedadesUseCase
         return resultadoExitoso(todas);
       }
 
-      // ASESOR: ve inventario comercial no archivado
-      // + borradores donde él sea el captador o responsable
+      // ASESOR: solo ve propiedades donde participa como captador o responsable.
       const filtradas = todas.filter((p) => {
-        const esPublica = p.estado.esDisponible() || p.estado.esReservada() || p.estado.esVendida();
-        if (esPublica) return true;
-
         const esAsociado =
           (p.captadaPorAsesorId as string | undefined) === usuarioAutenticado.id ||
           (p.asesorResponsableId as string | undefined) === usuarioAutenticado.id;

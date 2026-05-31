@@ -5,6 +5,7 @@ import {
   CrearPropiedadUseCase,
   EliminarPropiedadUseCase,
   ListarPropiedadesUseCase,
+  ObtenerPropiedadUseCase,
 } from "../../../src/lib/propiedades/application/use-cases";
 import { Propiedad } from "../../../src/lib/propiedades/domain/entities/Propiedad";
 import {
@@ -193,7 +194,7 @@ describe("propiedades / use cases", () => {
     expect(repo.propiedades.size).toBe(0);
   });
 
-  test("asesor puede listar inventario completo", async () => {
+  test("asesor solo lista propiedades captadas o asignadas a el", async () => {
     const repo = new FakePropiedadRepository();
     await repo.guardar(
       Propiedad.crear({
@@ -203,6 +204,17 @@ describe("propiedades / use cases", () => {
         precio: 250000,
         origen: "ALVAS",
         estado: "DISPONIBLE",
+      }),
+    );
+    await repo.guardar(
+      Propiedad.crear({
+        id: "prop-002",
+        titulo: "Departamento asignado",
+        descripcion: "Propiedad del asesor",
+        precio: 180000,
+        origen: "ALVAS",
+        estado: "DISPONIBLE",
+        asesorResponsableId: "asesor-1",
       }),
     );
 
@@ -215,6 +227,58 @@ describe("propiedades / use cases", () => {
 
     expect(resultado.esExito).toBe(true);
     expect(resultado.esExito ? resultado.valor : []).toHaveLength(1);
+    expect(resultado.esExito ? (resultado.valor[0]?.id as string) : undefined).toBe("prop-002");
+  });
+
+  test("asesor no obtiene detalle de propiedad disponible sin relacion propia", async () => {
+    const repo = new FakePropiedadRepository();
+    await repo.guardar(
+      Propiedad.crear({
+        id: "prop-001",
+        titulo: "Casa central",
+        descripcion: "Casa lista",
+        precio: 250000,
+        origen: "ALVAS",
+        estado: "DISPONIBLE",
+      }),
+    );
+
+    const resultado = await new ObtenerPropiedadUseCase(
+      repo,
+      new AutorizadorPropiedadesAdapter(),
+    ).ejecutar({
+      idPropiedad: "prop-001",
+      usuarioAutenticado: { id: "asesor-1", rol: "ASESOR" },
+    });
+
+    expect(resultado.esExito).toBe(false);
+    expect(resultado.esExito ? undefined : resultado.error.codigo).toBe("SIN_PERMISOS");
+  });
+
+  test("asesor obtiene detalle de propiedad asignada a el", async () => {
+    const repo = new FakePropiedadRepository();
+    await repo.guardar(
+      Propiedad.crear({
+        id: "prop-001",
+        titulo: "Departamento asignado",
+        descripcion: "Propiedad del asesor",
+        precio: 180000,
+        origen: "ALVAS",
+        estado: "DISPONIBLE",
+        asesorResponsableId: "asesor-1",
+      }),
+    );
+
+    const resultado = await new ObtenerPropiedadUseCase(
+      repo,
+      new AutorizadorPropiedadesAdapter(),
+    ).ejecutar({
+      idPropiedad: "prop-001",
+      usuarioAutenticado: { id: "asesor-1", rol: "ASESOR" },
+    });
+
+    expect(resultado.esExito).toBe(true);
+    expect(resultado.esExito ? (resultado.valor.id as string) : undefined).toBe("prop-001");
   });
 
   test("asesor puede actualizar propiedad originada en su lead vendedor", async () => {
