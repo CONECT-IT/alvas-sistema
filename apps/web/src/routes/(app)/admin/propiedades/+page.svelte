@@ -239,120 +239,149 @@
 	{:else}
 		<PropiedadStats {propiedades} />
 
-		{#if captaciones.length > 0}
-			<Card>
-				<div class="mb-5 flex flex-col justify-between gap-3 md:flex-row md:items-center">
-					<div>
-						<h2 class="font-display text-xl font-bold text-text-main">Captaciones</h2>
-						<p class="mt-1 text-sm text-text-muted">
-							Propiedades en borrador que requieren validación antes de publicarse.
-						</p>
-					</div>
-					<p class="text-sm font-semibold text-primary">{captaciones.length} pendientes</p>
-				</div>
-
-				{#if reviewSuccess}
-					<p class="success-alert mb-4">
-						{reviewSuccess}
-					</p>
-				{/if}
-
-				{#if reviewError}
-					<p class="error-alert mb-4">
-						{reviewError}
-					</p>
-				{/if}
-
-				<div class="grid gap-4">
-					{#each captaciones as propiedad (propiedad.id)}
-						<article
-							class="rounded-2xl border border-border-light bg-bg-base/70 p-5 shadow-xs transition hover:border-primary/30"
-						>
-							<div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-								<div>
-									<div class="flex flex-wrap items-center gap-2">
-										<p class="font-display text-lg font-bold text-text-main">
-											{propiedad.titulo}
-										</p>
-										<span
-											class="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary"
-										>
-											{propiedad.estado}
-										</span>
-										<span
-											class="rounded-full bg-bg-card px-3 py-1 text-xs font-semibold text-text-muted"
-										>
-											{propiedad.origen}
-										</span>
-									</div>
-									<p class="mt-2 max-w-3xl text-sm leading-relaxed text-text-muted">
-										{propiedad.descripcion}
-									</p>
-									<div class="mt-3 grid gap-2 text-xs text-text-muted sm:grid-cols-3">
-										<p>
-											Origen comercial: {propiedad.idLeadOrigen
-												? 'Lead de captación'
-												: 'Registro directo'}
-										</p>
-										<p>Captada por: {nombreAsesor(propiedad.captadaPorAsesorId)}</p>
-										<p>Responsable: {nombreAsesor(propiedad.asesorResponsableId)}</p>
-									</div>
-								</div>
-
-								<div class="flex flex-col gap-2 sm:flex-row lg:flex-col">
-									<Button
-										variant="secondary"
-										disabled={updatingId === propiedad.id}
-										onclick={() => cambiarEstadoPropiedad(propiedad, 'BORRADOR')}
-									>
-										Validar datos
-									</Button>
-									<Button
-										disabled={updatingId === propiedad.id}
-										onclick={() => cambiarEstadoPropiedad(propiedad, 'DISPONIBLE')}
-									>
-										Publicar
-									</Button>
-									<Button
-										variant="ghost"
-										disabled={updatingId === propiedad.id}
-										onclick={() => cambiarEstadoPropiedad(propiedad, 'ARCHIVADA')}
-									>
-										Descartar
-									</Button>
-								</div>
+		<div class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_20rem]">
+			<div class="grid gap-5">
+				{#if captaciones.length > 0}
+					<Card>
+						<div class="mb-5 flex flex-col justify-between gap-3 md:flex-row md:items-center">
+							<div>
+								<h2 class="font-display text-xl font-bold text-text-main">Captaciones</h2>
+								<p class="mt-1 text-sm text-text-muted">
+									Propiedades en borrador que requieren validación antes de publicarse.
+								</p>
 							</div>
-						</article>
-					{/each}
-				</div>
-			</Card>
-		{/if}
+							<p class="text-sm font-semibold text-primary">{captaciones.length} pendientes</p>
+						</div>
 
-		{#if disponibles.length > 0}
-			<Card>
-				<div class="mb-5">
-					<h2 class="font-display text-xl font-bold text-text-main">Disponibles</h2>
-					<p class="mt-1 text-sm text-text-muted">
-						Propiedades listas para comercialización, visibles para el equipo de ventas.
-					</p>
-				</div>
-				<PropiedadAdminTable propiedades={disponibles} onPropiedadClick={verDetalle} />
-			</Card>
-		{/if}
+						{#if reviewSuccess}
+							<p class="success-alert mb-4">
+								{reviewSuccess}
+							</p>
+						{/if}
 
-		{#if otras.length > 0}
+						{#if reviewError}
+							<p class="error-alert mb-4">
+								{reviewError}
+							</p>
+						{/if}
+
+						<div class="grid gap-4">
+							{#each captaciones as propiedad (propiedad.id)}
+								<article
+									class="rounded-2xl border border-border-light bg-bg-base/70 p-5 shadow-xs transition hover:border-primary/30"
+								>
+									<div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+										<div>
+											<div class="flex flex-wrap items-center gap-2">
+												<p class="font-display text-lg font-bold text-text-main">
+													{propiedad.titulo}
+												</p>
+												<span
+													class="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary"
+												>
+													{propiedad.estado}
+												</span>
+												<span
+													class="rounded-full bg-bg-card px-3 py-1 text-xs font-semibold text-text-muted"
+												>
+													{propiedad.origen}
+												</span>
+											</div>
+											<p class="mt-2 max-w-3xl text-sm leading-relaxed text-text-muted">
+												{propiedad.descripcion}
+											</p>
+											<div class="mt-3 grid gap-2 text-xs text-text-muted sm:grid-cols-3">
+												<p>
+													Origen comercial: {propiedad.idLeadOrigen
+														? 'Lead de captación'
+														: 'Registro directo'}
+												</p>
+												<p>Captada por: {nombreAsesor(propiedad.captadaPorAsesorId)}</p>
+												<p>Responsable: {nombreAsesor(propiedad.asesorResponsableId)}</p>
+											</div>
+										</div>
+
+										<div class="flex flex-col gap-2 sm:flex-row lg:flex-col">
+											<Button
+												variant="secondary"
+												disabled={updatingId === propiedad.id}
+												onclick={() => cambiarEstadoPropiedad(propiedad, 'BORRADOR')}
+											>
+												Validar datos
+											</Button>
+											<Button
+												disabled={updatingId === propiedad.id}
+												onclick={() => cambiarEstadoPropiedad(propiedad, 'DISPONIBLE')}
+											>
+												Publicar
+											</Button>
+											<Button
+												variant="ghost"
+												disabled={updatingId === propiedad.id}
+												onclick={() => cambiarEstadoPropiedad(propiedad, 'ARCHIVADA')}
+											>
+												Descartar
+											</Button>
+										</div>
+									</div>
+								</article>
+							{/each}
+						</div>
+					</Card>
+				{/if}
+
+				{#if disponibles.length > 0}
+					<Card>
+						<div class="mb-5">
+							<h2 class="font-display text-xl font-bold text-text-main">Disponibles</h2>
+							<p class="mt-1 text-sm text-text-muted">
+								Propiedades listas para comercialización, visibles para el equipo de ventas.
+							</p>
+						</div>
+						<PropiedadAdminTable propiedades={disponibles} onPropiedadClick={verDetalle} />
+					</Card>
+				{/if}
+
+				{#if otras.length > 0}
+					<Card>
+						<div class="mb-5 flex flex-col justify-between gap-3 md:flex-row md:items-center">
+							<div>
+								<h2 class="font-display text-xl font-bold text-text-main">Otras propiedades</h2>
+								<p class="mt-1 text-sm text-text-muted">
+									Propiedades en validación, reservadas, vendidas o descartadas.
+								</p>
+							</div>
+							<p class="text-sm font-semibold text-primary">{otras.length} registros</p>
+						</div>
+						<PropiedadAdminTable propiedades={otras} onPropiedadClick={verDetalle} />
+					</Card>
+				{/if}
+			</div>
+
 			<Card>
-				<div class="mb-5 flex flex-col justify-between gap-3 md:flex-row md:items-center">
-					<div>
-						<h2 class="font-display text-xl font-bold text-text-main">Otras propiedades</h2>
-						<p class="mt-1 text-sm text-text-muted">
-							Propiedades en validación, reservadas, vendidas o descartadas.
+				<h2 class="font-display text-xl font-bold text-text-main">Clasificación</h2>
+				<p class="mt-2 text-sm text-text-muted">
+					Control rápido por estado comercial del inventario.
+				</p>
+				<div class="mt-5 grid gap-3">
+					<div class="rounded-xl bg-surface-muted p-4">
+						<p class="text-xs font-semibold tracking-[0.12em] text-text-muted uppercase">
+							Borrador
 						</p>
+						<p class="mt-2 font-display text-2xl font-bold text-text-main">{captaciones.length}</p>
 					</div>
-					<p class="text-sm font-semibold text-primary">{otras.length} registros</p>
+					<div class="rounded-xl bg-surface-muted p-4">
+						<p class="text-xs font-semibold tracking-[0.12em] text-text-muted uppercase">
+							Disponible
+						</p>
+						<p class="mt-2 font-display text-2xl font-bold text-primary">{disponibles.length}</p>
+					</div>
+					<div class="rounded-xl bg-surface-muted p-4">
+						<p class="text-xs font-semibold tracking-[0.12em] text-text-muted uppercase">Otros</p>
+						<p class="mt-2 font-display text-2xl font-bold text-text-main">{otras.length}</p>
+					</div>
 				</div>
-				<PropiedadAdminTable propiedades={otras} onPropiedadClick={verDetalle} />
 			</Card>
-		{/if}
+		</div>
 	{/if}
 </div>

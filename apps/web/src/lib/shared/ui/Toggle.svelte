@@ -5,6 +5,7 @@
 		error?: string;
 		disabled?: boolean;
 		required?: boolean;
+		onchange?: (checked: boolean) => void;
 		class?: string;
 	}
 
@@ -13,8 +14,15 @@
 		label = '',
 		error,
 		disabled = false,
+		onchange,
 		class: className = ''
 	}: Props = $props();
+
+	function toggle() {
+		if (disabled) return;
+		checked = !checked;
+		onchange?.(checked);
+	}
 </script>
 
 <label
@@ -28,13 +36,11 @@
 		aria-checked={checked}
 		aria-label={label || 'Toggle'}
 		{disabled}
-		onclick={() => {
-			if (!disabled) checked = !checked;
-		}}
+		onclick={toggle}
 		onkeydown={(e) => {
 			if (e.key === ' ' || e.key === 'Enter') {
 				e.preventDefault();
-				if (!disabled) checked = !checked;
+				toggle();
 			}
 		}}
 		class="relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors duration-200 ease-in-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary {checked

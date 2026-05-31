@@ -38,9 +38,9 @@
 	<div class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
 		<div>
 			<p class="section-label">Clientes</p>
-			<h1 class="page-heading">Todos los clientes</h1>
+			<h1 class="page-heading">Clientes y contratos</h1>
 			<p class="mt-2 max-w-2xl text-sm leading-relaxed text-text-muted">
-				Clientes formalizados desde leads convertidos o registrados directamente.
+				Cartera de clientes formalizados con acceso directo a contratos asociados.
 			</p>
 		</div>
 
@@ -60,15 +60,48 @@
 			<Button class="mt-5" onclick={cargar}>Intentar nuevamente</Button>
 		</Card>
 	{:else if clientes.length === 0}
-		<Card class="text-center">
-			<p class="font-display text-xl font-bold text-text-main">No hay clientes registrados</p>
-			<p class="mx-auto mt-2 max-w-xl text-sm text-text-muted">
-				Los leads convertidos y clientes directos aparecerán aquí.
-			</p>
-		</Card>
+		<div class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_20rem]">
+			<Card class="text-center">
+				<p class="font-display text-xl font-bold text-text-main">No hay clientes registrados</p>
+				<p class="mx-auto mt-2 max-w-xl text-sm text-text-muted">
+					Los leads convertidos y clientes directos aparecerán aquí.
+				</p>
+			</Card>
+			<Card>
+				<h2 class="font-display text-xl font-bold text-text-main">Contratos</h2>
+				<p class="mt-2 text-sm text-text-muted">Sin clientes registrados todavía.</p>
+				<Button href="/admin/contratos" variant="secondary" class="mt-5">Ver contratos</Button>
+			</Card>
+		</div>
 	{:else}
-		<Card>
-			<ClienteTable {clientes} onClienteClick={irACliente} />
-		</Card>
+		<div class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_20rem]">
+			<Card>
+				<div class="mb-5">
+					<h2 class="font-display text-xl font-bold text-text-main">Clientes</h2>
+					<p class="mt-1 text-sm text-text-muted">{clientes.length} clientes en cartera.</p>
+				</div>
+				<ClienteTable {clientes} onClienteClick={irACliente} />
+			</Card>
+			<Card>
+				<h2 class="font-display text-xl font-bold text-text-main">Contratos</h2>
+				<p class="mt-2 text-sm text-text-muted">
+					Revisa documentos activos, firmas pendientes y cancelaciones desde el módulo contractual.
+				</p>
+				<div class="mt-5 grid gap-3">
+					<a
+						href="/admin/contratos"
+						class="rounded-xl border border-border-light bg-bg-base p-4 text-sm font-semibold text-text-main transition hover:border-primary/40"
+					>
+						Contratos activos
+					</a>
+					<a
+						href="/admin/contratos"
+						class="rounded-xl border border-border-light bg-bg-base p-4 text-sm font-semibold text-text-main transition hover:border-primary/40"
+					>
+						Firmas y seguimiento
+					</a>
+				</div>
+			</Card>
+		</div>
 	{/if}
 </div>

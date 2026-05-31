@@ -67,10 +67,10 @@
 	}
 </script>
 
-<div class="no-scrollbar flex gap-4 overflow-x-auto pb-4">
+<div class="grid min-w-0 gap-4 lg:grid-cols-2 2xl:grid-cols-4">
 	{#each columns as column (column)}
 		<section
-			class="flex max-w-[350px] min-w-[300px] flex-1 flex-col gap-4"
+			class="flex min-w-0 flex-col gap-4"
 			ondragover={(e) => handleDragOver(e, column)}
 			ondragleave={handleDragLeave}
 			ondrop={(e) => handleDrop(e, column)}
@@ -88,7 +88,7 @@
 			</div>
 
 			<div
-				class="flex min-h-[500px] flex-1 flex-col gap-3 rounded-2xl p-2 transition-all duration-200 {dragOverColumn ===
+				class="flex min-h-[22rem] flex-1 flex-col gap-3 rounded-2xl p-2 transition-all duration-200 {dragOverColumn ===
 				column
 					? 'bg-primary/10 ring-2 ring-primary/40 ring-inset'
 					: draggingLeadId

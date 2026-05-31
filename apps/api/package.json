@@ -32,6 +32,8 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "@hono/zod-openapi": "^1.4.0",
+    "@scalar/hono-api-reference": "^0.10.19",
     "drizzle-orm": "^0.45.2",
     "hono": "^4.12.15",
     "uuid": "^14.0.0",

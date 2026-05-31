@@ -2,6 +2,8 @@
 	import Badge from '$lib/shared/ui/Badge.svelte';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
+	import FloatingTextInput from '$lib/shared/ui/FloatingTextInput.svelte';
+	import Toggle from '$lib/shared/ui/Toggle.svelte';
 	import { authStore } from '$lib/auth/infrastructure/authStore';
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import type { Usuario } from '../domain/models/Usuario';
@@ -149,84 +151,103 @@
 			<p class="error-alert">{saveError}</p>
 		{/if}
 
-		<div class="grid gap-6 xl:grid-cols-2">
-			<Card>
-				<div class="mb-4 flex flex-wrap items-start justify-between gap-4">
-					<h2 class="font-display text-xl font-bold text-text-main">Datos de la cuenta</h2>
-					<div class="relative">
-						<Button
-							variant="secondary"
-							onclick={() => {
-								mostrarEdicion = !mostrarEdicion;
-								saveError = null;
-								saveSuccess = null;
-							}}
+		<div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
+			<div class="grid gap-6">
+				<Card class="overflow-hidden">
+					<div class="flex flex-col gap-5 sm:flex-row sm:items-center">
+						<div
+							class="flex h-20 w-20 shrink-0 items-center justify-center rounded-3xl bg-gradient-to-br from-amber-400 to-orange-500 font-display text-2xl font-bold text-white shadow-panel"
 						>
-							Editar
-						</Button>
-						{#if mostrarEdicion}
-							<div
-								class="fixed inset-0 z-40"
-								onclick={() => (mostrarEdicion = false)}
-								onkeydown={(e) => e.key === 'Escape' && (mostrarEdicion = false)}
-								role="button"
-								tabindex="0"
-								aria-label="Cerrar edición"
-							></div>
-							<div
-								class="absolute top-full right-0 z-50 mt-3 w-[22rem] rounded-2xl border border-border-light bg-bg-base p-5 shadow-xl"
-								role="dialog"
-								aria-label="Editar perfil"
+							{usuario.username.substring(0, 2).toUpperCase()}
+						</div>
+						<div class="min-w-0">
+							<h2 class="font-display text-2xl font-bold text-text-main">{usuario.nombre}</h2>
+							<p class="mt-1 text-sm text-text-muted">{usuario.username}</p>
+							<div class="mt-3 flex flex-wrap gap-2">
+								<Badge tone="brand">{usuario.rol}</Badge>
+								<Badge tone={presentarEstadoUsuario(usuario.estado).tone}>
+									{presentarEstadoUsuario(usuario.estado).label}
+								</Badge>
+							</div>
+						</div>
+					</div>
+				</Card>
+
+				<Card>
+					<div class="mb-4 flex flex-wrap items-start justify-between gap-4">
+						<h2 class="font-display text-xl font-bold text-text-main">Datos de la cuenta</h2>
+						<div class="relative">
+							<Button
+								variant="secondary"
+								onclick={() => {
+									mostrarEdicion = !mostrarEdicion;
+									saveError = null;
+									saveSuccess = null;
+								}}
 							>
-								<form class="grid gap-4" onsubmit={guardarCambios}>
-									<label class="label-field">
-										Usuario de acceso
-										<input bind:value={editUsername} class="input-field" />
-									</label>
-									<label class="label-field">
-										Nueva contraseña
-										<input
+								Editar
+							</Button>
+							{#if mostrarEdicion}
+								<div
+									class="fixed inset-0 z-40"
+									onclick={() => (mostrarEdicion = false)}
+									onkeydown={(e) => e.key === 'Escape' && (mostrarEdicion = false)}
+									role="button"
+									tabindex="0"
+									aria-label="Cerrar edición"
+								></div>
+								<div
+									class="absolute top-full right-0 z-50 mt-3 w-[22rem] rounded-2xl border border-border-light bg-bg-base p-5 shadow-xl"
+									role="dialog"
+									aria-label="Editar perfil"
+								>
+									<form class="grid gap-4" onsubmit={guardarCambios}>
+										<FloatingTextInput label="Usuario de acceso" bind:value={editUsername} />
+										<FloatingTextInput
+											label="Nueva contraseña"
 											type="password"
 											bind:value={editClave}
-											autocomplete="new-password"
-											class="input-field"
 										/>
-									</label>
-									{#if saveError}
-										<p class="error-alert">
-											{saveError}
-										</p>
-									{/if}
-									<div class="flex justify-end gap-3">
-										<Button type="button" variant="ghost" onclick={() => (mostrarEdicion = false)}>
-											Cancelar
-										</Button>
-										<Button type="submit" disabled={saving}>
-											{saving ? 'Guardando...' : 'Guardar'}
-										</Button>
-									</div>
-								</form>
-							</div>
-						{/if}
+										{#if saveError}
+											<p class="error-alert">
+												{saveError}
+											</p>
+										{/if}
+										<div class="flex justify-end gap-3">
+											<Button
+												type="button"
+												variant="ghost"
+												onclick={() => (mostrarEdicion = false)}
+											>
+												Cancelar
+											</Button>
+											<Button type="submit" disabled={saving}>
+												{saving ? 'Guardando...' : 'Guardar'}
+											</Button>
+										</div>
+									</form>
+								</div>
+							{/if}
+						</div>
 					</div>
-				</div>
-				<dl class="dl-grid">
-					<dt class="font-semibold text-text-muted">Nombre</dt>
-					<dd class="text-text-main">{usuario.nombre}</dd>
-					<dt class="font-semibold text-text-muted">Usuario</dt>
-					<dd class="text-text-main">{usuario.username}</dd>
-					<dt class="font-semibold text-text-muted">ID</dt>
-					<dd class="text-text-main">{usuario.id}</dd>
-					<dt class="font-semibold text-text-muted">Rol</dt>
-					<dd><Badge tone="brand">{usuario.rol}</Badge></dd>
-					<dt class="font-semibold text-text-muted">Estado</dt>
-					<dd>
-						<Badge tone={presentarEstadoUsuario(usuario.estado).tone}>
-							{presentarEstadoUsuario(usuario.estado).label}
-						</Badge>
-					</dd>
-				</dl>
-			</Card>
+					<dl class="dl-grid">
+						<dt class="font-semibold text-text-muted">Nombre</dt>
+						<dd class="text-text-main">{usuario.nombre}</dd>
+						<dt class="font-semibold text-text-muted">Usuario</dt>
+						<dd class="text-text-main">{usuario.username}</dd>
+						<dt class="font-semibold text-text-muted">ID</dt>
+						<dd class="text-text-main">{usuario.id}</dd>
+						<dt class="font-semibold text-text-muted">Rol</dt>
+						<dd><Badge tone="brand">{usuario.rol}</Badge></dd>
+						<dt class="font-semibold text-text-muted">Estado</dt>
+						<dd>
+							<Badge tone={presentarEstadoUsuario(usuario.estado).tone}>
+								{presentarEstadoUsuario(usuario.estado).label}
+							</Badge>
+						</dd>
+					</dl>
+				</Card>
+			</div>
 
 			<Card>
 				<h2 class="card-title">Preferencias</h2>
@@ -238,20 +259,7 @@
 								Alterna entre modo claro y oscuro para la interfaz.
 							</p>
 						</div>
-						<button
-							onclick={toggleTema}
-							class="relative flex h-8 w-14 cursor-pointer items-center rounded-full bg-surface-muted p-1 transition-colors"
-							aria-label="Cambiar tema"
-						>
-							<span
-								class="flex h-6 w-6 items-center justify-center rounded-full bg-bg-card text-xs shadow-md transition-transform {tema ===
-								'dark'
-									? 'translate-x-6'
-									: ''}"
-							>
-								{tema === 'light' ? '☀️' : '🌙'}
-							</span>
-						</button>
+						<Toggle checked={tema === 'dark'} label="" onchange={toggleTema} />
 					</div>
 
 					<div class="flex items-center justify-between">

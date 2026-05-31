@@ -25,28 +25,16 @@
 		if (shellUser.esAdmin) {
 			return [
 				{
-					label: 'Dashboard',
+					label: 'Panel',
 					href: '/admin/dashboard',
 					icon: 'grid',
 					color: 'from-amber-400 to-orange-500'
 				},
 				{
-					label: 'Usuarios',
-					href: '/admin/usuarios',
-					icon: 'users',
-					color: 'from-blue-400 to-indigo-500'
-				},
-				{
-					label: 'Leads',
+					label: 'Ventas',
 					href: '/admin/leads',
 					icon: 'trending-up',
 					color: 'from-emerald-400 to-teal-500'
-				},
-				{
-					label: 'Captaciones',
-					href: '/admin/captaciones',
-					icon: 'inbox',
-					color: 'from-lime-400 to-emerald-500'
 				},
 				{
 					label: 'Clientes',
@@ -55,62 +43,32 @@
 					color: 'from-violet-400 to-purple-500'
 				},
 				{
-					label: 'Citas',
-					href: '/admin/citas',
-					icon: 'calendar',
-					color: 'from-pink-400 to-rose-500'
-				},
-				{
-					label: 'Contratos',
-					href: '/admin/contratos',
-					icon: 'file-text',
-					color: 'from-cyan-400 to-sky-500'
-				},
-				{
 					label: 'Propiedades',
 					href: '/admin/propiedades',
 					icon: 'home',
-					color: 'from-amber-300 to-yellow-500'
+					color: 'from-orange-400 to-amber-500'
 				},
 				{
-					label: 'Reportes',
-					href: '/admin/reportes',
-					icon: 'bar-chart',
-					color: 'from-red-400 to-rose-500'
+					label: 'Usuarios',
+					href: '/admin/usuarios',
+					icon: 'users',
+					color: 'from-blue-400 to-indigo-500'
 				}
 			];
 		}
 
 		return [
 			{
-				label: 'Dashboard',
+				label: 'Panel',
 				href: '/asesor/dashboard',
 				icon: 'grid',
 				color: 'from-amber-400 to-orange-500'
 			},
 			{
-				label: 'Mis Leads',
+				label: 'Ventas',
 				href: '/asesor/leads',
 				icon: 'trending-up',
 				color: 'from-emerald-400 to-teal-500'
-			},
-			{
-				label: 'Captaciones',
-				href: '/asesor/captaciones',
-				icon: 'inbox',
-				color: 'from-lime-400 to-emerald-500'
-			},
-			{
-				label: 'Agenda',
-				href: '/asesor/citas',
-				icon: 'calendar',
-				color: 'from-pink-400 to-rose-500'
-			},
-			{
-				label: 'Contratos',
-				href: '/asesor/contratos',
-				icon: 'file-text',
-				color: 'from-cyan-400 to-sky-500'
 			},
 			{
 				label: 'Clientes',
@@ -122,7 +80,7 @@
 				label: 'Propiedades',
 				href: '/asesor/propiedades',
 				icon: 'home',
-				color: 'from-amber-300 to-yellow-500'
+				color: 'from-orange-400 to-amber-500'
 			}
 		];
 	});
@@ -254,7 +212,9 @@
 				</a>
 
 				<!-- Navigation items with blur balls -->
-				<nav class="no-scrollbar flex flex-1 flex-col items-center gap-1 overflow-y-auto">
+				<nav
+					class="no-scrollbar flex flex-1 flex-col items-center justify-center gap-1 overflow-y-auto"
+				>
 					{#each sidebarItems as item (item.href)}
 						<a
 							href={item.href}
@@ -349,7 +309,7 @@
 						<AlvasLogo variant="full" size="md" />
 					</a>
 
-					<nav class="flex items-center gap-1">
+					<nav class="absolute left-1/2 flex -translate-x-1/2 items-center gap-1">
 						{#each sidebarItems as item (item.href)}
 							<a
 								href={item.href}
@@ -477,9 +437,11 @@
 
 		<!-- Main content -->
 		<main
-			class="min-h-screen w-full min-w-0 flex-1 {$authStore.layout === 'sidebar' ? 'md:ml-28' : ''}"
+			class="min-h-screen w-full min-w-0 flex-1 overflow-x-hidden {$authStore.layout === 'sidebar'
+				? 'md:ml-28'
+				: ''}"
 		>
-			<div class="mx-auto max-w-7xl p-4 md:p-8">
+			<div class="mx-auto max-w-7xl min-w-0 p-4 md:p-8">
 				{@render children()}
 			</div>
 		</main>

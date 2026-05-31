@@ -36,7 +36,13 @@
 </script>
 
 {#if href}
-	<a {href} {onclick} class={`${baseClass} ${variants[variant]} ${className}`}>
+	<a
+		{href}
+		{onclick}
+		use:pressEffect
+		use:ripple
+		class={`${baseClass} ${variants[variant]} ${className}`}
+	>
 		{@render children()}
 	</a>
 {:else}

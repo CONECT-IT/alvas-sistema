@@ -1,9 +1,11 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { Scalar } from "@scalar/hono-api-reference";
 import { ErrorDeDominio } from "./lib/shared/domain";
 import { mapErrorDeDominioAStatus } from "./lib/shared/infrastructure/http/responses";
 import { ValidationError } from "./lib/shared/infrastructure/validation/helpers";
 import { verifySessionMiddleware, requireRolesMiddleware } from "./lib/shared/infrastructure";
+import { crearOpenApiDocument } from "./lib/shared/infrastructure/openapi";
 import { crearTokenProviderDesdeEnv } from "./lib/auth/infrastructure/security/TokenProviderFactory";
 import { crearAuthRouter } from "./lib/auth/infrastructure";
 import { crearUsuarioRouter } from "./lib/usuarios/infrastructure";
@@ -43,7 +45,7 @@ app.use(
   "*",
   cors({
     origin: (origin, c) => {
-      const allowed = (c.env.CORS_ORIGINS ?? "http://localhost:5173")
+      const allowed = (c.env?.CORS_ORIGINS ?? "http://localhost:5173")
         .split(",")
         .map((s: string) => s.trim());
       return allowed.includes(origin) ? origin : null;
@@ -99,6 +101,14 @@ app.use("*", async (c, next) => {
 });
 
 app.get("/health", (c) => c.json({ status: "ok", service: "alvas-api" }));
+app.get("/openapi.json", (c) => c.json(crearOpenApiDocument(new URL(c.req.url).origin)));
+app.get(
+  "/docs",
+  Scalar((c) => ({
+    url: new URL("/openapi.json", c.req.url).toString(),
+    title: "ALVAS API",
+  })),
+);
 
 // Auth middleware applied at composition root - BEFORE mounting routes
 app.use(

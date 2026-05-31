@@ -78,43 +78,70 @@
 	{:else}
 		<PropiedadStats {propiedades} />
 
-		{#if !mostrarSoloPublicadas && captaciones.length > 0}
+		<div class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_20rem]">
+			<div class="grid gap-5">
+				{#if !mostrarSoloPublicadas && captaciones.length > 0}
+					<Card>
+						<div class="mb-5 flex flex-col justify-between gap-3 md:flex-row md:items-center">
+							<div>
+								<h2 class="font-display text-xl font-bold text-text-main">Captaciones</h2>
+								<p class="mt-1 text-sm text-text-muted">
+									Tus propiedades en borrador captadas que requieren validación.
+								</p>
+							</div>
+							<p class="text-sm font-semibold text-primary">{captaciones.length} registros</p>
+						</div>
+						<PropiedadAdminTable propiedades={captaciones} onPropiedadClick={irAPropiedad} />
+					</Card>
+				{/if}
+
+				{#if disponibles.length > 0}
+					<Card>
+						<div class="mb-5">
+							<h2 class="font-display text-xl font-bold text-text-main">Disponibles</h2>
+							<p class="mt-1 text-sm text-text-muted">
+								Propiedades listas para comercialización en el sistema.
+							</p>
+						</div>
+						<PropiedadAdminTable propiedades={disponibles} onPropiedadClick={irAPropiedad} />
+					</Card>
+				{/if}
+
+				{#if !mostrarSoloPublicadas && otras.length > 0}
+					<Card>
+						<div class="mb-5">
+							<h2 class="font-display text-xl font-bold text-text-main">Otras propiedades</h2>
+							<p class="mt-1 text-sm text-text-muted">
+								Propiedades en validación, reservadas o ya vendidas.
+							</p>
+						</div>
+						<PropiedadAdminTable propiedades={otras} onPropiedadClick={irAPropiedad} />
+					</Card>
+				{/if}
+			</div>
+
 			<Card>
-				<div class="mb-5 flex flex-col justify-between gap-3 md:flex-row md:items-center">
-					<div>
-						<h2 class="font-display text-xl font-bold text-text-main">Captaciones</h2>
-						<p class="mt-1 text-sm text-text-muted">
-							Tus propiedades en borrador captadas que requieren validación.
+				<h2 class="font-display text-xl font-bold text-text-main">Clasificación</h2>
+				<p class="mt-2 text-sm text-text-muted">Resumen de tu inventario por estado comercial.</p>
+				<div class="mt-5 grid gap-3">
+					<div class="rounded-xl bg-surface-muted p-4">
+						<p class="text-xs font-semibold tracking-[0.12em] text-text-muted uppercase">
+							Borrador
 						</p>
+						<p class="mt-2 font-display text-2xl font-bold text-text-main">{captaciones.length}</p>
 					</div>
-					<p class="text-sm font-semibold text-primary">{captaciones.length} registros</p>
+					<div class="rounded-xl bg-surface-muted p-4">
+						<p class="text-xs font-semibold tracking-[0.12em] text-text-muted uppercase">
+							Disponible
+						</p>
+						<p class="mt-2 font-display text-2xl font-bold text-primary">{disponibles.length}</p>
+					</div>
+					<div class="rounded-xl bg-surface-muted p-4">
+						<p class="text-xs font-semibold tracking-[0.12em] text-text-muted uppercase">Otros</p>
+						<p class="mt-2 font-display text-2xl font-bold text-text-main">{otras.length}</p>
+					</div>
 				</div>
-				<PropiedadAdminTable propiedades={captaciones} onPropiedadClick={irAPropiedad} />
 			</Card>
-		{/if}
-
-		{#if disponibles.length > 0}
-			<Card>
-				<div class="mb-5">
-					<h2 class="font-display text-xl font-bold text-text-main">Disponibles</h2>
-					<p class="mt-1 text-sm text-text-muted">
-						Propiedades listas para comercialización en el sistema.
-					</p>
-				</div>
-				<PropiedadAdminTable propiedades={disponibles} onPropiedadClick={irAPropiedad} />
-			</Card>
-		{/if}
-
-		{#if !mostrarSoloPublicadas && otras.length > 0}
-			<Card>
-				<div class="mb-5">
-					<h2 class="font-display text-xl font-bold text-text-main">Otras propiedades</h2>
-					<p class="mt-1 text-sm text-text-muted">
-						Propiedades en validación, reservadas o ya vendidas.
-					</p>
-				</div>
-				<PropiedadAdminTable propiedades={otras} onPropiedadClick={irAPropiedad} />
-			</Card>
-		{/if}
+		</div>
 	{/if}
 </div>

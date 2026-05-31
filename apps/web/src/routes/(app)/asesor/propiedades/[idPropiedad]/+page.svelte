@@ -3,6 +3,7 @@
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
 	import Badge from '$lib/shared/ui/Badge.svelte';
+	import FloatingTextInput from '$lib/shared/ui/FloatingTextInput.svelte';
 	import SidePanel from '$lib/shared/ui/SidePanel.svelte';
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import { propiedadRepository } from '$lib/propiedades/infrastructure/propiedadRepository';
@@ -88,6 +89,14 @@
 			updating = false;
 		}
 	}
+
+	function formatearPrecio(valor: number): string {
+		return valor.toLocaleString('es-PE', {
+			style: 'currency',
+			currency: 'USD',
+			maximumFractionDigits: 0
+		});
+	}
 </script>
 
 <svelte:head>
@@ -129,15 +138,8 @@
 
 		<SidePanel isOpen={editando} title="Editar propiedad" onClose={cancelarEdicion}>
 			<form class="grid gap-4" onsubmit={manejarActualizar}>
-				<label class="label-field">
-					Título
-					<input bind:value={titulo} class="input-field" />
-				</label>
-
-				<label class="label-field">
-					Precio (USD)
-					<input type="number" bind:value={precio} class="input-field" />
-				</label>
+				<FloatingTextInput label="Titulo" bind:value={titulo} />
+				<FloatingTextInput label="Precio (USD)" type="number" bind:value={precio} />
 
 				<label class="label-field">
 					Estado
@@ -168,29 +170,68 @@
 			</form>
 		</SidePanel>
 
-		<Card>
-			<h2 class="card-title">Datos actuales</h2>
-			<dl class="dl-grid">
-				<dt class="font-semibold text-text-muted">Estado</dt>
-				<dd>
-					<Badge tone={presentarEstadoPropiedad(propiedad.estado).tone}
-						>{presentarEstadoPropiedad(propiedad.estado).label}</Badge
-					>
-				</dd>
+		<div class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_22rem]">
+			<div class="grid gap-5">
+				<Card>
+					<div class="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
+						<div>
+							<p class="text-xs font-semibold tracking-[0.14em] text-primary uppercase">
+								Ficha comercial
+							</p>
+							<h2 class="mt-2 font-display text-2xl font-bold text-text-main">
+								{propiedad.titulo}
+							</h2>
+							<p class="mt-4 max-w-3xl text-sm leading-relaxed text-text-muted">
+								{propiedad.descripcion}
+							</p>
+						</div>
+						<Badge tone={presentarEstadoPropiedad(propiedad.estado).tone}>
+							{presentarEstadoPropiedad(propiedad.estado).label}
+						</Badge>
+					</div>
+				</Card>
 
-				<dt class="font-semibold text-text-muted">Origen</dt>
-				<dd class="text-text-main">{propiedad.origen}</dd>
+				<div class="grid gap-4 md:grid-cols-3">
+					<Card tilt>
+						<p class="stat-label">Precio</p>
+						<p class="mt-3 font-display text-3xl font-bold text-primary">
+							{formatearPrecio(propiedad.precio)}
+						</p>
+					</Card>
+					<Card tilt>
+						<p class="stat-label">Origen</p>
+						<p class="mt-3 font-display text-2xl font-bold text-text-main">{propiedad.origen}</p>
+					</Card>
+					<Card tilt>
+						<p class="stat-label">Responsable</p>
+						<p class="mt-3 font-display text-2xl font-bold text-text-main">
+							{propiedad.asesorResponsableId ? 'Asignado' : 'Sin asignar'}
+						</p>
+					</Card>
+				</div>
+			</div>
 
-				{#if propiedad.idLeadOrigen}
-					<dt class="font-semibold text-text-muted">Origen comercial</dt>
-					<dd class="text-text-main">Asociada a un lead de captación</dd>
-				{/if}
-
-				<dt class="font-semibold text-text-muted">Responsable</dt>
-				<dd class="text-text-main">
-					{propiedad.asesorResponsableId ? 'Responsable asignado' : 'Sin asignar'}
-				</dd>
-			</dl>
-		</Card>
+			<Card>
+				<h2 class="card-title">Seguimiento CRM</h2>
+				<div class="grid gap-3 text-sm">
+					<div class="rounded-xl bg-surface-muted p-4">
+						<p class="font-semibold text-text-main">Estado comercial</p>
+						<p class="mt-1 text-text-muted">{presentarEstadoPropiedad(propiedad.estado).label}</p>
+					</div>
+					<div class="rounded-xl bg-surface-muted p-4">
+						<p class="font-semibold text-text-main">Origen comercial</p>
+						<p class="mt-1 text-text-muted">
+							{propiedad.idLeadOrigen ? 'Lead de captación' : 'Registro directo'}
+						</p>
+					</div>
+					<div class="rounded-xl bg-surface-muted p-4">
+						<p class="font-semibold text-text-main">Cliente propietario</p>
+						<p class="mt-1 text-text-muted">
+							{propiedad.idClientePropietario ?? 'Sin propietario vinculado'}
+						</p>
+					</div>
+				</div>
+			</Card>
+		</div>
 	{/if}
 </div>

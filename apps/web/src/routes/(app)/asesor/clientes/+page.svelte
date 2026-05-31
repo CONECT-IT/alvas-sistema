@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
+	import FloatingTextInput from '$lib/shared/ui/FloatingTextInput.svelte';
 	import SidePanel from '$lib/shared/ui/SidePanel.svelte';
 	import { goto, invalidateAll } from '$app/navigation';
 	import { HttpError } from '$lib/shared/http/httpClient';
@@ -81,10 +82,9 @@
 	<div class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
 		<div>
 			<p class="section-label">Clientes</p>
-			<h1 class="page-heading">Cartera de clientes</h1>
+			<h1 class="page-heading">Clientes y contratos</h1>
 			<p class="mt-2 max-w-2xl text-sm leading-relaxed text-text-muted">
-				Clientes formalizados desde leads convertidos o registrados directamente para seguimiento
-				comercial.
+				Tu cartera de clientes formalizados y acceso rápido a contratos de seguimiento.
 			</p>
 		</div>
 
@@ -93,25 +93,9 @@
 
 	<SidePanel isOpen={mostrarPanel} title="Nuevo cliente" onClose={() => (mostrarPanel = false)}>
 		<form class="grid gap-4" onsubmit={crearCliente}>
-			<label class="label-field">
-				Nombre
-				<input bind:value={nombre} class="input-field" placeholder="Nombre del cliente" />
-			</label>
-
-			<label class="label-field">
-				Teléfono
-				<input bind:value={telefono} class="input-field" placeholder="Número de contacto" />
-			</label>
-
-			<label class="label-field">
-				Correo
-				<input
-					bind:value={email}
-					type="email"
-					class="input-field"
-					placeholder="correo@ejemplo.com"
-				/>
-			</label>
+			<FloatingTextInput label="Nombre" bind:value={nombre} />
+			<FloatingTextInput label="Telefono" bind:value={telefono} />
+			<FloatingTextInput label="Correo" type="email" bind:value={email} />
 
 			{#if createError}
 				<p class="error-alert">
@@ -136,15 +120,35 @@
 			<Button class="mt-5" onclick={cargarClientes}>Intentar nuevamente</Button>
 		</Card>
 	{:else if clientes.length === 0}
-		<Card class="text-center">
-			<p class="font-display text-xl font-bold text-text-main">No hay clientes registrados</p>
-			<p class="mx-auto mt-2 max-w-xl text-sm text-text-muted">
-				Los leads convertidos y clientes directos aparecerán en esta cartera.
-			</p>
-		</Card>
+		<div class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_20rem]">
+			<Card class="text-center">
+				<p class="font-display text-xl font-bold text-text-main">No hay clientes registrados</p>
+				<p class="mx-auto mt-2 max-w-xl text-sm text-text-muted">
+					Los leads convertidos y clientes directos aparecerán en esta cartera.
+				</p>
+			</Card>
+			<Card>
+				<h2 class="font-display text-xl font-bold text-text-main">Contratos</h2>
+				<p class="mt-2 text-sm text-text-muted">Sin clientes registrados todavía.</p>
+				<Button href="/asesor/contratos" variant="secondary" class="mt-5">Ver contratos</Button>
+			</Card>
+		</div>
 	{:else}
-		<Card>
-			<ClienteTable {clientes} onClienteClick={irACliente} />
-		</Card>
+		<div class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_20rem]">
+			<Card>
+				<div class="mb-5">
+					<h2 class="font-display text-xl font-bold text-text-main">Clientes</h2>
+					<p class="mt-1 text-sm text-text-muted">{clientes.length} clientes en cartera.</p>
+				</div>
+				<ClienteTable {clientes} onClienteClick={irACliente} />
+			</Card>
+			<Card>
+				<h2 class="font-display text-xl font-bold text-text-main">Contratos</h2>
+				<p class="mt-2 text-sm text-text-muted">
+					Accede a contratos pendientes, firmados o cancelados de tus clientes.
+				</p>
+				<Button href="/asesor/contratos" variant="secondary" class="mt-5">Abrir contratos</Button>
+			</Card>
+		</div>
 	{/if}
 </div>

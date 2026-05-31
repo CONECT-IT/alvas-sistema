@@ -35,7 +35,7 @@ export default function (data) {
     { name: "clientes", url: "/ventas/clientes" },
     { name: "propiedades", url: "/propiedades" },
     { name: "usuarios", url: "/usuarios" },
-    { name: "captaciones", url: "/captaciones/pendientes" },
+    { name: "captaciones", url: "/integraciones/captaciones/pendientes" },
     { name: "reportes", url: "/reportes/general" },
   ];
 

@@ -1,0 +1,1212 @@
+openapi: 3.1.0
+info:
+  title: ALVAS API
+  version: 1.0.0
+  description: API operativa para autenticacion, usuarios, propiedades, ventas, reportes e integraciones.
+servers:
+  - url: http://127.0.0.1:8787
+    description: Wrangler local por defecto
+  - url: https://alvas-api-staging.softwarelazana.workers.dev
+    description: Staging
+  - url: https://alvas-api.softwarelazana.workers.dev
+    description: Production
+security:
+  - bearerAuth: []
+tags:
+  - name: Health
+  - name: Auth
+  - name: Usuarios
+  - name: Propiedades
+  - name: Ventas
+  - name: Reportes
+  - name: Integraciones
+paths:
+  /health:
+    get:
+      tags: [Health]
+      security: []
+      summary: Estado operativo del servicio
+      responses:
+        "200":
+          description: Servicio disponible
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  service:
+                    type: string
+                    example: alvas-api
+  /auth/login:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Inicia sesion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Sesion iniciada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          $ref: "#/components/responses/Error"
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Renueva token de sesion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        "200":
+          description: Token renovado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          $ref: "#/components/responses/Error"
+  /usuarios:
+    get:
+      tags: [Usuarios]
+      summary: Lista usuarios
+      responses:
+        "200":
+          description: Lista de usuarios
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Usuario"
+        "401":
+          $ref: "#/components/responses/Error"
+    post:
+      tags: [Usuarios]
+      summary: Crea usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CrearUsuarioRequest"
+      responses:
+        "201":
+          description: Usuario creado
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Usuario"
+        "400":
+          $ref: "#/components/responses/Error"
+  /usuarios/{idUsuario}:
+    parameters:
+      - $ref: "#/components/parameters/idUsuario"
+    get:
+      tags: [Usuarios]
+      summary: Obtiene usuario por id
+      responses:
+        "200":
+          description: Usuario
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Usuario"
+        "404":
+          $ref: "#/components/responses/Error"
+    put:
+      tags: [Usuarios]
+      summary: Actualiza usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ActualizarUsuarioRequest"
+      responses:
+        "200":
+          description: Usuario actualizado
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Usuario"
+        "400":
+          $ref: "#/components/responses/Error"
+  /propiedades:
+    get:
+      tags: [Propiedades]
+      summary: Lista propiedades
+      parameters:
+        - name: leadId
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Lista de propiedades
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Propiedad"
+    post:
+      tags: [Propiedades]
+      summary: Crea propiedad
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CrearPropiedadRequest"
+      responses:
+        "201":
+          description: Propiedad creada
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Propiedad"
+  /propiedades/{idPropiedad}:
+    parameters:
+      - $ref: "#/components/parameters/idPropiedad"
+    get:
+      tags: [Propiedades]
+      summary: Obtiene propiedad
+      responses:
+        "200":
+          description: Propiedad
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Propiedad"
+        "404":
+          $ref: "#/components/responses/Error"
+    put:
+      tags: [Propiedades]
+      summary: Actualiza propiedad
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ActualizarPropiedadRequest"
+      responses:
+        "200":
+          description: Propiedad actualizada
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Propiedad"
+    delete:
+      tags: [Propiedades]
+      summary: Elimina propiedad
+      responses:
+        "200":
+          description: Propiedad eliminada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+  /ventas/pipeline:
+    get:
+      tags: [Ventas]
+      summary: Lista pipeline comercial del usuario autenticado
+      responses:
+        "200":
+          description: Pipeline
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Lead"
+  /ventas/lead:
+    post:
+      tags: [Ventas]
+      summary: Registra lead
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegistrarLeadRequest"
+      responses:
+        "201":
+          description: Lead registrado
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Lead"
+  /ventas/lead/{idLead}:
+    parameters:
+      - $ref: "#/components/parameters/idLead"
+    get:
+      tags: [Ventas]
+      summary: Obtiene lead
+      responses:
+        "200":
+          description: Lead
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Lead"
+    put:
+      tags: [Ventas]
+      summary: Actualiza lead
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ActualizarLeadRequest"
+      responses:
+        "200":
+          description: Lead actualizado
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Lead"
+  /ventas/lead/{idLead}/asesor:
+    put:
+      tags: [Ventas]
+      summary: Asigna asesor a lead
+      parameters:
+        - $ref: "#/components/parameters/idLead"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [idAsesor]
+              properties:
+                idAsesor:
+                  type: string
+      responses:
+        "200":
+          description: Lead reasignado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+  /ventas/convertir:
+    post:
+      tags: [Ventas]
+      summary: Convierte lead a cliente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [idLead]
+              properties:
+                idLead:
+                  type: string
+      responses:
+        "200":
+          description: Cliente creado desde lead
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+  /ventas/leads:
+    get:
+      tags: [Ventas]
+      summary: Lista todos los leads
+      responses:
+        "200":
+          description: Leads
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Lead"
+  /ventas/asesores:
+    get:
+      tags: [Ventas]
+      summary: Lista asesores con leads
+      responses:
+        "200":
+          description: Asesores con total de leads
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+  /ventas/cita:
+    post:
+      tags: [Ventas]
+      summary: Agenda cita
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgendarCitaRequest"
+      responses:
+        "200":
+          description: Cita agendada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+  /ventas/citas:
+    get:
+      tags: [Ventas]
+      summary: Lista citas
+      responses:
+        "200":
+          description: Citas
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+  /ventas/lead/{idLead}/cita/{idCita}:
+    parameters:
+      - $ref: "#/components/parameters/idLead"
+      - name: idCita
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags: [Ventas]
+      summary: Obtiene cita de un lead
+      responses:
+        "200":
+          description: Cita
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+    put:
+      tags: [Ventas]
+      summary: Actualiza cita
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ActualizarCitaRequest"
+      responses:
+        "200":
+          description: Cita actualizada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+  /ventas/clientes:
+    get:
+      tags: [Ventas]
+      summary: Lista clientes
+      responses:
+        "200":
+          description: Clientes
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Cliente"
+  /ventas/cliente:
+    post:
+      tags: [Ventas]
+      summary: Registra cliente directo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegistrarClienteRequest"
+      responses:
+        "201":
+          description: Cliente registrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+  /ventas/cliente/{idCliente}:
+    parameters:
+      - name: idCliente
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags: [Ventas]
+      summary: Obtiene cliente
+      responses:
+        "200":
+          description: Cliente
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Cliente"
+    put:
+      tags: [Ventas]
+      summary: Actualiza cliente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ActualizarClienteRequest"
+      responses:
+        "200":
+          description: Cliente actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+  /ventas/cliente/{idCliente}/propiedades:
+    get:
+      tags: [Ventas]
+      summary: Lista propiedades vinculadas a cliente
+      parameters:
+        - name: idCliente
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Propiedades del cliente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+  /ventas/contratos:
+    get:
+      tags: [Ventas]
+      summary: Lista contratos
+      responses:
+        "200":
+          description: Contratos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+    post:
+      tags: [Ventas]
+      summary: Crea contrato
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CrearContratoRequest"
+      responses:
+        "201":
+          description: Contrato creado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+  /ventas/contratos/mios:
+    get:
+      tags: [Ventas]
+      summary: Lista contratos del asesor autenticado
+      responses:
+        "200":
+          description: Contratos del asesor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+  /ventas/contratos/{idContrato}/firmar:
+    post:
+      tags: [Ventas]
+      summary: Firma contrato
+      parameters:
+        - $ref: "#/components/parameters/idContrato"
+      responses:
+        "200":
+          description: Contrato firmado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+  /ventas/contratos/{idContrato}/cancelar:
+    post:
+      tags: [Ventas]
+      summary: Cancela contrato
+      parameters:
+        - $ref: "#/components/parameters/idContrato"
+      responses:
+        "200":
+          description: Contrato cancelado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+  /ventas/lead/{idLead}/actividad:
+    get:
+      tags: [Ventas]
+      summary: Lista actividad de un lead
+      parameters:
+        - $ref: "#/components/parameters/idLead"
+      responses:
+        "200":
+          description: Actividad del lead
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+  /reportes/estadisticas-globales:
+    get:
+      tags: [Reportes]
+      summary: Resumen global de acciones comerciales
+      description: Requiere rol ADMIN.
+      responses:
+        "200":
+          description: Resumen de acciones
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/ResumenAcciones"
+        "403":
+          $ref: "#/components/responses/Error"
+  /reportes/general:
+    get:
+      tags: [Reportes]
+      summary: Reporte general con acciones recientes
+      description: Requiere rol ADMIN.
+      responses:
+        "200":
+          description: Reporte general
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/ReporteGeneral"
+        "403":
+          $ref: "#/components/responses/Error"
+  /integraciones/captaciones:
+    post:
+      tags: [Integraciones]
+      security: []
+      summary: Recibe captacion entrante
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CaptacionEntranteRequest"
+      responses:
+        "200":
+          description: Captacion recibida
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+  /integraciones/captaciones/pendientes:
+    get:
+      tags: [Integraciones]
+      summary: Lista captaciones pendientes
+      responses:
+        "200":
+          description: Captaciones pendientes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+  /integraciones/captaciones/pendientes/{idCaptacion}/revisar:
+    post:
+      tags: [Integraciones]
+      summary: Marca captacion pendiente como revisada
+      parameters:
+        - $ref: "#/components/parameters/idCaptacion"
+      responses:
+        "200":
+          description: Captacion revisada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+  /integraciones/captaciones/pendientes/{idCaptacion}/duplicada:
+    post:
+      tags: [Integraciones]
+      summary: Marca captacion como duplicada
+      parameters:
+        - $ref: "#/components/parameters/idCaptacion"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                razon:
+                  type: string
+      responses:
+        "200":
+          description: Captacion marcada como duplicada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+  /integraciones/captaciones/pendientes/{idCaptacion}/rechazar:
+    post:
+      tags: [Integraciones]
+      summary: Rechaza captacion pendiente
+      parameters:
+        - $ref: "#/components/parameters/idCaptacion"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                razon:
+                  type: string
+      responses:
+        "200":
+          description: Captacion rechazada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+  /integraciones/captaciones/pendientes/{idCaptacion}/convertir:
+    post:
+      tags: [Integraciones]
+      summary: Convierte captacion pendiente a lead
+      parameters:
+        - $ref: "#/components/parameters/idCaptacion"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                idAsesor:
+                  type: string
+      responses:
+        "200":
+          description: Captacion convertida
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+  /integraciones/webhooks/whatsapp:
+    post:
+      tags: [Integraciones]
+      security: []
+      summary: Webhook de WhatsApp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WhatsAppWebhookRequest"
+      responses:
+        "200":
+          description: Webhook procesado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    idUsuario:
+      name: idUsuario
+      in: path
+      required: true
+      schema:
+        type: string
+    idPropiedad:
+      name: idPropiedad
+      in: path
+      required: true
+      schema:
+        type: string
+    idLead:
+      name: idLead
+      in: path
+      required: true
+      schema:
+        type: string
+    idContrato:
+      name: idContrato
+      in: path
+      required: true
+      schema:
+        type: string
+    idCaptacion:
+      name: idCaptacion
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    Error:
+      description: Error de negocio, validacion, autenticacion o sistema
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+  schemas:
+    Success:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+          const: true
+    ErrorResponse:
+      type: object
+      required: [success, message, code]
+      properties:
+        success:
+          type: boolean
+          const: false
+        message:
+          type: string
+        code:
+          type: string
+        detalles:
+          type: array
+          items:
+            type: object
+            properties:
+              path:
+                type: string
+              message:
+                type: string
+    LoginRequest:
+      type: object
+      required: [username, clave]
+      properties:
+        username:
+          type: string
+        clave:
+          type: string
+          format: password
+    AuthResponse:
+      allOf:
+        - $ref: "#/components/schemas/Success"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                authToken:
+                  type: string
+                refreshToken:
+                  type: string
+                usuario:
+                  $ref: "#/components/schemas/Usuario"
+    CrearUsuarioRequest:
+      type: object
+      required: [username, nombre, clave, rol]
+      properties:
+        username:
+          type: string
+        nombre:
+          type: string
+        clave:
+          type: string
+        rol:
+          type: string
+          examples: [ADMIN, ASESOR]
+    ActualizarUsuarioRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        nombre:
+          type: string
+        clave:
+          type: string
+        rol:
+          type: string
+    Usuario:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        nombre:
+          type: string
+        rol:
+          type: string
+        estado:
+          type: string
+        creadoEn:
+          type: string
+          format: date-time
+        actualizadoEn:
+          type: string
+          format: date-time
+    CrearPropiedadRequest:
+      type: object
+      required: [titulo, descripcion, precio]
+      properties:
+        titulo:
+          type: string
+        descripcion:
+          type: string
+        precio:
+          type: number
+          exclusiveMinimum: 0
+        origen:
+          type: string
+        estado:
+          type: string
+        idLeadOrigen:
+          type: string
+        idClientePropietario:
+          type: string
+        captadaPorAsesorId:
+          type: string
+        asesorResponsableId:
+          type: string
+    ActualizarPropiedadRequest:
+      type: object
+      properties:
+        titulo:
+          type: string
+        descripcion:
+          type: string
+        precio:
+          type: number
+          exclusiveMinimum: 0
+        estado:
+          type: string
+        idClientePropietario:
+          type: string
+        asesorResponsableId:
+          type: string
+    Propiedad:
+      type: object
+      additionalProperties: true
+      properties:
+        id:
+          type: string
+        titulo:
+          type: string
+        descripcion:
+          type: string
+        precio:
+          type: number
+        estado:
+          type: string
+    RegistrarLeadRequest:
+      type: object
+      required: [nombre, email, telefono, tipo]
+      properties:
+        nombre:
+          type: string
+        email:
+          type: string
+        telefono:
+          type: string
+        tipo:
+          type: string
+          examples: [COMPRA, VENTA]
+        idPropiedadInteres:
+          type: string
+        idAsesor:
+          type: string
+        datosPropiedad:
+          type: object
+          required: [titulo, descripcion, precio]
+          properties:
+            titulo:
+              type: string
+            descripcion:
+              type: string
+            precio:
+              type: number
+              exclusiveMinimum: 0
+    ActualizarLeadRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+        email:
+          type: string
+        telefono:
+          type: string
+        tipo:
+          type: string
+        idPropiedadInteres:
+          type: string
+        estado:
+          type: string
+    Lead:
+      type: object
+      additionalProperties: true
+      properties:
+        id:
+          type: string
+        nombre:
+          type: string
+        email:
+          type: string
+        telefono:
+          type: string
+        tipo:
+          type: string
+        estado:
+          type: string
+        idAsesor:
+          type: string
+    AgendarCitaRequest:
+      type: object
+      required: [idLead, fechaInicio, duracionMinutos]
+      properties:
+        idLead:
+          type: string
+        idPropiedad:
+          type: string
+        fechaInicio:
+          type: string
+          format: date-time
+        duracionMinutos:
+          type: integer
+          exclusiveMinimum: 0
+        observacion:
+          type: string
+    ActualizarCitaRequest:
+      type: object
+      properties:
+        fechaInicio:
+          type: string
+          format: date-time
+        duracionMinutos:
+          type: integer
+          exclusiveMinimum: 0
+        observacion:
+          type: string
+        estado:
+          type: string
+    RegistrarClienteRequest:
+      type: object
+      required: [nombre, email, telefono]
+      properties:
+        nombre:
+          type: string
+        email:
+          type: string
+        telefono:
+          type: string
+    ActualizarClienteRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+        email:
+          type: string
+        telefono:
+          type: string
+    Cliente:
+      type: object
+      additionalProperties: true
+      properties:
+        id:
+          type: string
+        nombre:
+          type: string
+        email:
+          type: string
+        telefono:
+          type: string
+    CrearContratoRequest:
+      type: object
+      required: [idLead, idPropiedad]
+      properties:
+        id:
+          type: string
+        idLead:
+          type: string
+        idPropiedad:
+          type: string
+        fechaInicio:
+          type: string
+          format: date-time
+        fechaFin:
+          type: string
+          format: date-time
+    ResumenAcciones:
+      type: object
+      required: [acciones, totalAcciones]
+      properties:
+        acciones:
+          type: array
+          items:
+            type: object
+            required: [evento, total]
+            properties:
+              evento:
+                type: string
+                examples: [LEAD_CREADO, CITA_AGENDADA, CLIENTE_CONVERTIDO, CONTRATO_FIRMADO]
+              total:
+                type: integer
+        totalAcciones:
+          type: integer
+    ReporteGeneral:
+      type: object
+      required: [fechaGeneracion, resumenAcciones, actividadReciente]
+      properties:
+        fechaGeneracion:
+          type: string
+          format: date-time
+        resumenAcciones:
+          $ref: "#/components/schemas/ResumenAcciones"
+        actividadReciente:
+          type: array
+          items:
+            type: object
+            properties:
+              idLead:
+                type: string
+              evento:
+                type: string
+              descripcion:
+                type: string
+              fecha:
+                type: string
+                format: date-time
+    CaptacionEntranteRequest:
+      type: object
+      required: [canal, origen, nombre, telefono, tipo]
+      properties:
+        canal:
+          type: string
+        origen:
+          type: string
+        nombre:
+          type: string
+        telefono:
+          type: string
+        email:
+          type: string
+        tipo:
+          type: string
+        idPropiedadInteres:
+          type: string
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+    WhatsAppWebhookRequest:
+      type: object
+      required: [wa_id, wa_name]
+      properties:
+        wa_id:
+          type: string
+        wa_name:
+          type: string
+        pregunta_tipo:
+          type: string
+        propiedad_id:
+          type: string
