@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Button from '$lib/shared/ui/Button.svelte';
-	import TextInput from '$lib/shared/ui/TextInput.svelte';
+	import FloatingTextInput from '$lib/shared/ui/FloatingTextInput.svelte';
 	import Textarea from '$lib/shared/ui/Textarea.svelte';
 	import { authStore } from '$lib/auth/infrastructure/authStore';
 	import { HttpError } from '$lib/shared/http/httpClient';
@@ -183,7 +183,9 @@
 
 			<div class="grid gap-5 md:grid-cols-3">
 				{#each propiedades as propiedad (propiedad.titulo)}
-					<article class="rounded-2xl border border-border-light bg-bg-base p-5">
+					<article
+						class="rounded-2xl border border-border-light bg-bg-base p-5 transition duration-200 hover:-translate-y-1 hover:border-primary/30 hover:shadow-panel"
+					>
 						<div class="mb-5 h-36 rounded-xl bg-[linear-gradient(135deg,#ffedd5,#fef3c7)]"></div>
 						<div class="flex items-start justify-between gap-3">
 							<div>
@@ -257,26 +259,13 @@
 			<div class="rounded-2xl border border-border-light bg-bg-base p-6 shadow-sm">
 				<form class="grid gap-4" onsubmit={enviarCaptacionVendedor}>
 					<div class="grid gap-3 sm:grid-cols-2">
-						<TextInput label="Nombre" bind:value={nombreVendedor} placeholder="Tu nombre" />
-						<TextInput
-							label="Teléfono"
-							bind:value={telefonoVendedor}
-							placeholder="Número de contacto"
-						/>
+						<FloatingTextInput label="Nombre" bind:value={nombreVendedor} />
+						<FloatingTextInput label="Teléfono" bind:value={telefonoVendedor} />
 					</div>
 
-					<TextInput
-						label="Correo opcional"
-						type="email"
-						bind:value={emailVendedor}
-						placeholder="correo@ejemplo.com"
-					/>
+					<FloatingTextInput label="Correo opcional" type="email" bind:value={emailVendedor} />
 
-					<TextInput
-						label="Propiedad"
-						bind:value={tituloPropiedad}
-						placeholder="Terreno, casa, local o predio"
-					/>
+					<FloatingTextInput label="Propiedad" bind:value={tituloPropiedad} />
 
 					<Textarea
 						label="Descripción inicial"
@@ -286,13 +275,12 @@
 						resize={false}
 					/>
 
-					<TextInput
-						label="Precio estimado opcional"
+					<FloatingTextInput
+						label="Precio estimado opcional (PEN)"
 						type="number"
 						bind:value={precioEstimado}
 						min={0}
 						step={0.01}
-						placeholder="Monto referencial"
 					/>
 
 					{#if captacionOk}

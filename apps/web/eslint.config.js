@@ -41,6 +41,7 @@ export default ts.config(
 			'worker-configuration.d.ts',
 			'coverage/**',
 			'playwright-report/**',
+			'storybook-static/**',
 			'test-results/**'
 		]
 	}

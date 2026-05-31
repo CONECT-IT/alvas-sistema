@@ -93,7 +93,7 @@
 	function formatearPrecio(valor: number): string {
 		return valor.toLocaleString('es-PE', {
 			style: 'currency',
-			currency: 'USD',
+			currency: 'PEN',
 			maximumFractionDigits: 0
 		});
 	}
@@ -139,7 +139,7 @@
 		<SidePanel isOpen={editando} title="Editar propiedad" onClose={cancelarEdicion}>
 			<form class="grid gap-4" onsubmit={manejarActualizar}>
 				<FloatingTextInput label="Titulo" bind:value={titulo} />
-				<FloatingTextInput label="Precio (USD)" type="number" bind:value={precio} />
+				<FloatingTextInput label="Precio (PEN)" type="number" bind:value={precio} />
 
 				<label class="label-field">
 					Estado

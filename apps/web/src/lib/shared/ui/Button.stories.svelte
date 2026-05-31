@@ -6,17 +6,37 @@
 <Meta title="UI/Button" component={Button} />
 
 <Story name="Primary">
-	<Button variant="primary">Button</Button>
+	<div class="flex min-h-[18rem] items-center justify-center bg-bg-base p-10">
+		<Button variant="primary">Crear lead</Button>
+	</div>
 </Story>
 
 <Story name="Secondary">
-	<Button variant="secondary">Cancel</Button>
+	<div class="flex min-h-[18rem] items-center justify-center bg-bg-base p-10">
+		<Button variant="secondary">Actualizar</Button>
+	</div>
 </Story>
 
 <Story name="Ghost">
-	<Button variant="ghost">More info</Button>
+	<div class="flex min-h-[18rem] items-center justify-center bg-bg-base p-10">
+		<Button variant="ghost">Ver detalle</Button>
+	</div>
 </Story>
 
 <Story name="Disabled">
-	<Button variant="primary" disabled>Disabled</Button>
+	<div class="flex min-h-[18rem] items-center justify-center bg-bg-base p-10">
+		<Button variant="primary" disabled>Guardando...</Button>
+	</div>
+</Story>
+
+<Story name="Variants">
+	<div class="flex min-h-[24rem] items-center justify-center bg-bg-base p-10">
+		<div
+			class="flex flex-wrap items-center gap-4 rounded-3xl border border-border-light bg-bg-card p-8 shadow-panel"
+		>
+			<Button variant="primary">Guardar</Button>
+			<Button variant="secondary">Cancelar</Button>
+			<Button variant="ghost">Volver</Button>
+		</div>
+	</div>
 </Story>

@@ -202,8 +202,9 @@
 							{/if}
 						</div>
 
-						<div class="flex w-full flex-col gap-3 xl:w-80">
-							<div class="grid grid-cols-2 gap-2">
+						<div class="flex w-full flex-col gap-2 xl:w-72">
+							<p class="text-xs font-semibold tracking-[0.14em] text-primary uppercase">Acciones</p>
+							<div class="grid grid-cols-2 gap-1.5">
 								<Button
 									variant="ghost"
 									disabled={accionando === captacion.id}
@@ -258,7 +259,7 @@
 										[captacion.id]: event.currentTarget.value
 									})}
 							></textarea>
-							<div class="grid grid-cols-2 gap-2">
+							<div class="grid grid-cols-2 gap-1.5">
 								<Button
 									variant="ghost"
 									disabled={accionando === captacion.id}

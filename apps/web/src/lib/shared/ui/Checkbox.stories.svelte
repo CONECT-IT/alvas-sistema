@@ -6,17 +6,25 @@
 <Meta title="UI/Checkbox" component={Checkbox} />
 
 <Story name="Unchecked">
-	<Checkbox />
+	<div class="flex min-h-[18rem] items-center justify-center bg-bg-base p-10">
+		<Checkbox label="Mostrar convertidos" />
+	</div>
 </Story>
 
 <Story name="Checked">
-	<Checkbox checked />
+	<div class="flex min-h-[18rem] items-center justify-center bg-bg-base p-10">
+		<Checkbox checked label="Mostrar convertidos" />
+	</div>
 </Story>
 
 <Story name="WithLabel">
-	<Checkbox checked label="Accept terms and conditions" />
+	<div class="flex min-h-[18rem] items-center justify-center bg-bg-base p-10">
+		<Checkbox checked label="Enviar notificación al asesor" />
+	</div>
 </Story>
 
 <Story name="Disabled">
-	<Checkbox disabled label="Option unavailable" />
+	<div class="flex min-h-[18rem] items-center justify-center bg-bg-base p-10">
+		<Checkbox disabled label="Opción no disponible" />
+	</div>
 </Story>
