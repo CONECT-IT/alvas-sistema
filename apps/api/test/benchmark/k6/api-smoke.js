@@ -10,15 +10,16 @@ export const options = {
   },
 };
 
-const BASE_URL = __ENV.API_URL || "http://127.0.0.1:3000";
+const BASE_URL = __ENV.API_URL || "http://127.0.0.1:8787";
 
 export function setup() {
-  const loginRes = http.post(`${BASE_URL}/api/auth/login`, {
-    username: "admin",
-    clave: "admin123",
-  });
+  const loginRes = http.post(
+    `${BASE_URL}/auth/login`,
+    JSON.stringify({ username: "admin", clave: "admin123" }),
+    { headers: { "Content-Type": "application/json" } },
+  );
   check(loginRes, { "login ok": (r) => r.status === 200 });
-  return { sessionToken: loginRes.json("token") };
+  return { sessionToken: loginRes.json("data.authToken") };
 }
 
 export default function (data) {
@@ -28,14 +29,14 @@ export default function (data) {
   };
 
   const endpoints = [
-    { name: "pipeline", url: "/api/ventas/pipeline" },
-    { name: "contratos", url: "/api/ventas/contratos" },
-    { name: "citas", url: "/api/ventas/citas" },
-    { name: "clientes", url: "/api/ventas/clientes" },
-    { name: "propiedades", url: "/api/propiedades" },
-    { name: "usuarios", url: "/api/usuarios" },
-    { name: "captaciones", url: "/api/captaciones/pendientes" },
-    { name: "reportes", url: "/api/reportes/general" },
+    { name: "pipeline", url: "/ventas/pipeline" },
+    { name: "contratos", url: "/ventas/contratos" },
+    { name: "citas", url: "/ventas/citas" },
+    { name: "clientes", url: "/ventas/clientes" },
+    { name: "propiedades", url: "/propiedades" },
+    { name: "usuarios", url: "/usuarios" },
+    { name: "captaciones", url: "/captaciones/pendientes" },
+    { name: "reportes", url: "/reportes/general" },
   ];
 
   const ep = endpoints[__ITER % endpoints.length];

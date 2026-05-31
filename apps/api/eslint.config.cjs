@@ -21,6 +21,7 @@ module.exports = [
       globals: {
         __ENV: "readonly",
         __ITER: "readonly",
+        console: "readonly",
       },
     },
   },
