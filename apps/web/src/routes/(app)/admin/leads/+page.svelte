@@ -24,12 +24,13 @@
 	let { data }: { data: PageData } = $props();
 
 	let leads = $derived((data?.leads as LeadPipeline[]) ?? []);
+	let captacionesCount = $derived(data?.captacionesCount ?? 0);
 	let propiedadesDisponibles = $derived((data?.propiedadesDisponibles as Propiedad[]) ?? []);
 	let asesores = $derived((data?.asesores as Usuario[]) ?? []);
 	let mostrarConvertidos = $state(false);
 	let vista = $state<'tabla' | 'kanban'>('tabla');
 	let busqueda = $state('');
-	type FiltroLeads = 'todos' | 'conCitas' | 'nuevos';
+	type FiltroLeads = 'todos' | 'conCitas' | 'nuevos' | 'compradores' | 'vendedores';
 	let filtro = $state<FiltroLeads>('todos');
 	let diaSeleccionado = $state(fechaClave(Date.now()));
 	let loading = $state(false);
@@ -57,6 +58,8 @@
 		leadsBase.filter((lead) => {
 			if (filtro === 'conCitas') return (lead.citasCount ?? 0) > 0;
 			if (filtro === 'nuevos') return presentarEstadoLead(lead.estado).tone === 'warning';
+			if (filtro === 'compradores') return lead.tipo === 'COMPRA';
+			if (filtro === 'vendedores') return lead.tipo === 'VENTA';
 			return true;
 		})
 	);
@@ -242,7 +245,7 @@
 									Inbox de captación
 								</p>
 								<h2 class="mt-2 font-display text-xl font-bold text-text-main">
-									WhatsApp y solicitudes por revisar
+									WhatsApp y solicitudes por revisar ({captacionesCount})
 								</h2>
 								<p class="mt-1 max-w-2xl text-sm text-text-muted">
 									Las captaciones entrantes se revisan antes de convertirse en leads o propiedades.

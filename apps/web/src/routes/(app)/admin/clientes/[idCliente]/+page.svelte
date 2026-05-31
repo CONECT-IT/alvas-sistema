@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import ClienteDetail from '$lib/clientes/presentation/ClienteDetail.svelte';
+	import type { PageData } from './$types';
 
-	let clienteId = $derived($page.params.idCliente ?? '');
+	let { data }: { data: PageData } = $props();
 </script>
 
 <svelte:head>
-	<title>Cliente {clienteId} | ALVAS</title>
+	<title>Cliente {data.cliente?.nombre ?? 'Detalle'} | ALVAS</title>
 </svelte:head>
 
-<ClienteDetail {clienteId} />
+<ClienteDetail clienteId={data.cliente?.id ?? ''} initialCliente={data.cliente} />

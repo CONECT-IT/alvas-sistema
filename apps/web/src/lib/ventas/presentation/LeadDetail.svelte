@@ -30,16 +30,17 @@
 
 	interface Props {
 		leadId: string;
+		initialLead?: LeadDetalle | null;
 	}
 
-	let { leadId }: Props = $props();
+	let { leadId, initialLead = null }: Props = $props();
 
-	let lead = $state<LeadDetalle | null>(null);
+	let lead = $state<LeadDetalle | null>(initialLead);
 	let propiedadesRelacionadas = $state<string[]>([]);
 	let propiedadesDetalle = $state<Propiedad[]>([]);
 	let propiedadesDisponibles = $state<Propiedad[]>([]);
 	let propiedadInteres = $state<Propiedad | null>(null);
-	let loading = $state(true);
+	let loading = $state(!initialLead);
 	let error = $state<string | null>(null);
 	let accionError = $state<string | null>(null);
 	let panel = $state<'editar' | 'cita' | 'contrato' | null>(null);
@@ -79,7 +80,10 @@
 			loading = false;
 			return;
 		}
-		loading = true;
+
+		if (!lead) {
+			loading = true;
+		}
 		error = null;
 		try {
 			lead = await obtenerLead(ventasRepository, leadId.trim());
@@ -117,7 +121,9 @@
 				}
 			}
 		} catch (err) {
-			error = err instanceof HttpError ? err.message : 'No se pudo cargar el lead.';
+			if (!lead) {
+				error = err instanceof HttpError ? err.message : 'No se pudo cargar el lead.';
+			}
 		} finally {
 			loading = false;
 		}
@@ -211,6 +217,12 @@
 
 	async function convertir() {
 		if (!lead) return;
+
+		const confirmacion = confirm(
+			'¿Estás seguro de que deseas convertir este lead a cliente? Esta acción formalizará el registro y permitirá crear contratos.'
+		);
+		if (!confirmacion) return;
+
 		guardando = true;
 		accionError = null;
 		try {

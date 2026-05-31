@@ -55,7 +55,7 @@
 						>
 					</td>
 					<td class="py-4 text-text-muted">
-						{propiedad.asesorResponsableId ?? 'Sin asignar'}
+						{propiedad.asesorResponsableId ? 'Asesor asignado' : 'Sin asignar'}
 					</td>
 				</tr>
 			{/each}

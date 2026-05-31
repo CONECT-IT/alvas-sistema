@@ -49,8 +49,8 @@ export class HmacTokenProvider implements ITokenProvider {
 
   constructor(private readonly params: HmacTokenProviderParams) {
     this.refreshSecret = params.refreshSecret ?? params.authSecret;
-    this.authTokenTtlSegundos = params.authTokenTtlSegundos ?? 900;
-    this.refreshTokenTtlSegundos = params.refreshTokenTtlSegundos ?? 60 * 60 * 24 * 7;
+    this.authTokenTtlSegundos = params.authTokenTtlSegundos ?? 14400; // 4 horas
+    this.refreshTokenTtlSegundos = params.refreshTokenTtlSegundos ?? 60 * 60 * 24 * 30; // 30 días
   }
 
   async generarAuthToken(payload: SessionClaims): Promise<string> {

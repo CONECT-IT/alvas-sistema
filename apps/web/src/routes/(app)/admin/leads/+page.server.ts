@@ -39,10 +39,11 @@ type UsuarioDto = {
 };
 
 export const load: ServerLoad = async ({ fetch }) => {
-	const [leadsRes, propsRes, usersRes] = await Promise.all([
+	const [leadsRes, propsRes, usersRes, captacionesRes] = await Promise.all([
 		fetch('/api/ventas/pipeline').then((r) => r.json<ApiResp<LeadPipeline[]>>()),
 		fetch('/api/propiedades').then((r) => r.json<ApiResp<PropiedadDto[]>>()),
-		fetch('/api/usuarios').then((r) => r.json<ApiResp<UsuarioDto[]>>())
+		fetch('/api/usuarios').then((r) => r.json<ApiResp<UsuarioDto[]>>()),
+		fetch('/api/integraciones/captaciones/pendientes').then((r) => r.json<ApiResp<unknown[]>>())
 	]);
 
 	return {
@@ -52,6 +53,7 @@ export const load: ServerLoad = async ({ fetch }) => {
 			: [],
 		asesores: usersRes.success
 			? usersRes.data.filter((u) => u.rol === 'ASESOR' && u.estado === 'ACTIVO')
-			: []
+			: [],
+		captacionesCount: captacionesRes.success ? captacionesRes.data.length : 0
 	};
 };

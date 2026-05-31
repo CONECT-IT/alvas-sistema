@@ -92,13 +92,7 @@
 						href="/admin/contratos"
 						class="rounded-xl border border-border-light bg-bg-base p-4 text-sm font-semibold text-text-main transition hover:border-primary/40"
 					>
-						Contratos activos
-					</a>
-					<a
-						href="/admin/contratos"
-						class="rounded-xl border border-border-light bg-bg-base p-4 text-sm font-semibold text-text-main transition hover:border-primary/40"
-					>
-						Firmas y seguimiento
+						Gestión de contratos
 					</a>
 				</div>
 			</Card>

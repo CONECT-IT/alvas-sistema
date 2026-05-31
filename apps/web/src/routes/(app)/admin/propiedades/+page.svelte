@@ -52,6 +52,13 @@
 	}
 
 	async function cambiarEstadoPropiedad(propiedad: Propiedad, nuevoEstado: string) {
+		if (nuevoEstado === 'DISPONIBLE') {
+			const confirmacion = confirm(
+				'¿Estás seguro de que deseas publicar esta propiedad? Asegúrate de que los datos sean correctos y que se cuente con el contrato respectivo.'
+			);
+			if (!confirmacion) return;
+		}
+
 		reviewError = null;
 		reviewSuccess = null;
 		updatingId = propiedad.id;
@@ -307,7 +314,7 @@
 												disabled={updatingId === propiedad.id}
 												onclick={() => cambiarEstadoPropiedad(propiedad, 'BORRADOR')}
 											>
-												Validar datos
+												Mover a borrador
 											</Button>
 											<Button
 												disabled={updatingId === propiedad.id}
