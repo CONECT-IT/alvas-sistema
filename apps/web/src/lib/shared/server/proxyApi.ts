@@ -103,7 +103,7 @@ async function proxyApiRequest(
 	} catch {
 		const text = await response.text().catch(() => '(no se pudo leer body)');
 		console.warn(
-			`proxyApi: Respuesta inválida del API — ruta=${path}, status=${response.status}, body="${text.slice(0, 300)}"`,
+			`proxyApi: Respuesta inválida del API — ruta=${path}, status=${response.status}, body="${text.slice(0, 300)}"`
 		);
 		payload = {
 			success: false,

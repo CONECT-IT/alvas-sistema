@@ -36,9 +36,7 @@ export class ObtenerPropiedadUseCase
         );
       }
 
-      const propiedad = await this.propiedadRepository.obtenerPorId(
-        idPropiedad(input.idPropiedad),
-      );
+      const propiedad = await this.propiedadRepository.obtenerPorId(idPropiedad(input.idPropiedad));
 
       if (!propiedad) {
         return resultadoFallido(new PropiedadError("Propiedad no encontrada.", "NO_ENCONTRADA"));

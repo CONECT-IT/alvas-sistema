@@ -46,14 +46,7 @@
 			aria-hidden="true"
 		>
 			<defs>
-				<linearGradient
-					id="logo-grad"
-					x1="0"
-					y1="4"
-					x2="48"
-					y2="44"
-					gradientUnits="userSpaceOnUse"
-				>
+				<linearGradient id="logo-grad" x1="0" y1="4" x2="48" y2="44" gradientUnits="userSpaceOnUse">
 					<stop offset="0%" stop-color="#FBBF24" />
 					<stop offset="100%" stop-color="#EA580C" />
 				</linearGradient>

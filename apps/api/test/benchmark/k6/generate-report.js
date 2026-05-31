@@ -29,9 +29,10 @@ function p95(arr) {
 
 const durations = metrics["http_req_duration"] || [];
 const failed = metrics["http_req_failed"] || [];
-const successRate = failed.length > 0
-  ? ((1 - failed.filter((d) => d > 0).length / failed.length) * 100).toFixed(1)
-  : 0;
+const successRate =
+  failed.length > 0
+    ? ((1 - failed.filter((d) => d > 0).length / failed.length) * 100).toFixed(1)
+    : 0;
 
 const checkNames = [...new Set(checks.map((c) => c.check))];
 
@@ -67,7 +68,19 @@ const html = `<!DOCTYPE html>
   </div>
   <h2>Checks</h2>
   <ul class="check-list">
-    ${checks.filter(c => c.check === summaryData.checkNames[0]).map(c => '<li><span class="' + (c.data > 0 ? 'pass' : 'fail') + '">' + c.check + ': ' + (c.data > 0 ? 'PASS' : 'FAIL') + '</span></li>').join('\n    ')}
+    ${checks
+      .filter((c) => c.check === summaryData.checkNames[0])
+      .map(
+        (c) =>
+          '<li><span class="' +
+          (c.data > 0 ? "pass" : "fail") +
+          '">' +
+          c.check +
+          ": " +
+          (c.data > 0 ? "PASS" : "FAIL") +
+          "</span></li>",
+      )
+      .join("\n    ")}
   </ul>
   <p style="color:#64748b;margin-top:2rem">Generated at ${new Date().toISOString()}</p>
 </body></html>`;

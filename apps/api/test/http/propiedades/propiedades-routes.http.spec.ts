@@ -24,7 +24,6 @@ import { crearAuthHeader, envConAuth } from "../helpers/auth";
 import { crearTokenProviderDesdeEnv } from "../../../src/lib/auth/infrastructure/security/TokenProviderFactory";
 import { verifySessionMiddleware } from "../../../src/lib/shared/infrastructure";
 
-
 function conManejadorError(app: Hono): Hono {
   app.onError((error, c) => {
     if (error instanceof ErrorDeDominio) {
@@ -112,7 +111,9 @@ function crearDeps(
           return p
             ? resultadoExitoso(p)
             : resultadoFallido(
-                new ErrorDeDominio("Propiedad no encontrada.", { codigo: "PROPIEDAD_NO_ENCONTRADA" }),
+                new ErrorDeDominio("Propiedad no encontrada.", {
+                  codigo: "PROPIEDAD_NO_ENCONTRADA",
+                }),
               );
         },
       }),
@@ -156,8 +157,14 @@ function crearCapturadas(): PropiedadesEntradasCapturadas {
 describe("http / propiedades routes", () => {
   it("lista propiedades autenticadas y permite filtrar por lead vendedor", async () => {
     const app = conManejadorError(new Hono());
-    app.use("/propiedades", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
-    app.use("/propiedades/*", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
+    app.use(
+      "/propiedades",
+      verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+    );
+    app.use(
+      "/propiedades/*",
+      verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+    );
     app.route("/propiedades", crearPropiedadRouter(crearDeps()));
 
     const res = await app.request(
@@ -187,8 +194,14 @@ describe("http / propiedades routes", () => {
   it("crea propiedad con usuario autenticado del adapter HTTP", async () => {
     const capturadas = crearCapturadas();
     const app = conManejadorError(new Hono());
-    app.use("/propiedades", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
-    app.use("/propiedades/*", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
+    app.use(
+      "/propiedades",
+      verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+    );
+    app.use(
+      "/propiedades/*",
+      verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+    );
     app.route("/propiedades", crearPropiedadRouter(crearDeps(capturadas)));
 
     const res = await app.request(
@@ -225,8 +238,14 @@ describe("http / propiedades routes", () => {
   it("actualiza propiedad pasando id de ruta y usuario autenticado", async () => {
     const capturadas = crearCapturadas();
     const app = conManejadorError(new Hono());
-    app.use("/propiedades", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
-    app.use("/propiedades/*", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
+    app.use(
+      "/propiedades",
+      verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+    );
+    app.use(
+      "/propiedades/*",
+      verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+    );
     app.route("/propiedades", crearPropiedadRouter(crearDeps(capturadas)));
 
     const res = await app.request(
@@ -263,8 +282,14 @@ describe("http / propiedades routes", () => {
     for (const estado of estadosCerrados) {
       const capturadas = crearCapturadas();
       const app = new Hono();
-      app.use("/propiedades", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
-      app.use("/propiedades/*", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
+      app.use(
+        "/propiedades",
+        verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+      );
+      app.use(
+        "/propiedades/*",
+        verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+      );
       app.route("/propiedades", crearPropiedadRouter(crearDeps(capturadas)));
 
       const res = await app.request(
@@ -293,8 +318,14 @@ describe("http / propiedades routes", () => {
 
   it("responde 403 cuando el use case rechaza permisos de propiedad", async () => {
     const app = conManejadorError(new Hono());
-    app.use("/propiedades", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
-    app.use("/propiedades/*", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
+    app.use(
+      "/propiedades",
+      verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+    );
+    app.use(
+      "/propiedades/*",
+      verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+    );
     app.route("/propiedades", crearPropiedadRouter(crearDepsSinPermisos()));
 
     const res = await app.request(
@@ -321,8 +352,14 @@ describe("http / propiedades routes", () => {
   it("elimina propiedad desde ruta autenticada", async () => {
     const capturadas = crearCapturadas();
     const app = conManejadorError(new Hono());
-    app.use("/propiedades", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
-    app.use("/propiedades/*", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
+    app.use(
+      "/propiedades",
+      verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+    );
+    app.use(
+      "/propiedades/*",
+      verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+    );
     app.route("/propiedades", crearPropiedadRouter(crearDeps(capturadas)));
 
     const res = await app.request(
@@ -346,8 +383,14 @@ describe("http / propiedades routes", () => {
 
   it("lista todas las propiedades sin filtro", async () => {
     const app = conManejadorError(new Hono());
-    app.use("/propiedades", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
-    app.use("/propiedades/*", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
+    app.use(
+      "/propiedades",
+      verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+    );
+    app.use(
+      "/propiedades/*",
+      verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+    );
     app.route("/propiedades", crearPropiedadRouter(crearDeps()));
 
     const res = await app.request(
@@ -383,8 +426,14 @@ describe("http / propiedades routes", () => {
       },
     };
     const app = new Hono();
-      app.use("/propiedades", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
-      app.use("/propiedades/*", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
+    app.use(
+      "/propiedades",
+      verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+    );
+    app.use(
+      "/propiedades/*",
+      verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+    );
     app.route("/propiedades", crearPropiedadRouter(conError));
 
     const res = await app.request(
@@ -424,8 +473,14 @@ describe("http / propiedades routes", () => {
       },
     };
     const app = new Hono();
-      app.use("/propiedades", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
-      app.use("/propiedades/*", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
+    app.use(
+      "/propiedades",
+      verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+    );
+    app.use(
+      "/propiedades/*",
+      verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+    );
     app.route("/propiedades", crearPropiedadRouter(conError));
 
     const res = await app.request(
@@ -450,8 +505,14 @@ describe("http / propiedades routes", () => {
 
   it("rechaza crear propiedad con body invalido (precio negativo)", async () => {
     const app = conManejadorError(new Hono());
-    app.use("/propiedades", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
-    app.use("/propiedades/*", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
+    app.use(
+      "/propiedades",
+      verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+    );
+    app.use(
+      "/propiedades/*",
+      verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+    );
     app.route("/propiedades", crearPropiedadRouter(crearDeps()));
 
     const res = await app.request(
@@ -479,8 +540,14 @@ describe("http / propiedades routes", () => {
 
   it("rechaza actualizar propiedad con body invalido (precio cero)", async () => {
     const app = conManejadorError(new Hono());
-    app.use("/propiedades", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
-    app.use("/propiedades/*", verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)));
+    app.use(
+      "/propiedades",
+      verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+    );
+    app.use(
+      "/propiedades/*",
+      verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
+    );
     app.route("/propiedades", crearPropiedadRouter(crearDeps()));
 
     const res = await app.request(

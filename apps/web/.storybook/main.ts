@@ -5,10 +5,10 @@ const config: StorybookConfig = {
 	addons: [
 		{
 			name: '@storybook/addon-svelte-csf',
-			options: { legacyTemplate: true },
-		},
+			options: { legacyTemplate: true }
+		}
 	],
-	framework: '@storybook/sveltekit',
+	framework: '@storybook/sveltekit'
 };
 
 export default config;

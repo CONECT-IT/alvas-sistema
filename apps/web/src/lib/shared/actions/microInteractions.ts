@@ -63,7 +63,10 @@ export function ripple(node: HTMLElement) {
 }
 
 /** Smooth number counter — counts from 0 to target value. */
-export function countUp(node: HTMLElement, params: { target: number; duration?: number } = { target: 0 }) {
+export function countUp(
+	node: HTMLElement,
+	params: { target: number; duration?: number } = { target: 0 }
+) {
 	const duration = params.duration ?? 800;
 	const target = params.target;
 	const start = performance.now();

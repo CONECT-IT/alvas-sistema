@@ -34,7 +34,7 @@ export function staggerFadeUp(node: HTMLElement, options: gsap.TweenVars = {}) {
 	if (typeof window === 'undefined') return;
 
 	const children = Array.from(node.children);
-	
+
 	const animation = gsap.from(children, {
 		y: options.y ?? 30,
 		opacity: options.opacity ?? 0,
