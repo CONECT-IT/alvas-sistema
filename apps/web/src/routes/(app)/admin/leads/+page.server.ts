@@ -51,13 +51,27 @@ type ClienteDto = {
 	actualizadoEn: string;
 };
 
+async function leerApi<T>(response: Response, fallback: T): Promise<ApiResp<T>> {
+	if (!response.ok) {
+		console.warn(`admin/leads: API respondió ${response.status} en ${response.url}`);
+		return { success: true, data: fallback };
+	}
+
+	try {
+		return (await response.json()) as ApiResp<T>;
+	} catch {
+		console.warn(`admin/leads: respuesta no JSON en ${response.url}`);
+		return { success: true, data: fallback };
+	}
+}
+
 export const load: ServerLoad = async ({ fetch }) => {
 	const [leadsRes, propsRes, usersRes, captacionesRes, clientesRes] = await Promise.all([
-		fetch('/api/ventas/pipeline').then((r) => r.json<ApiResp<LeadPipeline[]>>()),
-		fetch('/api/propiedades').then((r) => r.json<ApiResp<PropiedadDto[]>>()),
-		fetch('/api/usuarios').then((r) => r.json<ApiResp<UsuarioDto[]>>()),
-		fetch('/api/integraciones/captaciones/pendientes').then((r) => r.json<ApiResp<unknown[]>>()),
-		fetch('/api/ventas/clientes').then((r) => r.json<ApiResp<ClienteDto[]>>())
+		fetch('/api/ventas/pipeline').then((r) => leerApi<LeadPipeline[]>(r, [])),
+		fetch('/api/propiedades').then((r) => leerApi<PropiedadDto[]>(r, [])),
+		fetch('/api/usuarios').then((r) => leerApi<UsuarioDto[]>(r, [])),
+		fetch('/api/captaciones/pendientes').then((r) => leerApi<unknown[]>(r, [])),
+		fetch('/api/ventas/clientes').then((r) => leerApi<ClienteDto[]>(r, []))
 	]);
 
 	return {
