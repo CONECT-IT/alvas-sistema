@@ -4,6 +4,7 @@ import { RolDeUsuarioInvalidoError } from "../errors";
 export const ROLES_USUARIO = ROLES_SISTEMA;
 export type ValorRolUsuario = ValorRol;
 
+/** Rol del usuario en el sistema (ADMIN | ASESOR). @group Value Objects */
 export class Rol {
   private readonly valorInterno: ValorRolUsuario;
 

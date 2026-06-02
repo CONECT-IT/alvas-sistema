@@ -27,6 +27,7 @@ export type ListarPipelineInput = {
 
 export type ListarPipelineOutput = LeadPipelineDTO[];
 
+/** @group Puertos de Entrada */
 export interface IListarPipeline {
   ejecutar(input: ListarPipelineInput): Promise<Resultado<ListarPipelineOutput, ErrorDeDominio>>;
 }

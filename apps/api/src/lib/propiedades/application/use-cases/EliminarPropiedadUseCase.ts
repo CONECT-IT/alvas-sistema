@@ -17,6 +17,11 @@ export type EliminarPropiedadInput = {
   };
 };
 
+/**
+ * Elimina una propiedad del sistema. Solo accesible para roles con permiso de gestion.
+ *
+ * @group Casos de Uso
+ */
 export class EliminarPropiedadUseCase
   implements CasoDeUso<EliminarPropiedadInput, Resultado<void, PropiedadError>>, IEliminarPropiedad
 {
@@ -25,6 +30,10 @@ export class EliminarPropiedadUseCase
     private readonly autorizador: IAutorizadorPropiedades,
   ) {}
 
+  /**
+   * @param input - Id de propiedad a eliminar y usuario autenticado.
+   * @returns Void si se elimino correctamente o error de dominio.
+   */
   async ejecutar(input: EliminarPropiedadInput): Promise<Resultado<void, PropiedadError>> {
     try {
       if (!this.autorizador.puedeGestionarPropiedades(input.usuarioAutenticado.rol)) {

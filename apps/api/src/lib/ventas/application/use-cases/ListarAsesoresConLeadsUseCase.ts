@@ -9,6 +9,7 @@ export type ListarAsesoresConLeadsOutput = {
   totalLeads: number;
 }[];
 
+/** @group Casos de Uso */
 export class ListarAsesoresConLeadsUseCase
   implements
     CasoDeUso<void, Resultado<ListarAsesoresConLeadsOutput, ErrorDeDominio>>,

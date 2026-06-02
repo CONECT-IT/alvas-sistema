@@ -33,6 +33,7 @@ type ReconstituirUsuarioParams = {
   actualizadoEn: string | Date;
 };
 
+/** Agregado raiz que representa un usuario del sistema. @group Entidades */
 export class Usuario {
   private readonly idInterno: IdUsuario;
   private usernameInterno: Username;

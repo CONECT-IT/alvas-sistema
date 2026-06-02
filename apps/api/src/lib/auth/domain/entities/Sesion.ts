@@ -8,6 +8,7 @@ type SesionProps = Readonly<{
   rol: ValorRolAcceso;
 }>;
 
+/** Sesion de autenticacion abierta tras login o renovacion. @group Entidades */
 export class Sesion {
   private constructor(private readonly props: SesionProps) {}
 

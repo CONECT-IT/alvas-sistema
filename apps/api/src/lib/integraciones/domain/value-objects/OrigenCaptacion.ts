@@ -1,5 +1,6 @@
 import { ErrorDeValidacion } from "../../../shared/domain";
 
+/** @group Value Objects */
 export class OrigenCaptacion {
   private readonly valorInterno: string;
 

@@ -3,6 +3,11 @@ import { type IRegistroPropiedadCliente } from "../../../ventas/domain/ports/IRe
 import { type IPropiedadRepository } from "../../domain/ports";
 import { idPropiedad } from "../../domain/value-objects/Ids";
 
+/**
+ * Adaptador que asigna un cliente propietario a una propiedad desde el modulo Ventas.
+ *
+ * @group Adaptadores
+ */
 export class RegistroPropiedadClienteAdapter implements IRegistroPropiedadCliente {
   constructor(private readonly propiedadRepository: IPropiedadRepository) {}
 

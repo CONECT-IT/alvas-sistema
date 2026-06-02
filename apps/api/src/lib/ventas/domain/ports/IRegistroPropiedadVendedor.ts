@@ -9,6 +9,7 @@ export interface RegistroPropiedadVendedorInput {
   precio: number;
 }
 
+/** @group Puertos */
 export interface IRegistroPropiedadVendedor {
   registrar(
     input: RegistroPropiedadVendedorInput,

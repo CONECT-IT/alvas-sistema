@@ -34,12 +34,20 @@ export type PropiedadControllerDeps = Readonly<{
   crearEliminarPropiedad: (c: ContextoPropiedades) => IEliminarPropiedad;
 }>;
 
+/**
+ * Controlador HTTP del modulo Propiedades.
+ *
+ * @group Controladores HTTP
+ */
 export class PropiedadController {
   constructor(
     private readonly autorizador: IAutorizadorPropiedades,
     private readonly deps: PropiedadControllerDeps,
   ) {}
 
+  /**
+   * POST /propiedades - Crea una nueva propiedad.
+   */
   async crear(c: ContextoPropiedades): Promise<Response> {
     try {
       const body = parseBody(CrearPropiedadSchema, await c.req.json());
@@ -61,6 +69,9 @@ export class PropiedadController {
     }
   }
 
+  /**
+   * GET /propiedades - Lista propiedades visibles.
+   */
   async listar(c: ContextoPropiedades): Promise<Response> {
     try {
       const authPayload = c.get("authPayload");
@@ -103,6 +114,9 @@ export class PropiedadController {
     }
   }
 
+  /**
+   * GET /propiedades/:idPropiedad - Obtiene detalle de una propiedad.
+   */
   async obtener(c: ContextoPropiedades): Promise<Response> {
     try {
       const authPayload = c.get("authPayload");
@@ -137,6 +151,9 @@ export class PropiedadController {
     }
   }
 
+  /**
+   * PUT /propiedades/:idPropiedad - Actualiza datos de una propiedad.
+   */
   async actualizar(c: ContextoPropiedades): Promise<Response> {
     try {
       const body = parseBody(ActualizarPropiedadSchema, await c.req.json());
@@ -159,6 +176,9 @@ export class PropiedadController {
     }
   }
 
+  /**
+   * DELETE /propiedades/:idPropiedad - Elimina una propiedad.
+   */
   async eliminar(c: ContextoPropiedades): Promise<Response> {
     try {
       const authPayload = c.get("authPayload");

@@ -10,6 +10,7 @@ import { type IConsultaVentasParaReportes } from "../../domain/ports/IConsultaVe
 import { type EstadisticasGlobalesOutput } from "../dto/ReportesSalidaDTOs";
 import { type IObtenerEstadisticasGlobales } from "../ports/in";
 
+/** @group Casos de Uso */
 export class ObtenerEstadisticasGlobalesUseCase
   implements
     CasoDeUso<void, Resultado<EstadisticasGlobalesOutput, ErrorDeDominio>>,

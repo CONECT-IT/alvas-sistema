@@ -22,6 +22,11 @@ export type ActualizarPropiedadInput = ActualizarPropiedadDTO & {
   };
 };
 
+/**
+ * Actualiza una propiedad existente validando permisos y existencia.
+ *
+ * @group Casos de Uso
+ */
 export class ActualizarPropiedadUseCase
   implements
     CasoDeUso<ActualizarPropiedadInput, Resultado<void, PropiedadError>>,
@@ -33,6 +38,10 @@ export class ActualizarPropiedadUseCase
     private readonly consultaRelacionPropiedad: IConsultaRelacionPropiedad,
   ) {}
 
+  /**
+   * @param input - Id de propiedad, campos a actualizar y usuario autenticado.
+   * @returns Void si se actualizo correctamente o error de dominio.
+   */
   async ejecutar(input: ActualizarPropiedadInput): Promise<Resultado<void, PropiedadError>> {
     try {
       const propiedad = await this.propiedadRepository.obtenerPorId(idPropiedad(input.idPropiedad));

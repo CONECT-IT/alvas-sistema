@@ -2,6 +2,11 @@ import { type IConsultaPropiedadInteres } from "../../../ventas/domain/ports/ICo
 import { type IPropiedadRepository } from "../../domain/ports";
 import { idPropiedad } from "../../domain/value-objects";
 
+/**
+ * Adaptador que consulta disponibilidad de propiedad desde el modulo Ventas.
+ *
+ * @group Adaptadores
+ */
 export class ConsultaPropiedadInteresVentasAdapter implements IConsultaPropiedadInteres {
   constructor(private readonly propiedadRepository: IPropiedadRepository) {}
 

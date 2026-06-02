@@ -16,6 +16,7 @@ import { type ICrearContrato } from "../ports/in";
 export type CrearContratoInput = CrearContratoInputDTO;
 export type CrearContratoOutput = ContratoOutputDTO;
 
+/** @group Casos de Uso */
 export class CrearContratoUseCase
   implements
     CasoDeUso<CrearContratoInput, Resultado<CrearContratoOutput, ErrorDeDominio>>,

@@ -11,6 +11,7 @@ export type ListarPropiedadesPorClienteInput = {
 
 export type ListarPropiedadesPorClienteOutput = IdPropiedad[];
 
+/** @group Casos de Uso */
 export class ListarPropiedadesPorClienteUseCase
   implements
     CasoDeUso<

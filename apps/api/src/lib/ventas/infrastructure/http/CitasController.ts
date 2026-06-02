@@ -7,6 +7,7 @@ import {
 import { parseBody } from "../../../shared/infrastructure/validation/helpers";
 import { AgendarCitaSchema, ActualizarCitaBodySchema } from "../validation/schemas";
 
+/** @group Controladores HTTP */
 export class CitasController {
   constructor(private readonly deps: VentasControllerDeps) {}
 

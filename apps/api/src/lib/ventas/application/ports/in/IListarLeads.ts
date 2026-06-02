@@ -7,6 +7,7 @@ export type ListarLeadsQuery = Readonly<{
   rolEjecutor: string;
 }>;
 
+/** @group Puertos de Entrada */
 export interface IListarLeads {
   ejecutar(input: ListarLeadsQuery): Promise<Resultado<Lead[], ErrorDeDominio>>;
 }

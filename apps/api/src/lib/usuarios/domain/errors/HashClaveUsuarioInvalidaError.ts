@@ -1,5 +1,6 @@
 import { ErrorDeDominio } from "../../../shared/domain";
 
+/** Error emitido cuando el hash de clave no cumple el formato. @group Errores */
 export class HashClaveUsuarioInvalidaError extends ErrorDeDominio {
   constructor() {
     super("El hash de clave del usuario no es valido.", {

@@ -1,5 +1,6 @@
 import { ErrorDeValidacion } from "../../../shared/domain";
 
+/** Nombre de usuario unico (3-50 caracteres alfanumericos). @group Value Objects */
 export class Username {
   private readonly valorInterno: string;
 

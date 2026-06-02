@@ -15,6 +15,7 @@ import { type CaptacionPendienteDTO, type EntradaWhatsAppWebhookDTO } from "../d
 import { captacionPendienteADTO } from "../mappers";
 import { type IProcesarWhatsAppWebhook } from "../ports/in";
 
+/** @group Casos de Uso */
 export class ProcesarWhatsAppWebhookUseCase
   implements
     CasoDeUso<EntradaWhatsAppWebhookDTO, Resultado<CaptacionPendienteDTO, ErrorDeDominio>>,

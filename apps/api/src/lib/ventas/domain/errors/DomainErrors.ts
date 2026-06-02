@@ -1,3 +1,4 @@
+/** @group Errores */
 import { ErrorDeDominio } from "../../../shared/domain/errors/ErrorDeDominio";
 
 export class LeadNoEncontradoError extends ErrorDeDominio {

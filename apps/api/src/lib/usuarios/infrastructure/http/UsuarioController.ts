@@ -28,9 +28,11 @@ export type UsuarioControllerDeps = Readonly<{
   crearActualizarUsuario: (c: ContextoUsuarios) => IActualizarUsuario;
 }>;
 
+/** Controlador HTTP de usuarios. @group Controladores HTTP */
 export class UsuarioController {
   constructor(private readonly deps: UsuarioControllerDeps) {}
 
+  /** Maneja POST /usuarios para crear usuario. */
   async crear(c: ContextoUsuarios): Promise<Response> {
     try {
       const body = parseBody(CrearUsuarioSchema, await c.req.json());
@@ -53,6 +55,7 @@ export class UsuarioController {
     }
   }
 
+  /** Maneja GET /usuarios para listar todos. */
   async listar(c: ContextoUsuarios): Promise<Response> {
     try {
       const useCase = this.deps.crearListarUsuarios(c);
@@ -68,6 +71,7 @@ export class UsuarioController {
     }
   }
 
+  /** Maneja GET /usuarios/{idUsuario} para obtener uno. */
   async obtener(c: ContextoUsuarios): Promise<Response> {
     try {
       const useCase = this.deps.crearObtenerUsuario(c);
@@ -83,6 +87,7 @@ export class UsuarioController {
     }
   }
 
+  /** Maneja PUT /usuarios/{idUsuario} para actualizar. */
   async actualizar(c: ContextoUsuarios): Promise<Response> {
     try {
       const body = parseBody(ActualizarUsuarioSchema, await c.req.json());

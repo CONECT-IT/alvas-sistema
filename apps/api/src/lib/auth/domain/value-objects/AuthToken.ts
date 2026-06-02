@@ -1,5 +1,6 @@
 import { ErrorDeValidacion } from "../../../shared/domain";
 
+/** Token de autenticacion firmado con HMAC. @group Value Objects */
 export class AuthToken {
   private readonly valorInterno: string;
 

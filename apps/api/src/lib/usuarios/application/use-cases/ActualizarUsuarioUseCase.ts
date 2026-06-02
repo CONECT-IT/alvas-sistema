@@ -13,6 +13,7 @@ import { type IActualizarUsuario } from "../ports/in";
 export type ActualizarUsuarioInput = ActualizarUsuarioInputDTO;
 export type ActualizarUsuarioOutput = UsuarioOutputDTO;
 
+/** Caso de uso: actualizar datos de un usuario existente. @group Casos de Uso */
 export class ActualizarUsuarioUseCase
   implements
     CasoDeUso<ActualizarUsuarioInput, Resultado<ActualizarUsuarioOutput, ErrorDeDominio>>,
@@ -23,6 +24,11 @@ export class ActualizarUsuarioUseCase
     private readonly passwordHasher?: IPasswordHasher,
   ) {}
 
+  /**
+   * Actualiza campos parciales de un usuario (nombre, username, clave, rol, estado).
+   * @param input - Datos a actualizar con idUsuario.
+   * @returns Resultado con usuario actualizado o error de dominio.
+   */
   async ejecutar(
     input: ActualizarUsuarioInput,
   ): Promise<Resultado<ActualizarUsuarioOutput, ErrorDeDominio>> {

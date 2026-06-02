@@ -2,6 +2,7 @@ import { type UsuarioRespuestaDTO } from "../../application";
 import { Usuario } from "../../domain/entities";
 import { type UsuarioRow } from "./schema";
 
+/** Mapea entre Usuario de dominio y filas de D1. @group Persistencia */
 export class UsuarioMapper {
   static aDominio(row: UsuarioRow): Usuario {
     const nombre = row.nombre && row.nombre.trim() ? row.nombre : row.id;

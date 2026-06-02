@@ -3,6 +3,7 @@ import { type ErrorDeDominio } from "../../../../shared/domain";
 import { type Cita } from "../../../domain/entities/Cita";
 import { type ObtenerCitaPorIdInputDTO } from "../../dto/LeadDTOs";
 
+/** @group Puertos de Entrada */
 export interface IObtenerCitaPorId {
   ejecutar(input: ObtenerCitaPorIdInputDTO): Promise<Resultado<Cita, ErrorDeDominio>>;
 }

@@ -1,3 +1,4 @@
+/** @group Value Objects */
 import { type Marca } from "../../../shared/domain/types/Marca";
 
 export type IdLead = Marca<string, "IdLead">;

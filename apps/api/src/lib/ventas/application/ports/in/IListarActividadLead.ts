@@ -6,6 +6,7 @@ export type ListarActividadLeadQuery = Readonly<{
   idLead: string;
 }>;
 
+/** @group Puertos de Entrada */
 export interface IListarActividadLead {
   ejecutar(input: ListarActividadLeadQuery): Promise<Resultado<ActividadLeadDTO[], ErrorDeDominio>>;
 }

@@ -6,6 +6,7 @@ export type ObtenerClienteQuery = Readonly<{
   id: string;
 }>;
 
+/** @group Puertos de Entrada */
 export interface IObtenerCliente {
   ejecutar(input: ObtenerClienteQuery): Promise<Resultado<Cliente, ErrorDeDominio>>;
 }

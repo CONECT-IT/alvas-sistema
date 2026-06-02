@@ -5,6 +5,7 @@ export type CancelarContratoCommand = Readonly<{
   idContrato: string;
 }>;
 
+/** @group Puertos de Entrada */
 export interface ICancelarContrato {
   ejecutar(input: CancelarContratoCommand): Promise<Resultado<void, ErrorDeDominio>>;
 }

@@ -11,6 +11,7 @@ import { type IRegistroPropiedadCaptacion } from "../../domain/ports/IRegistroPr
 import { type CaptacionEntranteDTO, type CaptacionProcesadaDTO } from "../dto/CaptacionDTOs";
 import { type IProcesarCaptacionEntrante } from "../ports/in";
 
+/** @group Casos de Uso */
 export class ProcesarCaptacionEntranteUseCase
   implements
     CasoDeUso<CaptacionEntranteDTO, Resultado<CaptacionProcesadaDTO, ErrorDeDominio>>,

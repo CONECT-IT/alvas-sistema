@@ -1,3 +1,4 @@
+/** @group Puertos */
 export interface IAutorizadorVentas {
   puedeVerLeadsGlobales(rol: string): boolean;
   puedeGestionarLead(rol: string, idUsuario: string, idAsesorDelLead: string): boolean;

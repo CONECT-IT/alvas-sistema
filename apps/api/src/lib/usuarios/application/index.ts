@@ -1,3 +1,4 @@
+/** @module usuarios @category Usuarios @group Aplicacion */
 export * from "./dto/UsuarioDTOs";
 export * from "./ports/in";
 export * from "./use-cases/CrearUsuarioUseCase";

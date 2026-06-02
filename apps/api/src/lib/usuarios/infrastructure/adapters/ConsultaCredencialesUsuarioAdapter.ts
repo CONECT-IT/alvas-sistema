@@ -2,6 +2,7 @@ import { type IConsultaCredencialesUsuario } from "../../../auth/domain";
 import { type IUsuarioRepository } from "../../domain/ports";
 import { Username } from "../../domain/value-objects";
 
+/** Adaptador que implementa IConsultaCredencialesUsuario desde el repositorio. @group Adaptadores */
 export class ConsultaCredencialesUsuarioAdapter implements IConsultaCredencialesUsuario {
   constructor(private readonly usuarioRepo: IUsuarioRepository) {}
 

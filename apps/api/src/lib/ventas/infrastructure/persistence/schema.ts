@@ -1,5 +1,6 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
+/** Esquema D1 para leads, clientes, citas, contratos y actividad. */
 export const leadsTable = sqliteTable("ventas_leads", {
   id: text("id").primaryKey(),
   nombre: text("nombre").notNull(),

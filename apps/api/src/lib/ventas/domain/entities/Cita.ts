@@ -12,15 +12,18 @@ export type PropsCita = {
   observacion?: string;
 };
 
+/** @group Entidades */
 export class Cita {
   private constructor(private props: PropsCita) {
     this.validarFechas();
   }
 
+  /** Crea cita en estado PENDIENTE con validacion de fechas. */
   static crear(params: Omit<PropsCita, "id" | "estado"> & { id: IdCita }): Cita {
     return new Cita({ ...params, estado: EstadoCita.pendiente() });
   }
 
+  /** Reconstituye cita desde persistencia. */
   static reconstituir(props: PropsCita): Cita {
     return new Cita(props);
   }
@@ -47,6 +50,7 @@ export class Cita {
     return this.props.observacion;
   }
 
+  /** Marca cita como realizada si no está cancelada. */
   marcarComoRealizada(): void {
     if (this.props.estado.esCancelada()) {
       throw new ErrorDeValidacion("No se puede marcar como realizada una cita cancelada.");
@@ -63,6 +67,7 @@ export class Cita {
     }
   }
 
+  /** Reprograma cita con nueva fecha y duracion. */
   reprogramar(fechaInicio: Date, duracionMinutos: number, observacion?: string): void {
     if (this.props.estado.esRealizada()) {
       throw new ErrorDeValidacion("No se puede reprogramar una cita ya realizada.");

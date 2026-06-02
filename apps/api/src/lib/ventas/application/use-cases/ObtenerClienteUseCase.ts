@@ -11,6 +11,7 @@ export type ObtenerClienteInput = {
   id: string;
 };
 
+/** @group Casos de Uso */
 export class ObtenerClienteUseCase
   implements CasoDeUso<ObtenerClienteInput, Resultado<Cliente, ErrorDeDominio>>, IObtenerCliente
 {

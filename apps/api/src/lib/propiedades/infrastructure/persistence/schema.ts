@@ -1,5 +1,6 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
+/** Esquema D1 de la tabla propiedades. @group Persistencia */
 export const propiedadesTable = sqliteTable("propiedades", {
   id: text("id").primaryKey(),
   titulo: text("titulo").notNull(),

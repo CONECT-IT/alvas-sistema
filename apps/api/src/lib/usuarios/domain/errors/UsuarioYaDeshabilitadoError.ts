@@ -1,5 +1,6 @@
 import { ErrorDeDominio } from "../../../shared/domain";
 
+/** Error emitido al intentar deshabilitar un usuario ya deshabilitado. @group Errores */
 export class UsuarioYaDeshabilitadoError extends ErrorDeDominio {
   constructor(idUsuario: string) {
     super("El usuario ya se encuentra deshabilitado.", {

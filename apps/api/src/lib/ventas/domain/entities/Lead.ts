@@ -22,9 +22,11 @@ export type PropsLead = {
   actualizadoEn: Date;
 };
 
+/** @group Entidades */
 export class Lead {
   private constructor(private props: PropsLead) {}
 
+  /** Registra un nuevo lead con estado NUEVO. */
   static registrar(params: {
     id: string;
     nombre: string;
@@ -52,6 +54,7 @@ export class Lead {
     });
   }
 
+  /** Reconstituye lead desde persistencia. */
   static reconstituir(props: PropsLead): Lead {
     return new Lead(props);
   }
@@ -93,6 +96,7 @@ export class Lead {
     return this.props.actualizadoEn;
   }
 
+  /** Agrega cita al lead si no está cerrado. */
   agendarCita(cita: Cita): void {
     if (this.props.estado.estaCerrado()) {
       throw new ErrorDeValidacion("No se pueden agendar citas en un lead cerrado.");
@@ -101,11 +105,13 @@ export class Lead {
     this.props.actualizadoEn = new Date();
   }
 
+  /** Cambia el estado del lead. */
   cambiarEstado(nuevoEstado: string): void {
     this.props.estado = EstadoLead.desde(nuevoEstado);
     this.props.actualizadoEn = new Date();
   }
 
+  /** Convierte lead a cliente si no está convertido. */
   convertirACliente(idCliente: IdCliente): void {
     if (this.props.estado.esConvertido()) {
       throw new ErrorDeValidacion("El lead ya ha sido convertido a cliente.");
@@ -155,6 +161,7 @@ export class Lead {
     this.props.actualizadoEn = new Date();
   }
 
+  /** Actualiza datos de contacto del lead. */
   actualizarDatos(params: {
     nombre?: string;
     email?: string;
@@ -196,6 +203,7 @@ export class Lead {
     this.props.actualizadoEn = new Date();
   }
 
+  /** Actualiza o reprograma una cita del lead. */
   actualizarCita(params: {
     idCita: IdCita;
     fechaInicio?: Date;

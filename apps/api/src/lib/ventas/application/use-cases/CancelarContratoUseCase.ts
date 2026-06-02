@@ -10,6 +10,7 @@ export type CancelarContratoInput = {
   idContrato: string;
 };
 
+/** @group Casos de Uso */
 export class CancelarContratoUseCase
   implements CasoDeUso<CancelarContratoInput, Resultado<void, ErrorDeDominio>>, ICancelarContrato
 {

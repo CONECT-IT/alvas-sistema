@@ -14,6 +14,7 @@ import { type IActualizarCliente } from "../ports/in";
 export type ActualizarClienteInput = ActualizarClienteInputDTO;
 export type ActualizarClienteOutput = ClienteOutputDTO;
 
+/** @group Casos de Uso */
 export class ActualizarClienteUseCase
   implements
     CasoDeUso<ActualizarClienteInput, Resultado<ActualizarClienteOutput, ErrorDeDominio>>,

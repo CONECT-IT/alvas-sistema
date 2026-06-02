@@ -1,3 +1,4 @@
+/** @group DTOs */
 export type CaptacionEntranteDTO = Readonly<{
   canal: string;
   origen: string;

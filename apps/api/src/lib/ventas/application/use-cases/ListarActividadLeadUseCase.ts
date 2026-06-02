@@ -12,6 +12,7 @@ export type ListarActividadLeadInput = {
 
 export type ListarActividadLeadOutput = ActividadLeadDTO[];
 
+/** @group Casos de Uso */
 export class ListarActividadLeadUseCase
   implements
     CasoDeUso<ListarActividadLeadInput, Resultado<ListarActividadLeadOutput, ErrorDeDominio>>,

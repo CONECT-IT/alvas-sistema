@@ -4,6 +4,11 @@ import { idPropiedad, idUsuarioRef } from "../../domain/value-objects";
 import { type OrigenPropiedad } from "../../domain/entities/Propiedad";
 import { type PropiedadRow } from "./schema";
 
+/**
+ * Mapa entre la entidad de dominio Propiedad y su representacion en persistencia.
+ *
+ * @group Persistencia
+ */
 export class PropiedadMapper {
   static aDominio(row: PropiedadRow): Propiedad {
     return Propiedad.reconstituir({

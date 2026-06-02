@@ -1,3 +1,4 @@
+/** DTO de salida para listado de usuarios. @group DTOs */
 export interface UsuarioListadoOutputDTO {
   id: string;
   username: string;

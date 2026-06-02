@@ -1,5 +1,6 @@
 import { ErrorDeDominio } from "../../../shared/domain";
 
+/** Error emitido cuando el rol del usuario no es valido. @group Errores */
 export class RolDeUsuarioInvalidoError extends ErrorDeDominio {
   constructor(rol: string) {
     super("El rol del usuario no es valido.", {

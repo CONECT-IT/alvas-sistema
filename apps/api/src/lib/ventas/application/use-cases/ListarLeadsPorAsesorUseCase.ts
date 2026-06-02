@@ -12,6 +12,7 @@ export type ListarLeadsPorAsesorInput = {
 
 export type ListarLeadsPorAsesorOutput = Lead[];
 
+/** @group Casos de Uso */
 export class ListarLeadsPorAsesorUseCase
   implements
     CasoDeUso<ListarLeadsPorAsesorInput, Resultado<ListarLeadsPorAsesorOutput, ErrorDeDominio>>,

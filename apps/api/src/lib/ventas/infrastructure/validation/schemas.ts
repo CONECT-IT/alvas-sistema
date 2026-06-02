@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { fechaStringSchema } from "../../../shared/infrastructure/validation/helpers";
 
+/** Esquemas Zod para validacion de entrada en ventas. */
 export const RegistrarLeadSchema = z.object({
   nombre: z.string().min(1, "Nombre requerido"),
   email: z.string().min(1, "Email requerido"),

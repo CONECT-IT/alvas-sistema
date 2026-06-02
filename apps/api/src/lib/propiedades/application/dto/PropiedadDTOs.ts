@@ -1,3 +1,7 @@
+/**
+ * DTO para la creacion de una propiedad.
+ * @group DTOs
+ */
 export type CrearPropiedadDTO = Readonly<{
   titulo: string;
   descripcion: string;
@@ -10,6 +14,10 @@ export type CrearPropiedadDTO = Readonly<{
   asesorResponsableId?: string;
 }>;
 
+/**
+ * DTO para la actualizacion de una propiedad.
+ * @group DTOs
+ */
 export type ActualizarPropiedadDTO = Readonly<{
   titulo?: string;
   descripcion?: string;
@@ -19,6 +27,10 @@ export type ActualizarPropiedadDTO = Readonly<{
   asesorResponsableId?: string;
 }>;
 
+/**
+ * DTO para la respuesta HTTP de una propiedad.
+ * @group DTOs
+ */
 export type PropiedadRespuestaDTO = Readonly<{
   id: string;
   titulo: string;

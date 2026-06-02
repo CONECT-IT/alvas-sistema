@@ -5,6 +5,7 @@ import { type CaptacionPendiente, type ICaptacionPendienteRepository } from "../
 import { CaptacionPendienteMapper } from "./CaptacionPendienteMapper";
 import { captacionesPendientesTable, type CaptacionPendienteRow } from "./schema";
 
+/** @group Persistencia */
 export class D1CaptacionPendienteRepository implements ICaptacionPendienteRepository {
   constructor(private readonly db: D1DatabaseLike) {}
 

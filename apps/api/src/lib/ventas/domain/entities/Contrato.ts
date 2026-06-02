@@ -19,11 +19,13 @@ export type PropsContrato = {
   actualizadoEn: Date;
 };
 
+/** @group Entidades */
 export class Contrato {
   private constructor(private props: PropsContrato) {
     this.validarFechas();
   }
 
+  /** Crea contrato en estado BORRADOR. */
   static crear(params: {
     id: IdContrato;
     idLead: IdLead;
@@ -44,6 +46,7 @@ export class Contrato {
     });
   }
 
+  /** Reconstituye contrato desde persistencia. */
   static reconstituir(props: PropsContrato): Contrato {
     return new Contrato(props);
   }
@@ -84,6 +87,7 @@ export class Contrato {
     this.props.actualizadoEn = new Date();
   }
 
+  /** Firma el contrato (BORRADOR → VIGENTE). */
   firmar(): void {
     if (!this.props.estado.esBorrador()) {
       throw new ErrorDeValidacion("Solo se pueden firmar contratos en estado borrador.");
@@ -97,6 +101,7 @@ export class Contrato {
     this.props.actualizadoEn = new Date();
   }
 
+  /** Cancela el contrato si no está finalizado. */
   cancelar(): void {
     if (this.props.estado.esFinalizado()) {
       throw new ErrorDeValidacion("No se puede cancelar un contrato finalizado.");

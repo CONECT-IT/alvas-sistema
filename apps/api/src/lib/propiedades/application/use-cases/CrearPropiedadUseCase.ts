@@ -27,6 +27,11 @@ export type CrearPropiedadInput = {
   };
 };
 
+/**
+ * Crea una nueva propiedad validando permisos segun rol y relacion comercial.
+ *
+ * @group Casos de Uso
+ */
 export class CrearPropiedadUseCase
   implements CasoDeUso<CrearPropiedadInput, Resultado<Propiedad, PropiedadError>>, ICrearPropiedad
 {
@@ -37,6 +42,10 @@ export class CrearPropiedadUseCase
     private readonly consultaRelacionPropiedad: IConsultaRelacionPropiedad,
   ) {}
 
+  /**
+   * @param input - Datos de la propiedad a crear con usuario autenticado.
+   * @returns Propiedad creada o error de dominio.
+   */
   async ejecutar(input: CrearPropiedadInput): Promise<Resultado<Propiedad, PropiedadError>> {
     try {
       const puedeCrear = await this.puedeCrear(input);

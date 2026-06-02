@@ -17,6 +17,7 @@ import {
   ReporteGeneralSchema,
 } from "../../../shared/infrastructure/openapi/OpenApiSchemas";
 
+/** @group Rutas */
 export function crearReportesRouter(deps: ReportesRouterDeps) {
   const router = new OpenAPIHono<{
     Bindings: BindingsReportes;

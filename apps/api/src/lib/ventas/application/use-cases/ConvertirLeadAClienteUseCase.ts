@@ -18,6 +18,7 @@ export type ConvertirLeadAClienteInput = {
   usuarioAutenticado?: UsuarioAutenticadoVentas;
 };
 
+/** @group Casos de Uso */
 export class ConvertirLeadAClienteUseCase
   implements
     CasoDeUso<ConvertirLeadAClienteInput, Resultado<Cliente, ErrorDeDominio>>,

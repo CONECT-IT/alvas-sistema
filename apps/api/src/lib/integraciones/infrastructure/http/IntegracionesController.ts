@@ -55,9 +55,11 @@ type ContextoIntegraciones = Context<{
   Variables: { authPayload: SessionClaims };
 }>;
 
+/** @group Controladores HTTP */
 export class IntegracionesController {
   constructor(private readonly deps: IntegracionesRouterDeps) {}
 
+  /** Valida secreto y procesa webhook entrante de WhatsApp. */
   async recibirWhatsAppLead(c: ContextoIntegraciones): Promise<Response> {
     const secretoEsperado = c.env.INTEGRACION_WHATSAPP_SECRETO;
     if (secretoEsperado) {
@@ -96,6 +98,7 @@ export class IntegracionesController {
     }
   }
 
+  /** Retorna todas las captaciones en estado pendiente. */
   async listarCaptacionesPendientes(c: ContextoIntegraciones): Promise<Response> {
     try {
       const useCase = this.deps.crearListarCaptacionesPendientes(c);
@@ -118,6 +121,7 @@ export class IntegracionesController {
     }
   }
 
+  /** Marca captacion como revisada. */
   async revisarCaptacionPendiente(c: ContextoIntegraciones): Promise<Response> {
     try {
       const useCase = this.deps.crearRevisarCaptacionPendiente(c);
@@ -140,6 +144,7 @@ export class IntegracionesController {
     }
   }
 
+  /** Marca captacion como duplicada con razón. */
   async marcarCaptacionDuplicada(c: ContextoIntegraciones): Promise<Response> {
     try {
       const body = parseBody(MarcarDuplicadaSchema, await c.req.json());
@@ -171,6 +176,7 @@ export class IntegracionesController {
     }
   }
 
+  /** Rechaza captacion con razón opcional. */
   async rechazarCaptacionPendiente(c: ContextoIntegraciones): Promise<Response> {
     try {
       const body = parseBody(RechazarCaptacionSchema, await c.req.json());
@@ -198,6 +204,7 @@ export class IntegracionesController {
     }
   }
 
+  /** Convierte captacion a lead registrado en ventas. */
   async convertirCaptacionPendiente(c: ContextoIntegraciones): Promise<Response> {
     try {
       const body = parseBody(ConvertirCaptacionSchema, await c.req.json());
@@ -230,6 +237,7 @@ export class IntegracionesController {
     }
   }
 
+  /** Recibe captacion entrante desde canal externo. */
   async recibirCaptacion(c: ContextoIntegraciones): Promise<Response> {
     try {
       const body = parseBody(CaptacionEntranteSchema, await c.req.json());

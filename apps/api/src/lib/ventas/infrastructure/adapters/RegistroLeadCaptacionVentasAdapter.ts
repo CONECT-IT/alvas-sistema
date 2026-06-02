@@ -6,6 +6,7 @@ import { type Resultado, resultadoExitoso } from "../../../shared";
 import { type ErrorDeDominio } from "../../../shared/domain";
 import { type IRegistrarLead } from "../../application";
 
+/** @group Persistencia */
 export class RegistroLeadCaptacionVentasAdapter implements IRegistroLeadCaptacion {
   constructor(private readonly registrarLead: IRegistrarLead) {}
 

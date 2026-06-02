@@ -6,6 +6,7 @@ type DatosContactoProps = Readonly<{
   email?: string;
 }>;
 
+/** @group Value Objects */
 export class DatosContactoCaptacion {
   private constructor(private readonly props: DatosContactoProps) {}
 

@@ -24,9 +24,11 @@ export type AuthControllerDeps = Readonly<{
 
 type ContextoAuth = Context<{ Bindings: BindingsAuth }>;
 
+/** Controlador HTTP de autenticacion. @group Controladores HTTP */
 export class AuthController {
   constructor(private readonly deps: AuthControllerDeps) {}
 
+  /** Maneja POST /login para autenticar usuario. */
   async iniciarSesion(c: ContextoAuth): Promise<Response> {
     try {
       const body = parseBody(IniciarSesionSchema, await c.req.json());
@@ -43,6 +45,7 @@ export class AuthController {
     }
   }
 
+  /** Maneja POST /refresh para renovar sesion. */
   async renovarSesion(c: ContextoAuth): Promise<Response> {
     try {
       const body = parseBody(RenovarSesionSchema, await c.req.json());

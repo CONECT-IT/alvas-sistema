@@ -19,6 +19,7 @@ import { schemasEntrada } from "../../../shared/infrastructure/openapi/OpenApiSc
 
 const sinSeguridad = [] as { bearerAuth: string[] }[];
 
+/** @group Rutas */
 export function crearIntegracionesRouter(deps: IntegracionesRouterDeps) {
   const router = new OpenAPIHono<{
     Bindings: BindingsIntegraciones;

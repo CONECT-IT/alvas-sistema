@@ -18,6 +18,7 @@ import {
   schemasEntrada,
 } from "../../../shared/infrastructure/openapi/OpenApiSchemas";
 
+/** Router con CRUD de usuarios (/). @group Rutas */
 export const crearUsuarioRouter = (deps: UsuarioControllerDeps) => {
   const router = new OpenAPIHono<{ Bindings: BindingsUsuarios }>({ defaultHook: validationHook });
   const controller = new UsuarioController(deps);

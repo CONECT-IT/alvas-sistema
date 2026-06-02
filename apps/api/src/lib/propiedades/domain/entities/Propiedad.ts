@@ -54,6 +54,8 @@ const textoOpcional = (valor?: string): string | undefined => valor?.trim() || u
  * responsable. Las reglas de visibilidad y permisos se aplican desde casos de
  * uso, pero esta entidad mantiene invariantes propios como origen valido,
  * titulo obligatorio y precio no negativo.
+ *
+ * @group Entidades
  */
 export class Propiedad {
   private props: PropsPropiedad;
@@ -150,6 +152,9 @@ export class Propiedad {
    *
    * Solo modifica campos presentes. Un titulo vacio o precio negativo produce
    * `PropiedadError`, porque dejaria la ficha comercial en un estado invalido.
+   *
+   * @param datos - Campos opcionales a modificar.
+   * @throws {PropiedadError} Si titulo vacio o precio negativo.
    */
   actualizar(datos: DatosPropiedad): void {
     if (datos.titulo !== undefined) {

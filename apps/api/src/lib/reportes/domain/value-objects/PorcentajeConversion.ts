@@ -1,8 +1,6 @@
 import { ErrorDeValidacion } from "../../../shared/domain";
 
-/**
- * Representa un porcentaje de conversión (0–100) derivado de conteos de negocio.
- */
+/** @group Value Objects */
 export class PorcentajeConversion {
   private constructor(public readonly valorNumerico: number) {
     if (Number.isNaN(valorNumerico) || valorNumerico < 0) {

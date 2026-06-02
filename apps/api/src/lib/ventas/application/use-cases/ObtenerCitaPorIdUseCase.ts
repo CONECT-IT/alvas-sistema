@@ -15,6 +15,7 @@ import { type IObtenerCitaPorId } from "../ports/in";
 export type ObtenerCitaPorIdInput = ObtenerCitaPorIdInputDTO;
 export type ObtenerCitaPorIdOutput = Cita;
 
+/** @group Casos de Uso */
 export class ObtenerCitaPorIdUseCase
   implements
     CasoDeUso<ObtenerCitaPorIdInput, Resultado<ObtenerCitaPorIdOutput, ErrorDeDominio>>,

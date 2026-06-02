@@ -3,6 +3,7 @@ import { ErrorDeValidacion } from "../../../shared/domain";
 export const ESTADOS_CITA = ["PENDIENTE", "REALIZADA", "CANCELADA", "REPROGRAMADA"] as const;
 export type ValorEstadoCita = (typeof ESTADOS_CITA)[number];
 
+/** @group Value Objects */
 export class EstadoCita {
   private readonly valorInterno: ValorEstadoCita;
 

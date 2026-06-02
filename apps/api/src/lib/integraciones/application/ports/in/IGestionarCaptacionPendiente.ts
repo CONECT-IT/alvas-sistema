@@ -9,6 +9,7 @@ import {
   type RevisarCaptacionPendienteDTO,
 } from "../../dto/CaptacionDTOs";
 
+/** @group Puertos de Entrada */
 export interface IRevisarCaptacionPendiente {
   ejecutar(
     input: RevisarCaptacionPendienteDTO,

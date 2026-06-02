@@ -31,6 +31,7 @@ function captacionNoEncontrada(id: string): ErrorDeDominio {
   });
 }
 
+/** @group Casos de Uso */
 export class RevisarCaptacionPendienteUseCase
   implements
     CasoDeUso<RevisarCaptacionPendienteDTO, Resultado<CaptacionPendienteDTO, ErrorDeDominio>>,
@@ -56,6 +57,7 @@ export class RevisarCaptacionPendienteUseCase
   }
 }
 
+/** @group Casos de Uso */
 export class MarcarCaptacionDuplicadaUseCase
   implements
     CasoDeUso<MarcarCaptacionDuplicadaDTO, Resultado<CaptacionPendienteDTO, ErrorDeDominio>>,
@@ -81,6 +83,7 @@ export class MarcarCaptacionDuplicadaUseCase
   }
 }
 
+/** @group Casos de Uso */
 export class RechazarCaptacionPendienteUseCase
   implements
     CasoDeUso<RechazarCaptacionPendienteDTO, Resultado<CaptacionPendienteDTO, ErrorDeDominio>>,
@@ -106,6 +109,7 @@ export class RechazarCaptacionPendienteUseCase
   }
 }
 
+/** @group Casos de Uso */
 export class ConvertirCaptacionPendienteUseCase
   implements
     CasoDeUso<ConvertirCaptacionPendienteDTO, Resultado<CaptacionConvertidaDTO, ErrorDeDominio>>,

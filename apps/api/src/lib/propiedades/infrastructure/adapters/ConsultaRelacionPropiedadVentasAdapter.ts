@@ -1,6 +1,11 @@
 import { type IVentasRepository } from "../../../ventas/domain/ports/IVentasRepository";
 import { type IConsultaRelacionPropiedad, type RelacionPropiedad } from "../../domain/ports";
 
+/**
+ * Adaptador que consulta si un asesor gestiona la entidad vinculada a una propiedad.
+ *
+ * @group Adaptadores
+ */
 export class ConsultaRelacionPropiedadVentasAdapter implements IConsultaRelacionPropiedad {
   constructor(private readonly ventasRepository: IVentasRepository) {}
 

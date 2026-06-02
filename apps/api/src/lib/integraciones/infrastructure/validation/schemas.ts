@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+/** Esquemas Zod para validacion de entrada en integraciones. */
 export const CaptacionEntranteSchema = z.object({
   canal: z.string().min(1, "Canal requerido"),
   origen: z.string().min(1, "Origen requerido"),

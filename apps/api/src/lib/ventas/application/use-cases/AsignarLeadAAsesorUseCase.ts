@@ -15,6 +15,7 @@ import { type IAsignarLeadAAsesor } from "../ports/in";
 export type AsignarLeadAAsesorInput = AsignarLeadAAsesorInputDTO;
 export type AsignarLeadAAsesorOutput = void;
 
+/** @group Casos de Uso */
 export class AsignarLeadAAsesorUseCase
   implements
     CasoDeUso<AsignarLeadAAsesorInput, Resultado<AsignarLeadAAsesorOutput, ErrorDeDominio>>,

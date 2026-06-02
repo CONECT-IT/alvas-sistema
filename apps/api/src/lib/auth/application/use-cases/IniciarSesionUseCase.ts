@@ -14,11 +14,13 @@ import {
   type IVerificadorDeClave,
 } from "../../domain/ports";
 
+/** @param username - Nombre de usuario. @param clave - Clave en texto plano. */
 export type IniciarSesionInput = {
   username: string;
   clave: string;
 };
 
+/** Caso de uso: autenticar usuario con username y clave. @group Casos de Uso */
 export class IniciarSesionUseCase
   implements
     CasoDeUso<IniciarSesionInput, Resultado<SesionAutenticadaDTO, ErrorDeDominio>>,
@@ -30,6 +32,11 @@ export class IniciarSesionUseCase
     private readonly tokenProvider: ITokenProvider,
   ) {}
 
+  /**
+   * Ejecuta el inicio de sesion.
+   * @param input - Datos de autenticacion (username, clave).
+   * @returns Resultado con sesion autenticada o error de dominio.
+   */
   async ejecutar(
     input: IniciarSesionInput,
   ): Promise<Resultado<SesionAutenticadaDTO, ErrorDeDominio>> {

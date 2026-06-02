@@ -11,6 +11,7 @@ export type ListarContratosPorAsesorInput = {
   idAsesor: string;
 };
 
+/** @group Casos de Uso */
 export class ListarContratosPorAsesorUseCase
   implements
     CasoDeUso<ListarContratosPorAsesorInput, Resultado<ListarContratosOutputDTO, ErrorDeDominio>>,

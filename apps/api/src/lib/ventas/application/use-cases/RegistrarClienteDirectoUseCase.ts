@@ -18,6 +18,7 @@ export type RegistrarClienteDirectoInput = {
   idAsesor: string;
 };
 
+/** @group Casos de Uso */
 export class RegistrarClienteDirectoUseCase
   implements
     CasoDeUso<RegistrarClienteDirectoInput, Resultado<Cliente, ErrorDeDominio>>,

@@ -22,6 +22,7 @@ export type AgendarCitaInput = {
   usuarioAutenticado?: UsuarioAutenticadoVentas;
 };
 
+/** @group Casos de Uso */
 export class AgendarCitaUseCase
   implements CasoDeUso<AgendarCitaInput, Resultado<void, ErrorDeDominio>>, IAgendarCita
 {

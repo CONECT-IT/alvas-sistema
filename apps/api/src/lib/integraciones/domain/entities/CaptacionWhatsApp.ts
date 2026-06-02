@@ -8,9 +8,11 @@ type CaptacionWhatsAppProps = Readonly<{
   idPropiedadInteres?: string;
 }>;
 
+/** @group Entidades */
 export class CaptacionWhatsApp {
   private constructor(private readonly props: CaptacionWhatsAppProps) {}
 
+  /** Crea desde payload del webhook de WhatsApp. */
   static crear(input: {
     wa_id: string;
     wa_name: string;
@@ -56,6 +58,7 @@ export class CaptacionWhatsApp {
     return `${this.props.telefono}@contacto.whatsapp.local`;
   }
 
+  /** Convierte a entidad Captacion genérica. */
   aCaptacion(): Captacion {
     return Captacion.registrar({
       canal: "WHATSAPP",

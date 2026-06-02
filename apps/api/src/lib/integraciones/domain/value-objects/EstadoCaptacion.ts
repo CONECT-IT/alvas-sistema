@@ -10,6 +10,7 @@ export const ESTADOS_CAPTACION = [
 
 export type ValorEstadoCaptacion = (typeof ESTADOS_CAPTACION)[number];
 
+/** @group Value Objects */
 export class EstadoCaptacion {
   private readonly valorInterno: ValorEstadoCaptacion;
 

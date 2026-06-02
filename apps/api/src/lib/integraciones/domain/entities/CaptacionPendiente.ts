@@ -11,9 +11,11 @@ type CaptacionPendienteProps = Readonly<{
   actualizadoEn: Date;
 }>;
 
+/** @group Entidades */
 export class CaptacionPendiente {
   private constructor(private props: CaptacionPendienteProps) {}
 
+  /** Crea una captacion pendiente tras validar que no esté cerrada. */
   static registrar(params: { id: string; captacion: Captacion }): CaptacionPendiente {
     const ahora = new Date();
     return new CaptacionPendiente({
@@ -25,10 +27,12 @@ export class CaptacionPendiente {
     });
   }
 
+  /** Reconstituye desde persistencia. */
   static reconstituir(props: CaptacionPendienteProps): CaptacionPendiente {
     return new CaptacionPendiente(props);
   }
 
+  /** Marca como revisada si es procesable. */
   marcarRevisada(): void {
     this.validarProcesable();
     this.props = {
@@ -38,6 +42,7 @@ export class CaptacionPendiente {
     };
   }
 
+  /** Marca como duplicada con razón. */
   marcarDuplicada(razon: string): void {
     this.validarProcesable();
     this.props = {
@@ -48,6 +53,7 @@ export class CaptacionPendiente {
     };
   }
 
+  /** Rechaza la captacion con razón opcional. */
   rechazar(razon?: string): void {
     this.validarProcesable();
     this.props = {
@@ -58,6 +64,7 @@ export class CaptacionPendiente {
     };
   }
 
+  /** Marca como convertida a lead. */
   marcarConvertida(): void {
     this.validarProcesable();
     this.props = {

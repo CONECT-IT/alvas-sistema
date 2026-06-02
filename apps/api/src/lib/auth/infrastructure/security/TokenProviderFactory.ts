@@ -7,6 +7,7 @@ type TokenEnv = {
   REFRESH_TOKEN_TTL_SEGUNDOS?: string;
 };
 
+/** Fabrica que crea HmacTokenProvider desde variables de entorno. @group Seguridad */
 export const crearTokenProviderDesdeEnv = (env: TokenEnv): HmacTokenProvider =>
   new HmacTokenProvider({
     authSecret: env.AUTH_SECRET,

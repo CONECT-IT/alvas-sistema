@@ -15,6 +15,7 @@ function normalizarCanalCaptacion(canal: string): string {
   return canal;
 }
 
+/** Mapea entre entidad de dominio y filas de D1. */
 export class CaptacionPendienteMapper {
   static aDominio(row: CaptacionPendienteRow): CaptacionPendiente {
     return CaptacionPendiente.reconstituir({

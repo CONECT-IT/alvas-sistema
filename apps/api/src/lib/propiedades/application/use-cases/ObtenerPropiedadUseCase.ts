@@ -23,9 +23,10 @@ export type ObtenerPropiedadInput = {
 /**
  * Obtiene el detalle de una propiedad respetando permisos por rol.
  *
- * Admin puede abrir cualquier ficha. Asesor solo puede abrir propiedades donde
- * participa como captador o responsable, incluso si la propiedad esta
- * disponible comercialmente.
+ * Admin puede abrir cualquier ficha. Asesor solo ve propiedades donde participa
+ * como captador o responsable.
+ *
+ * @group Casos de Uso
  */
 export class ObtenerPropiedadUseCase
   implements
@@ -38,7 +39,8 @@ export class ObtenerPropiedadUseCase
   ) {}
 
   /**
-   * Devuelve la propiedad solicitada o un error de dominio si no existe o no es visible.
+   * @param input - Id de propiedad y usuario autenticado.
+   * @returns Propiedad solicitada o error si no existe o no es visible.
    */
   async ejecutar(input: ObtenerPropiedadInput): Promise<Resultado<Propiedad, PropiedadError>> {
     try {

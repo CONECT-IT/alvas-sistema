@@ -1,7 +1,4 @@
-/**
- * Puerto de lectura: el módulo reportes no depende de entidades de ventas.
- * Los snapshots son proyecciones mínimas para métricas y reportes.
- */
+/** @group Puertos */
 export type LeadLecturaParaReportes = Readonly<{
   id: string;
   estado: string;

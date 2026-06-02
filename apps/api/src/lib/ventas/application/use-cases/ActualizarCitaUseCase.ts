@@ -21,6 +21,7 @@ export type ActualizarCitaInput = {
   usuarioAutenticado?: UsuarioAutenticadoVentas;
 };
 
+/** @group Casos de Uso */
 export class ActualizarCitaUseCase
   implements CasoDeUso<ActualizarCitaInput, Resultado<void, ErrorDeDominio>>, IActualizarCita
 {

@@ -16,6 +16,7 @@ type ContextoReportes = Context<{
   Variables: { authPayload: SessionClaims };
 }>;
 
+/** @group Controladores HTTP */
 export class ReportesController {
   constructor(private readonly deps: ReportesRouterDeps) {}
 

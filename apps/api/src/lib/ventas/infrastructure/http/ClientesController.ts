@@ -7,6 +7,7 @@ import {
 import { parseBody } from "../../../shared/infrastructure/validation/helpers";
 import { RegistrarClienteDirectoSchema, ActualizarClienteSchema } from "../validation/schemas";
 
+/** @group Controladores HTTP */
 export class ClientesController {
   constructor(private readonly deps: VentasControllerDeps) {}
 

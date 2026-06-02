@@ -1,6 +1,7 @@
 import { Lead } from "../entities/Lead";
 import { Cliente } from "../entities/Cliente";
 
+/** @group Puertos */
 export interface IVentasRepository {
   // Gestión de Leads
   obtenerLeadPorId(id: string): Promise<Lead | null>;

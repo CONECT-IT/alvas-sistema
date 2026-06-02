@@ -1,3 +1,5 @@
+/** @module integraciones @category Integraciones @group Dominio */
+
 export * from "./entities";
 export * from "./ports/ICaptacionPendienteRepository";
 export * from "./ports/IRegistroLeadCaptacion";

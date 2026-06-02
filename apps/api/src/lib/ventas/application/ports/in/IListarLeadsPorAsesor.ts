@@ -6,6 +6,7 @@ export type ListarLeadsPorAsesorQuery = Readonly<{
   idAsesor: string;
 }>;
 
+/** @group Puertos de Entrada */
 export interface IListarLeadsPorAsesor {
   ejecutar(input: ListarLeadsPorAsesorQuery): Promise<Resultado<Lead[], ErrorDeDominio>>;
 }

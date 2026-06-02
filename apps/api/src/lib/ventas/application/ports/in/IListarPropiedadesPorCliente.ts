@@ -5,6 +5,7 @@ export type ListarPropiedadesPorClienteQuery = Readonly<{
   idCliente: string;
 }>;
 
+/** @group Puertos de Entrada */
 export interface IListarPropiedadesPorCliente {
   ejecutar(input: ListarPropiedadesPorClienteQuery): Promise<Resultado<string[], ErrorDeDominio>>;
 }

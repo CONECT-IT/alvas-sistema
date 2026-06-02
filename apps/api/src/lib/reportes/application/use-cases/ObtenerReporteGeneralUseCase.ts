@@ -10,6 +10,7 @@ import { type IConsultaVentasParaReportes } from "../../domain/ports/IConsultaVe
 import { type ReporteGeneralOutput } from "../dto/ReportesSalidaDTOs";
 import { type IObtenerReporteGeneral } from "../ports/in";
 
+/** @group Casos de Uso */
 export class ObtenerReporteGeneralUseCase
   implements
     CasoDeUso<void, Resultado<ReporteGeneralOutput, ErrorDeDominio>>,

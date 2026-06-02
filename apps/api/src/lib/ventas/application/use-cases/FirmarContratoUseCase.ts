@@ -14,6 +14,7 @@ export type FirmarContratoInput = {
   idContrato: string;
 };
 
+/** @group Casos de Uso */
 export class FirmarContratoUseCase
   implements CasoDeUso<FirmarContratoInput, Resultado<void, ErrorDeDominio>>, IFirmarContrato
 {

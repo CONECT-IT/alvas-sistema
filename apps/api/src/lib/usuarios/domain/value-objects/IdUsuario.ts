@@ -1,5 +1,6 @@
 import { IdUsuarioInvalidoError } from "../errors";
 
+/** Identificador unico de usuario. @group Value Objects */
 export class IdUsuario {
   private readonly valorInterno: string;
 

@@ -3,6 +3,7 @@ import { type ErrorDeDominio } from "../../../../shared/domain";
 import { type Lead } from "../../../domain/entities/Lead";
 import { type ObtenerLeadInputDTO } from "../../dto/LeadDTOs";
 
+/** @group Puertos de Entrada */
 export interface IObtenerLead {
   ejecutar(input: ObtenerLeadInputDTO): Promise<Resultado<Lead, ErrorDeDominio>>;
 }

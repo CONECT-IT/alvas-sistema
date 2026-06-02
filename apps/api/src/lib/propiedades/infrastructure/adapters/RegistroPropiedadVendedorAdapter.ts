@@ -8,6 +8,11 @@ import { type IGeneradorId } from "../../../shared/domain/ports/IGeneradorId";
 import { Propiedad } from "../../domain/entities";
 import { type IPropiedadRepository } from "../../domain/ports";
 
+/**
+ * Adaptador que registra una propiedad desde un lead vendedor (modulo Ventas).
+ *
+ * @group Adaptadores
+ */
 export class RegistroPropiedadVendedorAdapter implements IRegistroPropiedadVendedor {
   constructor(
     private readonly propiedadRepository: IPropiedadRepository,

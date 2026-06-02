@@ -1,3 +1,4 @@
+/** @group DTOs */
 export interface CrearContratoInputDTO {
   id?: string;
   idLead: string;

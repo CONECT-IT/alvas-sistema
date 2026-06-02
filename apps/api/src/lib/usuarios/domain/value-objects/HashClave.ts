@@ -1,5 +1,6 @@
 import { HashClaveUsuarioInvalidaError } from "../errors";
 
+/** Hash de clave con formato pbkdf2. @group Value Objects */
 export class HashClave {
   private readonly valorInterno: string;
 

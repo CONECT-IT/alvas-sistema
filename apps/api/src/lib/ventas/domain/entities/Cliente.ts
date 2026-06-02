@@ -12,9 +12,11 @@ export type PropsCliente = {
   actualizadoEn: Date;
 };
 
+/** @group Entidades */
 export class Cliente {
   private constructor(private props: PropsCliente) {}
 
+  /** Crea un nuevo cliente. */
   static crear(params: {
     id: string;
     nombre: string;
@@ -32,6 +34,7 @@ export class Cliente {
     });
   }
 
+  /** Reconstituye cliente desde persistencia. */
   static reconstituir(props: PropsCliente): Cliente {
     return new Cliente(props);
   }
@@ -61,6 +64,7 @@ export class Cliente {
     return this.props.actualizadoEn;
   }
 
+  /** Actualiza nombre, email o telefono del cliente. */
   actualizarDatosContacto(params: { nombre?: string; email?: string; telefono?: string }): void {
     if (params.nombre) this.props.nombre = params.nombre;
     if (params.email) this.props.email = params.email;

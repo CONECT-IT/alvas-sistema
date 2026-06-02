@@ -4,6 +4,7 @@ export const ESTADOS_CONTRATO = ["BORRADOR", "VIGENTE", "FINALIZADO", "CANCELADO
 
 export type ValorEstadoContrato = (typeof ESTADOS_CONTRATO)[number];
 
+/** @group Value Objects */
 export class EstadoContrato {
   private readonly valorInterno: ValorEstadoContrato;
 

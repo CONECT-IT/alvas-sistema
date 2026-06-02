@@ -42,6 +42,7 @@ const compararSeguro = (a: string, b: string): boolean => {
   return acumulado === 0;
 };
 
+/** Implementa ITokenProvider con HMAC-SHA256 y formato JWT-like. @group Seguridad */
 export class HmacTokenProvider implements ITokenProvider {
   private readonly refreshSecret: string;
   private readonly authTokenTtlSegundos: number;

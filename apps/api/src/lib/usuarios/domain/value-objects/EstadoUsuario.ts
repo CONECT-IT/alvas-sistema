@@ -3,6 +3,7 @@ import { EstadoUsuarioInvalidoError } from "../errors";
 export const ESTADOS_USUARIO = ["ACTIVO", "DESHABILITADO"] as const;
 export type ValorEstadoUsuario = (typeof ESTADOS_USUARIO)[number];
 
+/** Estado del usuario (ACTIVO | DESHABILITADO). @group Value Objects */
 export class EstadoUsuario {
   private readonly valorInterno: ValorEstadoUsuario;
 

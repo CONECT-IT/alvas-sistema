@@ -9,9 +9,11 @@ type CaptacionProps = Readonly<{
   metadata?: Readonly<Record<string, string>>;
 }>;
 
+/** @group Entidades */
 export class Captacion {
   private constructor(private readonly props: CaptacionProps) {}
 
+  /** Crea una captacion validando canal, origen y contacto. */
   static registrar(params: {
     canal: string;
     origen: string;
@@ -60,6 +62,7 @@ export class Captacion {
     return this.props.metadata;
   }
 
+  /** Email del contacto o uno generado si no tiene. */
   get emailDeContacto(): string {
     return (
       this.props.contacto.email ??

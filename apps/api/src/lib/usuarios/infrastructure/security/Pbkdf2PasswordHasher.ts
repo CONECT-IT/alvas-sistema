@@ -35,6 +35,7 @@ const compararSeguro = (a: string, b: string): boolean => {
   return acumulado === 0;
 };
 
+/** Hashea claves con PBKDF2-SHA256 + pepper y las compara. @group Seguridad */
 export class Pbkdf2PasswordHasher implements IPasswordHasher {
   constructor(private readonly pepper: string = "") {}
 

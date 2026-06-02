@@ -1,5 +1,6 @@
 import { sqliteTable, text } from "drizzle-orm/sqlite-core";
 
+/** Tabla de usuarios en D1 definida con Drizzle. @group Persistencia */
 export const usuariosTable = sqliteTable("usuarios", {
   id: text("id").primaryKey(),
   username: text("username").notNull().unique(),

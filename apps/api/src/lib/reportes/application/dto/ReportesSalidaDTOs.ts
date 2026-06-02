@@ -1,3 +1,4 @@
+/** @group DTOs */
 export type AccionResumenDTO = Readonly<{
   evento: string;
   total: number;

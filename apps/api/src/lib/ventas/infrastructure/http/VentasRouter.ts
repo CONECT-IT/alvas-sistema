@@ -23,6 +23,7 @@ import {
   schemasEntrada,
 } from "../../../shared/infrastructure/openapi/OpenApiSchemas";
 
+/** @group Rutas */
 export function crearVentasRouter(deps: VentasControllerDeps) {
   const ventasRouter = new OpenAPIHono<{
     Bindings: BindingsVentas;

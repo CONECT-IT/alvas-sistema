@@ -4,6 +4,7 @@ const CANALES_CAPTACION = ["WHATSAPP", "FORMULARIO_WEB", "META_ADS", "PORTAL", "
 
 export type ValorCanalCaptacion = (typeof CANALES_CAPTACION)[number];
 
+/** @group Value Objects */
 export class CanalCaptacion {
   private readonly valorInterno: ValorCanalCaptacion;
 

@@ -24,6 +24,7 @@ export type ActualizarLeadInput = {
   usuarioAutenticado?: UsuarioAutenticadoVentas;
 };
 
+/** @group Casos de Uso */
 export class ActualizarLeadUseCase
   implements CasoDeUso<ActualizarLeadInput, Resultado<void, ErrorDeDominio>>, IActualizarLead
 {

@@ -10,6 +10,7 @@ import { type CaptacionPendienteDTO } from "../dto/CaptacionDTOs";
 import { captacionPendienteADTO } from "../mappers";
 import { type IListarCaptacionesPendientes } from "../ports/in";
 
+/** @group Casos de Uso */
 export class ListarCaptacionesPendientesUseCase
   implements
     CasoDeUso<void, Resultado<CaptacionPendienteDTO[], ErrorDeDominio>>,

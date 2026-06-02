@@ -15,6 +15,7 @@ export type ObtenerUsuarioInput = {
 };
 export type ObtenerUsuarioOutput = UsuarioOutputDTO;
 
+/** Caso de uso: obtener un usuario por su id. @group Casos de Uso */
 export class ObtenerUsuarioUseCase
   implements
     CasoDeUso<ObtenerUsuarioInput, Resultado<ObtenerUsuarioOutput, ErrorDeDominio>>,
@@ -22,6 +23,11 @@ export class ObtenerUsuarioUseCase
 {
   constructor(private readonly usuarioRepository: IUsuarioRepository) {}
 
+  /**
+   * Obtiene un usuario por su identificador.
+   * @param input - Query con idUsuario.
+   * @returns Resultado con datos del usuario o error de dominio.
+   */
   async ejecutar(
     input: ObtenerUsuarioInput,
   ): Promise<Resultado<ObtenerUsuarioOutput, ErrorDeDominio>> {

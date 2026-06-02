@@ -19,6 +19,7 @@ export type CitaConAsesorDTO = {
 
 export type ListarCitasOutput = CitaConAsesorDTO[];
 
+/** @group Casos de Uso */
 export class ListarCitasUseCase
   implements CasoDeUso<ListarCitasInput, Resultado<ListarCitasOutput, ErrorDeDominio>>, IListarCitas
 {

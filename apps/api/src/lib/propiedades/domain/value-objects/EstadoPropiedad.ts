@@ -9,6 +9,11 @@ export const ESTADOS_PROPIEDAD = [
 ] as const;
 export type ValorEstadoPropiedad = (typeof ESTADOS_PROPIEDAD)[number];
 
+/**
+ * Value object que representa el estado comercial de una propiedad.
+ *
+ * @group Value Objects
+ */
 export class EstadoPropiedad {
   private readonly valorInterno: ValorEstadoPropiedad;
 
@@ -16,6 +21,12 @@ export class EstadoPropiedad {
     this.valorInterno = valor;
   }
 
+  /**
+   * Construye un estado valido o lanza {@link PropiedadError} si el valor no es reconocido.
+   *
+   * @param valor - Estado en string (case-insensitive).
+   * @returns Instancia de EstadoPropiedad.
+   */
   static desde(valor: string): EstadoPropiedad {
     const normalizado = valor.trim().toUpperCase() as ValorEstadoPropiedad;
     if (!ESTADOS_PROPIEDAD.includes(normalizado)) {

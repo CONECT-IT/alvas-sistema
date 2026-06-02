@@ -26,6 +26,11 @@ export type PropiedadRouterDeps = Readonly<{
   controllerDeps: PropiedadControllerDeps;
 }>;
 
+/**
+ * Fabrica el router OpenAPI de propiedades con sus rutas y controlador.
+ *
+ * @group Rutas
+ */
 export function crearPropiedadRouter(deps: PropiedadRouterDeps) {
   const router = new OpenAPIHono<{
     Bindings: BindingsPropiedades;

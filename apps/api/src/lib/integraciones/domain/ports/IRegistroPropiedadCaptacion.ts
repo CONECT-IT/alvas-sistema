@@ -9,6 +9,7 @@ export type RegistroPropiedadCaptacionInput = Readonly<{
   metadata?: Readonly<Record<string, string>>;
 }>;
 
+/** @group Puertos */
 export interface IRegistroPropiedadCaptacion {
   registrar(
     input: RegistroPropiedadCaptacionInput,

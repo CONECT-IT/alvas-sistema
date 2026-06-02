@@ -10,6 +10,7 @@ import {
   type ListarPipelineOutput,
 } from "../ports/in/IListarPipeline";
 
+/** @group Casos de Uso */
 export class ListarPipelineUseCase
   implements
     CasoDeUso<ListarPipelineInput, Resultado<ListarPipelineOutput, ErrorDeDominio>>,

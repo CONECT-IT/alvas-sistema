@@ -7,6 +7,7 @@ import { obtenerDb } from "../../../shared/infrastructure/persistence/drizzle";
 import { usuariosTable, type UsuarioRow } from "./schema";
 import { UsuarioMapper } from "./UsuarioMapper";
 
+/** Repositorio de usuarios implementado con D1 y Drizzle. @group Persistencia */
 export class D1UsuarioRepository implements IUsuarioRepository {
   constructor(private readonly db: D1DatabaseLike) {}
 

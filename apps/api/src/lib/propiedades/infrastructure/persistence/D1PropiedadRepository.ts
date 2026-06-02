@@ -6,6 +6,11 @@ import { obtenerDb } from "../../../shared/infrastructure/persistence/drizzle";
 import { propiedadesTable, type PropiedadRow } from "./schema";
 import { PropiedadMapper } from "./PropiedadMapper";
 
+/**
+ * Implementacion del repositorio de propiedades sobre D1 (Cloudflare).
+ *
+ * @group Persistencia
+ */
 export class D1PropiedadRepository implements IPropiedadRepository {
   constructor(private readonly db: D1DatabaseLike) {}
 

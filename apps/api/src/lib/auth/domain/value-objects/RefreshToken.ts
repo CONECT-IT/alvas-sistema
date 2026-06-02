@@ -1,5 +1,6 @@
 import { RefreshTokenInvalidoError } from "../errors";
 
+/** Token de refresco para renovar sesion expirada. @group Value Objects */
 export class RefreshToken {
   private readonly valorInterno: string;
 

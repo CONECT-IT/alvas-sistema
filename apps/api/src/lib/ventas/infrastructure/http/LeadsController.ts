@@ -12,6 +12,7 @@ import {
   AsignarLeadAsesorSchema,
 } from "../validation/schemas";
 
+/** @group Controladores HTTP */
 export class LeadsController {
   constructor(private readonly deps: VentasControllerDeps) {}
 

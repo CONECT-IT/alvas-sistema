@@ -7,6 +7,7 @@ export type ActividadReporte = Readonly<{
   fecha: string;
 }>;
 
+/** @group Entidades */
 export class ReporteGeneral {
   constructor(
     readonly fechaGeneracion: Date,

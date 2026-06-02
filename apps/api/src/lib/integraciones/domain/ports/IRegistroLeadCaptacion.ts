@@ -13,6 +13,7 @@ export type RegistroLeadCaptacionInput = Readonly<{
   metadata?: Readonly<Record<string, string>>;
 }>;
 
+/** @group Puertos */
 export interface IRegistroLeadCaptacion {
   registrar(
     input: RegistroLeadCaptacionInput,

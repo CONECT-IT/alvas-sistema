@@ -6,6 +6,7 @@ export type AsesorConLeadsDTO = Readonly<{
   totalLeads: number;
 }>;
 
+/** @group Puertos de Entrada */
 export interface IListarAsesoresConLeads {
   ejecutar(): Promise<Resultado<AsesorConLeadsDTO[], ErrorDeDominio>>;
 }

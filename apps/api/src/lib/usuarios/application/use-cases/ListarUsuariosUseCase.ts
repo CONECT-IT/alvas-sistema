@@ -12,6 +12,7 @@ import { type IListarUsuarios } from "../ports/in";
 export type ListarUsuariosInput = void;
 export type ListarUsuariosOutput = UsuarioListadoOutputDTO[];
 
+/** Caso de uso: obtener listado de todos los usuarios. @group Casos de Uso */
 export class ListarUsuariosUseCase
   implements
     CasoDeUso<ListarUsuariosInput, Resultado<ListarUsuariosOutput, ErrorDeDominio>>,
@@ -19,6 +20,10 @@ export class ListarUsuariosUseCase
 {
   constructor(private readonly usuarioRepository: IUsuarioRepository) {}
 
+  /**
+   * Lista todos los usuarios registrados.
+   * @returns Resultado con array de usuarios o error de dominio.
+   */
   async ejecutar(): Promise<Resultado<ListarUsuariosOutput, ErrorDeDominio>> {
     try {
       const usuarios = await this.usuarioRepository.listar();

@@ -5,6 +5,7 @@ import {
   type EntradaWhatsAppWebhookDTO,
 } from "../../dto/CaptacionDTOs";
 
+/** @group Puertos de Entrada */
 export interface IProcesarWhatsAppWebhook {
   ejecutar(
     input: EntradaWhatsAppWebhookDTO,

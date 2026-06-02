@@ -1,5 +1,6 @@
 import { ErrorDeDominio } from "../../../shared/domain";
 
+/** Error emitido cuando el estado del usuario no es valido. @group Errores */
 export class EstadoUsuarioInvalidoError extends ErrorDeDominio {
   constructor(estado: string) {
     super("El estado del usuario no es valido.", {

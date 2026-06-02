@@ -1,5 +1,6 @@
 import { ErrorDeValidacion } from "../../../shared/domain";
 
+/** Nombre completo del usuario (2-100 caracteres). @group Value Objects */
 export class Nombre {
   private readonly valorInterno: string;
 

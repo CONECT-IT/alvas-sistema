@@ -2,6 +2,7 @@ import { type IRepositorioEscritura, type IRepositorioLectura } from "../../../s
 import { Usuario } from "../entities";
 import { Username } from "../value-objects";
 
+/** Puerto repositorio para persistencia de usuarios. @group Puertos */
 export interface IUsuarioRepository
   extends IRepositorioLectura<Usuario, string>, IRepositorioEscritura<Usuario, string> {
   listar(): Promise<Usuario[]>;

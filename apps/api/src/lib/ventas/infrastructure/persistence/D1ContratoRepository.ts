@@ -6,6 +6,7 @@ import { type IContratoRepository } from "../../domain/ports/IContratoRepository
 import { contratosTable, type ContratoRow } from "./schema";
 import { VentasMapper } from "./VentasMapper";
 
+/** @group Persistencia */
 export class D1ContratoRepository implements IContratoRepository {
   constructor(private readonly db: D1DatabaseLike) {}
 

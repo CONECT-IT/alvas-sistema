@@ -5,6 +5,7 @@ import {
   type VentasControllerDeps,
 } from "./VentasHttp";
 
+/** @group Controladores HTTP */
 export class PipelineController {
   constructor(private readonly deps: VentasControllerDeps) {}
 

@@ -10,6 +10,7 @@ import { idUsuarioRef } from "../../../shared/domain/value-objects/IdUsuarioRef"
 import { type LeadRow, type ClienteRow, type CitaVentaRow, type ContratoRow } from "./schema";
 import { idLead, idCita, idCliente, idContrato, idPropiedad } from "../../domain/value-objects/Ids";
 
+/** Mapea entre entidades de dominio y filas D1. */
 export class VentasMapper {
   static leadADominio(row: LeadRow, citasRows: CitaVentaRow[]): Lead {
     return Lead.reconstituir({

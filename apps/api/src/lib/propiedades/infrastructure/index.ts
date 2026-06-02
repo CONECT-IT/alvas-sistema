@@ -1,3 +1,9 @@
+/**
+ * @module propiedades/infrastructure
+ * @category Propiedades
+ * @group Infraestructura
+ */
+
 export * from "./http";
 export * from "./persistence";
 export * from "./security/AutorizadorPropiedadesAdapter";

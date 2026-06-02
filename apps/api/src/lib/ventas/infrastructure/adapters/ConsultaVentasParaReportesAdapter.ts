@@ -8,6 +8,7 @@ import {
 } from "../../../reportes/domain/ports/IConsultaVentasParaReportes";
 import { type IVentasRepository } from "../../domain/ports/IVentasRepository";
 
+/** @group Persistencia */
 export class ConsultaVentasParaReportesAdapter implements IConsultaVentasParaReportes {
   constructor(private readonly ventas: IVentasRepository) {}
 

@@ -1,5 +1,6 @@
 import { type IAutorizadorVentas } from "../../domain/ports/IAutorizadorVentas";
 
+/** @group Persistencia */
 export class AutorizadorVentasAdapter implements IAutorizadorVentas {
   puedeVerLeadsGlobales(rol: string): boolean {
     return rol === "ADMIN";

@@ -9,6 +9,7 @@ export type ListarClientesInput = void;
 
 export type ListarClientesOutput = Cliente[];
 
+/** @group Casos de Uso */
 export class ListarClientesUseCase
   implements
     CasoDeUso<ListarClientesInput, Resultado<ListarClientesOutput, ErrorDeDominio>>,

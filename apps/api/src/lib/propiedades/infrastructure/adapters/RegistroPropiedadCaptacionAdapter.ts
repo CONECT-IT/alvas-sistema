@@ -8,6 +8,11 @@ import { type IGeneradorId } from "../../../shared/domain/ports/IGeneradorId";
 import { Propiedad } from "../../domain/entities";
 import { type IPropiedadRepository } from "../../domain/ports";
 
+/**
+ * Adaptador que registra una propiedad desde una captacion (integraciones).
+ *
+ * @group Adaptadores
+ */
 export class RegistroPropiedadCaptacionAdapter implements IRegistroPropiedadCaptacion {
   constructor(
     private readonly propiedadRepository: IPropiedadRepository,

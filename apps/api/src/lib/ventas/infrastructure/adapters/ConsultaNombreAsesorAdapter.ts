@@ -1,6 +1,7 @@
 import type { IConsultaNombreAsesor } from "../../domain/ports/IConsultaNombreAsesor";
 import type { IUsuarioRepository } from "../../../usuarios/domain/ports/IUsuarioRepository";
 
+/** @group Persistencia */
 export class ConsultaNombreAsesorAdapter implements IConsultaNombreAsesor {
   constructor(private readonly usuarioRepository: IUsuarioRepository) {}
 

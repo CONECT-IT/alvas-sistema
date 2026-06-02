@@ -11,6 +11,7 @@ export const ESTADOS_LEAD = [
 
 export type ValorEstadoLead = (typeof ESTADOS_LEAD)[number];
 
+/** @group Value Objects */
 export class EstadoLead {
   private readonly valorInterno: ValorEstadoLead;
 

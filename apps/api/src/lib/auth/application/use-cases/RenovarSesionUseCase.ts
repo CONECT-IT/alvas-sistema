@@ -10,10 +10,12 @@ import { type SesionAutenticadaDTO } from "../dto";
 import { type IRenovarSesion } from "../ports/in";
 import { type IConsultaCredencialesUsuario, type ITokenProvider } from "../../domain/ports";
 
+/** @param refreshToken - Token de refresco valido. */
 export type RenovarSesionInput = {
   refreshToken: string;
 };
 
+/** Caso de uso: renovar sesion usando refresh token. @group Casos de Uso */
 export class RenovarSesionUseCase
   implements
     CasoDeUso<RenovarSesionInput, Resultado<SesionAutenticadaDTO, ErrorDeDominio>>,
@@ -24,6 +26,11 @@ export class RenovarSesionUseCase
     private readonly tokenProvider: ITokenProvider,
   ) {}
 
+  /**
+   * Ejecuta la renovacion de sesion.
+   * @param input - Datos con refresh token.
+   * @returns Resultado con nueva sesion o error de dominio.
+   */
   async ejecutar(
     input: RenovarSesionInput,
   ): Promise<Resultado<SesionAutenticadaDTO, ErrorDeDominio>> {

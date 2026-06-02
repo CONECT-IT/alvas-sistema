@@ -1,3 +1,4 @@
+/** @group DTOs */
 export interface ActualizarClienteInputDTO {
   idCliente: string;
   nombre?: string;

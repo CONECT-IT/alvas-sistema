@@ -11,6 +11,7 @@ export interface IEvaluadorAsignacion {
   evaluar(stats: AsesorStat[]): Resultado<IdUsuarioRef, ErrorDeDominio>;
 }
 
+/** @group Servicios */
 export class EvaluadorAsignacionService implements IEvaluadorAsignacion {
   evaluar(stats: AsesorStat[]): Resultado<IdUsuarioRef, ErrorDeDominio> {
     try {

@@ -25,6 +25,14 @@ export type ListarPropiedadesInput = {
  * participa como captador o responsable, evitando que vea fichas libres o de
  * otros asesores desde su cartera operativa.
  */
+/**
+ * Lista propiedades aplicando la politica de visibilidad por rol.
+ *
+ * Admin obtiene el inventario completo. Asesor obtiene solo propiedades donde
+ * participa como captador o responsable.
+ *
+ * @group Casos de Uso
+ */
 export class ListarPropiedadesUseCase
   implements
     CasoDeUso<ListarPropiedadesInput, Resultado<Propiedad[], ErrorDeDominio>>,
@@ -36,7 +44,8 @@ export class ListarPropiedadesUseCase
   ) {}
 
   /**
-   * Ejecuta la consulta de inventario visible para el usuario autenticado.
+   * @param input - Datos del usuario autenticado.
+   * @returns Lista de propiedades visibles segun el rol.
    */
   async ejecutar(input: ListarPropiedadesInput): Promise<Resultado<Propiedad[], ErrorDeDominio>> {
     try {

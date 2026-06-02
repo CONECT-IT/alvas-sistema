@@ -1,5 +1,6 @@
 import { sqliteTable, text } from "drizzle-orm/sqlite-core";
 
+/** Esquema D1 para captaciones pendientes de integraciones. */
 export const captacionesPendientesTable = sqliteTable("integraciones_captaciones_pendientes", {
   id: text("id").primaryKey(),
   canal: text("canal").notNull(),

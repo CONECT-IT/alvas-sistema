@@ -25,6 +25,7 @@ export type RegistrarLeadInput = RegistrarLeadInputDTO & {
   usuarioAutenticado?: UsuarioAutenticadoVentas;
 };
 
+/** @group Casos de Uso */
 export class RegistrarLeadUseCase
   implements CasoDeUso<RegistrarLeadInput, Resultado<Lead, ErrorDeDominio>>, IRegistrarLead
 {

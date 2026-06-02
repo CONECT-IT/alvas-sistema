@@ -1,5 +1,6 @@
 import { Contrato } from "../entities/Contrato";
 
+/** @group Puertos */
 export interface IContratoRepository {
   buscarPorId(id: string): Promise<Contrato | null>;
   guardar(contrato: Contrato): Promise<void>;

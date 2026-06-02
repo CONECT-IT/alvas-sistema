@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+/** Esquema Zod para validar creacion de propiedad. @group Validacion */
 export const CrearPropiedadSchema = z.object({
   titulo: z.string().min(1, "Título requerido"),
   descripcion: z.string().min(1, "Descripción requerida"),
@@ -12,6 +13,7 @@ export const CrearPropiedadSchema = z.object({
   asesorResponsableId: z.string().optional(),
 });
 
+/** Esquema Zod para validar actualizacion de propiedad. @group Validacion */
 export const ActualizarPropiedadSchema = z.object({
   titulo: z.string().optional(),
   descripcion: z.string().optional(),

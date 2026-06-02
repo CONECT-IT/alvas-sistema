@@ -8,6 +8,7 @@ export type CredencialesUsuario = Readonly<{
   estado: string;
 }>;
 
+/** Puerto para consultar credenciales de usuario en el sistema. @group Puertos */
 export interface IConsultaCredencialesUsuario {
   buscarPorId(idUsuario: string): Promise<CredencialesUsuario | null>;
   buscarPorUsername(username: string): Promise<CredencialesUsuario | null>;

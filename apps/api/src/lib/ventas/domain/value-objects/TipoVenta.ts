@@ -3,6 +3,7 @@ import { ErrorDeValidacion } from "../../../shared/domain";
 export const TIPOS_VENTA = ["COMPRA", "VENTA"] as const;
 export type ValorTipoVenta = (typeof TIPOS_VENTA)[number];
 
+/** @group Value Objects */
 export class TipoVenta {
   private readonly valorInterno: ValorTipoVenta;
 

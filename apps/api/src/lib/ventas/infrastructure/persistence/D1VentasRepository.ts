@@ -15,6 +15,7 @@ import {
 } from "./schema";
 import { VentasMapper } from "./VentasMapper";
 
+/** @group Persistencia */
 export class D1VentasRepository implements IVentasRepository {
   constructor(private readonly db: D1DatabaseLike) {}
 

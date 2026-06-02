@@ -14,6 +14,7 @@ import { idLead } from "../../domain/value-objects";
 export type ListarContratosInput = void;
 export type ListarContratosOutput = ListarContratosOutputDTO;
 
+/** @group Casos de Uso */
 export class ListarContratosUseCase
   implements
     CasoDeUso<ListarContratosInput, Resultado<ListarContratosOutput, ErrorDeDominio>>,

@@ -13,6 +13,7 @@ import { type CrearUsuarioDTO } from "../dto/UsuarioDTOs";
 import { type ICrearUsuario } from "../ports/in";
 import { type IGeneradorId } from "../../../shared/domain/ports";
 
+/** Caso de uso: registrar un nuevo usuario en el sistema. @group Casos de Uso */
 export class CrearUsuarioUseCase
   implements CasoDeUso<CrearUsuarioDTO, Resultado<Usuario, ErrorDeDominio>>, ICrearUsuario
 {
@@ -22,6 +23,11 @@ export class CrearUsuarioUseCase
     private readonly generadorId: IGeneradorId,
   ) {}
 
+  /**
+   * Crea un nuevo usuario con clave hasheada.
+   * @param dto - Datos de creacion (username, nombre, clave, rol).
+   * @returns Resultado con el usuario creado o error de dominio.
+   */
   async ejecutar(dto: CrearUsuarioDTO): Promise<Resultado<Usuario, ErrorDeDominio>> {
     try {
       const idUsuario = new IdUsuario(this.generadorId.generar());

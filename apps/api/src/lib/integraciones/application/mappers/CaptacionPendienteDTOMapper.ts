@@ -1,6 +1,7 @@
 import { type CaptacionPendiente } from "../../domain";
 import { type CaptacionPendienteDTO } from "../dto/CaptacionDTOs";
 
+/** Convierte entidad de dominio a DTO de salida. */
 export function captacionPendienteADTO(captacion: CaptacionPendiente): CaptacionPendienteDTO {
   return {
     id: captacion.id,

@@ -3,6 +3,7 @@ export type AccionResumen = Readonly<{
   total: number;
 }>;
 
+/** @group Entidades */
 export class ResumenAcciones {
   constructor(
     readonly acciones: ReadonlyArray<AccionResumen>,
