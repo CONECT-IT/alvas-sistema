@@ -30,14 +30,20 @@ jobs:
       - run: bun install --frozen-lockfile
       - name: Start API server
         run: |
-          bun run --cwd apps/api dev -- --port 3000 &
-          sleep 3
-          curl --retry 10 --retry-delay 2 --retry-connrefused http://127.0.0.1:3000/health
+          bun run --cwd apps/api dev --port 3000 &
+          sleep 10
+          curl --retry 15 --retry-delay 2 --retry-connrefused http://127.0.0.1:3000/health
       - name: Run k6 smoke test
         uses: grafana/k6-action@v0.3.1
         with:
           filename: apps/api/test/benchmark/k6/api-smoke.js
-          flags: --env API_URL=http://127.0.0.1:3000
+          flags: --env API_URL=http://127.0.0.1:3000 --out json=apps/api/test/benchmark/k6/reports/results.json
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: k6-results
+          path: apps/api/test/benchmark/k6/reports/
+          retention-days: 30
 
   benchmark-lighthouse:
     name: "Lighthouse: Web Perf Audit"

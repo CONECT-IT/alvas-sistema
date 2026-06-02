@@ -42,6 +42,23 @@ jobs:
       - run: bun run --cwd apps/${{ matrix.app }} lint
       - run: bunx tsc --noEmit -p apps/${{ matrix.app }}/tsconfig.json
 
+  api-sast:
+    name: "CodeQL SAST"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+          build-mode: none
+      - uses: github/codeql-action/analyze@v3
+
   build:
     name: "Stage 2: Build (${{ matrix.app }})"
     runs-on: ubuntu-latest
