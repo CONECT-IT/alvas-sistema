@@ -1,1 +1,2 @@
-export * from "./OpenApiDocument";
+export * from "./OpenApiSchemas";
+export * from "./openapi-utils";

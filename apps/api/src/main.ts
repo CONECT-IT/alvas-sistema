@@ -1,11 +1,11 @@
-import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { Scalar } from "@scalar/hono-api-reference";
+import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import { ErrorDeDominio } from "./lib/shared/domain";
 import { mapErrorDeDominioAStatus } from "./lib/shared/infrastructure/http/responses";
 import { ValidationError } from "./lib/shared/infrastructure/validation/helpers";
 import { verifySessionMiddleware, requireRolesMiddleware } from "./lib/shared/infrastructure";
-import { crearOpenApiDocument } from "./lib/shared/infrastructure/openapi";
+import { validationHook } from "./lib/shared/infrastructure/openapi/openapi-utils";
 import { crearTokenProviderDesdeEnv } from "./lib/auth/infrastructure/security/TokenProviderFactory";
 import { crearAuthRouter } from "./lib/auth/infrastructure";
 import { crearUsuarioRouter } from "./lib/usuarios/infrastructure";
@@ -38,7 +38,9 @@ type AppVariables = {
   authPayload: SessionClaims;
 };
 
-const app = new Hono<{ Bindings: AppBindings; Variables: AppVariables }>();
+type AppEnv = { Bindings: AppBindings; Variables: AppVariables };
+
+const app = new OpenAPIHono<AppEnv>({ defaultHook: validationHook });
 
 // Security: CORS
 app.use(
@@ -100,8 +102,57 @@ app.use("*", async (c, next) => {
   await next();
 });
 
-app.get("/health", (c) => c.json({ status: "ok", service: "alvas-api" }));
-app.get("/openapi.json", (c) => c.json(crearOpenApiDocument(new URL(c.req.url).origin)));
+// Create routers early so they're available for OpenAPI doc generation
+const routerUsuarios = crearUsuarioRouter(crearUsuarioControllerDeps());
+const routerAuth = crearAuthRouter(crearAuthControllerDeps());
+const routerPropiedades = crearPropiedadRouter(crearPropiedadRouterDeps());
+const routerVentas = crearVentasRouter(crearVentasControllerDeps());
+const routerReportes = crearReportesRouter(crearReportesRouterDeps());
+const routerIntegraciones = crearIntegracionesRouter(crearIntegracionesRouterDeps());
+
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/health",
+    tags: ["Health"],
+    summary: "Estado operativo del servicio",
+    security: [],
+    responses: {
+      200: {
+        description: "Servicio disponible",
+        content: {
+          "application/json": {
+            schema: z.object({ status: z.string(), service: z.string() }),
+          },
+        },
+      },
+    },
+  }),
+  (c) => c.json({ status: "ok", service: "alvas-api" }),
+);
+app.openAPIRegistry.registerComponent("securitySchemes", "bearerAuth", {
+  type: "http",
+  scheme: "bearer",
+  bearerFormat: "JWT",
+});
+
+app.get(
+  "/openapi.json",
+  (c) =>
+    c.json(
+      app.getOpenAPI31Document({
+        openapi: "3.1.0",
+        info: {
+          title: "ALVAS API",
+          version: "1.0.0",
+          description:
+            "Contrato HTTP de ALVAS. La documentacion vive en infraestructura y respeta los bounded contexts de dominio.",
+        },
+        servers: [{ url: new URL(c.req.url).origin, description: "Entorno actual" }],
+        security: [{ bearerAuth: [] as string[] }],
+      }),
+    ),
+);
 app.get(
   "/docs",
   Scalar((c) => ({
@@ -158,12 +209,12 @@ app.use(
   verifySessionMiddleware((env) => crearTokenProviderDesdeEnv(env)),
 );
 
-app.route("/usuarios", crearUsuarioRouter(crearUsuarioControllerDeps()));
-app.route("/auth", crearAuthRouter(crearAuthControllerDeps()));
-app.route("/propiedades", crearPropiedadRouter(crearPropiedadRouterDeps()));
-app.route("/ventas", crearVentasRouter(crearVentasControllerDeps()));
-app.route("/reportes", crearReportesRouter(crearReportesRouterDeps()));
-app.route("/integraciones", crearIntegracionesRouter(crearIntegracionesRouterDeps()));
+app.route("/usuarios", routerUsuarios);
+app.route("/auth", routerAuth);
+app.route("/propiedades", routerPropiedades);
+app.route("/ventas", routerVentas);
+app.route("/reportes", routerReportes);
+app.route("/integraciones", routerIntegraciones);
 
 // Audit logging for write operations
 const METODOS_ESCRITURA = new Set(["POST", "PUT", "PATCH", "DELETE"]);

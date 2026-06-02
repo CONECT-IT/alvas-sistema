@@ -5,7 +5,7 @@ La documentacion de contrato viva se expone desde el API:
 - UI interactiva: `/docs`
 - Contrato JSON: `/openapi.json`
 
-El archivo `openapi.yaml` queda como snapshot de referencia inicial. La fuente mantenible es el generador en `apps/api/src/lib/shared/infrastructure/openapi`.
+El OpenAPI se genera automáticamente desde el código via `@hono/zod-openapi`. Cada ruta se documenta inline donde se define su handler.
 
 ## Herramienta recomendada
 
