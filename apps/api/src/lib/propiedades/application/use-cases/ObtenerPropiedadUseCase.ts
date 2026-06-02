@@ -11,13 +11,22 @@ import { PropiedadError } from "../../domain/errors/PropiedadError";
 import { type IObtenerPropiedad } from "../ports/in";
 
 export type ObtenerPropiedadInput = {
+  /** Identificador publico de la propiedad solicitada. */
   idPropiedad: string;
+  /** Usuario que solicita el detalle y define permisos de lectura. */
   usuarioAutenticado: {
     id: string;
     rol: string;
   };
 };
 
+/**
+ * Obtiene el detalle de una propiedad respetando permisos por rol.
+ *
+ * Admin puede abrir cualquier ficha. Asesor solo puede abrir propiedades donde
+ * participa como captador o responsable, incluso si la propiedad esta
+ * disponible comercialmente.
+ */
 export class ObtenerPropiedadUseCase
   implements
     CasoDeUso<ObtenerPropiedadInput, Resultado<Propiedad, PropiedadError>>,
@@ -28,6 +37,9 @@ export class ObtenerPropiedadUseCase
     private readonly autorizador: IAutorizadorPropiedades,
   ) {}
 
+  /**
+   * Devuelve la propiedad solicitada o un error de dominio si no existe o no es visible.
+   */
   async ejecutar(input: ObtenerPropiedadInput): Promise<Resultado<Propiedad, PropiedadError>> {
     try {
       if (!this.autorizador.puedeVerPropiedades(input.usuarioAutenticado.rol)) {

@@ -11,12 +11,20 @@ import { type IAutorizadorPropiedades } from "../../domain/ports";
 import { type IListarPropiedades } from "../ports/in";
 
 export type ListarPropiedadesInput = {
+  /** Usuario que ejecuta la consulta y define el alcance de visibilidad. */
   usuarioAutenticado: {
     id: string;
     rol: string;
   };
 };
 
+/**
+ * Lista propiedades aplicando la politica de visibilidad por rol.
+ *
+ * Admin obtiene el inventario completo. Asesor obtiene solo propiedades donde
+ * participa como captador o responsable, evitando que vea fichas libres o de
+ * otros asesores desde su cartera operativa.
+ */
 export class ListarPropiedadesUseCase
   implements
     CasoDeUso<ListarPropiedadesInput, Resultado<Propiedad[], ErrorDeDominio>>,
@@ -27,6 +35,9 @@ export class ListarPropiedadesUseCase
     private readonly autorizador: IAutorizadorPropiedades,
   ) {}
 
+  /**
+   * Ejecuta la consulta de inventario visible para el usuario autenticado.
+   */
   async ejecutar(input: ListarPropiedadesInput): Promise<Resultado<Propiedad[], ErrorDeDominio>> {
     try {
       const { usuarioAutenticado } = input;

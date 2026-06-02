@@ -2,6 +2,13 @@ import { idPropiedad, type IdPropiedad, type IdUsuarioRef } from "../value-objec
 import { EstadoPropiedad } from "../value-objects/EstadoPropiedad";
 import { PropiedadError } from "../errors/PropiedadError";
 
+/**
+ * Origen comercial permitido para una propiedad dentro del inventario ALVAS.
+ *
+ * - `ALVAS`: inventario registrado directamente por administracion.
+ * - `CLIENTE`: propiedad vinculada a un cliente propietario.
+ * - `CAPTACION`: propiedad nacida desde una captacion o lead vendedor.
+ */
 export const ORIGENES_PROPIEDAD = ["ALVAS", "CLIENTE", "CAPTACION"] as const;
 export type OrigenPropiedad = (typeof ORIGENES_PROPIEDAD)[number];
 
@@ -39,6 +46,15 @@ const normalizarOrigen = (valor?: string): OrigenPropiedad => {
 
 const textoOpcional = (valor?: string): string | undefined => valor?.trim() || undefined;
 
+/**
+ * Aggregate root del modulo Propiedades.
+ *
+ * Representa un bien inmobiliario gestionado por ALVAS. Centraliza el estado
+ * comercial, el origen del inventario y la relacion con lead, cliente o asesor
+ * responsable. Las reglas de visibilidad y permisos se aplican desde casos de
+ * uso, pero esta entidad mantiene invariantes propios como origen valido,
+ * titulo obligatorio y precio no negativo.
+ */
 export class Propiedad {
   private props: PropsPropiedad;
 
@@ -46,6 +62,12 @@ export class Propiedad {
     this.props = props;
   }
 
+  /**
+   * Crea una propiedad nueva desde datos de entrada normalizados por la capa de aplicacion.
+   *
+   * Si no se indica origen, se asume `ALVAS`. Si no se indica estado, se asume
+   * `DISPONIBLE`. Los identificadores opcionales vacios se limpian a `undefined`.
+   */
   static crear(params: {
     id: string;
     titulo: string;
@@ -79,6 +101,9 @@ export class Propiedad {
     });
   }
 
+  /**
+   * Reconstituye una propiedad existente desde persistencia sin alterar fechas ni estado.
+   */
   static reconstituir(props: PropsPropiedad): Propiedad {
     return new Propiedad(props);
   }
@@ -120,6 +145,12 @@ export class Propiedad {
     return this.props.actualizadoEn;
   }
 
+  /**
+   * Actualiza datos comerciales manteniendo invariantes del agregado.
+   *
+   * Solo modifica campos presentes. Un titulo vacio o precio negativo produce
+   * `PropiedadError`, porque dejaria la ficha comercial en un estado invalido.
+   */
   actualizar(datos: DatosPropiedad): void {
     if (datos.titulo !== undefined) {
       const titulo = datos.titulo.trim();
