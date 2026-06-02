@@ -1,0 +1,57 @@
+name: Deploy Docs to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/docs-pages.yml"
+      - "apps/docs/**"
+      - "apps/api/src/**"
+      - "apps/web/src/lib/**"
+      - "docs/**"
+      - "package.json"
+      - "bun.lock"
+      - "typedoc.api.json"
+      - "typedoc.web.json"
+  workflow_dispatch:
+
+concurrency:
+  group: docs-pages
+  cancel-in-progress: true
+
+env:
+  CI: "true"
+  HUSKY: "0"
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  DOCS_SITE: "https://conect-it.github.io"
+  DOCS_BASE: "/alvas-sistema"
+
+jobs:
+  build:
+    name: Build Starlight docs
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.14"
+      - run: bun install --frozen-lockfile
+      - run: bun run docs:build
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: apps/docs/dist
+      - id: deployment
+        uses: actions/deploy-pages@v5
