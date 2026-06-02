@@ -20,7 +20,9 @@ type LeadDetalle = {
 	tipo: string;
 	estado: string;
 	idAsesor: string;
-	idPropiedadInteres?: string;
+	nombreAsesor?: string;
+	idCliente: string | null;
+	idPropiedadInteres: string | null;
 	citas: CitaDto[];
 	creadoEn: string;
 	actualizadoEn: string;

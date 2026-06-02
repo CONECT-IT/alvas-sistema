@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { presentarEstadoLead } from '$lib/shared/presentation';
 	import type { LeadPipeline } from '../domain/models/LeadPipeline';
 
 	type FiltroKey = 'todos' | 'conCitas' | 'nuevos' | 'compradores' | 'vendedores';
@@ -13,12 +12,8 @@
 	let { leads, filtro = 'todos', onFilter }: Props = $props();
 
 	const conCitas = $derived(leads.filter((lead) => lead.citasCount > 0).length);
-	const nuevos = $derived(
-		leads.filter((lead) => presentarEstadoLead(lead.estado).tone === 'warning').length
-	);
 	const compradores = $derived(leads.filter((lead) => lead.tipo === 'COMPRA').length);
 	const vendedores = $derived(leads.filter((lead) => lead.tipo === 'VENTA').length);
-	const estados = $derived(new Set(leads.map((lead) => lead.estado)).size);
 
 	const tarjetas = $derived([
 		{

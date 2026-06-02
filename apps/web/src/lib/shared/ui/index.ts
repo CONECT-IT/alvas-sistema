@@ -5,6 +5,7 @@ export { default as Badge } from './Badge.svelte';
 export { default as Button } from './Button.svelte';
 export { default as Card } from './Card.svelte';
 export { default as Checkbox } from './Checkbox.svelte';
+export { default as ConfirmDialog } from './ConfirmDialog.svelte';
 export { default as DateTimePicker } from './DateTimePicker.svelte';
 export { default as FloatingTextInput } from './FloatingTextInput.svelte';
 export { default as FormField } from './FormField.svelte';

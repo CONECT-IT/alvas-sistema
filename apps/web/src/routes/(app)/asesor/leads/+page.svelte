@@ -25,10 +25,13 @@
 
 	let leads = $derived((data?.leads as LeadPipeline[]) ?? []);
 	let propiedadesDisponibles = $derived((data?.propiedadesDisponibles as Propiedad[]) ?? []);
+	let clientes = $derived(
+		(data?.clientes as Array<{ id: string; nombre: string; email: string }>) ?? []
+	);
 	let mostrarConvertidos = $state(false);
 	let vista = $state<'tabla' | 'kanban'>('tabla');
 	let busqueda = $state('');
-	type FiltroLeads = 'todos' | 'conCitas' | 'nuevos';
+	type FiltroLeads = 'todos' | 'conCitas' | 'nuevos' | 'compradores' | 'vendedores';
 	let filtro = $state<FiltroLeads>('todos');
 	let diaSeleccionado = $state(fechaClave(Date.now()));
 	let loading = $state(false);
@@ -41,6 +44,7 @@
 		email: '',
 		telefono: '',
 		tipo: 'COMPRA' as 'COMPRA' | 'VENTA',
+		idCliente: '',
 		idPropiedadInteres: '',
 		propiedadTitulo: '',
 		propiedadDescripcion: '',
@@ -54,6 +58,8 @@
 		leadsBase.filter((lead) => {
 			if (filtro === 'conCitas') return (lead.citasCount ?? 0) > 0;
 			if (filtro === 'nuevos') return presentarEstadoLead(lead.estado).tone === 'warning';
+			if (filtro === 'compradores') return lead.tipo === 'COMPRA';
+			if (filtro === 'vendedores') return lead.tipo === 'VENTA';
 			return true;
 		})
 	);
@@ -180,6 +186,7 @@
 				email: formLead.email,
 				telefono: formLead.telefono,
 				tipo: formLead.tipo,
+				idCliente: formLead.idCliente || undefined,
 				idPropiedadInteres:
 					formLead.tipo === 'COMPRA' && formLead.idPropiedadInteres
 						? formLead.idPropiedadInteres
@@ -402,6 +409,13 @@
 			<Select bind:value={formLead.tipo}>
 				{#each opcionesTipoVenta() as opt (opt.value)}
 					<option value={opt.value}>{opt.label}</option>
+				{/each}
+			</Select>
+
+			<Select label="Cliente existente" bind:value={formLead.idCliente}>
+				<option value="">Sin cliente asociado</option>
+				{#each clientes as cliente (cliente.id)}
+					<option value={cliente.id}>{cliente.nombre} ({cliente.email})</option>
 				{/each}
 			</Select>
 

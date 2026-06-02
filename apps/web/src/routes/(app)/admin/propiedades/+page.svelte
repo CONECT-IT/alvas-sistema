@@ -2,6 +2,7 @@
 	import { goto, invalidateAll } from '$app/navigation';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
+	import ConfirmDialog from '$lib/shared/ui/ConfirmDialog.svelte';
 	import SidePanel from '$lib/shared/ui/SidePanel.svelte';
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import type { Propiedad } from '$lib/propiedades/domain/models/Propiedad';
@@ -25,6 +26,7 @@
 	let reviewError = $state<string | null>(null);
 	let reviewSuccess = $state<string | null>(null);
 	let mostrarPanel = $state(false);
+	let publicarConfirm = $state<{ id: string; titulo: string } | null>(null);
 	let titulo = $state('');
 	let descripcion = $state('');
 	let precio = $state('');
@@ -51,12 +53,37 @@
 		}
 	}
 
+	function confirmarPublicar(propiedad: Propiedad) {
+		publicarConfirm = { id: propiedad.id, titulo: propiedad.titulo };
+	}
+
+	async function ejecutarPublicar() {
+		const target = publicarConfirm;
+		if (!target) return;
+		publicarConfirm = null;
+
+		reviewError = null;
+		reviewSuccess = null;
+		updatingId = target.id;
+
+		try {
+			await actualizarPropiedad(propiedadRepository, {
+				id: target.id,
+				estado: 'DISPONIBLE'
+			});
+			reviewSuccess = `${target.titulo} se publicó correctamente.`;
+			await invalidateAll();
+		} catch (err) {
+			reviewError = err instanceof HttpError ? err.message : 'No se pudo publicar la propiedad.';
+		} finally {
+			updatingId = null;
+		}
+	}
+
 	async function cambiarEstadoPropiedad(propiedad: Propiedad, nuevoEstado: string) {
 		if (nuevoEstado === 'DISPONIBLE') {
-			const confirmacion = confirm(
-				'¿Estás seguro de que deseas publicar esta propiedad? Asegúrate de que los datos sean correctos y que se cuente con el contrato respectivo.'
-			);
-			if (!confirmacion) return;
+			confirmarPublicar(propiedad);
+			return;
 		}
 
 		reviewError = null;
@@ -345,7 +372,11 @@
 								Propiedades listas para comercialización, visibles para el equipo de ventas.
 							</p>
 						</div>
-						<PropiedadAdminTable propiedades={disponibles} onPropiedadClick={verDetalle} />
+						<PropiedadAdminTable
+							propiedades={disponibles}
+							{asesores}
+							onPropiedadClick={verDetalle}
+						/>
 					</Card>
 				{/if}
 
@@ -360,7 +391,7 @@
 							</div>
 							<p class="text-sm font-semibold text-primary">{otras.length} registros</p>
 						</div>
-						<PropiedadAdminTable propiedades={otras} onPropiedadClick={verDetalle} />
+						<PropiedadAdminTable propiedades={otras} {asesores} onPropiedadClick={verDetalle} />
 					</Card>
 				{/if}
 			</div>
@@ -392,3 +423,14 @@
 		</div>
 	{/if}
 </div>
+
+<ConfirmDialog
+	isOpen={publicarConfirm !== null}
+	variant="confirm"
+	title="Publicar propiedad"
+	message="¿Estás seguro de que deseas publicar esta propiedad? Asegúrate de que los datos sean correctos y que se cuente con el contrato respectivo."
+	confirmLabel="Publicar"
+	cancelLabel="Cancelar"
+	onConfirm={ejecutarPublicar}
+	onCancel={() => (publicarConfirm = null)}
+/>

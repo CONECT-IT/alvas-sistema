@@ -21,7 +21,7 @@
 	let error = $state<string | null>(null);
 	let busqueda = $state('');
 	let mostrarConvertidos = $state(false);
-	type FiltroLeads = 'todos' | 'conCitas' | 'nuevos';
+	type FiltroLeads = 'todos' | 'conCitas' | 'nuevos' | 'compradores' | 'vendedores';
 	let filtro = $state<FiltroLeads>('todos');
 	let panelCrear = $state(false);
 	let panelOrigen = $state<DOMRect | null>(null);
@@ -48,6 +48,8 @@
 		leadsBase.filter((lead) => {
 			if (filtro === 'conCitas') return (lead.citasCount ?? 0) > 0;
 			if (filtro === 'nuevos') return presentarEstadoLead(lead.estado).tone === 'warning';
+			if (filtro === 'compradores') return lead.tipo === 'COMPRA';
+			if (filtro === 'vendedores') return lead.tipo === 'VENTA';
 			return true;
 		})
 	);

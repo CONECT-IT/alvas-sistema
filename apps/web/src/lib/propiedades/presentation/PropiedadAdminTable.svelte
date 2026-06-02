@@ -5,10 +5,16 @@
 
 	interface Props {
 		propiedades: Propiedad[];
+		asesores?: { id: string; nombre: string }[];
 		onPropiedadClick?: (propiedad: Propiedad) => void;
 	}
 
-	let { propiedades, onPropiedadClick }: Props = $props();
+	let { propiedades, asesores = [], onPropiedadClick }: Props = $props();
+
+	function nombreAsesor(id?: string | null): string {
+		if (!id) return 'Sin asignar';
+		return asesores.find((a) => a.id === id)?.nombre ?? `Asesor (${id.slice(0, 8)}…)`;
+	}
 
 	const currencyFormatter = new Intl.NumberFormat('es-PE', {
 		style: 'currency',
@@ -55,7 +61,7 @@
 						>
 					</td>
 					<td class="py-4 text-text-muted">
-						{propiedad.asesorResponsableId ? 'Asesor asignado' : 'Sin asignar'}
+						{nombreAsesor(propiedad.asesorResponsableId)}
 					</td>
 				</tr>
 			{/each}

@@ -50,6 +50,7 @@ export class HttpVentasRepository implements VentasRepository {
 			telefono: input.telefono,
 			tipo: input.tipo,
 			idAsesor: input.idAsesor || undefined,
+			idCliente: input.idCliente || undefined,
 			idPropiedadInteres: input.idPropiedadInteres || undefined,
 			datosPropiedad: input.datosPropiedad || undefined
 		};

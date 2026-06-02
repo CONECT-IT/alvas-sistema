@@ -87,6 +87,7 @@ export class RegistrarLeadUseCase
         telefono: input.telefono,
         tipo: input.tipo,
         idAsesor: idAsesorFinal,
+        idCliente: input.idCliente,
         idPropiedadInteres: input.idPropiedadInteres,
       });
 

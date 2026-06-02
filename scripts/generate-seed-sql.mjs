@@ -214,8 +214,9 @@ async function main() {
       telefono: "999111222",
       tipo: "COMPRA",
       idAsesor: IDS.USUARIO_ASESOR1,
+      idCliente: IDS.CLIENTES[0],
       idPropiedadInteres: IDS.PROPIEDADES[0],
-      estadoOverride: "CONTACTO",
+      estadoOverride: "CONVERTIDO",
     },
     {
       id: IDS.LEADS[1],
@@ -255,19 +256,41 @@ async function main() {
       idAsesor: IDS.USUARIO_ASESOR1,
       estadoOverride: "NUEVO",
     },
+    {
+      id: IDS.LEADS[5],
+      nombre: "María Torres",
+      email: "maria@example.com",
+      telefono: "999111222",
+      tipo: "COMPRA",
+      idAsesor: IDS.USUARIO_ASESOR1,
+      idCliente: IDS.CLIENTES[0],
+      estadoOverride: "NUEVO",
+    },
   ];
 
   sqlLines.push("-- Leads");
   for (const l of leadsSeed) {
     sqlLines.push(
       `INSERT INTO ventas_leads (id, nombre, email, telefono, tipo, estado, id_asesor, id_cliente, id_propiedad_interes, creado_en, actualizado_en)` +
-        ` VALUES (${escapeSql(l.id)}, ${escapeSql(l.nombre)}, ${escapeSql(l.email)}, ${escapeSql(l.telefono)}, ${escapeSql(l.tipo)}, ${escapeSql(l.estadoOverride)}, ${escapeSql(l.idAsesor)}, NULL, ${escapeSql(l.idPropiedadInteres)}, ${escapeSql(ahoraIso)}, ${escapeSql(ahoraIso)})` +
-        ` ON CONFLICT(id) DO UPDATE SET nombre=excluded.nombre, email=excluded.email, telefono=excluded.telefono, tipo=excluded.tipo, estado=excluded.estado, id_asesor=excluded.id_asesor, id_propiedad_interes=excluded.id_propiedad_interes, actualizado_en=excluded.actualizado_en;`,
+        ` VALUES (${escapeSql(l.id)}, ${escapeSql(l.nombre)}, ${escapeSql(l.email)}, ${escapeSql(l.telefono)}, ${escapeSql(l.tipo)}, ${escapeSql(l.estadoOverride)}, ${escapeSql(l.idAsesor)}, ${escapeSql(l.idCliente ?? null)}, ${escapeSql(l.idPropiedadInteres)}, ${escapeSql(ahoraIso)}, ${escapeSql(ahoraIso)})` +
+        ` ON CONFLICT(id) DO UPDATE SET nombre=excluded.nombre, email=excluded.email, telefono=excluded.telefono, tipo=excluded.tipo, estado=excluded.estado, id_asesor=excluded.id_asesor, id_cliente=excluded.id_cliente, id_propiedad_interes=excluded.id_propiedad_interes, actualizado_en=excluded.actualizado_en;`,
     );
+    const eventoExtra =
+      l.idCliente && l.estadoOverride === "CONVERTIDO" ? "CLIENTE_CONVERTIDO" : null;
+    const descExtra =
+      l.idCliente && l.estadoOverride === "CONVERTIDO"
+        ? `Lead convertido a cliente: ${l.nombre}`
+        : null;
     sqlLines.push(
       `INSERT INTO ventas_actividad (id_lead, evento, descripcion, fecha)` +
         ` VALUES (${escapeSql(l.id)}, ${escapeSql("LEAD_CREADO")}, ${escapeSql(`Lead registrado: ${l.nombre}`)}, ${escapeSql(siguienteFechaActividad())});`,
     );
+    if (eventoExtra) {
+      sqlLines.push(
+        `INSERT INTO ventas_actividad (id_lead, evento, descripcion, fecha)` +
+          ` VALUES (${escapeSql(l.id)}, ${escapeSql(eventoExtra)}, ${escapeSql(descExtra)}, ${escapeSql(siguienteFechaActividad())});`,
+      );
+    }
   }
   sqlLines.push("");
 
@@ -298,9 +321,10 @@ async function main() {
       id: IDS.CITAS[0],
       idLead: IDS.LEADS[0],
       idPropiedad: IDS.PROPIEDADES[0],
-      offsetDays: 1,
+      offsetDays: -1,
       durationHours: 1,
       observacion: "Primera visita - Casa en Surco",
+      estado: "REALIZADA",
     },
   ];
 
@@ -310,19 +334,32 @@ async function main() {
     const end = new Date(start.getTime() + c.durationHours * 3600000);
     sqlLines.push(
       `INSERT INTO ventas_citas (id, id_lead, id_propiedad, fecha_inicio, fecha_fin, estado, observacion)` +
-        ` VALUES (${escapeSql(c.id)}, ${escapeSql(c.idLead)}, ${escapeSql(c.idPropiedad)}, ${escapeSql(start.toISOString())}, ${escapeSql(end.toISOString())}, ${escapeSql("PENDIENTE")}, ${escapeSql(c.observacion)})` +
+        ` VALUES (${escapeSql(c.id)}, ${escapeSql(c.idLead)}, ${escapeSql(c.idPropiedad)}, ${escapeSql(start.toISOString())}, ${escapeSql(end.toISOString())}, ${escapeSql(c.estado)}, ${escapeSql(c.observacion)})` +
         ` ON CONFLICT(id) DO UPDATE SET id_lead=excluded.id_lead, id_propiedad=excluded.id_propiedad, fecha_inicio=excluded.fecha_inicio, fecha_fin=excluded.fecha_fin, estado=excluded.estado, observacion=excluded.observacion;`,
     );
     sqlLines.push(
       `INSERT INTO ventas_actividad (id_lead, evento, descripcion, fecha)` +
         ` VALUES (${escapeSql(c.idLead)}, ${escapeSql("CITA_AGENDADA")}, ${escapeSql(`Cita agendada para ${c.observacion}`)}, ${escapeSql(siguienteFechaActividad())});`,
     );
+    if (c.estado === "REALIZADA") {
+      sqlLines.push(
+        `INSERT INTO ventas_actividad (id_lead, evento, descripcion, fecha)` +
+          ` VALUES (${escapeSql(c.idLead)}, ${escapeSql("CITA_REALIZADA")}, ${escapeSql(`Visita realizada: ${c.observacion}`)}, ${escapeSql(siguienteFechaActividad())});`,
+      );
+    }
   }
   sqlLines.push("");
 
   // ── Contratos ──
   const contratosSeed = [
-    { id: IDS.CONTRATOS[0], idLead: IDS.LEADS[0], idPropiedad: IDS.PROPIEDADES[0], meses: 12 },
+    {
+      id: IDS.CONTRATOS[0],
+      idLead: IDS.LEADS[0],
+      idCliente: IDS.CLIENTES[0],
+      idPropiedad: IDS.PROPIEDADES[0],
+      meses: 12,
+      estado: "VIGENTE",
+    },
   ];
 
   sqlLines.push("-- Contratos");
@@ -330,7 +367,7 @@ async function main() {
     const fechaFin = new Date(ahora.getFullYear() + 1, ahora.getMonth(), ahora.getDate());
     sqlLines.push(
       `INSERT INTO ventas_contratos (id, id_lead, id_cliente, id_propiedad, fecha_inicio, fecha_fin, estado, creado_en, actualizado_en)` +
-        ` VALUES (${escapeSql(c.id)}, ${escapeSql(c.idLead)}, NULL, ${escapeSql(c.idPropiedad)}, ${escapeSql(ahoraIso)}, ${escapeSql(fechaFin.toISOString())}, ${escapeSql("BORRADOR")}, ${escapeSql(ahoraIso)}, ${escapeSql(ahoraIso)})` +
+        ` VALUES (${escapeSql(c.id)}, ${escapeSql(c.idLead)}, ${escapeSql(c.idCliente ?? null)}, ${escapeSql(c.idPropiedad)}, ${escapeSql(ahoraIso)}, ${escapeSql(fechaFin.toISOString())}, ${escapeSql(c.estado)}, ${escapeSql(ahoraIso)}, ${escapeSql(ahoraIso)})` +
         ` ON CONFLICT(id) DO UPDATE SET id_lead=excluded.id_lead, id_cliente=excluded.id_cliente, id_propiedad=excluded.id_propiedad, fecha_inicio=excluded.fecha_inicio, fecha_fin=excluded.fecha_fin, estado=excluded.estado, actualizado_en=excluded.actualizado_en;`,
     );
     sqlLines.push(
@@ -358,10 +395,6 @@ async function main() {
       `INSERT INTO ventas_clientes (id, nombre, email, telefono, id_asesor, id_lead_origen, creado_en, actualizado_en)` +
         ` VALUES (${escapeSql(cl.id)}, ${escapeSql(cl.nombre)}, ${escapeSql(cl.email)}, ${escapeSql(cl.telefono)}, ${escapeSql(cl.idAsesor)}, ${escapeSql(cl.idLeadOrigen)}, ${escapeSql(ahoraIso)}, ${escapeSql(ahoraIso)})` +
         ` ON CONFLICT(id) DO UPDATE SET nombre=excluded.nombre, email=excluded.email, telefono=excluded.telefono, id_asesor=excluded.id_asesor, id_lead_origen=excluded.id_lead_origen, actualizado_en=excluded.actualizado_en;`,
-    );
-    sqlLines.push(
-      `INSERT INTO ventas_actividad (id_lead, evento, descripcion, fecha)` +
-        ` VALUES (${escapeSql(cl.idLeadOrigen)}, ${escapeSql("CLIENTE_CONVERTIDO")}, ${escapeSql(`Lead convertido a cliente: ${cl.nombre}`)}, ${escapeSql(siguienteFechaActividad())});`,
     );
   }
   sqlLines.push("");

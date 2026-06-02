@@ -38,12 +38,26 @@ type UsuarioDto = {
 	estado: string;
 };
 
+type ClienteDto = {
+	id: string;
+	nombre: string;
+	email: string;
+	telefono: string;
+	idAsesor: string;
+	nombreAsesor?: string;
+	idLeadOrigen?: string;
+	nombreLead?: string;
+	creadoEn: string;
+	actualizadoEn: string;
+};
+
 export const load: ServerLoad = async ({ fetch }) => {
-	const [leadsRes, propsRes, usersRes, captacionesRes] = await Promise.all([
+	const [leadsRes, propsRes, usersRes, captacionesRes, clientesRes] = await Promise.all([
 		fetch('/api/ventas/pipeline').then((r) => r.json<ApiResp<LeadPipeline[]>>()),
 		fetch('/api/propiedades').then((r) => r.json<ApiResp<PropiedadDto[]>>()),
 		fetch('/api/usuarios').then((r) => r.json<ApiResp<UsuarioDto[]>>()),
-		fetch('/api/integraciones/captaciones/pendientes').then((r) => r.json<ApiResp<unknown[]>>())
+		fetch('/api/integraciones/captaciones/pendientes').then((r) => r.json<ApiResp<unknown[]>>()),
+		fetch('/api/ventas/clientes').then((r) => r.json<ApiResp<ClienteDto[]>>())
 	]);
 
 	return {
@@ -54,6 +68,7 @@ export const load: ServerLoad = async ({ fetch }) => {
 		asesores: usersRes.success
 			? usersRes.data.filter((u) => u.rol === 'ASESOR' && u.estado === 'ACTIVO')
 			: [],
-		captacionesCount: captacionesRes.success ? captacionesRes.data.length : 0
+		captacionesCount: captacionesRes.success ? captacionesRes.data.length : 0,
+		clientes: clientesRes.success ? clientesRes.data : []
 	};
 };

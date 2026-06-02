@@ -27,6 +27,9 @@
 	let captacionesCount = $derived(data?.captacionesCount ?? 0);
 	let propiedadesDisponibles = $derived((data?.propiedadesDisponibles as Propiedad[]) ?? []);
 	let asesores = $derived((data?.asesores as Usuario[]) ?? []);
+	let clientes = $derived(
+		(data?.clientes as Array<{ id: string; nombre: string; email: string }>) ?? []
+	);
 	let mostrarConvertidos = $state(false);
 	let vista = $state<'tabla' | 'kanban'>('tabla');
 	let busqueda = $state('');
@@ -45,6 +48,7 @@
 		telefono: '',
 		tipo: 'COMPRA' as 'COMPRA' | 'VENTA',
 		idAsesor: '',
+		idCliente: '',
 		idPropiedadInteres: '',
 		propiedadTitulo: '',
 		propiedadDescripcion: '',
@@ -177,6 +181,7 @@
 				telefono: formLead.telefono,
 				tipo: formLead.tipo,
 				idAsesor: formLead.idAsesor || undefined,
+				idCliente: formLead.idCliente || undefined,
 				idPropiedadInteres:
 					formLead.tipo === 'COMPRA' && formLead.idPropiedadInteres
 						? formLead.idPropiedadInteres
@@ -398,6 +403,13 @@
 			<option value="">Sin asignar</option>
 			{#each asesores as asesor (asesor.id)}
 				<option value={asesor.id}>{asesor.nombre} ({asesor.username})</option>
+			{/each}
+		</Select>
+
+		<Select label="Cliente existente" bind:value={formLead.idCliente}>
+			<option value="">Sin cliente asociado</option>
+			{#each clientes as cliente (cliente.id)}
+				<option value={cliente.id}>{cliente.nombre} ({cliente.email})</option>
 			{/each}
 		</Select>
 
