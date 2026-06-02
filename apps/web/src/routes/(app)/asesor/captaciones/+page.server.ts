@@ -1,6 +1,5 @@
 import type { ServerLoad } from '@sveltejs/kit';
-
-type ApiResp<T> = { success: true; data: T } | { success: false };
+import { leerApi } from '$lib/shared/server/leerApi';
 
 type CaptacionPendiente = {
 	id: string;
@@ -18,7 +17,7 @@ type CaptacionPendiente = {
 
 export const load: ServerLoad = async ({ fetch }) => {
 	const res = await fetch('/api/captaciones/pendientes').then((r) =>
-		r.json<ApiResp<CaptacionPendiente[]>>()
+		leerApi<CaptacionPendiente[]>(r, [])
 	);
 
 	return {

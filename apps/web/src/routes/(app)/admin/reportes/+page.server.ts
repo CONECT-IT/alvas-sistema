@@ -1,6 +1,5 @@
 import type { ServerLoad } from '@sveltejs/kit';
-
-type ApiResp<T> = { success: true; data: T } | { success: false };
+import { leerApi } from '$lib/shared/server/leerApi';
 
 type ActividadDto = {
 	idLead: string;
@@ -28,9 +27,9 @@ type EstadisticasGlobales = {
 
 export const load: ServerLoad = async ({ fetch }) => {
 	const [reporteRes, estadisticasRes] = await Promise.all([
-		fetch('/api/reportes/general').then((r) => r.json<ApiResp<ReporteGeneral>>()),
+		fetch('/api/reportes/general').then((r) => leerApi<ReporteGeneral>(r, null)),
 		fetch('/api/reportes/estadisticas-globales').then((r) =>
-			r.json<ApiResp<EstadisticasGlobales>>()
+			leerApi<EstadisticasGlobales>(r, null)
 		)
 	]);
 

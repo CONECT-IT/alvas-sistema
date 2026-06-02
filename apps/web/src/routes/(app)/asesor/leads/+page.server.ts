@@ -1,6 +1,5 @@
+import { leerApi } from '$lib/shared/server/leerApi';
 import type { ServerLoad } from '@sveltejs/kit';
-
-type ApiResp<T> = { success: true; data: T } | { success: false };
 
 type LeadCita = {
 	id: string;
@@ -44,9 +43,9 @@ type ClienteDto = {
 
 export const load: ServerLoad = async ({ fetch }) => {
 	const [pipelineRes, propiedadesRes, clientesRes] = await Promise.all([
-		fetch('/api/ventas/pipeline').then((r) => r.json<ApiResp<LeadPipeline[]>>()),
-		fetch('/api/propiedades').then((r) => r.json<ApiResp<PropiedadDto[]>>()),
-		fetch('/api/ventas/clientes').then((r) => r.json<ApiResp<ClienteDto[]>>())
+		fetch('/api/ventas/pipeline').then((r) => leerApi<LeadPipeline[]>(r, [])),
+		fetch('/api/propiedades').then((r) => leerApi<PropiedadDto[]>(r, [])),
+		fetch('/api/ventas/clientes').then((r) => leerApi<ClienteDto[]>(r, []))
 	]);
 
 	return {

@@ -1,6 +1,5 @@
 import type { ServerLoad } from '@sveltejs/kit';
-
-type ApiResp<T> = { success: true; data: T } | { success: false };
+import { leerApi } from '$lib/shared/server/leerApi';
 
 type ContratoDto = {
 	id: string;
@@ -25,7 +24,7 @@ type ListarContratosResp = {
 
 export const load: ServerLoad = async ({ fetch, params }) => {
 	const res = await fetch('/api/ventas/contratos').then((r) =>
-		r.json<ApiResp<ListarContratosResp>>()
+		leerApi<ListarContratosResp>(r, { contratos: [] })
 	);
 
 	return {

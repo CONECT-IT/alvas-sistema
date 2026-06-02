@@ -1,6 +1,5 @@
 import type { ServerLoad } from '@sveltejs/kit';
-
-type ApiResp<T> = { success: true; data: T } | { success: false };
+import { leerApi } from '$lib/shared/server/leerApi';
 
 type AccionResumen = {
 	evento: string;
@@ -39,10 +38,10 @@ type ReporteGeneral = {
 export const load: ServerLoad = async ({ fetch }) => {
 	const [estadisticasRes, propiedadesRes, reporteRes] = await Promise.all([
 		fetch('/api/reportes/estadisticas-globales').then((r) =>
-			r.json<ApiResp<EstadisticasGlobales>>()
+			leerApi<EstadisticasGlobales>(r, null)
 		),
-		fetch('/api/propiedades').then((r) => r.json<ApiResp<PropiedadDto[]>>()),
-		fetch('/api/reportes/general').then((r) => r.json<ApiResp<ReporteGeneral>>())
+		fetch('/api/propiedades').then((r) => leerApi<PropiedadDto[]>(r, [])),
+		fetch('/api/reportes/general').then((r) => leerApi<ReporteGeneral>(r, null))
 	]);
 
 	return {

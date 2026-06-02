@@ -1,6 +1,5 @@
 import type { ServerLoad } from '@sveltejs/kit';
-
-type ApiResp<T> = { success: true; data: T } | { success: false };
+import { leerApi } from '$lib/shared/server/leerApi';
 
 type CitaDto = {
 	id: string;
@@ -30,8 +29,8 @@ type LeadDetalle = {
 
 export const load: ServerLoad = async ({ fetch, params }) => {
 	const [leadRes, actividadRes] = await Promise.all([
-		fetch(`/api/ventas/lead/${params.idLead}`).then((r) => r.json<ApiResp<LeadDetalle>>()),
-		fetch(`/api/ventas/lead/${params.idLead}/actividad`).then((r) => r.json<ApiResp<unknown[]>>())
+		fetch(`/api/ventas/lead/${params.idLead}`).then((r) => leerApi<LeadDetalle>(r, null)),
+		fetch(`/api/ventas/lead/${params.idLead}/actividad`).then((r) => leerApi<unknown[]>(r, []))
 	]);
 
 	return {

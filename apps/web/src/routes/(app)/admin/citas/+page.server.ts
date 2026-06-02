@@ -1,6 +1,5 @@
+import { leerApi } from '$lib/shared/server/leerApi';
 import type { ServerLoad } from '@sveltejs/kit';
-
-type ApiResp<T> = { success: true; data: T } | { success: false };
 
 type CitaDto = {
 	id: string;
@@ -17,7 +16,7 @@ type CitaDto = {
 };
 
 export const load: ServerLoad = async ({ fetch }) => {
-	const res = await fetch('/api/ventas/citas').then((r) => r.json<ApiResp<CitaDto[]>>());
+	const res = await fetch('/api/ventas/citas').then((r) => leerApi<CitaDto[]>(r, []));
 
 	return {
 		citas: res.success ? res.data : []

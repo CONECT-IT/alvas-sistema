@@ -1,6 +1,5 @@
+import { leerApi } from '$lib/shared/server/leerApi';
 import type { ServerLoad } from '@sveltejs/kit';
-
-type ApiResp<T> = { success: true; data: T } | { success: false };
 
 type LeadCita = {
 	id: string;
@@ -50,21 +49,6 @@ type ClienteDto = {
 	creadoEn: string;
 	actualizadoEn: string;
 };
-
-async function leerApi<T>(response: Response, fallback: T): Promise<ApiResp<T>> {
-	if (!response.ok) {
-		console.warn(`admin/leads: API respondió ${response.status} en ${response.url}`);
-		return { success: true, data: fallback };
-	}
-
-	try {
-		return (await response.json()) as ApiResp<T>;
-	} catch {
-		console.warn(`admin/leads: respuesta no JSON en ${response.url}`);
-		return { success: true, data: fallback };
-	}
-}
-
 export const load: ServerLoad = async ({ fetch }) => {
 	const [leadsRes, propsRes, usersRes, captacionesRes, clientesRes] = await Promise.all([
 		fetch('/api/ventas/pipeline').then((r) => leerApi<LeadPipeline[]>(r, [])),
