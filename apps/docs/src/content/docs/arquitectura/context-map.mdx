@@ -5,6 +5,8 @@ sidebar:
   order: 3
 ---
 
+import Mermaid from "../../../components/Mermaid.astro";
+
 # Context Map — ALVAS
 
 ## Bounded Contexts
@@ -16,7 +18,7 @@ sidebar:
 | `propiedades`   | propiedad, catalogo, origen, estado, BORRADOR, DISPONIBLE  | Propiedad               |
 | `ventas`        | lead, cita, cliente, contrato, pipeline, conversion        | Lead, Cliente, Contrato |
 | `integraciones` | captacion, WhatsApp, webhook, normalizacion, deduplicacion | Captacion               |
-| `reportes`      | metrica, dashboard, estadistica, rendimiento, conversion   | (lectura)               |
+| `reportes`      | metrica, dashboard, estadistica, rendimiento, conversion   | lectura                 |
 
 ## Relaciones
 
@@ -70,20 +72,17 @@ sidebar:
 
 ## Resumen grafico
 
-```
-  usuarios ──ACL──▶ auth
-      │
-      ├──ACL──▶ ventas
-      │
-      └──ACL──▶ reportes
+<Mermaid
+  chart={`graph TD
+  usuarios -- ACL --> auth
+  usuarios -- ACL --> ventas
+  usuarios -- ACL --> reportes
 
-  propiedades ──ACL──▶ ventas
-      │
-      └──ACL──▶ integraciones
+propiedades -- ACL --> ventas
+propiedades -- ACL --> integraciones
 
-  ventas ──ACL──▶ reportes
-      │
-      └──ACL──▶ integraciones
-```
+ventas -- ACL --> reportes
+ventas -- ACL --> integraciones`}
+/>
 
 > Todas las relaciones usan ACL porque cada contexto necesita autonomia evolutiva. No hay relaciones de conformidad, shared kernel ni OHS porque no hay contexto que domine semanticamente sobre otro: cada contexto define su propio lenguaje ubicuo y los demas se adaptan via traductores.

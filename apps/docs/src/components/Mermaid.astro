@@ -1,0 +1,56 @@
+---
+type Props = {
+  chart: string;
+};
+
+const { chart } = Astro.props;
+---
+
+<figure class="alvas-mermaid" data-mermaid>{chart}</figure>
+
+<script is:inline type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+
+  if (!window.__alvasMermaidReady) {
+    window.__alvasMermaidReady = true;
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: "strict",
+      theme: document.documentElement.dataset.theme === "light" ? "default" : "dark",
+    });
+  }
+
+  const diagrams = document.querySelectorAll(".alvas-mermaid[data-mermaid]:not([data-processed])");
+
+  for (const [index, diagram] of diagrams.entries()) {
+    diagram.dataset.processed = "true";
+    const source = diagram.textContent?.trim() ?? "";
+    if (!source) continue;
+
+    const id = `alvas-mermaid-${Date.now()}-${index}`;
+    try {
+      const { svg } = await mermaid.render(id, source);
+      diagram.innerHTML = svg;
+    } catch (error) {
+      console.error("No se pudo renderizar Mermaid", error);
+    }
+  }
+</script>
+
+<style>
+  .alvas-mermaid {
+    margin: 1.5rem 0;
+    overflow-x: auto;
+    padding: 1rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.75rem;
+    background: var(--sl-color-bg-sidebar);
+  }
+
+  .alvas-mermaid :global(svg) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+  }
+</style>

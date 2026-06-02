@@ -3,6 +3,8 @@ title: Módulos
 description: "Módulos del dominio de ALVAS: Auth, Usuarios, Ventas, Propiedades, Integraciones y Reportes"
 ---
 
+import Mermaid from "../../../components/Mermaid.astro";
+
 ## Auth
 
 Gestiona inicio de sesión, renovación de sesión, tokens y middleware de autenticación.
@@ -29,8 +31,8 @@ Resume actividad comercial y acciones registradas para lectura operativa.
 
 ## Entidades Core
 
-```mermaid
-classDiagram
+<Mermaid
+  chart={`classDiagram
   class Lead {
     id
     nombre
@@ -39,39 +41,39 @@ classDiagram
     idAsesor
   }
 
-  class Cliente {
-    id
-    nombre
-    email
-    telefono
-  }
+class Cliente {
+id
+nombre
+email
+telefono
+}
 
-  class Contrato {
-    id
-    idCliente
-    idPropiedad
-    estado
-    fechaFirma
-  }
+class Contrato {
+id
+idCliente
+idPropiedad
+estado
+fechaFirma
+}
 
-  class Cita {
-    id
-    idLead
-    idPropiedad
-    fechaInicio
-    estado
-  }
+class Cita {
+id
+idLead
+idPropiedad
+fechaInicio
+estado
+}
 
-  class Propiedad {
-    id
-    titulo
-    estado
-    precio
-  }
+class Propiedad {
+id
+titulo
+estado
+precio
+}
 
-  Lead "1" --> "0..*" Cita
-  Lead "0..1" --> "1" Cliente
-  Cliente "1" --> "0..*" Contrato
-  Propiedad "1" --> "0..*" Cita
-  Propiedad "1" --> "0..*" Contrato
-```
+Lead "1" --> "0.._" Cita
+Lead "0..1" --> "1" Cliente
+Cliente "1" --> "0.._" Contrato
+Propiedad "1" --> "0.._" Cita
+Propiedad "1" --> "0.._" Contrato`}
+/>

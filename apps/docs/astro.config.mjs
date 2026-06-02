@@ -1,7 +1,7 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 import starlightUtils from "@lorenzo_lewis/starlight-utils";
-import starlightCelestiaTheme from "starlight-theme-celestia";
+import starlightCelestiaTheme from "starlight-theme-celestia-monorepo/packages/starlight-theme-celestia";
 import { createStarlightTypeDocPlugin } from "starlight-typedoc";
 
 const [apiTypeDoc] = createStarlightTypeDocPlugin();

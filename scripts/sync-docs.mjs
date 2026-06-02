@@ -53,11 +53,11 @@ description: "${description}"${sidebar}
 
   mkdirSync(dirname(destinoPath), { recursive: true });
   writeFileSync(destinoPath, frontmatter + raw);
-  console.log(`  ✓ ${origenPath} → ${destinoPath}`);
+  console.log(`  OK ${origenPath} -> ${destinoPath}`);
 }
 
 // ── ADRs ──
-console.log("\n📋 ADRs...");
+console.log("\nADRs...");
 const adrDir = ORIGEN("docs/adr");
 if (existsSync(adrDir)) {
   const adrFiles = [
@@ -73,7 +73,7 @@ if (existsSync(adrDir)) {
 }
 
 // ── Especificaciones (SDD) ──
-console.log("\n📋 Especificaciones SDD...");
+console.log("\nEspecificaciones SDD...");
 const specsDir = ORIGEN("docs/specs");
 if (existsSync(specsDir)) {
   const specs = [
@@ -95,9 +95,8 @@ if (existsSync(specsDir)) {
 }
 
 // ── Guías ──
-console.log("\n📋 Guías...");
+console.log("\nGuias...");
 const guias = [
-  ["docs/context-map.md", "arquitectura/context-map.md", { title: "Context Map", sidebar: 3 }],
   [
     "docs/mutation-testing.md",
     "calidad/mutation-testing.md",
@@ -116,4 +115,4 @@ for (const [origen, destino, opts] of guias) {
   }
 }
 
-console.log("\n✅ Sync completo.");
+console.log("\nSync completo.");

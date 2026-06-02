@@ -3,34 +3,35 @@ title: Inicio
 description: Portal de documentación técnica del CRM inmobiliario ALVAS
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { Card, CardGrid } from "@astrojs/starlight/components";
+import Mermaid from "../../components/Mermaid.astro";
 
 ALVAS es un CRM inmobiliario organizado por módulos de dominio, arquitectura hexagonal y lenguaje ubicuo.
 
 ## Arquitectura
 
-```mermaid
-graph LR
+<Mermaid
+  chart={`graph LR
   subgraph Nucleo
-    auth["🔐 Auth"]
-    usuarios["👤 Usuarios"]
-    propiedades["🏠 Propiedades"]
+    auth["Auth"]
+    usuarios["Usuarios"]
+    propiedades["Propiedades"]
   end
   subgraph Comercial
-    ventas["📊 Ventas"]
-    reportes["📈 Reportes"]
+    ventas["Ventas"]
+    reportes["Reportes"]
   end
   subgraph Externo
-    integraciones["🔌 Integraciones"]
+    integraciones["Integraciones"]
   end
 
-  usuarios -- ACL --> auth
-  usuarios -- ACL --> ventas
-  propiedades -- ACL --> ventas
-  ventas -- ACL --> reportes
-  integraciones -- ACL --> ventas
-  integraciones -- ACL --> propiedades
-```
+usuarios -- ACL --> auth
+usuarios -- ACL --> ventas
+propiedades -- ACL --> ventas
+ventas -- ACL --> reportes
+integraciones -- ACL --> ventas
+integraciones -- ACL --> propiedades`}
+/>
 
 ## Tech Stack
 
