@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/svelte';
 import { describe, expect, it, vi } from 'vitest';
-import SidePanel from './SidePanel.svelte';
+import SidePanel from '$lib/shared/ui/SidePanel.svelte';
 
 describe('shared / ui / SidePanel', () => {
 	it('no renderiza el panel cuando esta cerrado', () => {

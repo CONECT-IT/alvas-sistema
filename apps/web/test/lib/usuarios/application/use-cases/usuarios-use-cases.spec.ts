@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { actualizarUsuario } from './actualizarUsuario';
-import { crearUsuario } from './crearUsuario';
-import { listarUsuarios } from './listarUsuarios';
-import { obtenerUsuario } from './obtenerUsuario';
-import type { UsuarioRepository } from '../ports/UsuarioRepository';
+import { actualizarUsuario } from '$lib/usuarios/application/use-cases/actualizarUsuario';
+import { crearUsuario } from '$lib/usuarios/application/use-cases/crearUsuario';
+import { listarUsuarios } from '$lib/usuarios/application/use-cases/listarUsuarios';
+import { obtenerUsuario } from '$lib/usuarios/application/use-cases/obtenerUsuario';
+import type { UsuarioRepository } from '$lib/usuarios/application/ports/UsuarioRepository';
 
 function crearUsuarioRepositoryFake(): UsuarioRepository {
 	const usuario = {

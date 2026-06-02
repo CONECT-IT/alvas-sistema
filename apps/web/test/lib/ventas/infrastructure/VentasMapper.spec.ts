@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { mapLeadPipelineFromDto } from './VentasMapper';
+import { mapLeadPipelineFromDto } from '$lib/ventas/infrastructure/VentasMapper';
 
 describe('ventas / infrastructure / VentasMapper', () => {
 	it('mapea un lead de pipeline desde el DTO de la API hacia el modelo de la web', () => {

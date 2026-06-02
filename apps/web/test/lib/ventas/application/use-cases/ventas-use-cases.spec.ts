@@ -1,18 +1,18 @@
 import { describe, expect, it, vi } from 'vitest';
-import { actualizarCita } from './actualizarCita';
-import { actualizarLead } from './actualizarLead';
-import { agendarCita } from './agendarCita';
-import { cancelarContrato } from './cancelarContrato';
-import { convertirLead } from './convertirLead';
-import { crearContrato } from './crearContrato';
-import { firmarContrato } from './firmarContrato';
-import { listarActividadLead } from './listarActividadLead';
-import { listarContratos } from './listarContratos';
-import { listarPipeline } from './listarPipeline';
-import { listarPropiedadesPorCliente } from './listarPropiedadesPorCliente';
-import { obtenerLead } from './obtenerLead';
-import { registrarLead } from './registrarLead';
-import type { VentasRepository } from '../ports/VentasRepository';
+import { actualizarCita } from '$lib/ventas/application/use-cases/actualizarCita';
+import { actualizarLead } from '$lib/ventas/application/use-cases/actualizarLead';
+import { agendarCita } from '$lib/ventas/application/use-cases/agendarCita';
+import { cancelarContrato } from '$lib/ventas/application/use-cases/cancelarContrato';
+import { convertirLead } from '$lib/ventas/application/use-cases/convertirLead';
+import { crearContrato } from '$lib/ventas/application/use-cases/crearContrato';
+import { firmarContrato } from '$lib/ventas/application/use-cases/firmarContrato';
+import { listarActividadLead } from '$lib/ventas/application/use-cases/listarActividadLead';
+import { listarContratos } from '$lib/ventas/application/use-cases/listarContratos';
+import { listarPipeline } from '$lib/ventas/application/use-cases/listarPipeline';
+import { listarPropiedadesPorCliente } from '$lib/ventas/application/use-cases/listarPropiedadesPorCliente';
+import { obtenerLead } from '$lib/ventas/application/use-cases/obtenerLead';
+import { registrarLead } from '$lib/ventas/application/use-cases/registrarLead';
+import type { VentasRepository } from '$lib/ventas/application/ports/VentasRepository';
 
 function crearVentasRepositoryFake(): VentasRepository {
 	return {

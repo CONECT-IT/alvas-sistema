@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { actualizarPropiedad } from './actualizarPropiedad';
-import { crearPropiedad } from './crearPropiedad';
-import { listarPropiedades } from './listarPropiedades';
-import { obtenerPropiedad } from './obtenerPropiedad';
-import type { PropiedadRepository } from '../ports/PropiedadRepository';
+import { actualizarPropiedad } from '$lib/propiedades/application/use-cases/actualizarPropiedad';
+import { crearPropiedad } from '$lib/propiedades/application/use-cases/crearPropiedad';
+import { listarPropiedades } from '$lib/propiedades/application/use-cases/listarPropiedades';
+import { obtenerPropiedad } from '$lib/propiedades/application/use-cases/obtenerPropiedad';
+import type { PropiedadRepository } from '$lib/propiedades/application/ports/PropiedadRepository';
 
 function crearPropiedadRepositoryFake(): PropiedadRepository {
 	const propiedad = {

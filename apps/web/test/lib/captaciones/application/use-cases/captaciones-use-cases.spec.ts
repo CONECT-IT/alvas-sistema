@@ -4,10 +4,10 @@ import {
 	marcarCaptacionDuplicada,
 	rechazarCaptacion,
 	revisarCaptacion
-} from './gestionarCaptacionPendiente';
-import { listarCaptacionesPendientes } from './listarCaptacionesPendientes';
-import { registrarCaptacionVendedor } from './registrarCaptacionVendedor';
-import type { CaptacionRepository } from '../ports/CaptacionRepository';
+} from '$lib/captaciones/application/use-cases/gestionarCaptacionPendiente';
+import { listarCaptacionesPendientes } from '$lib/captaciones/application/use-cases/listarCaptacionesPendientes';
+import { registrarCaptacionVendedor } from '$lib/captaciones/application/use-cases/registrarCaptacionVendedor';
+import type { CaptacionRepository } from '$lib/captaciones/application/ports/CaptacionRepository';
 
 function crearRepositoryFake(): CaptacionRepository {
 	return {

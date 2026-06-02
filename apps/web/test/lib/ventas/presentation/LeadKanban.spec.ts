@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/svelte';
 import { describe, expect, it, vi } from 'vitest';
-import LeadKanban from './LeadKanban.svelte';
-import type { LeadPipeline } from '../domain/models/LeadPipeline';
+import LeadKanban from '$lib/ventas/presentation/LeadKanban.svelte';
+import type { LeadPipeline } from '$lib/ventas/domain/models/LeadPipeline';
 
 const leads: LeadPipeline[] = [
 	{

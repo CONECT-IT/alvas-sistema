@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { actualizarCliente } from './actualizarCliente';
-import { listarClientes } from './listarClientes';
-import { obtenerCliente } from './obtenerCliente';
-import { registrarCliente } from './registrarCliente';
-import type { ClienteRepository } from '../ports/ClienteRepository';
+import { actualizarCliente } from '$lib/clientes/application/use-cases/actualizarCliente';
+import { listarClientes } from '$lib/clientes/application/use-cases/listarClientes';
+import { obtenerCliente } from '$lib/clientes/application/use-cases/obtenerCliente';
+import { registrarCliente } from '$lib/clientes/application/use-cases/registrarCliente';
+import type { ClienteRepository } from '$lib/clientes/application/ports/ClienteRepository';
 
 function crearClienteRepositoryFake(): ClienteRepository {
 	const cliente = {

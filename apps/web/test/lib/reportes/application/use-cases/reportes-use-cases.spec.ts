@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { obtenerReportes } from './obtenerReportes';
-import type { ReporteRepository } from '../ports/ReporteRepository';
+import { obtenerReportes } from '$lib/reportes/application/use-cases/obtenerReportes';
+import type { ReporteRepository } from '$lib/reportes/application/ports/ReporteRepository';
 
 describe('reportes / application use cases', () => {
 	it('consulta estadisticas y reporte general en paralelo desde el puerto', async () => {

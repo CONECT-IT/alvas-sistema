@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { User } from './User';
+import { User } from '$lib/auth/domain/models/User';
 
 describe('auth / domain / User', () => {
 	it('identifica usuarios admin y asesores con lenguaje ubicuo', () => {
