@@ -161,6 +161,12 @@ export default defineConfig({
               items: [
                 { label: "Visión general", slug: "arquitectura/vision-general" },
                 { label: "DDD y hexagonal", slug: "arquitectura/hexagonal-ddd" },
+                { label: "Context Map", slug: "arquitectura/context-map" },
+                { label: "ADR 0001: DDD Táctico", slug: "arquitectura/adr-0001-ddd-tactico" },
+                {
+                  label: "ADR 0002: Aggregate Roots",
+                  slug: "arquitectura/adr-0002-aggregate-roots",
+                },
               ],
             },
             {
@@ -173,6 +179,33 @@ export default defineConfig({
             {
               label: "Flujos",
               items: [{ label: "Captaciones y leads", slug: "flujos/captaciones-leads" }],
+            },
+            {
+              label: "Especificaciones",
+              items: [
+                {
+                  label: "Ventas, leads y clientes",
+                  slug: "especificaciones/ventas-leads-clientes",
+                },
+                {
+                  label: "Usuarios, roles y permisos",
+                  slug: "especificaciones/usuarios-roles-permisos",
+                },
+                { label: "Propiedades", slug: "especificaciones/propiedades" },
+                {
+                  label: "Integraciones WhatsApp",
+                  slug: "especificaciones/integraciones-whatsapp",
+                },
+                { label: "Reportes", slug: "especificaciones/reportes" },
+                { label: "Web y design system", slug: "especificaciones/web-ux-design-system" },
+              ],
+            },
+            {
+              label: "Calidad",
+              items: [
+                { label: "Mutation Testing", slug: "calidad/mutation-testing" },
+                { label: "Walkthrough Log", slug: "calidad/walkthrough-log" },
+              ],
             },
             {
               label: "Referencias",

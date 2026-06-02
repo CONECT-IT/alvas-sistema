@@ -26,3 +26,52 @@ Gestiona captaciones entrantes, principalmente WhatsApp y flujos de conversión 
 ## Reportes
 
 Resume actividad comercial y acciones registradas para lectura operativa.
+
+## Entidades Core
+
+```mermaid
+classDiagram
+  class Lead {
+    id
+    nombre
+    estado
+    tipo
+    idAsesor
+  }
+
+  class Cliente {
+    id
+    nombre
+    email
+    telefono
+  }
+
+  class Contrato {
+    id
+    idCliente
+    idPropiedad
+    estado
+    fechaFirma
+  }
+
+  class Cita {
+    id
+    idLead
+    idPropiedad
+    fechaInicio
+    estado
+  }
+
+  class Propiedad {
+    id
+    titulo
+    estado
+    precio
+  }
+
+  Lead "1" --> "0..*" Cita
+  Lead "0..1" --> "1" Cliente
+  Cliente "1" --> "0..*" Contrato
+  Propiedad "1" --> "0..*" Cita
+  Propiedad "1" --> "0..*" Contrato
+```

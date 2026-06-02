@@ -18,3 +18,23 @@ Al confirmar una captación, el sistema crea un lead. Si no se especifica asesor
 ## Seguimiento
 
 El asesor gestiona el lead, agenda citas y decide si avanza a cliente o contrato según el proceso comercial.
+
+## Secuencia
+
+```mermaid
+sequenceDiagram
+  participant Canal as Canal externo
+  participant Integraciones as Integraciones
+  participant Ventas as Ventas
+  participant Asesor as Asesor
+  participant Contratos as Contratos
+
+  Canal->>Integraciones: Captacion entrante
+  Integraciones->>Integraciones: Validar y normalizar datos
+  Integraciones->>Ventas: Convertir captacion en lead
+  Ventas->>Ventas: Asignar asesor
+  Ventas->>Asesor: Notificar lead pendiente
+  Asesor->>Ventas: Agendar cita
+  Ventas->>Contratos: Crear contrato si avanza
+  Contratos-->>Ventas: Estado de contrato
+```
