@@ -4,8 +4,20 @@
   "entryPoints": ["apps/web/src/lib"],
   "entryPointStrategy": "expand",
   "tsconfig": "apps/web/tsconfig.json",
-  "out": "docs/typedoc/web",
-  "readme": "apps/web/README.md",
+  "plugin": ["typedoc-plugin-markdown"],
+  "out": "apps/docs/src/content/docs/referencias/typedoc/web/ref",
+  "entryFileName": "index",
+  "router": "kind",
+  "modulesFileName": "modulos",
+  "membersWithOwnFile": ["Class", "Interface", "Enum", "TypeAlias"],
+  "indexFormat": "table",
+  "parametersFormat": "table",
+  "interfacePropertiesFormat": "table",
+  "classPropertiesFormat": "table",
+  "propertyMembersFormat": "table",
+  "typeAliasPropertiesFormat": "table",
+  "typeDeclarationFormat": "table",
+  "readme": "README.md",
   "exclude": [
     "**/*.svelte",
     "**/*.test.ts",
@@ -18,10 +30,28 @@
   "excludePrivate": false,
   "excludeProtected": false,
   "excludeInternal": false,
+  "excludeNotDocumented": true,
+  "excludeNotDocumentedKinds": ["Function", "Variable"],
+  "excludeReferences": true,
   "categorizeByGroup": true,
+  "groupOrder": [
+    "Classes",
+    "Interfaces",
+    "Type Aliases",
+    "Enumerations",
+    "Functions",
+    "Variables",
+    "*"
+  ],
+  "kindSortOrder": ["Class", "Interface", "TypeAlias", "Enum", "Function", "Variable"],
+  "sort": ["kind", "source-order", "alphabetical-ignoring-documents"],
+  "navigation": {
+    "includeCategories": true,
+    "includeGroups": true,
+    "includeFolders": true,
+    "compactFolders": false,
+    "excludeReferences": true
+  },
   "includeVersion": true,
-  "navigationLinks": {
-    "Storybook": "../../storybook",
-    "Arquitectura": "../../ARCHITECTURE.md"
-  }
+  "navigationLinks": {}
 }

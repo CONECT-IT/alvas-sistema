@@ -34,9 +34,8 @@
     "test:all": "bun run test:unit && bun run test:bdd && bun run test:web && bun run test:security && bun run coverage:domain && bun run test:mutation",
     "release": "bunx semantic-release",
     "storybook": "bun run --cwd apps/web storybook",
-    "docs:typedoc": "bun run docs:typedoc:api && bun run docs:typedoc:web",
-    "docs:typedoc:api": "typedoc --options typedoc.api.json",
-    "docs:typedoc:web": "bun run --cwd apps/web prepare && typedoc --options typedoc.web.json",
+    "docs:dev": "bun run --cwd apps/web prepare && bun run --cwd apps/docs dev",
+    "docs:build": "bun run --cwd apps/web prepare && bun run --cwd apps/docs build",
     "lint:staged": "lint-staged",
     "typecheck": "tsc --noEmit -p apps/api/tsconfig.json && tsc --noEmit -p apps/web/tsconfig.json",
     "format": "prettier --write . && bun run --cwd apps/api format && bun run --cwd apps/web format",
@@ -49,6 +48,7 @@
     "@commitlint/cli": "^20.5.3",
     "@commitlint/config-conventional": "^20.5.3",
     "@eslint/js": "^10.0.1",
+    "@lorenzo_lewis/starlight-utils": "^0.3.2",
     "@stryker-mutator/core": "^9.6.1",
     "@typescript-eslint/eslint-plugin": "^8.59.4",
     "@typescript-eslint/parser": "^8.59.4",
@@ -57,12 +57,15 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.8.3",
+    "starlight-typedoc": "^0.23.0",
     "typedoc": "^0.28.19",
+    "typedoc-plugin-markdown": "^4.11.0",
     "typescript": "^5.9.3",
     "wrangler": "^4.94.0"
   },
   "dependencies": {
-    "drizzle-kit": "^0.31.10"
+    "drizzle-kit": "^0.31.10",
+    "starlight-theme-celestia-monorepo": "git+ssh://git@codefloe.com/devxy/starlight-theme-celestia.git"
   },
   "lint-staged": {
     "*.{js,ts,mjs,cjs,json,md,yml,yaml,css,html,svelte}": "prettier --write",

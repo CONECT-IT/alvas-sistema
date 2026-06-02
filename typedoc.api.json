@@ -4,7 +4,19 @@
   "entryPoints": ["apps/api/src"],
   "entryPointStrategy": "expand",
   "tsconfig": "apps/api/tsconfig.json",
-  "out": "docs/typedoc/api",
+  "plugin": ["typedoc-plugin-markdown"],
+  "out": "apps/docs/src/content/docs/referencias/typedoc/api/ref",
+  "entryFileName": "index",
+  "router": "kind",
+  "modulesFileName": "modulos",
+  "membersWithOwnFile": ["Class", "Interface", "Enum", "TypeAlias"],
+  "indexFormat": "table",
+  "parametersFormat": "table",
+  "interfacePropertiesFormat": "table",
+  "classPropertiesFormat": "table",
+  "propertyMembersFormat": "table",
+  "typeAliasPropertiesFormat": "table",
+  "typeDeclarationFormat": "table",
   "readme": "README.md",
   "exclude": [
     "**/*.test.ts",
@@ -16,10 +28,28 @@
   "excludePrivate": false,
   "excludeProtected": false,
   "excludeInternal": false,
+  "excludeNotDocumented": true,
+  "excludeNotDocumentedKinds": ["Function", "Variable"],
+  "excludeReferences": true,
   "categorizeByGroup": true,
+  "groupOrder": [
+    "Classes",
+    "Interfaces",
+    "Type Aliases",
+    "Enumerations",
+    "Functions",
+    "Variables",
+    "*"
+  ],
+  "kindSortOrder": ["Class", "Interface", "TypeAlias", "Enum", "Function", "Variable"],
+  "sort": ["kind", "source-order", "alphabetical-ignoring-documents"],
+  "navigation": {
+    "includeCategories": true,
+    "includeGroups": true,
+    "includeFolders": true,
+    "compactFolders": false,
+    "excludeReferences": true
+  },
   "includeVersion": true,
-  "navigationLinks": {
-    "OpenAPI": "../api/openapi.yaml",
-    "Arquitectura": "../../ARCHITECTURE.md"
-  }
+  "navigationLinks": {}
 }

@@ -12,6 +12,12 @@ coverage
 reports/mutation/
 .stryker-tmp/
 docs/typedoc/
+apps/docs/static/typedoc/
+apps/docs/public/typedoc/
+apps/docs/src/content/docs/referencias/typedoc/api/ref/
+apps/docs/src/content/docs/referencias/typedoc/web/ref/
+apps/docs/dist/
+apps/docs/.astro/
 
 # logs
 logs
