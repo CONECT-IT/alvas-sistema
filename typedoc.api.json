@@ -1,0 +1,25 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "name": "ALVAS API",
+  "entryPoints": ["apps/api/src"],
+  "entryPointStrategy": "expand",
+  "tsconfig": "apps/api/tsconfig.json",
+  "out": "docs/typedoc/api",
+  "readme": "README.md",
+  "exclude": [
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/test/**",
+    "**/drizzle/**",
+    "**/worker-configuration.d.ts"
+  ],
+  "excludePrivate": false,
+  "excludeProtected": false,
+  "excludeInternal": false,
+  "categorizeByGroup": true,
+  "includeVersion": true,
+  "navigationLinks": {
+    "OpenAPI": "../api/openapi.yaml",
+    "Arquitectura": "../../ARCHITECTURE.md"
+  }
+}

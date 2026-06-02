@@ -1,0 +1,27 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "name": "ALVAS Web",
+  "entryPoints": ["apps/web/src/lib"],
+  "entryPointStrategy": "expand",
+  "tsconfig": "apps/web/tsconfig.json",
+  "out": "docs/typedoc/web",
+  "readme": "apps/web/README.md",
+  "exclude": [
+    "**/*.svelte",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/*.stories.ts",
+    "**/*.stories.svelte",
+    "**/test/**",
+    "**/__tests__/**"
+  ],
+  "excludePrivate": false,
+  "excludeProtected": false,
+  "excludeInternal": false,
+  "categorizeByGroup": true,
+  "includeVersion": true,
+  "navigationLinks": {
+    "Storybook": "../../storybook",
+    "Arquitectura": "../../ARCHITECTURE.md"
+  }
+}

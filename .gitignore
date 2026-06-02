@@ -11,6 +11,7 @@ coverage
 *.lcov
 reports/mutation/
 .stryker-tmp/
+docs/typedoc/
 
 # logs
 logs
