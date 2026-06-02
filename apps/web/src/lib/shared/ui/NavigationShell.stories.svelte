@@ -23,7 +23,9 @@
 								? 'bg-primary-light text-primary shadow-sm'
 								: 'text-text-muted hover:bg-surface-muted hover:text-text-main'}"
 						>
-							<span class="h-2 w-2 rounded-full bg-current"><span class="sr-only">{item}</span></span>
+							<span class="h-2 w-2 rounded-full bg-current"
+								><span class="sr-only">{item}</span></span
+							>
 							<span class="mt-1">{item}</span>
 						</a>
 					{/each}

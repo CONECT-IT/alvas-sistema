@@ -23,7 +23,9 @@
 								? 'bg-primary-light text-primary shadow-sm'
 								: 'text-text-muted hover:bg-surface-muted hover:text-text-main'}"
 						>
-							<span class="h-2 w-2 rounded-full bg-current"><span class="sr-only">{item}</span></span>
+							<span class="h-2 w-2 rounded-full bg-current"
+								><span class="sr-only">{item}</span></span
+							>
 							<span class="mt-1">{item}</span>
 						</a>
 					{/each}
@@ -37,7 +39,9 @@
 			<main class="min-w-0 flex-1 p-8">
 				<p class="section-label">Panel</p>
 				<h1 class="page-heading">Layout con sidebar</h1>
-				<p class="mt-2 text-sm text-text-muted">Sidebar fijo con 28 iconos de ancho, navegación vertical centrada.</p>
+				<p class="mt-2 text-sm text-text-muted">
+					Sidebar fijo con 28 iconos de ancho, navegación vertical centrada.
+				</p>
 				<div class="mt-8 grid gap-5 md:grid-cols-3">
 					<div class="rounded-3xl border border-border-light p-6">
 						<p class="stat-label">Leads</p>
@@ -78,7 +82,9 @@
 						</a>
 					{/each}
 				</nav>
-				<div class="flex items-center gap-2 rounded-full border border-border-light bg-bg-card py-1 pr-3 pl-1">
+				<div
+					class="flex items-center gap-2 rounded-full border border-border-light bg-bg-card py-1 pr-3 pl-1"
+				>
 					<div
 						class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-[10px] font-bold text-white"
 					>
@@ -90,7 +96,9 @@
 			<main class="p-8">
 				<p class="section-label">Ventas</p>
 				<h1 class="page-heading">Layout con navbar superior</h1>
-				<p class="mt-2 text-sm text-text-muted">Navbar horizontal centrado con avatar de usuario.</p>
+				<p class="mt-2 text-sm text-text-muted">
+					Navbar horizontal centrado con avatar de usuario.
+				</p>
 			</main>
 		</div>
 	</div>

@@ -16,8 +16,11 @@
 
 		<div class="rounded-xl border border-border-light p-5">
 			<h2 class="text-sm font-bold">Importacion</h2>
-			<pre class="mt-3 overflow-auto rounded-xl border border-border-light bg-bg-base p-4 text-xs"><code>{`import Button from '$lib/shared/ui/Button.svelte';
-import TextInput from '$lib/shared/ui/TextInput.svelte';`}</code></pre>
+			<pre
+				class="mt-3 overflow-auto rounded-xl border border-border-light bg-bg-base p-4 text-xs"><code
+					>{`import Button from '$lib/shared/ui/Button.svelte';
+import TextInput from '$lib/shared/ui/TextInput.svelte';`}</code
+				></pre>
 		</div>
 
 		<div class="grid gap-4 md:grid-cols-2">

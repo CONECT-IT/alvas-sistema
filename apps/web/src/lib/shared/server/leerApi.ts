@@ -10,9 +10,7 @@ export async function leerApi<T>(response: Response, fallback: T | null): Promis
 		return (await response.json()) as ApiResp<T>;
 	} catch {
 		const text = await response.text().catch(() => '(no se pudo leer body)');
-		console.warn(
-			`leerApi: respuesta no JSON en ${response.url} — "${text.slice(0, 200)}"`
-		);
+		console.warn(`leerApi: respuesta no JSON en ${response.url} — "${text.slice(0, 200)}"`);
 		return { success: true, data: fallback as T };
 	}
 }

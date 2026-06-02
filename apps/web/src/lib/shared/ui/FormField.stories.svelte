@@ -19,7 +19,7 @@
 
 <Story name="WithHelp">
 	<div class="flex min-h-[18rem] items-center justify-center bg-bg-base p-10">
-		<div class="w-full max-w-sm grid gap-4">
+		<div class="grid w-full max-w-sm gap-4">
 			<FormField label="Correo" help="Usaremos este correo para enviar notificaciones.">
 				<TextInput type="email" placeholder="correo@ejemplo.com" />
 			</FormField>
@@ -29,7 +29,7 @@
 
 <Story name="WithError">
 	<div class="flex min-h-[18rem] items-center justify-center bg-bg-base p-10">
-		<div class="w-full max-w-sm grid gap-4">
+		<div class="grid w-full max-w-sm gap-4">
 			<FormField label="Correo" error="El correo ingresado no es válido.">
 				<TextInput type="email" value="invalido" error />
 			</FormField>
