@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import LeadDetail from '$lib/ventas/presentation/LeadDetail.svelte';
+	import type { PageData } from './$types';
 
-	let leadId = $derived($page.params.idLead ?? '');
+	let { data }: { data: PageData } = $props();
 </script>
 
 <svelte:head>
-	<title>Lead {leadId} | ALVAS</title>
+	<title>Lead {data.lead?.nombre ?? 'Detalle'} | ALVAS</title>
 </svelte:head>
 
-<LeadDetail {leadId} />
+<LeadDetail leadId={data.lead?.id ?? ''} initialLead={data.lead} />

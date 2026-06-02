@@ -18,12 +18,13 @@
 
 	interface Props {
 		clienteId: string;
+		initialCliente?: Cliente | null;
 	}
 
-	let { clienteId }: Props = $props();
+	let { clienteId, initialCliente = null }: Props = $props();
 
-	let cliente = $state<Cliente | null>(null);
-	let loading = $state(true);
+	let cliente = $state<Cliente | null>(initialCliente);
+	let loading = $state(!initialCliente);
 	let error = $state<string | null>(null);
 	let editando = $state(false);
 	let editNombre = $state('');
@@ -43,7 +44,10 @@
 			loading = false;
 			return;
 		}
-		loading = true;
+
+		if (!cliente) {
+			loading = true;
+		}
 		error = null;
 		try {
 			cliente = await obtenerCliente(clienteRepository, clienteId.trim());
@@ -51,7 +55,9 @@
 				await cargarHistorial(cliente);
 			}
 		} catch (err) {
-			error = err instanceof HttpError ? err.message : 'No se pudo cargar el cliente.';
+			if (!cliente) {
+				error = err instanceof HttpError ? err.message : 'No se pudo cargar el cliente.';
+			}
 		} finally {
 			loading = false;
 		}

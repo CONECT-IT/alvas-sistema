@@ -28,7 +28,7 @@
 				<th class="pb-3">Cliente</th>
 				<th class="pb-3">Contacto</th>
 				<th class="pb-3">Origen</th>
-				<th class="pb-3">Alta</th>
+				<th class="pb-3">Fecha de registro</th>
 			</tr>
 		</thead>
 		<tbody class="divide-y divide-border-light text-sm">

@@ -9,6 +9,7 @@ export interface RegistrarLeadInputDTO {
   tipo: string;
   idPropiedadInteres?: string;
   idAsesor?: string;
+  idCliente?: string;
   datosPropiedad?: {
     titulo: string;
     descripcion: string;

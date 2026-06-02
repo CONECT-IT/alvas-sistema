@@ -214,7 +214,7 @@
 			<Card tilt>
 				<p class="stat-label">Acceso</p>
 				<p class="mt-3 font-display text-2xl font-bold text-text-main">@{usuario.username}</p>
-				<p class="mt-1 text-sm text-text-muted">Identificador de login.</p>
+				<p class="mt-1 text-sm text-text-muted">Identificador de acceso.</p>
 			</Card>
 		</div>
 
@@ -238,18 +238,14 @@
 			</Card>
 
 			<Card>
-				<h2 class="card-title">Acceso y seguridad</h2>
+				<h2 class="card-title">Seguridad</h2>
 				<div class="grid gap-3 text-sm">
 					<div class="rounded-xl bg-surface-muted p-4">
 						<p class="font-semibold text-text-main">Contraseña</p>
 						<p class="mt-1 text-text-muted">
-							No se muestra: se almacena como hash seguro. Desde editar puedes reemplazarla por una
-							clave temporal.
+							No se muestra por seguridad. Desde el botón "Editar" puedes asignar una nueva clave
+							temporal si es necesario.
 						</p>
-					</div>
-					<div class="rounded-xl bg-surface-muted p-4">
-						<p class="font-semibold text-text-main">ID interno</p>
-						<p class="mt-1 break-all text-text-muted">{usuario.id}</p>
 					</div>
 				</div>
 			</Card>

@@ -8,6 +8,7 @@ export const RegistrarLeadSchema = z.object({
   tipo: z.string().min(1, "Tipo requerido"),
   idPropiedadInteres: z.string().optional(),
   idAsesor: z.string().optional(),
+  idCliente: z.string().optional(),
   datosPropiedad: z
     .object({
       titulo: z.string().min(1),

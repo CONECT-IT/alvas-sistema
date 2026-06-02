@@ -75,7 +75,9 @@
 								tone={presentarEstadoLead(lead.estado).tone}
 								class="transition-all group-hover:ring-2 group-hover:ring-primary/20"
 							>
-								{presentarEstadoLead(lead.estado).label}
+								{lead.estado.toUpperCase() === 'CONVERTIDO' ? '✓ ' : ''}{presentarEstadoLead(
+									lead.estado
+								).label}
 							</Badge>
 						</button>
 

@@ -2,6 +2,7 @@
 	import Badge from '$lib/shared/ui/Badge.svelte';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
+	import ConfirmDialog from '$lib/shared/ui/ConfirmDialog.svelte';
 	import DateTimePicker from '$lib/shared/ui/DateTimePicker.svelte';
 	import SidePanel from '$lib/shared/ui/SidePanel.svelte';
 	import { HttpError } from '$lib/shared/http/httpClient';
@@ -30,19 +31,21 @@
 
 	interface Props {
 		leadId: string;
+		initialLead?: LeadDetalle | null;
 	}
 
-	let { leadId }: Props = $props();
+	let { leadId, initialLead = null }: Props = $props();
 
-	let lead = $state<LeadDetalle | null>(null);
+	let lead = $state<LeadDetalle | null>(initialLead);
 	let propiedadesRelacionadas = $state<string[]>([]);
 	let propiedadesDetalle = $state<Propiedad[]>([]);
 	let propiedadesDisponibles = $state<Propiedad[]>([]);
 	let propiedadInteres = $state<Propiedad | null>(null);
-	let loading = $state(true);
+	let loading = $state(!initialLead);
 	let error = $state<string | null>(null);
 	let accionError = $state<string | null>(null);
 	let panel = $state<'editar' | 'cita' | 'contrato' | null>(null);
+	let confirmarConvertir = $state(false);
 	let guardando = $state(false);
 	let formLead = $state({
 		nombre: '',
@@ -79,7 +82,10 @@
 			loading = false;
 			return;
 		}
-		loading = true;
+
+		if (!lead) {
+			loading = true;
+		}
 		error = null;
 		try {
 			lead = await obtenerLead(ventasRepository, leadId.trim());
@@ -117,7 +123,9 @@
 				}
 			}
 		} catch (err) {
-			error = err instanceof HttpError ? err.message : 'No se pudo cargar el lead.';
+			if (!lead) {
+				error = err instanceof HttpError ? err.message : 'No se pudo cargar el lead.';
+			}
 		} finally {
 			loading = false;
 		}
@@ -209,8 +217,13 @@
 		}
 	}
 
-	async function convertir() {
+	function abrirConvertir() {
+		confirmarConvertir = true;
+	}
+
+	async function ejecutarConvertir() {
 		if (!lead) return;
+		confirmarConvertir = false;
 		guardando = true;
 		accionError = null;
 		try {
@@ -316,7 +329,9 @@
 				<Button variant="secondary" onclick={abrirEditar}>Editar</Button>
 				<Button variant="secondary" onclick={abrirCita}>Agendar cita</Button>
 				{#if !lead.idCliente}
-					<Button variant="secondary" onclick={convertir} disabled={guardando}>Convertir</Button>
+					<Button variant="secondary" onclick={abrirConvertir} disabled={guardando}
+						>Convertir</Button
+					>
 				{/if}
 				{#if lead.tipo === 'VENTA'}
 					<Button onclick={abrirContrato}>Crear contrato</Button>
@@ -559,3 +574,15 @@
 		</div>
 	</SidePanel>
 {/if}
+
+<ConfirmDialog
+	isOpen={confirmarConvertir}
+	variant="info"
+	title="Convertir lead a cliente"
+	message="¿Estás seguro de que deseas convertir este lead a cliente? Esta acción formalizará el registro y permitirá crear contratos."
+	confirmLabel="Convertir"
+	cancelLabel="Cancelar"
+	onConfirm={ejecutarConvertir}
+	onCancel={() => (confirmarConvertir = false)}
+	loading={guardando}
+/>
