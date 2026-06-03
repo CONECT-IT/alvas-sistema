@@ -136,22 +136,20 @@ app.openAPIRegistry.registerComponent("securitySchemes", "bearerAuth", {
   bearerFormat: "JWT",
 });
 
-app.get(
-  "/openapi.json",
-  (c) =>
-    c.json(
-      app.getOpenAPI31Document({
-        openapi: "3.1.0",
-        info: {
-          title: "ALVAS API",
-          version: "1.0.0",
-          description:
-            "Contrato HTTP de ALVAS. La documentacion vive en infraestructura y respeta los bounded contexts de dominio.",
-        },
-        servers: [{ url: new URL(c.req.url).origin, description: "Entorno actual" }],
-        security: [{ bearerAuth: [] as string[] }],
-      }),
-    ),
+app.get("/openapi.json", (c) =>
+  c.json(
+    app.getOpenAPI31Document({
+      openapi: "3.1.0",
+      info: {
+        title: "ALVAS API",
+        version: "1.0.0",
+        description:
+          "Contrato HTTP de ALVAS. La documentacion vive en infraestructura y respeta los bounded contexts de dominio.",
+      },
+      servers: [{ url: new URL(c.req.url).origin, description: "Entorno actual" }],
+      security: [{ bearerAuth: [] as string[] }],
+    }),
+  ),
 );
 app.get(
   "/docs",

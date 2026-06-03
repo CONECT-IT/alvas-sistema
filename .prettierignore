@@ -9,3 +9,4 @@ coverage
 .idea
 .DS_Store
 bun.lock
+worker-configuration.d.ts

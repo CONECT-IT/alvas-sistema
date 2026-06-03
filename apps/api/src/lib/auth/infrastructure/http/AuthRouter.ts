@@ -7,7 +7,10 @@ import {
   error,
   validationHook,
 } from "../../../shared/infrastructure/openapi/openapi-utils";
-import { AuthDataSchema, schemasEntrada } from "../../../shared/infrastructure/openapi/OpenApiSchemas";
+import {
+  AuthDataSchema,
+  schemasEntrada,
+} from "../../../shared/infrastructure/openapi/OpenApiSchemas";
 
 /** Router con rutas POST /login y POST /refresh. @group Rutas */
 export function crearAuthRouter(deps: AuthControllerDeps) {
