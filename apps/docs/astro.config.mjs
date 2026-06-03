@@ -204,6 +204,7 @@ export default defineConfig({
               label: "Calidad",
               items: [
                 { label: "Mutation Testing", slug: "calidad/mutation-testing" },
+                { label: "Benchmarks y smoke tests", slug: "calidad/benchmarks" },
                 { label: "Walkthrough Log", slug: "calidad/walkthrough-log" },
               ],
             },

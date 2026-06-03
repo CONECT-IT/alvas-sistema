@@ -28,16 +28,24 @@ jobs:
         with:
           bun-version: latest
       - run: bun install --frozen-lockfile
+      - name: Prepare local D1 data
+        run: |
+          bun run db:migrate:local
+          bun run seed:local
+      - name: Prepare k6 reports directory
+        run: mkdir -p apps/api/test/benchmark/k6/reports
       - name: Start API server
         run: |
-          bun run --cwd apps/api dev --port 3000 &
+          bun run --cwd apps/api dev --ip 0.0.0.0 --port 3000 &
           sleep 10
           curl --retry 15 --retry-delay 2 --retry-connrefused http://127.0.0.1:3000/health
+      - uses: grafana/setup-k6-action@v1
       - name: Run k6 smoke test
-        uses: grafana/k6-action@v0.3.1
-        with:
-          filename: apps/api/test/benchmark/k6/api-smoke.js
-          flags: --env API_URL=http://127.0.0.1:3000 --out json=apps/api/test/benchmark/k6/reports/results.json
+        run: |
+          k6 run \
+            --env API_URL=http://127.0.0.1:3000 \
+            --out json=apps/api/test/benchmark/k6/reports/results.json \
+            apps/api/test/benchmark/k6/api-smoke.js
       - uses: actions/upload-artifact@v6
         if: always()
         with:
@@ -60,6 +68,8 @@ jobs:
       - run: bun install --frozen-lockfile
       - name: Build web app
         run: bun run --cwd apps/web build
+      - name: Prepare Lighthouse reports directory
+        run: mkdir -p apps/web/test/benchmark/lighthouse/reports
       - name: Run Lighthouse CI
         run: |
           bun run --cwd apps/web test:benchmark:lighthouse

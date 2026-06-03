@@ -1,8 +1,8 @@
 export default {
 	ci: {
 		collect: {
-			startServerCommand: 'bun run build && bun run preview',
-			url: ['http://localhost:4173/login', 'http://localhost:4173/admin/leads'],
+			startServerCommand: 'bun run preview',
+			url: ['http://localhost:5173/login', 'http://localhost:5173/admin/leads'],
 			numberOfRuns: 1
 		},
 		assert: {
