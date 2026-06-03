@@ -1,5 +1,5 @@
 ---
-title: "ADR 0001: DDD Táctico"
+title: "ADR 0001: Adopcion de Diseno Tactico DDD"
 description: "ADR 0001: Adopcion de Diseno Tactico DDD"
 sidebar:
   order: 1

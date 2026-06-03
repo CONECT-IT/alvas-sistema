@@ -188,10 +188,37 @@ export default defineConfig({
                 { label: "Visión general", slug: "arquitectura/vision-general" },
                 { label: "DDD y hexagonal", slug: "arquitectura/hexagonal-ddd" },
                 { label: "Context Map", slug: "arquitectura/context-map" },
-                { label: "ADR 0001: DDD Táctico", slug: "arquitectura/adr-0001-ddd-tactico" },
                 {
-                  label: "ADR 0002: Aggregate Roots",
+                  label: "ADR 0001: Adopcion de Diseno Tactico DDD",
+                  slug: "arquitectura/adr-0001-ddd-tactico",
+                },
+                {
+                  label: "ADR 0002: Definicion de Aggregate Roots",
                   slug: "arquitectura/adr-0002-aggregate-roots",
+                },
+                {
+                  label: "ADR 0003: Estrategia de Persistencia",
+                  slug: "arquitectura/adr-0003-persistencia",
+                },
+                {
+                  label: "ADR 0004: Manejo de Errores y Excepciones",
+                  slug: "arquitectura/adr-0004-manejo-errores",
+                },
+                {
+                  label: "ADR 0005: Autenticación y Autorización",
+                  slug: "arquitectura/adr-0005-autenticacion",
+                },
+                {
+                  label: "ADR 0006: Modelos de Lectura para Reportes",
+                  slug: "arquitectura/adr-0006-modelos-lectura",
+                },
+                {
+                  label: "ADR 0007: Integraciones y captación multicanal",
+                  slug: "arquitectura/adr-0007-integraciones",
+                },
+                {
+                  label: "ADR 0008: Plataforma de backend API en Cloudflare Workers + D1",
+                  slug: "arquitectura/adr-0008-cloudflare-workers",
                 },
               ],
             },

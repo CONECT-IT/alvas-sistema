@@ -5,8 +5,8 @@
  * Se ejecuta antes de docs:build.
  */
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
-import { resolve, dirname, basename } from "path";
+import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from "fs";
+import { resolve, dirname, basename, join } from "path";
 
 const ORIGEN = (...p) => resolve(process.cwd(), ...p);
 const DESTINO = (...p) => ORIGEN("apps/docs/src/content/docs", ...p);
@@ -60,22 +60,46 @@ description: "${description}"${sidebar}
 console.log("\nADRs...");
 const adrDir = ORIGEN("docs/adr");
 if (existsSync(adrDir)) {
-  const adrFiles = [
-    ["0001-ddd-tactico.md", { title: "ADR 0001: DDD Táctico", sidebar: 1 }],
-    ["0002-aggregate-roots.md", { title: "ADR 0002: Aggregate Roots", sidebar: 2 }],
-    ["0003-event-sourcing.md", { title: "ADR 0003: Event Sourcing", sidebar: 3 }],
-    ["0004-cqrs.md", { title: "ADR 0004: CQRS", sidebar: 4 }],
-    ["0005-domain-events.md", { title: "ADR 0005: Domain Events", sidebar: 5 }],
-    ["0006-value-objects.md", { title: "ADR 0006: Value Objects", sidebar: 6 }],
-    ["0007-repositorios.md", { title: "ADR 0007: Repositorios", sidebar: 7 }],
-    ["0008-hexagonal-architecture.md", { title: "ADR 0008: Arquitectura Hexagonal", sidebar: 8 }],
-  ];
-  for (const [file, opts] of adrFiles) {
-    const src = resolve(adrDir, file);
-    if (existsSync(src)) {
-      syncFile(src, DESTINO("arquitectura", `adr-${file}`), opts);
-    }
+  const adrRegex = /^(\d{4})-(.+)\.md$/;
+  const adrFiles = readdirSync(adrDir)
+    .filter((f) => adrRegex.test(f))
+    .map((f) => {
+      const [, number, name] = f.match(adrRegex);
+      const src = resolve(adrDir, f);
+      const content = readFileSync(src, "utf-8");
+      const title =
+        content.match(/^#\s+(.+)/m)?.[1]?.trim() ||
+        `ADR ${number}: ${name
+          .split("-")
+          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(" ")}`;
+      return { file: f, number, name, src, title };
+    })
+    .sort((a, b) => a.number.localeCompare(b.number));
+
+  for (const adr of adrFiles) {
+    syncFile(adr.src, DESTINO("arquitectura", `adr-${adr.file}`), {
+      title: adr.title,
+      sidebar: parseInt(adr.number, 10),
+    });
   }
+
+  // Auto-generar sidebar en astro.config.mjs
+  const sidebarItems = adrFiles
+    .map(
+      (adr) =>
+        `                { label: "${adr.title}", slug: "arquitectura/adr-${adr.number}-${adr.name}" },`,
+    )
+    .join("\n");
+
+  const astroConfigPath = ORIGEN("apps/docs/astro.config.mjs");
+  let astroConfig = readFileSync(astroConfigPath, "utf-8");
+  astroConfig = astroConfig.replace(
+    /(\s*)\/\/ ADR_SIDEBAR_AUTO[\s\S]*?\/\/ ADR_SIDEBAR_AUTO_END/,
+    `$1// ADR_SIDEBAR_AUTO\n${sidebarItems}\n$1// ADR_SIDEBAR_AUTO_END`,
+  );
+  writeFileSync(astroConfigPath, astroConfig, "utf-8");
+  console.log(`  Sidebar actualizado con ${adrFiles.length} ADRs`);
 }
 
 // ── Especificaciones (SDD) ──
