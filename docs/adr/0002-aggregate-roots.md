@@ -19,7 +19,6 @@ Se definen los siguientes aggregate roots y modelos de lectura:
 - **Aggregate root:** `Sesion`.
 - **Responsabilidad:** representar una sesion autenticada emitida despues de credenciales validas.
 - **Invariantes:** tokens obligatorios y usuario/rol consistentes en la sesion emitida.
-- **Nota:** hoy es un agregado tecnico y efimero; si luego hay revocacion o auditoria, requerira persistencia y estados explicitos.
 
 ### `usuarios`
 

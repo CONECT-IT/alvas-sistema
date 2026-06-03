@@ -63,6 +63,12 @@ if (existsSync(adrDir)) {
   const adrFiles = [
     ["0001-ddd-tactico.md", { title: "ADR 0001: DDD Táctico", sidebar: 1 }],
     ["0002-aggregate-roots.md", { title: "ADR 0002: Aggregate Roots", sidebar: 2 }],
+    ["0003-event-sourcing.md", { title: "ADR 0003: Event Sourcing", sidebar: 3 }],
+    ["0004-cqrs.md", { title: "ADR 0004: CQRS", sidebar: 4 }],
+    ["0005-domain-events.md", { title: "ADR 0005: Domain Events", sidebar: 5 }],
+    ["0006-value-objects.md", { title: "ADR 0006: Value Objects", sidebar: 6 }],
+    ["0007-repositorios.md", { title: "ADR 0007: Repositorios", sidebar: 7 }],
+    ["0008-hexagonal-architecture.md", { title: "ADR 0008: Arquitectura Hexagonal", sidebar: 8 }],
   ];
   for (const [file, opts] of adrFiles) {
     const src = resolve(adrDir, file);
