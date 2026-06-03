@@ -41,6 +41,12 @@
 			alert('No se pudo actualizar el estado.');
 		}
 	}
+
+	function nombreAsesor(lead: LeadPipeline): string {
+		if (lead.nombreAsesor) return lead.nombreAsesor;
+		if (lead.idAsesor) return `Asesor no encontrado (${lead.idAsesor})`;
+		return 'Sin asesor asignado';
+	}
 </script>
 
 <div class="overflow-x-auto">
@@ -111,7 +117,7 @@
 							></div>
 						{/if}
 					</td>
-					<td class="py-4 pr-6 text-text-muted">{lead.nombreAsesor ?? 'Sin asignar'}</td>
+					<td class="py-4 pr-6 text-text-muted">{nombreAsesor(lead)}</td>
 					<td class="py-4 text-text-muted">{lead.citasCount}</td>
 					<td class="py-4 pl-3">
 						{#if onEditClick}

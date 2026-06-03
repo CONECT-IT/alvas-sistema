@@ -3,16 +3,42 @@ import starlight from "@astrojs/starlight";
 import starlightUtils from "@lorenzo_lewis/starlight-utils";
 import starlightCelestiaTheme from "starlight-theme-celestia-monorepo/packages/starlight-theme-celestia";
 import { createStarlightTypeDocPlugin } from "starlight-typedoc";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const [apiTypeDoc] = createStarlightTypeDocPlugin();
 const [webTypeDoc] = createStarlightTypeDocPlugin();
 
 const docsBase = process.env.DOCS_BASE ?? "";
 const docsPath = (path) => `${docsBase}${path}`;
+const celestiaPackageRoot = dirname(
+  fileURLToPath(
+    import.meta
+      .resolve("starlight-theme-celestia-monorepo/packages/starlight-theme-celestia/package.json"),
+  ),
+);
 
 export default defineConfig({
   site: process.env.DOCS_SITE ?? "https://alvas-docs.pages.dev",
   base: docsBase,
+  vite: {
+    resolve: {
+      alias: [
+        {
+          find: /^starlight-theme-celestia\/(.*\.css)$/,
+          replacement: join(celestiaPackageRoot, "lib", "$1"),
+        },
+        {
+          find: /^starlight-theme-celestia\/components\/(.*)$/,
+          replacement: join(celestiaPackageRoot, "src", "components", "$1"),
+        },
+        {
+          find: "starlight-theme-celestia",
+          replacement: join(celestiaPackageRoot, "src", "index.ts"),
+        },
+      ],
+    },
+  },
   integrations: [
     starlight({
       title: "ALVAS Docs",

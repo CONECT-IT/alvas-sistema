@@ -40,6 +40,22 @@ export class AgendarCitaUseCase
           new ErrorDeDominio("Lead no encontrado", { codigo: "LEAD_NO_ENCONTRADO" }),
         );
 
+      if (!lead.idAsesor) {
+        return resultadoFallido(
+          new ErrorDeDominio("El lead debe tener un asesor asignado para agendar citas.", {
+            codigo: "LEAD_SIN_ASESOR",
+          }),
+        );
+      }
+
+      if (input.usuarioAutenticado?.rol === "ADMIN") {
+        return resultadoFallido(
+          new ErrorDeDominio("El administrador no agenda citas comerciales.", {
+            codigo: "ADMIN_NO_AGENDA_CITAS",
+          }),
+        );
+      }
+
       if (
         input.usuarioAutenticado &&
         this.autorizador &&

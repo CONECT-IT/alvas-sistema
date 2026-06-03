@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { HttpError } from '$lib/shared/http/httpClient';
 	import { listarActividadLead } from '$lib/ventas/application/use-cases/listarActividadLead';
 	import { ventasRepository } from '$lib/ventas/infrastructure/ventasRepository';
@@ -10,6 +11,7 @@
 	let actividades = $state<ActividadLeadDTO[]>([]);
 	let loading = $state(false);
 	let error = $state<string | null>(null);
+	let leadCargado = $state('');
 
 	const labels: Record<string, string> = {
 		LEAD_REGISTRADO: 'Lead registrado',
@@ -59,7 +61,13 @@
 	}
 
 	$effect(() => {
-		if (leadId) cargar();
+		const id = leadId.trim();
+		untrack(() => {
+			if (id && id !== leadCargado) {
+				leadCargado = id;
+				void cargar();
+			}
+		});
 	});
 </script>
 

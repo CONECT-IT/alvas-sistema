@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto, invalidateAll } from '$app/navigation';
 	import { flip } from 'svelte/animate';
+	import { SvelteDate } from 'svelte/reactivity';
 	import { fly, scale } from 'svelte/transition';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
@@ -16,7 +17,6 @@
 	import { registrarLead } from '$lib/ventas/application/use-cases/registrarLead';
 	import { ventasRepository } from '$lib/ventas/infrastructure/ventasRepository';
 	import LeadPipelineTable from '$lib/ventas/presentation/LeadPipelineTable.svelte';
-	import LeadKanban from '$lib/ventas/presentation/LeadKanban.svelte';
 	import PipelineStats from '$lib/ventas/presentation/PipelineStats.svelte';
 	import ActividadLeadTimeline from '$lib/ventas/presentation/ActividadLeadTimeline.svelte';
 	import type { PageData } from './$types';
@@ -29,11 +29,20 @@
 		(data?.clientes as Array<{ id: string; nombre: string; email: string }>) ?? []
 	);
 	let mostrarConvertidos = $state(false);
-	let vista = $state<'tabla' | 'kanban'>('tabla');
 	let busqueda = $state('');
 	type FiltroLeads = 'todos' | 'conCitas' | 'nuevos' | 'compradores' | 'vendedores';
 	let filtro = $state<FiltroLeads>('todos');
 	let diaSeleccionado = $state(fechaClave(Date.now()));
+	let mesCalendario = new SvelteDate(inicioMes(new Date()));
+	let citaResumen = $state<{
+		id: string;
+		idLead: string;
+		leadNombre: string;
+		fechaInicio: string;
+		fechaFin: string;
+		estado: string;
+		observacion?: string;
+	} | null>(null);
 	let loading = $state(false);
 	let error = $state<string | null>(null);
 	let guardando = $state(false);
@@ -81,30 +90,24 @@
 			.sort((a, b) => new Date(a.fechaInicio).getTime() - new Date(b.fechaInicio).getTime())
 	);
 	let citasPendientes = $derived(citas.filter((cita) => cita.estado !== 'CANCELADA'));
-	let citasHoy = $derived(
-		citasPendientes.filter((cita) => fechaClave(cita.fechaInicio) === fechaClave(Date.now()))
-	);
 	let citasSeleccionadas = $derived(
-		citasPendientes.filter((cita) => fechaClave(cita.fechaInicio) === diaSeleccionado).slice(0, 5)
+		citasPendientes.filter((cita) => fechaClave(cita.fechaInicio) === diaSeleccionado)
+	);
+	let proximasCitas = $derived(
+		citasPendientes
+			.filter((cita) => new Date(cita.fechaInicio).getTime() >= inicioDia(new Date()).getTime())
+			.slice(0, 6)
 	);
 	let etiquetaDiaSeleccionado = $derived(
 		new Intl.DateTimeFormat('es-PE', { weekday: 'long', day: 'numeric', month: 'short' }).format(
 			Date.parse(`${diaSeleccionado}T00:00:00`)
 		)
 	);
-	const diasCalendario = $derived(
-		Array.from({ length: 7 }, (_, index) => {
-			const timestamp = Date.now() + index * 24 * 60 * 60 * 1000;
-			const clave = fechaClave(timestamp);
-			const total = citasPendientes.filter((cita) => fechaClave(cita.fechaInicio) === clave).length;
-			return {
-				clave,
-				diaSemana: new Intl.DateTimeFormat('es-PE', { weekday: 'short' }).format(timestamp),
-				diaMes: new Intl.DateTimeFormat('es-PE', { day: 'numeric' }).format(timestamp),
-				total
-			};
-		})
+	let etiquetaMesCalendario = $derived(
+		new Intl.DateTimeFormat('es-PE', { month: 'long', year: 'numeric' }).format(mesCalendario)
 	);
+	const diasSemana = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+	const diasCalendario = $derived(construirDiasMes(mesCalendario, citasPendientes));
 
 	async function cargarLeads() {
 		loading = true;
@@ -149,6 +152,50 @@
 		return new Intl.DateTimeFormat('en-CA').format(
 			typeof fecha === 'string' ? Date.parse(fecha) : fecha
 		);
+	}
+
+	function inicioDia(fecha: Date): Date {
+		return new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
+	}
+
+	function inicioMes(fecha: Date): Date {
+		return new Date(fecha.getFullYear(), fecha.getMonth(), 1);
+	}
+
+	function moverMes(delta: number) {
+		mesCalendario.setFullYear(mesCalendario.getFullYear(), mesCalendario.getMonth() + delta, 1);
+		citaResumen = null;
+	}
+
+	function construirDiasMes(
+		mes: Date,
+		citasMes: Array<{ fechaInicio: string }>
+	): Array<{ clave: string; diaMes: string; total: number; fueraDeMes: boolean }> {
+		const primero = inicioMes(mes);
+		const offset = (primero.getDay() + 6) % 7;
+		const inicio = new SvelteDate(primero.getTime());
+		inicio.setDate(primero.getDate() - offset);
+
+		return Array.from({ length: 42 }, (_, index) => {
+			const fecha = new SvelteDate(inicio.getTime());
+			fecha.setDate(inicio.getDate() + index);
+			const clave = fechaClave(fecha.getTime());
+			return {
+				clave,
+				diaMes: new Intl.DateTimeFormat('es-PE', { day: 'numeric' }).format(fecha),
+				total: citasMes.filter((cita) => fechaClave(cita.fechaInicio) === clave).length,
+				fueraDeMes: fecha.getMonth() !== mes.getMonth()
+			};
+		});
+	}
+
+	function seleccionarDia(clave: string) {
+		diaSeleccionado = clave;
+		citaResumen = null;
+	}
+
+	function seleccionarCita(cita: NonNullable<typeof citaResumen>) {
+		citaResumen = cita;
 	}
 
 	// SidePanel state
@@ -279,45 +326,17 @@
 						</div>
 						<div class="flex flex-col gap-3 sm:flex-row sm:items-center">
 							<FloatingTextInput label="Buscar lead" bind:value={busqueda} class="sm:w-56" />
-							<div class="flex items-center rounded-xl bg-surface-muted p-1">
-								<button
-									onclick={() => (vista = 'tabla')}
-									class="rounded-lg px-3 py-1 text-xs font-bold transition {vista === 'tabla'
-										? 'bg-bg-card text-primary shadow-xs'
-										: 'text-text-muted hover:text-text-main'}"
-								>
-									Lista
-								</button>
-								<button
-									onclick={() => (vista = 'kanban')}
-									class="rounded-lg px-3 py-1 text-xs font-bold transition {vista === 'kanban'
-										? 'bg-bg-card text-primary shadow-xs'
-										: 'text-text-muted hover:text-text-main'}"
-								>
-									Kanban
-								</button>
-							</div>
 							<Checkbox bind:checked={mostrarConvertidos} label="Convertidos" />
 						</div>
 					</div>
 
-					{#if vista === 'tabla'}
-						<div class="min-w-0 overflow-x-auto">
-							<LeadPipelineTable
-								leads={leadsVisibles}
-								onLeadClick={irALead}
-								onStatusChanged={actualizarEstadoLeadLocal}
-							/>
-						</div>
-					{:else}
-						<div class="min-w-0 overflow-x-auto">
-							<LeadKanban
-								leads={leadsVisibles}
-								onLeadClick={irALead}
-								onStatusChanged={actualizarEstadoLeadLocal}
-							/>
-						</div>
-					{/if}
+					<div class="min-w-0 overflow-x-auto">
+						<LeadPipelineTable
+							leads={leadsVisibles}
+							onLeadClick={irALead}
+							onStatusChanged={actualizarEstadoLeadLocal}
+						/>
+					</div>
 				</Card>
 			</div>
 
@@ -329,26 +348,44 @@
 								Calendario
 							</p>
 							<h2 class="mt-2 font-display text-xl font-bold text-text-main">
-								{citasHoy.length} citas hoy
+								{etiquetaMesCalendario}
 							</h2>
 							<p class="mt-1 text-sm text-text-muted">{citasPendientes.length} citas activas</p>
 						</div>
-						<Button href="/asesor/citas" variant="secondary" class="px-4 py-2 text-sm">Ver</Button>
+						<div class="flex items-center gap-2">
+							<button
+								type="button"
+								class="rounded-lg border border-border-light px-3 py-1 text-sm font-semibold text-text-muted hover:border-primary/40 hover:text-primary"
+								aria-label="Mes anterior"
+								onclick={() => moverMes(-1)}
+							>
+								&lt;
+							</button>
+							<button
+								type="button"
+								class="rounded-lg border border-border-light px-3 py-1 text-sm font-semibold text-text-muted hover:border-primary/40 hover:text-primary"
+								aria-label="Mes siguiente"
+								onclick={() => moverMes(1)}
+							>
+								&gt;
+							</button>
+						</div>
 					</div>
-					<div class="mt-5 grid grid-cols-7 gap-2">
+					<div class="mt-5 grid grid-cols-7 gap-1 text-center">
+						{#each diasSemana as dia, indiceDia (indiceDia)}
+							<p class="py-1 text-[10px] font-bold text-text-muted uppercase">{dia}</p>
+						{/each}
 						{#each diasCalendario as dia (dia.clave)}
 							<button
 								type="button"
-								onclick={() => (diaSeleccionado = dia.clave)}
-								class="rounded-xl border border-border-light bg-bg-base p-2 text-center transition hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-sm {dia.total >
-								0
+								onclick={() => seleccionarDia(dia.clave)}
+								class="min-h-12 rounded-xl border border-border-light bg-bg-base p-2 text-center transition hover:border-primary/50 {dia.fueraDeMes
+									? 'opacity-40'
+									: ''} {dia.total > 0
 									? 'border-primary/40 bg-primary-light/40'
 									: ''} {diaSeleccionado === dia.clave ? 'ring-2 ring-primary/20' : ''}"
 							>
-								<p class="text-[10px] font-semibold text-text-muted uppercase">
-									{dia.diaSemana}
-								</p>
-								<p class="mt-1 font-display text-lg font-bold text-text-main">{dia.diaMes}</p>
+								<p class="font-display text-sm font-bold text-text-main">{dia.diaMes}</p>
 								<p class="text-[10px] font-semibold text-primary">{dia.total || ''}</p>
 							</button>
 						{/each}
@@ -370,20 +407,85 @@
 					{:else}
 						<div class="grid gap-3">
 							{#each citasSeleccionadas as cita (`${cita.id}-${cita.idLead}`)}
-								<a
+								<button
+									type="button"
 									animate:flip={{ duration: 180 }}
 									transition:fly={{ y: 8, duration: 180 }}
-									href={`/asesor/leads/${encodeURIComponent(cita.idLead)}`}
-									class="rounded-xl border border-border-light bg-bg-base p-3 transition hover:border-primary/40"
+									onclick={() => seleccionarCita(cita)}
+									class="rounded-xl border border-border-light bg-bg-base p-3 text-left transition hover:border-primary/40"
 								>
 									<p class="text-sm font-semibold text-text-main">{cita.leadNombre}</p>
 									<p class="mt-1 text-xs text-text-muted">{formatearCita(cita.fechaInicio)}</p>
 									<p class="mt-2 text-xs font-semibold text-primary">{cita.estado}</p>
-								</a>
+								</button>
 							{/each}
 						</div>
 					{/if}
 				</Card>
+
+				<Card class="min-w-0">
+					<h2 class="font-display text-xl font-bold text-text-main">Próximas citas</h2>
+					{#if proximasCitas.length === 0}
+						<p class="mt-3 rounded-xl bg-surface-muted p-4 text-sm text-text-muted">
+							No hay citas próximas.
+						</p>
+					{:else}
+						<div class="mt-4 grid gap-3">
+							{#each proximasCitas as cita (`proxima-${cita.id}-${cita.idLead}`)}
+								<button
+									type="button"
+									class="rounded-xl border border-border-light bg-bg-base p-3 text-left transition hover:border-primary/40"
+									onclick={() => seleccionarCita(cita)}
+								>
+									<p class="text-sm font-semibold text-text-main">{cita.leadNombre}</p>
+									<p class="mt-1 text-xs text-text-muted">{formatearCita(cita.fechaInicio)}</p>
+								</button>
+							{/each}
+						</div>
+					{/if}
+				</Card>
+
+				{#if citaResumen}
+					<Card class="min-w-0 border-primary/30 bg-primary-light/20">
+						<div class="flex items-start justify-between gap-3">
+							<div>
+								<p class="text-xs font-semibold tracking-[0.14em] text-primary uppercase">
+									Resumen de cita
+								</p>
+								<h2 class="mt-2 font-display text-lg font-bold text-text-main">
+									{citaResumen.leadNombre}
+								</h2>
+								<p class="mt-1 text-sm text-text-muted">
+									{formatearCita(citaResumen.fechaInicio)} - {new Date(
+										citaResumen.fechaFin
+									).toLocaleTimeString('es-PE', {
+										hour: '2-digit',
+										minute: '2-digit'
+									})}
+								</p>
+								<p class="mt-2 text-xs font-semibold text-primary">{citaResumen.estado}</p>
+								{#if citaResumen.observacion}
+									<p class="mt-2 text-sm text-text-muted">{citaResumen.observacion}</p>
+								{/if}
+							</div>
+							<button
+								type="button"
+								class="text-sm font-bold text-text-muted hover:text-text-main"
+								aria-label="Cerrar resumen"
+								onclick={() => (citaResumen = null)}
+							>
+								x
+							</button>
+						</div>
+						<Button
+							href={`/asesor/leads/${encodeURIComponent(citaResumen.idLead)}`}
+							variant="secondary"
+							class="mt-4 w-full justify-center"
+						>
+							Abrir lead
+						</Button>
+					</Card>
+				{/if}
 			</aside>
 		</div>
 	{/if}

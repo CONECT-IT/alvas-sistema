@@ -484,6 +484,28 @@ describe("ventas / use cases", () => {
     expect(resultado.esExito ? undefined : resultado.error.codigo).toBe("SIN_PERMISOS_LEAD");
   });
 
+  test("AgendarCitaUseCase rechaza agendamiento desde admin", async () => {
+    const repo = new FakeVentasRepository();
+    await repo.guardarLead(crearLead());
+
+    const resultado = await new AgendarCitaUseCase(
+      repo,
+      new SecuenciaGeneradorId(["cita-001"]),
+      new AutorizadorVentasAdapter(),
+    ).ejecutar({
+      idLead: "lead-001",
+      fechaInicio: new Date("2026-06-01T10:00:00.000Z"),
+      duracionMinutos: 60,
+      usuarioAutenticado: { id: "admin-1", rol: "ADMIN" },
+    });
+
+    expect(resultado.esExito).toBe(false);
+    expect(resultado.esExito ? undefined : resultado.error.message).toBe(
+      "El administrador no agenda citas comerciales.",
+    );
+    expect(resultado.esExito ? undefined : resultado.error.codigo).toBe("ADMIN_NO_AGENDA_CITAS");
+  });
+
   test("AgendarCitaUseCase funciona sin usuarioAutenticado", async () => {
     const repo = new FakeVentasRepository();
     await repo.guardarLead(crearLead());

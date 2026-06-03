@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import Badge from '$lib/shared/ui/Badge.svelte';
 	import Button from '$lib/shared/ui/Button.svelte';
 	import Card from '$lib/shared/ui/Card.svelte';
@@ -36,12 +37,12 @@
 
 	let { leadId, initialLead = null }: Props = $props();
 
-	let lead = $state<LeadDetalle | null>(initialLead);
+	let lead = $state<LeadDetalle | null>(null);
 	let propiedadesRelacionadas = $state<string[]>([]);
 	let propiedadesDetalle = $state<Propiedad[]>([]);
 	let propiedadesDisponibles = $state<Propiedad[]>([]);
 	let propiedadInteres = $state<Propiedad | null>(null);
-	let loading = $state(!initialLead);
+	let loading = $state(false);
 	let error = $state<string | null>(null);
 	let accionError = $state<string | null>(null);
 	let panel = $state<'editar' | 'cita' | 'contrato' | null>(null);
@@ -66,7 +67,9 @@
 		fechaInicio: '',
 		fechaFin: ''
 	});
+	let leadCargado = $state('');
 	let basePath = $derived($page.url.pathname.startsWith('/admin') ? '/admin' : '/asesor');
+	let puedeAgendarCita = $derived(basePath !== '/admin' && !!lead?.idAsesor);
 	let propiedadesPorId = $derived(new Map(propiedadesDetalle.map((p) => [p.id, p])));
 	let catalogoPropiedadesPorId = $derived(
 		new Map(
@@ -145,6 +148,10 @@
 	}
 
 	function abrirCita() {
+		if (!puedeAgendarCita) {
+			accionError = 'Este lead debe tener un asesor asignado para agendar citas.';
+			return;
+		}
 		formCita = {
 			fecha: '',
 			hora: '',
@@ -190,6 +197,10 @@
 
 	async function guardarCita() {
 		if (!lead) return;
+		if (!puedeAgendarCita) {
+			accionError = 'Este lead debe tener un asesor asignado para agendar citas.';
+			return;
+		}
 		const fechaInicio = crearFechaHoraLocal(formCita.fecha, formCita.hora);
 		const duracion = Number(formCita.duracionMinutos);
 
@@ -274,6 +285,12 @@
 		return catalogoPropiedadesPorId.get(id)?.titulo ?? 'Propiedad registrada';
 	}
 
+	function nombreAsesorLead(): string {
+		if (lead?.nombreAsesor) return lead.nombreAsesor;
+		if (lead?.idAsesor) return `Asesor no encontrado (${lead.idAsesor})`;
+		return 'Sin asesor asignado';
+	}
+
 	function crearFechaHoraLocal(fecha: string, hora: string): Date | null {
 		if (!fecha || !hora) return null;
 		const date = new Date(`${fecha}T${hora}:00`);
@@ -291,7 +308,16 @@
 	}
 
 	$effect(() => {
-		cargar();
+		const id = leadId.trim();
+		const leadInicial = initialLead;
+		untrack(() => {
+			if (id !== leadCargado) {
+				leadCargado = id;
+				lead = leadInicial;
+				loading = !leadInicial;
+				void cargar();
+			}
+		});
 	});
 </script>
 
@@ -319,7 +345,7 @@
 					>
 				</div>
 				<p class="mt-2 text-sm text-text-muted">
-					Asesor: {lead.nombreAsesor ?? 'Sin asignar'}
+					Asesor: {nombreAsesorLead()}
 					{#if lead.idCliente}
 						&middot; Cliente vinculado
 					{/if}
@@ -327,7 +353,11 @@
 			</div>
 			<div class="flex gap-2">
 				<Button variant="secondary" onclick={abrirEditar}>Editar</Button>
-				<Button variant="secondary" onclick={abrirCita}>Agendar cita</Button>
+				{#if basePath !== '/admin'}
+					<Button variant="secondary" onclick={abrirCita} disabled={!puedeAgendarCita}
+						>Agendar cita</Button
+					>
+				{/if}
 				{#if !lead.idCliente}
 					<Button variant="secondary" onclick={abrirConvertir} disabled={guardando}
 						>Convertir</Button
@@ -358,7 +388,7 @@
 					<dt class="font-semibold text-text-muted">Estado</dt>
 					<dd class="text-text-main">{lead.estado}</dd>
 					<dt class="font-semibold text-text-muted">Asesor asignado</dt>
-					<dd class="text-text-main">{lead.nombreAsesor ?? 'Sin asignar'}</dd>
+					<dd class="text-text-main">{nombreAsesorLead()}</dd>
 					{#if lead.idPropiedadInteres}
 						<dt class="font-semibold text-text-muted">Propiedad de interés</dt>
 						<dd class="flex flex-wrap items-center gap-2">
