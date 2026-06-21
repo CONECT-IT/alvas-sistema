@@ -38,7 +38,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - run: bun install --frozen-lockfile
+      - run: bun install --frozen-lockfile --filter "./apps/api" --filter "./apps/web"
       - run: bun run --cwd apps/${{ matrix.app }} lint
       - run: bunx tsc --noEmit -p apps/${{ matrix.app }}/tsconfig.json
 
@@ -76,7 +76,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - run: bun install --frozen-lockfile
+      - run: bun install --frozen-lockfile --filter "./apps/api" --filter "./apps/web"
       - run: bun run --cwd apps/${{ matrix.app }} build
       - uses: actions/upload-artifact@v6
         if: matrix.app == 'web'
@@ -99,7 +99,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - run: bun install --frozen-lockfile
+      - run: bun install --frozen-lockfile --filter "./apps/api" --filter "./apps/web"
       - run: bun run --cwd apps/api test
 
   api-integration-bdd:
@@ -115,7 +115,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - run: bun install --frozen-lockfile
+      - run: bun install --frozen-lockfile --filter "./apps/api" --filter "./apps/web"
       - run: bun run --cwd apps/api test:bdd
 
   api-coverage:
@@ -131,7 +131,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - run: bun install --frozen-lockfile
+      - run: bun install --frozen-lockfile --filter "./apps/api" --filter "./apps/web"
       - name: Quality gate de cobertura de dominio
         run: bun run coverage:domain
       - name: Resumen de cobertura API
@@ -166,7 +166,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - run: bun install --frozen-lockfile
+      - run: bun install --frozen-lockfile --filter "./apps/api" --filter "./apps/web"
       - name: Verificar que DTOs no exponen datos sensibles
         run: bun run --cwd apps/api test:security
 
@@ -183,7 +183,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - run: bun install --frozen-lockfile
+      - run: bun install --frozen-lockfile --filter "./apps/api" --filter "./apps/web"
       - name: Quality gate de mutation testing
         env:
           STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
@@ -230,7 +230,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - run: bun install --frozen-lockfile
+      - run: bun install --frozen-lockfile --filter "./apps/api" --filter "./apps/web"
       - run: bun run --cwd apps/web test:unit
 
   web-coverage:
@@ -246,7 +246,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - run: bun install --frozen-lockfile
+      - run: bun install --frozen-lockfile --filter "./apps/api" --filter "./apps/web"
       - run: bun run --cwd apps/web coverage:components
       - uses: actions/upload-artifact@v6
         if: always()

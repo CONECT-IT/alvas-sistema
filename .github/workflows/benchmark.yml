@@ -27,7 +27,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - run: bun install --frozen-lockfile
+      - run: bun install --frozen-lockfile --filter "./apps/api" --filter "./apps/web"
       - name: Prepare local D1 data
         run: |
           bun run db:migrate:local
@@ -65,7 +65,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - run: bun install --frozen-lockfile
+      - run: bun install --frozen-lockfile --filter "./apps/api" --filter "./apps/web"
       - name: Build web app
         run: bun run --cwd apps/web build
       - name: Prepare Lighthouse reports directory
