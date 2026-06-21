@@ -2,7 +2,7 @@ name: E2E Pipeline
 
 on:
   workflow_run:
-    workflows: ["Test & Quality Pipeline"]
+    workflows: ["CI"]
     types: [completed]
   workflow_dispatch:
     inputs:

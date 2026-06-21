@@ -2,7 +2,7 @@ name: Deploy Staging
 
 on:
   workflow_run:
-    workflows: ["Test & Quality Pipeline"]
+    workflows: ["CI"]
     types: [completed]
   workflow_dispatch:
 

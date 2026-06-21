@@ -1,9 +1,6 @@
 name: Version Release
 
 on:
-  workflow_run:
-    workflows: ["E2E Pipeline"]
-    types: [completed]
   workflow_dispatch:
 
 concurrency:
