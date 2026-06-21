@@ -4,7 +4,7 @@ coverageReporter = ["text", "lcov"]
 coverageDir = "./coverage"
 
 # Threshold de cobertura del 80% (líneas, funciones, sentencias)
-coverageThreshold = 0.8
+coverageThreshold = 0.99
 
 coverageSkipTestFiles = true
 coveragePathIgnorePatterns = [
