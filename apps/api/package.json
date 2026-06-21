@@ -31,6 +31,7 @@
     "k6-html-reporter": "^1.0.5",
     "prettier": "^3.8.3",
     "ts-node": "^10.9.2",
+    "@stryker-mutator/core": "^9.6.1",
     "tsx": "^4.21.0",
     "typescript": "^6.0.3"
   },
