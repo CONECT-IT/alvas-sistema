@@ -68,7 +68,7 @@ bun run typecheck
 Requisitos:
 
 - Bun.
-- Node.js 22 o superior. El proyecto ejecuta scripts con Bun, pero Wrangler valida la version de Node en build.
+- Node.js 24 o superior. El proyecto ejecuta scripts con Bun, pero Wrangler valida la version de Node en build.
 
 Instalacion reproducible:
 
@@ -126,14 +126,6 @@ Mutation testing:
 - Umbral: `break: 70`.
 - Reporte: `reports/mutation/`, publicado como artefacto `stryker-report`.
 - Dashboard: si GitHub Secrets define `STRYKER_DASHBOARD_API_KEY`, Stryker publica el reporte completo en Stryker Dashboard.
-
-## Evidencias de entrega
-
-- Workflow: `.github/workflows/test.yml`.
-- Reporte de cobertura: artefacto `coverage-report`.
-- Reporte de Stryker: artefacto `stryker-report`.
-- Log de walkthrough cruzado: `docs/walkthrough-log.md`.
-- Tag esperado al cierre: `v1.1.0`.
 
 ## Especificaciones SDD
 
