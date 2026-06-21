@@ -79,7 +79,7 @@ export function helper10(matrix: number[][]): number[][] {
   for (let j = 0; j < cols; j++) {
     result[j] = [];
     for (let i = 0; i < rows; i++) {
-      result[j][i] = matrix[i][j];
+      result[j]![i] = matrix[i]![j]!;
     }
   }
   return result;
