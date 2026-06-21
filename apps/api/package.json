@@ -33,7 +33,8 @@
     "ts-node": "^10.9.2",
     "@stryker-mutator/core": "^9.6.1",
     "tsx": "^4.21.0",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "wrangler": "^4.94.0"
   },
   "dependencies": {
     "@hono/zod-openapi": "^1.4.0",
