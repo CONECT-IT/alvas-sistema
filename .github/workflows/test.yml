@@ -183,7 +183,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - run: bun install --frozen-lockfile --filter "./apps/api" --filter "./apps/web"
+      - run: bun install --frozen-lockfile --filter "./apps/api" --filter "./apps/web" --linker=hoisted
       - name: Quality gate de mutation testing
         env:
           STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
