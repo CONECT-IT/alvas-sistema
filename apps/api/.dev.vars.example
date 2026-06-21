@@ -1,0 +1,7 @@
+# Secretos locales para desarrollo con `bun --cwd apps/api wrangler dev`
+# Copiar a .dev.vars y llenar valores reales.
+# Ver CONTRIBUTING.md para configurar secrets remotos.
+
+AUTH_SECRET="cambiar-por-secreto-local"
+AUTH_REFRESH_SECRET="cambiar-por-secreto-local-refresh"
+AUTH_PEPPER="cambiar-por-pepper-local"
