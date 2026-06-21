@@ -25,6 +25,7 @@
     "test:web": "bun run --cwd apps/web test:unit",
     "test:bdd": "bun run --cwd apps/api test:bdd",
     "test:coverage": "bun --cwd apps/api test --coverage --coverage-reporter=lcov --coverage-dir=coverage",
+    "test:cov": "bun run test:coverage && bun scripts/check-domain-coverage.mjs apps/api/coverage/lcov.info 80",
     "coverage:domain": "bun run test:coverage",
     "test:mutation": "bunx stryker run",
     "test:mutation:dry-run": "stryker run --dryRunOnly",
