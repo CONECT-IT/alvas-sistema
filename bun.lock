@@ -6,7 +6,6 @@
       "name": "alvas-sistema",
       "dependencies": {
         "drizzle-kit": "^0.31.10",
-        "starlight-theme-celestia-monorepo": "git+ssh://git@codefloe.com/devxy/starlight-theme-celestia.git",
       },
       "devDependencies": {
         "@commitlint/cli": "^20.5.3",
@@ -54,6 +53,7 @@
         "ts-node": "^10.9.2",
         "tsx": "^4.21.0",
         "typescript": "^6.0.3",
+        "wrangler": "^4.94.0",
       },
     },
     "apps/docs": {
@@ -75,6 +75,7 @@
         "remark-custom-header-id": "^1.0.0",
         "sharp": "^0.34.5",
         "shiki-twoslash-renderer": "^0.3.3",
+        "starlight-theme-celestia-monorepo": "git+ssh://git@codefloe.com/devxy/starlight-theme-celestia.git",
         "starlight-versions": "^0.9.0",
       },
     },
@@ -2529,7 +2530,7 @@
 
     "stackframe": ["stackframe@1.3.4", "", {}, "sha512-oeVtt7eWQS+Na6F//S4kJ2K2VbRlS9D43mAlMyVpVWovy9o+jfgH8O9agzANzaiLjclA0oYzUXEM4PurhSUChw=="],
 
-    "starlight-theme-celestia-monorepo": ["starlight-theme-celestia-monorepo@git+ssh://git@codefloe.com/devxy/starlight-theme-celestia.git#3cc93ae85cc9b90861c45580d1446f950a903811", {}, "3cc93ae85cc9b90861c45580d1446f950a903811"],
+    "starlight-theme-celestia-monorepo": ["starlight-theme-celestia-monorepo@git+ssh://git@codefloe.com/devxy/starlight-theme-celestia.git#938267438d9f2c5c77002b782f504a1d77372445", {}, "938267438d9f2c5c77002b782f504a1d77372445"],
 
     "starlight-typedoc": ["starlight-typedoc@0.23.0", "", { "dependencies": { "github-slugger": "^2.0.0" }, "peerDependencies": { "@astrojs/starlight": ">=0.39.0", "typedoc": ">=0.28.0", "typedoc-plugin-markdown": ">=4.6.0" } }, "sha512-GB0tB/15nL3l9tt1aGpkV8EixnSXbApZNZaSBRt8KfIsDAJet7pRiyItk5dxBSbDTXilF2whOMXPqqkbm8dNWA=="],
 

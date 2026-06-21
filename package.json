@@ -66,8 +66,7 @@
     "wrangler": "^4.94.0"
   },
   "dependencies": {
-    "drizzle-kit": "^0.31.10",
-    "starlight-theme-celestia-monorepo": "git+ssh://git@codefloe.com/devxy/starlight-theme-celestia.git"
+    "drizzle-kit": "^0.31.10"
   },
   "lint-staged": {
     "*.{js,ts,mjs,cjs,json,md,yml,yaml,css,html,svelte}": "prettier --write",
