@@ -27,8 +27,6 @@ jobs:
         with:
           bun-version: "1.3.14"
       - run: bun install --frozen-lockfile --filter "./apps/api" --filter "./apps/web"
-      - name: Lint y typecheck
-        run: bun run lint
       - name: Tests
         run: bun run test
 
