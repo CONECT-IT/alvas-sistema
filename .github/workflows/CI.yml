@@ -27,12 +27,12 @@ jobs:
       fail-fast: false
       matrix:
         app: [api, web]
-    uses: ./.github/workflows/jobs/lint.yml
+    uses: ./.github/workflows/job-lint.yml
     with:
       app: ${{ matrix.app }}
 
   api-sast:
-    uses: ./.github/workflows/jobs/api-sast.yml
+    uses: ./.github/workflows/job-api-sast.yml
 
   build:
     needs: lint
@@ -40,37 +40,37 @@ jobs:
       fail-fast: false
       matrix:
         app: [api, web]
-    uses: ./.github/workflows/jobs/build.yml
+    uses: ./.github/workflows/job-build.yml
     with:
       app: ${{ matrix.app }}
 
   api-unit-test:
     needs: build
-    uses: ./.github/workflows/jobs/api-unit-test.yml
+    uses: ./.github/workflows/job-api-unit-test.yml
 
   api-integration-bdd:
     needs: api-unit-test
-    uses: ./.github/workflows/jobs/api-integration-bdd.yml
+    uses: ./.github/workflows/job-api-integration-bdd.yml
 
   api-coverage:
     needs: api-integration-bdd
-    uses: ./.github/workflows/jobs/api-coverage.yml
+    uses: ./.github/workflows/job-api-coverage.yml
 
   api-security:
     needs: api-coverage
-    uses: ./.github/workflows/jobs/api-security.yml
+    uses: ./.github/workflows/job-api-security.yml
 
   api-mutation:
     needs: [api-coverage, api-security]
-    uses: ./.github/workflows/jobs/api-mutation.yml
+    uses: ./.github/workflows/job-api-mutation.yml
 
   web-component-test:
     needs: build
-    uses: ./.github/workflows/jobs/web-component-test.yml
+    uses: ./.github/workflows/job-web-component-test.yml
 
   web-coverage:
     needs: web-component-test
-    uses: ./.github/workflows/jobs/web-coverage.yml
+    uses: ./.github/workflows/job-web-coverage.yml
 
   quality-gate:
     needs:
@@ -84,7 +84,7 @@ jobs:
       - web-component-test
       - web-coverage
     if: always()
-    uses: ./.github/workflows/jobs/quality-gate.yml
+    uses: ./.github/workflows/job-quality-gate.yml
     with:
       lint-result: ${{ needs.lint.result }}
       build-result: ${{ needs.build.result }}
@@ -99,4 +99,4 @@ jobs:
   update-status-log:
     needs: quality-gate
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    uses: ./.github/workflows/jobs/update-status-log.yml
+    uses: ./.github/workflows/job-update-status-log.yml
