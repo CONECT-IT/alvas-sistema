@@ -13,10 +13,6 @@ function crearRepoMock(): IUsuarioRepository {
     listar: mock(() => Promise.resolve([])),
     obtenerPorUsername: mock(() => Promise.resolve(null)),
     existePorUsername: mock(() => Promise.resolve(false)),
-    listarTodos: mock(() => Promise.resolve([])),
-    deshabilitarPorId: mock(() => Promise.resolve()),
-    actualizarRol: mock(() => Promise.resolve()),
-    actualizarHashClave: mock(() => Promise.resolve()),
   };
 }
 

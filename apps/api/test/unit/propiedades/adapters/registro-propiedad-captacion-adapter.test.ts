@@ -10,9 +10,7 @@ function crearRepoMock(): IPropiedadRepository {
     existePorId: mock(() => Promise.resolve(false)),
     guardar: mock(() => Promise.resolve()),
     eliminarPorId: mock(() => Promise.resolve()),
-    listar: mock(() => Promise.resolve([])),
-    buscarPorTitulo: mock(() => Promise.resolve(null)),
-    contarPorEstado: mock(() => Promise.resolve(0)),
+    listarTodas: mock(() => Promise.resolve([])),
   };
 }
 

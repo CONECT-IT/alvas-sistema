@@ -25,7 +25,7 @@ jobs:
           REF="${{ github.ref }}"
           REPO="${{ github.repository }}"
           WORKFLOW="${{ github.workflow }}"
-          
+
           if [ -f scm-status-report.json ]; then
             jq '. += [{
               "timestamp": "'"$TIMESTAMP"'",
