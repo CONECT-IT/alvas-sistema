@@ -30,7 +30,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
+          ref: main
           fetch-depth: 0
       - uses: actions/setup-node@v6
         with:
@@ -42,4 +42,5 @@ jobs:
       - name: Publicar tag y GitHub Release
         env:
           GH_TOKEN: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
+          GITHUB_REF: refs/heads/main
         run: bun run release
