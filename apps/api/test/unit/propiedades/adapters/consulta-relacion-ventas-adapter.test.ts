@@ -43,7 +43,7 @@ describe("ConsultaRelacionPropiedadVentasAdapter", () => {
   test("retorna true cuando lead pertenece al asesor", async () => {
     const repo = crearVentasRepoMock();
     repo.obtenerLeadPorId = mock(() =>
-      Promise.resolve({ id: "lead-1", idAsesor: "asesor-1" } as any),
+      Promise.resolve({ id: "lead-1", idAsesor: "asesor-1" }),
     );
     const adapter = new ConsultaRelacionPropiedadVentasAdapter(repo);
 
@@ -57,7 +57,7 @@ describe("ConsultaRelacionPropiedadVentasAdapter", () => {
   test("retorna false cuando lead pertenece a otro asesor", async () => {
     const repo = crearVentasRepoMock();
     repo.obtenerLeadPorId = mock(() =>
-      Promise.resolve({ id: "lead-1", idAsesor: "asesor-2" } as any),
+      Promise.resolve({ id: "lead-1", idAsesor: "asesor-2" }),
     );
     const adapter = new ConsultaRelacionPropiedadVentasAdapter(repo);
 
@@ -71,7 +71,7 @@ describe("ConsultaRelacionPropiedadVentasAdapter", () => {
   test("retorna true cuando cliente propietario pertenece al asesor", async () => {
     const repo = crearVentasRepoMock();
     repo.obtenerClientePorId = mock(() =>
-      Promise.resolve({ id: "cliente-1", idAsesor: "asesor-1" } as any),
+      Promise.resolve({ id: "cliente-1", idAsesor: "asesor-1" }),
     );
     const adapter = new ConsultaRelacionPropiedadVentasAdapter(repo);
 
@@ -85,10 +85,10 @@ describe("ConsultaRelacionPropiedadVentasAdapter", () => {
   test("retorna false cuando lead y cliente son de otros asesores", async () => {
     const repo = crearVentasRepoMock();
     repo.obtenerLeadPorId = mock(() =>
-      Promise.resolve({ id: "lead-1", idAsesor: "asesor-2" } as any),
+      Promise.resolve({ id: "lead-1", idAsesor: "asesor-2" }),
     );
     repo.obtenerClientePorId = mock(() =>
-      Promise.resolve({ id: "cliente-1", idAsesor: "asesor-3" } as any),
+      Promise.resolve({ id: "cliente-1", idAsesor: "asesor-3" }),
     );
     const adapter = new ConsultaRelacionPropiedadVentasAdapter(repo);
 

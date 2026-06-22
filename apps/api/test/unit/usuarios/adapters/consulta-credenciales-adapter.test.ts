@@ -3,7 +3,6 @@ import { describe, expect, mock, test } from "bun:test";
 import { ConsultaCredencialesUsuarioAdapter } from "../../../../src/lib/usuarios/infrastructure/adapters/ConsultaCredencialesUsuarioAdapter";
 import { Usuario } from "../../../../src/lib/usuarios/domain/entities";
 import { type IUsuarioRepository } from "../../../../src/lib/usuarios/domain/ports";
-import { Username } from "../../../../src/lib/usuarios/domain/value-objects";
 
 function crearRepoMock(): IUsuarioRepository {
   return {
