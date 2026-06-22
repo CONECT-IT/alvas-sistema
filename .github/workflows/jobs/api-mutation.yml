@@ -1,0 +1,51 @@
+name: API Mutation Test
+
+on:
+  workflow_call:
+
+jobs:
+  api-mutation:
+    name: "API Mutation Test"
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile --filter "./apps/api" --filter "./apps/web" --linker=hoisted
+      - name: Quality gate de mutation testing
+        env:
+          STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
+        run: bun run test:mutation
+      - name: Resumen de mutation testing
+        if: always()
+        env:
+          STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
+        run: |
+          {
+            echo "## Mutation testing API"
+            echo ""
+            if [ -f reports/mutation/mutation.json ]; then
+              bun scripts/write-mutation-summary.mjs reports/mutation/mutation.json
+            else
+              echo "No se encontro el reporte de mutation testing. Revisa los logs del job de Stryker."
+            fi
+            echo ""
+            echo "Artifact: \`stryker-report\`"
+            if [ -n "$STRYKER_DASHBOARD_API_KEY" ]; then
+              echo "Stryker dashboard upload: habilitado"
+            else
+              echo "Stryker dashboard upload: deshabilitado (falta secret)"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: stryker-report
+          path: reports/mutation/
+          if-no-files-found: ignore
+          retention-days: 90

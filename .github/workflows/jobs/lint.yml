@@ -1,0 +1,26 @@
+name: Lint
+
+on:
+  workflow_call:
+    inputs:
+      app:
+        description: "App to lint (api o web)"
+        required: true
+        type: string
+
+jobs:
+  lint:
+    name: "Lint (${{ inputs.app }})"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile --filter "./apps/api" --filter "./apps/web"
+      - run: bun run --cwd apps/${{ inputs.app }} lint
+      - run: bunx tsc --noEmit -p apps/${{ inputs.app }}/tsconfig.json

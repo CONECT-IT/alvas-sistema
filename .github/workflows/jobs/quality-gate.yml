@@ -1,0 +1,44 @@
+name: Quality Gate
+
+on:
+  workflow_call:
+    inputs:
+      lint-result:
+        type: string
+      build-result:
+        type: string
+      api-unit-test-result:
+        type: string
+      api-integration-bdd-result:
+        type: string
+      api-coverage-result:
+        type: string
+      api-security-result:
+        type: string
+      api-mutation-result:
+        type: string
+      web-component-test-result:
+        type: string
+      web-coverage-result:
+        type: string
+
+jobs:
+  quality-gate:
+    name: "Quality Gate"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verificar todos los stages
+        run: |
+          if [ "${{ inputs.lint-result }}" != "success" ] ||
+             [ "${{ inputs.build-result }}" != "success" ] ||
+             [ "${{ inputs.api-unit-test-result }}" != "success" ] ||
+             [ "${{ inputs.api-integration-bdd-result }}" != "success" ] ||
+             [ "${{ inputs.api-coverage-result }}" != "success" ] ||
+             [ "${{ inputs.api-security-result }}" != "success" ] ||
+             [ "${{ inputs.api-mutation-result }}" != "success" ] ||
+             [ "${{ inputs.web-component-test-result }}" != "success" ] ||
+             [ "${{ inputs.web-coverage-result }}" != "success" ]; then
+            echo "El pipeline fallo antes de cumplir todos los quality gates de API/Web."
+            exit 1
+          fi
+          echo "Todos los quality gates de API y Web pasaron."

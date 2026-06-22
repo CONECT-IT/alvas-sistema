@@ -1,0 +1,56 @@
+name: Status Accounting
+
+on:
+  workflow_call:
+
+jobs:
+  update-status-log:
+    name: "Status Accounting (post-merge)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Actualizar SCM status log
+        run: |
+          TIMESTAMP=$(date -Iseconds)
+          AUTHOR="${{ github.actor }}"
+          COMMIT="${{ github.sha }}"
+          REF="${{ github.ref }}"
+          REPO="${{ github.repository }}"
+          WORKFLOW="${{ github.workflow }}"
+          
+          if [ -f scm-status-report.json ]; then
+            jq '. += [{
+              "timestamp": "'"$TIMESTAMP"'",
+              "author": "'"$AUTHOR"'",
+              "commit": "'"$COMMIT"'",
+              "ref": "'"$REF"'",
+              "repository": "'"$REPO"'",
+              "workflow": "'"$WORKFLOW"'",
+              "status": "merged"
+            }]' scm-status-report.json > tmp.json && mv tmp.json scm-status-report.json
+          else
+            echo '[{
+              "timestamp": "'"$TIMESTAMP"'",
+              "author": "'"$AUTHOR"'",
+              "commit": "'"$COMMIT"'",
+              "ref": "'"$REF"'",
+              "repository": "'"$REPO"'",
+              "workflow": "'"$WORKFLOW"'",
+              "status": "merged"
+            }]' > scm-status-report.json
+          fi
+      - name: Commit y push log
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add scm-status-report.json
+          git commit -m "docs: actualizar registro de estado SCM [skip ci]" || echo "No hay cambios para commitear"
+          git push
