@@ -14,12 +14,7 @@
     "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true,
-    "baseUrl": ".",
-    "paths": {
-      "@alvas/api/*": ["apps/api/src/*"],
-      "@alvas/web/*": ["apps/web/src/*"]
-    }
+    "noImplicitOverride": true
   },
   "include": ["apps/**/*.ts"],
   "exclude": ["node_modules", "dist", "out", ".wrangler", "coverage"]

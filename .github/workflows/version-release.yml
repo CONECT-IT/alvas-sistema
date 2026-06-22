@@ -2,7 +2,7 @@ name: Version Release
 
 on:
   workflow_run:
-    workflows: ["E2E Pipeline"]
+    workflows: ["CI"]
     types: [completed]
   workflow_dispatch:
 
@@ -38,7 +38,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: "1.3.14"
-      - run: bun install --frozen-lockfile
+      - run: bun install --frozen-lockfile --filter "./apps/api" --filter "./apps/web"
       - name: Publicar tag y GitHub Release
         env:
           GH_TOKEN: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}

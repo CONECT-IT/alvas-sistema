@@ -1,0 +1,21 @@
+name: API Security Audit
+
+on:
+  workflow_call:
+
+jobs:
+  api-security:
+    name: "API Security Audit"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile --filter "./apps/api" --filter "./apps/web"
+      - name: Verificar que DTOs no exponen datos sensibles
+        run: bun run --cwd apps/api test:security

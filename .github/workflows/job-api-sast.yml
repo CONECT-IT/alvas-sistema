@@ -1,0 +1,22 @@
+name: CodeQL SAST
+
+on:
+  workflow_call:
+
+jobs:
+  api-sast:
+    name: "CodeQL SAST"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+      - uses: github/codeql-action/init@v4.33.0
+        with:
+          languages: javascript-typescript
+          build-mode: none
+      - uses: github/codeql-action/analyze@v4.33.0

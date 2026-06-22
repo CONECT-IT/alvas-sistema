@@ -1,0 +1,108 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+      - "feature/**"
+      - "stryker-*"
+  pull_request:
+    branches:
+      - develop
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: "true"
+  NODE_ENV: test
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  lint:
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [api, web]
+    uses: ./.github/workflows/job-lint.yml
+    with:
+      app: ${{ matrix.app }}
+
+  api-sast:
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    uses: ./.github/workflows/job-api-sast.yml
+
+  build:
+    needs: lint
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [api, web]
+    uses: ./.github/workflows/job-build.yml
+    with:
+      app: ${{ matrix.app }}
+
+  api-unit-test:
+    needs: build
+    uses: ./.github/workflows/job-api-unit-test.yml
+
+  api-integration-bdd:
+    needs: api-unit-test
+    uses: ./.github/workflows/job-api-integration-bdd.yml
+
+  api-coverage:
+    needs: api-integration-bdd
+    uses: ./.github/workflows/job-api-coverage.yml
+
+  api-security:
+    needs: api-coverage
+    uses: ./.github/workflows/job-api-security.yml
+
+  api-mutation:
+    needs: [api-coverage, api-security]
+    uses: ./.github/workflows/job-api-mutation.yml
+
+  web-component-test:
+    needs: build
+    uses: ./.github/workflows/job-web-component-test.yml
+
+  web-coverage:
+    needs: web-component-test
+    uses: ./.github/workflows/job-web-coverage.yml
+
+  quality-gate:
+    needs:
+      - lint
+      - build
+      - api-unit-test
+      - api-integration-bdd
+      - api-coverage
+      - api-security
+      - api-mutation
+      - web-component-test
+      - web-coverage
+    if: always()
+    uses: ./.github/workflows/job-quality-gate.yml
+    with:
+      lint-result: ${{ needs.lint.result }}
+      build-result: ${{ needs.build.result }}
+      api-unit-test-result: ${{ needs.api-unit-test.result }}
+      api-integration-bdd-result: ${{ needs.api-integration-bdd.result }}
+      api-coverage-result: ${{ needs.api-coverage.result }}
+      api-security-result: ${{ needs.api-security.result }}
+      api-mutation-result: ${{ needs.api-mutation.result }}
+      web-component-test-result: ${{ needs.web-component-test.result }}
+      web-coverage-result: ${{ needs.web-coverage.result }}
+
+  update-status-log:
+    permissions:
+      contents: write
+    needs: quality-gate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/job-update-status-log.yml

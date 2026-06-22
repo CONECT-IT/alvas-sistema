@@ -1,0 +1,20 @@
+name: API Integration BDD
+
+on:
+  workflow_call:
+
+jobs:
+  api-integration-bdd:
+    name: "API Integration BDD"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile --filter "./apps/api" --filter "./apps/web"
+      - run: bun run --cwd apps/api test:bdd

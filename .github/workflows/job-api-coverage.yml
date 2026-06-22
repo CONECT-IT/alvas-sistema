@@ -1,0 +1,39 @@
+name: API Coverage
+
+on:
+  workflow_call:
+
+jobs:
+  api-coverage:
+    name: "API Domain Coverage"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile --filter "./apps/api" --filter "./apps/web"
+      - name: test:cov
+        run: bun run test:cov
+      - name: Resumen de cobertura
+        if: always()
+        run: |
+          {
+            echo "## Cobertura global API"
+            echo ""
+            if [ -f apps/api/coverage/lcov.info ]; then
+              bun scripts/check-domain-coverage.mjs apps/api/coverage/lcov.info 80
+            else
+              echo "No se encontro el reporte de coverage."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: api-coverage-report
+          path: apps/api/coverage/
+          retention-days: 60

@@ -7,6 +7,7 @@
   ],
   "scripts": {
     "dev:api": "bun run --cwd apps/api dev",
+    "dev:api:infisical": "infisical run --env=dev -- bun run --cwd apps/api dev",
     "dev:web": "bun run --cwd apps/web dev",
     "db:generate": "bunx drizzle-kit generate",
     "db:migrate:local": "bun run --cwd apps/api wrangler d1 migrations apply alvas-dev --local",
@@ -24,8 +25,9 @@
     "test:web": "bun run --cwd apps/web test:unit",
     "test:bdd": "bun run --cwd apps/api test:bdd",
     "test:coverage": "bun --cwd apps/api test --coverage --coverage-reporter=lcov --coverage-dir=coverage",
-    "coverage:domain": "bun run test:coverage && bun scripts/check-domain-coverage.mjs apps/api/coverage/lcov.info 80",
-    "test:mutation": "stryker run",
+    "test:cov": "bun run test:coverage && bun scripts/check-domain-coverage.mjs apps/api/coverage/lcov.info 80",
+    "coverage:domain": "bun run test:coverage",
+    "test:mutation": "bunx stryker run",
     "test:mutation:dry-run": "stryker run --dryRunOnly",
     "test:security": "bun run --cwd apps/api test:security",
     "test:benchmark:k6": "bun run --cwd apps/api test:benchmark:k6",
@@ -61,12 +63,11 @@
     "starlight-typedoc": "^0.23.0",
     "typedoc": "^0.28.19",
     "typedoc-plugin-markdown": "^4.11.0",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.3",
     "wrangler": "^4.94.0"
   },
   "dependencies": {
-    "drizzle-kit": "^0.31.10",
-    "starlight-theme-celestia-monorepo": "git+ssh://git@codefloe.com/devxy/starlight-theme-celestia.git"
+    "drizzle-kit": "^0.31.10"
   },
   "lint-staged": {
     "*.{js,ts,mjs,cjs,json,md,yml,yaml,css,html,svelte}": "prettier --write",

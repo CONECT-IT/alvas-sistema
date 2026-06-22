@@ -1,0 +1,32 @@
+name: Build
+
+on:
+  workflow_call:
+    inputs:
+      app:
+        description: "App to build (api o web)"
+        required: true
+        type: string
+
+jobs:
+  build:
+    name: "Build (${{ inputs.app }})"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile --filter "./apps/api" --filter "./apps/web"
+      - run: bun run --cwd apps/${{ inputs.app }} build
+      - uses: actions/upload-artifact@v6
+        if: inputs.app == 'web'
+        with:
+          name: web-build-svelte-kit
+          path: apps/web/.svelte-kit/
+          include-hidden-files: true
+          retention-days: 7

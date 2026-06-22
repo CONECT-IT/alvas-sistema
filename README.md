@@ -68,7 +68,7 @@ bun run typecheck
 Requisitos:
 
 - Bun.
-- Node.js 22 o superior. El proyecto ejecuta scripts con Bun, pero Wrangler valida la version de Node en build.
+- Node.js 24 o superior. El proyecto ejecuta scripts con Bun, pero Wrangler valida la version de Node en build.
 
 Instalacion reproducible:
 
@@ -127,36 +127,6 @@ Mutation testing:
 - Reporte: `reports/mutation/`, publicado como artefacto `stryker-report`.
 - Dashboard: si GitHub Secrets define `STRYKER_DASHBOARD_API_KEY`, Stryker publica el reporte completo en Stryker Dashboard.
 
-Justificacion S07/S08: el 70% de mutation score representa un equilibrio entre rigor de asserts y costo de ejecucion en CI. La corrida ampliada actual registro 59.40%, por lo que el gate falla hasta reforzar pruebas en mutantes sobrevivientes.
-
-Para activar el badge de mutation score:
-
-1. Habilitar el repositorio en https://dashboard.stryker-mutator.io.
-2. Crear el secret `STRYKER_DASHBOARD_API_KEY` en GitHub Actions.
-3. Ejecutar el pipeline en `develop` para publicar el primer reporte.
-
-## Auditoria arquitectonica
-
-Comando de verificacion:
-
-```bash
-rg -n "import.*infrastructure" apps/api/src/lib/*/domain
-```
-
-Deuda registrada: `apps/api/src/lib/auth/domain/ports/ITokenProvider.ts` importa `SessionClaims` desde `shared/infrastructure/session`. Esta dependencia debe moverse a un contrato de dominio o shared neutral para cumplir estrictamente la arquitectura hexagonal.
-
-## Evidencias de entrega
-
-- Workflow: `.github/workflows/test.yml`.
-- Reporte de cobertura: artefacto `coverage-report`.
-- Reporte de Stryker: artefacto `stryker-report`.
-- Log de walkthrough cruzado: `docs/walkthrough-log.md`.
-- Tag esperado al cierre: `v1.1.0`.
-
 ## Especificaciones SDD
 
 Las especificaciones humanas viven en `docs/specs/`. Ese directorio define reglas de negocio, lenguaje ubicuo, criterios de aceptacion y trazabilidad hacia tests ejecutables (`unit`, `bdd`, `http`, `contract`, component y E2E).
-
-## Deuda tecnica
-
-El roadmap de deuda tecnica vive en `docs/technical-debt-roadmap.md`. Consolida hallazgos del audit generado y los separa entre verificados, parcialmente corregidos y pendientes de validacion.

@@ -2,7 +2,7 @@ name: E2E Pipeline
 
 on:
   workflow_run:
-    workflows: ["Test & Quality Pipeline"]
+    workflows: ["CI"]
     types: [completed]
   workflow_dispatch:
     inputs:
@@ -41,7 +41,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: "1.3.14"
-      - run: bun install --frozen-lockfile
+      - run: bun install --frozen-lockfile --filter "./apps/api" --filter "./apps/web"
       - name: Build Web para E2E
         run: bun run --cwd apps/web --bun build
       - run: bunx playwright install --with-deps chromium
