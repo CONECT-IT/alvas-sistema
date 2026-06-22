@@ -132,13 +132,13 @@ jobs:
         with:
           bun-version: latest
       - run: bun install --frozen-lockfile --filter "./apps/api" --filter "./apps/web"
-      - name: Quality gate de cobertura de dominio
-        run: bun run coverage:domain
-      - name: Resumen de cobertura API
+      - name: test:cov
+        run: bun run test:cov
+      - name: Resumen de cobertura
         if: always()
         run: |
           {
-            echo "## Cobertura de dominio API"
+            echo "## Cobertura global API"
             echo ""
             if [ -f apps/api/coverage/lcov.info ]; then
               bun scripts/check-domain-coverage.mjs apps/api/coverage/lcov.info 80
