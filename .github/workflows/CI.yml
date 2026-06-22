@@ -99,10 +99,3 @@ jobs:
       api-mutation-result: ${{ needs.api-mutation.result }}
       web-component-test-result: ${{ needs.web-component-test.result }}
       web-coverage-result: ${{ needs.web-coverage.result }}
-
-  update-status-log:
-    permissions:
-      contents: write
-    needs: quality-gate
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    uses: ./.github/workflows/job-update-status-log.yml
