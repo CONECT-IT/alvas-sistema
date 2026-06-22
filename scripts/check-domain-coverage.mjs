@@ -17,6 +17,14 @@ if (!lcov) {
   process.exit(1);
 }
 
+const ignorePatterns = [
+  /\.spec\.ts$/,
+  /\.test\.ts$/,
+  /src[\\/]utils[\\/]/,
+  /\.config\.js$/,
+  /generated[\\/]/,
+];
+
 let foundFiles = 0;
 let linesFound = 0;
 let linesHit = 0;
@@ -29,6 +37,10 @@ for (const record of lcov.split("end_of_record")) {
     .replaceAll("\\", "/");
 
   if (!sourceFile) {
+    continue;
+  }
+
+  if (ignorePatterns.some((pattern) => pattern.test(sourceFile))) {
     continue;
   }
 
