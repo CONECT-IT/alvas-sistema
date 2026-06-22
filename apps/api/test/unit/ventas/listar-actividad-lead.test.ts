@@ -27,7 +27,13 @@ describe("ListarActividadLeadUseCase", () => {
     const repo = crearVentasRepoMock();
     repo.obtenerActividadPorLead = mock(() =>
       Promise.resolve([
-        { id: 1, idLead: "lead-1", evento: "CREADO", descripcion: "Lead creado", fecha: "2026-01-01" },
+        {
+          id: 1,
+          idLead: "lead-1",
+          evento: "CREADO",
+          descripcion: "Lead creado",
+          fecha: "2026-01-01",
+        },
       ]),
     );
 

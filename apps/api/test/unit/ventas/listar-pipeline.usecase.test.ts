@@ -37,7 +37,7 @@ function crearLead(): Lead {
     email: "test@test.com",
     telefono: "123456",
     tipo: "VENTA",
-    idAsesor: "asesor-1" as any,
+    idAsesor: "asesor-1",
   });
 }
 

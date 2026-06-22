@@ -1,6 +1,9 @@
 import { describe, expect, mock, test } from "bun:test";
 
 import { ConsultaVentasParaReportesAdapter } from "../../../src/lib/ventas/infrastructure/adapters/ConsultaVentasParaReportesAdapter";
+import { Lead } from "../../../src/lib/ventas/domain/entities/Lead";
+import { Cliente } from "../../../src/lib/ventas/domain/entities/Cliente";
+import { idUsuarioRef } from "../../../src/lib/shared/domain/value-objects/IdUsuarioRef";
 import { type IVentasRepository } from "../../../src/lib/ventas/domain/ports/IVentasRepository";
 
 function crearVentasRepoMock(): IVentasRepository {
@@ -25,35 +28,39 @@ function crearVentasRepoMock(): IVentasRepository {
 describe("ConsultaVentasParaReportesAdapter", () => {
   test("listarLeadsParaReporte retorna leads formateados", async () => {
     const repo = crearVentasRepoMock();
-    repo.listarLeads = mock(() =>
-      Promise.resolve([
-        {
-          id: "lead-1",
-          estado: { valor: "NUEVO" },
-          creadoEn: new Date(),
-          citas: [{ estado: { valor: "PENDIENTE" } }],
-        },
-      ]),
-    );
+    const lead = Lead.registrar({
+      id: "lead-1",
+      nombre: "Lead Test",
+      email: "test@test.com",
+      telefono: "123456",
+      tipo: "VENTA",
+      idAsesor: "asesor-1",
+    });
+    repo.listarLeads = mock(() => Promise.resolve([lead]));
 
     const adapter = new ConsultaVentasParaReportesAdapter(repo);
     const resultado = await adapter.listarLeadsParaReporte();
 
     expect(resultado).toHaveLength(1);
-    expect(resultado[0].id).toBe("lead-1");
+    expect(resultado[0]!.id).toBe("lead-1");
   });
 
   test("listarClientesParaReporte retorna clientes formateados", async () => {
     const repo = crearVentasRepoMock();
-    repo.listarClientes = mock(() =>
-      Promise.resolve([{ id: "cliente-1" }]),
-    );
+    const cliente = Cliente.crear({
+      id: "cliente-1",
+      nombre: "Cliente Test",
+      email: "cliente@test.com",
+      telefono: "789012",
+      idAsesor: idUsuarioRef("asesor-1"),
+    });
+    repo.listarClientes = mock(() => Promise.resolve([cliente]));
 
     const adapter = new ConsultaVentasParaReportesAdapter(repo);
     const resultado = await adapter.listarClientesParaReporte();
 
     expect(resultado).toHaveLength(1);
-    expect(resultado[0].id).toBe("cliente-1");
+    expect(resultado[0]!.id).toBe("cliente-1");
   });
 
   test("obtenerActividadReciente delega al repositorio", async () => {
@@ -75,15 +82,13 @@ describe("ConsultaVentasParaReportesAdapter", () => {
     const resultado = await adapter.listarAsesoresConTotalesLeads();
 
     expect(resultado).toHaveLength(1);
-    expect(resultado[0].idAsesor).toBe("asesor-1");
-    expect(resultado[0].totalLeads).toBe(5);
+    expect(resultado[0]!.idAsesor).toBe("asesor-1");
+    expect(resultado[0]!.totalLeads).toBe(5);
   });
 
   test("contarAccionesPorTipo delega al repositorio", async () => {
     const repo = crearVentasRepoMock();
-    repo.contarAccionesPorTipo = mock(() =>
-      Promise.resolve([{ evento: "CREADO", total: 10 }]),
-    );
+    repo.contarAccionesPorTipo = mock(() => Promise.resolve([{ evento: "CREADO", total: 10 }]));
 
     const adapter = new ConsultaVentasParaReportesAdapter(repo);
     const resultado = await adapter.contarAccionesPorTipo();

@@ -3,6 +3,7 @@ import { describe, expect, mock, test } from "bun:test";
 import { ListarContratosPorAsesorUseCase } from "../../../src/lib/ventas/application/use-cases/ListarContratosPorAsesorUseCase";
 import { Lead } from "../../../src/lib/ventas/domain/entities/Lead";
 import { Contrato } from "../../../src/lib/ventas/domain/entities/Contrato";
+import { idContrato, idLead, idPropiedad } from "../../../src/lib/ventas/domain/value-objects/Ids";
 import { type IVentasRepository } from "../../../src/lib/ventas/domain/ports/IVentasRepository";
 import { type IContratoRepository } from "../../../src/lib/ventas/domain/ports/IContratoRepository";
 
@@ -46,12 +47,12 @@ describe("ListarContratosPorAsesorUseCase", () => {
       email: "test@test.com",
       telefono: "123",
       tipo: "VENTA",
-      idAsesor: "asesor-1" as any,
+      idAsesor: "asesor-1",
     });
     const contrato = Contrato.crear({
-      id: "contrato-1" as any,
-      idLead: "lead-1" as any,
-      idPropiedad: "prop-1" as any,
+      id: idContrato("contrato-1"),
+      idLead: idLead("lead-1"),
+      idPropiedad: idPropiedad("prop-1"),
       fechaInicio: new Date(),
       fechaFin: new Date(Date.now() + 86400000),
     });

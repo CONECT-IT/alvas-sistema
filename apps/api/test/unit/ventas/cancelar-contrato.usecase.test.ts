@@ -2,6 +2,7 @@ import { describe, expect, mock, test } from "bun:test";
 
 import { CancelarContratoUseCase } from "../../../src/lib/ventas/application/use-cases/CancelarContratoUseCase";
 import { Contrato } from "../../../src/lib/ventas/domain/entities/Contrato";
+import { idContrato, idLead, idPropiedad } from "../../../src/lib/ventas/domain/value-objects/Ids";
 import { type IContratoRepository } from "../../../src/lib/ventas/domain/ports/IContratoRepository";
 
 function crearRepoMock(): IContratoRepository {
@@ -17,9 +18,9 @@ function crearRepoMock(): IContratoRepository {
 
 function crearContrato(): Contrato {
   return Contrato.crear({
-    id: "contrato-1" as any,
-    idLead: "lead-1" as any,
-    idPropiedad: "prop-1" as any,
+    id: idContrato("contrato-1"),
+    idLead: idLead("lead-1"),
+    idPropiedad: idPropiedad("prop-1"),
     fechaInicio: new Date(),
     fechaFin: new Date(Date.now() + 86400000 * 30),
   });

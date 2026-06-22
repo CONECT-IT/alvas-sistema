@@ -1,6 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
 
 import { ConsultaPropiedadInteresVentasAdapter } from "../../../../src/lib/propiedades/infrastructure/adapters/ConsultaPropiedadInteresVentasAdapter";
+import { Propiedad } from "../../../../src/lib/propiedades/domain/entities/Propiedad";
 import { type IPropiedadRepository } from "../../../../src/lib/propiedades/domain/ports";
 
 function crearPropiedadRepoMock(): IPropiedadRepository {
@@ -22,11 +23,16 @@ describe("ConsultaPropiedadInteresVentasAdapter", () => {
     expect(resultado).toBe(false);
   });
 
-  test("propiedadDisponibleParaCompra retorna false cuando propiedad no tiene estado", async () => {
+  test("propiedadDisponibleParaCompra retorna false cuando propiedad no esta disponible", async () => {
     const repo = crearPropiedadRepoMock();
-    repo.obtenerPorId = mock(() =>
-      Promise.resolve({ estado: null }),
-    );
+    const propiedad = Propiedad.crear({
+      id: "prop-1",
+      titulo: "Casa Test",
+      descripcion: "Casa de prueba",
+      precio: 100000,
+      estado: "RESERVADA",
+    });
+    repo.obtenerPorId = mock(() => Promise.resolve(propiedad));
     const adapter = new ConsultaPropiedadInteresVentasAdapter(repo);
     const resultado = await adapter.propiedadDisponibleParaCompra("prop-1");
 
