@@ -37,8 +37,9 @@ export default {
     "apps/web/test-results/**",
   ],
   reporters: ["progress", "clear-text", "html", "json", ...(dashboardEnabled ? ["dashboard"] : [])],
-  coverageAnalysis: "off",
-  concurrency: 2,
+  coverageAnalysis: "perTest",
+  concurrency: 4,
+  incremental: true,
   timeoutMS: 10000,
   thresholds: {
     high: 80,
