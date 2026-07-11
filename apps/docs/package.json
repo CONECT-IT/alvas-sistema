@@ -26,7 +26,7 @@
     "remark-custom-header-id": "^1.0.0",
     "sharp": "^0.34.5",
     "shiki-twoslash-renderer": "^0.3.3",
-    "starlight-theme-celestia-monorepo": "git+ssh://git@codefloe.com/devxy/starlight-theme-celestia.git",
+    "starlight-theme-celestia-monorepo": "git+https://git@codefloe.com/devxy/starlight-theme-celestia.git",
     "starlight-versions": "^0.9.0"
   }
 }
