@@ -1,4 +1,5 @@
 import { defineConfig } from "astro/config";
+import { unified } from "@astrojs/markdown-remark";
 import starlight from "@astrojs/starlight";
 import starlightUtils from "@lorenzo_lewis/starlight-utils";
 import starlightCelestiaTheme from "starlight-theme-celestia-monorepo/packages/starlight-theme-celestia";
@@ -21,6 +22,9 @@ const celestiaPackageRoot = dirname(
 export default defineConfig({
   site: process.env.DOCS_SITE ?? "https://alvas-docs.pages.dev",
   base: docsBase,
+  markdown: {
+    processor: unified(),
+  },
   vite: {
     resolve: {
       alias: [

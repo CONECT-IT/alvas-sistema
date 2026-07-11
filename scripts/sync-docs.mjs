@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 /**
  * Sincroniza docs/ (ADRs, specs, guías) hacia apps/docs/src/content/docs/
  * Agrega frontmatter automático para Starlight.

@@ -1,9 +1,9 @@
 name: Version Release
 
 on:
-  workflow_run:
-    workflows: ["CI"]
-    types: [completed]
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 concurrency:
@@ -19,9 +19,6 @@ jobs:
   semantic-release:
     name: Crear version semantica
     runs-on: ubuntu-latest
-    if: >
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
     timeout-minutes: 15
     permissions:
       contents: write
@@ -30,7 +27,6 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
           fetch-depth: 0
       - uses: actions/setup-node@v6
         with:
@@ -39,7 +35,25 @@ jobs:
         with:
           bun-version: "1.3.14"
       - run: bun install --frozen-lockfile --filter "./apps/api" --filter "./apps/web"
-      - name: Publicar tag y GitHub Release
+      - name: Importar clave GPG para firma de tags
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+          echo "default-cache-ttl 7200" > ~/.gnupg/gpg-agent.conf
+          echo "max-cache-ttl 31536000" >> ~/.gnupg/gpg-agent.conf
+          gpg-connect-agent reloadagent /bye
+          echo "$GPG_PASSPHRASE" | gpg --batch --pinentry-mode loopback --passphrase-fd 0 --list-secret-keys
+      - name: Configurar git para firma de tags
+        run: |
+          SIGNING_KEY=$(gpg --list-secret-keys --keyid-format=long | grep -oP '[A-F0-9]{40}' | head -1 | tail -c 17)
+          git config --local user.signingkey "$SIGNING_KEY"
+          git config --local gpg.program gpg
+          git config --local tag.gpgsign true
+          git config --local commit.gpgsign true
+      - name: Publicar tag firmado y GitHub Release
         env:
           GH_TOKEN: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: bun run release
