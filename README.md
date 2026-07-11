@@ -130,3 +130,35 @@ Mutation testing:
 ## Especificaciones SDD
 
 Las especificaciones humanas viven en `docs/specs/`. Ese directorio define reglas de negocio, lenguaje ubicuo, criterios de aceptacion y trazabilidad hacia tests ejecutables (`unit`, `bdd`, `http`, `contract`, component y E2E).
+
+## Monitoreo con Prometheus y Grafana
+
+El proyecto utiliza Cloudflare Prometheus Exporter para monitorear métricas de Cloudflare Workers.
+
+### Configuración
+
+- **Cloudflare Prometheus Exporter**: Desplegado en `https://cloudflare-prometheus-exporter.adeityssx.workers.dev`
+- **Prometheus**: Ejecutándose localmente en `http://localhost:9090`
+- **Archivo de configuración**: `prometheus.yml` en la raíz del proyecto
+
+### Métricas disponibles
+
+El exporter proporciona 90+ métricas de Cloudflare, incluyendo:
+- `cloudflare_worker_requests_count` - Requests por worker
+- `cloudflare_worker_errors_count` - Errores por worker
+- `cloudflare_worker_cpu_time` - Tiempo CPU por worker
+- `cloudflare_worker_duration` - Duración por worker
+
+### Ejecutar Prometheus
+
+Para iniciar Prometheus:
+```bash
+cd C:\prometheus  # o donde hayas extraído Prometheus
+.\prometheus.exe --config.file=prometheus.yml
+```
+
+### Próximos pasos (opcional)
+
+- Instalar Grafana para visualización de métricas
+- Configurar dashboards personalizados
+- Configurar alertas
