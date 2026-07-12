@@ -40,7 +40,8 @@ jobs:
         with:
           bun-version: "1.3.14"
       - run: bun install --frozen-lockfile --filter "./apps/api" --filter "./apps/web"
-      - run: bun run lint
+      - run: bun run --cwd apps/api lint
+      - run: bun run --cwd apps/web lint
       - run: bun run --cwd apps/api test
       - run: bun run --cwd apps/api test:bdd
       - run: bun run --cwd apps/web test:unit
