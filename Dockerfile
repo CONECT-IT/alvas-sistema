@@ -3,10 +3,8 @@ FROM oven/bun:1.3.14-alpine
 WORKDIR /app
 
 COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile
-
 COPY apps/api/package.json apps/api/
-RUN cd apps/api && bun install --frozen-lockfile
+RUN bun install --filter alvas-api
 
 COPY apps/api/src apps/api/src
 COPY apps/api/tsconfig.json apps/api/
