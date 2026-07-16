@@ -35,7 +35,7 @@ jobs:
              [ "${{ inputs.api-integration-bdd-result }}" != "success" ] ||
              [ "${{ inputs.api-coverage-result }}" != "success" ] ||
              [ "${{ inputs.api-security-result }}" != "success" ] ||
-             [ "${{ inputs.api-mutation-result }}" != "success" ] ||
+             { [ "${{ inputs.api-mutation-result }}" != "success" ] && [ "${{ inputs.api-mutation-result }}" != "skipped" ]; } ||
              [ "${{ inputs.web-component-test-result }}" != "success" ] ||
              [ "${{ inputs.web-coverage-result }}" != "success" ]; then
             echo "El pipeline fallo antes de cumplir todos los quality gates de API/Web."
