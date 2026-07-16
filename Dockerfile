@@ -22,4 +22,4 @@ ENV DB_PATH=/app/data/alvas.db
 
 EXPOSE 8787
 
-CMD ["bun", "run", "src/main.ts"]
+CMD ["bun", "src/main.ts"]

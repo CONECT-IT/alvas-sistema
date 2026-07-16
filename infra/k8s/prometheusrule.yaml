@@ -1,0 +1,31 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: alvas-api-slo
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: alvas-api.slo
+      rules:
+        - alert: AlvasHighErrorRateBurnRate
+          expr: |
+            sum(rate(http_errors_total{job="alvas-api"}[5m]))
+            / sum(rate(http_requests_total{job="alvas-api"}[5m]))
+            / (1 - 0.999) > 1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Burn Rate alto en alvas-api"
+            description: "El error budget se esta consumiendo a mas de 1x. SLI actual por debajo del SLO 99.9%."
+        - alert: AlvasHighLatencyBurnRate
+          expr: |
+            histogram_quantile(0.99, sum(rate(http_request_duration_ms_bucket{job="alvas-api"}[5m])) by (le)) > 500
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Latencia p99 alta en alvas-api"
+            description: "La latencia p99 supera 500ms por mas de 5 minutos."
