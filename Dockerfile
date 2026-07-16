@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY package.json bun.lock ./
 COPY apps/api/package.json apps/api/
-RUN bun install --filter alvas-api
+RUN bun install --filter ./apps/api
 
 COPY apps/api/src apps/api/src
 COPY apps/api/tsconfig.json apps/api/
