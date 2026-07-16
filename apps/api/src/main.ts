@@ -22,6 +22,7 @@ import {
   crearVentasControllerDeps,
 } from "./composition";
 import { type D1DatabaseLike, type SessionClaims } from "./lib/shared/infrastructure";
+import { incRequest, observeDuration, incInFlight, decInFlight, renderMetrics } from "./lib/shared/infrastructure/metrics/prometheus";
 
 type AppBindings = {
   DB: D1DatabaseLike;
@@ -100,6 +101,25 @@ app.use("*", async (c, next) => {
   }
 
   await next();
+});
+
+// Metrics middleware
+app.use("*", async (c, next) => {
+  incInFlight();
+  const start = Date.now();
+  await next();
+  const duration = Date.now() - start;
+  decInFlight();
+  const path = c.req.path === "/" ? "/" : c.req.routePath || c.req.path;
+  incRequest(c.req.method, path, c.res.status);
+  observeDuration(c.req.method, path, duration);
+});
+
+// Prometheus metrics endpoint
+app.get("/metrics", (c) => {
+  return c.text(renderMetrics(), 200, {
+    "Content-Type": "text/plain; version=0.0.4; charset=utf-8",
+  });
 });
 
 // Create routers early so they're available for OpenAPI doc generation
