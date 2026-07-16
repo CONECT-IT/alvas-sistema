@@ -23,6 +23,7 @@ import {
 } from "./composition";
 import { type D1DatabaseLike, type SessionClaims } from "./lib/shared/infrastructure";
 import { incRequest, observeDuration, incInFlight, decInFlight, renderMetrics } from "./lib/shared/infrastructure/metrics/prometheus";
+import { tracingMiddleware } from "./lib/shared/infrastructure/telemetry/opentelemetry";
 
 type AppBindings = {
   DB: D1DatabaseLike;
@@ -56,6 +57,9 @@ app.use(
     credentials: true,
   }),
 );
+
+// OpenTelemetry tracing
+app.use("*", tracingMiddleware());
 
 // Security: headers
 app.use("*", async (c, next) => {

@@ -17,7 +17,7 @@ spec:
 apiVersion: chaos-mesh.org/v1alpha1
 kind: NetworkChaos
 metadata:
-  name: alvas-network-delay
+  name: alvas-network-delay-1500ms
   namespace: alvas
 spec:
   action: delay
@@ -28,10 +28,10 @@ spec:
     labelSelectors:
       app: alvas-api
   delay:
-    latency: "200ms"
-    jitter: "50ms"
-    correlation: "75"
-  duration: "30s"
+    latency: "1500ms"
+    jitter: "100ms"
+    correlation: "100"
+  duration: "60s"
   scheduler:
     cron: "@every 5m"
 ---

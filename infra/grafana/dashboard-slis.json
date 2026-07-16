@@ -27,7 +27,7 @@
       },
       "targets": [
         {
-          "expr": "1 - (sum(rate(http_errors_total{job=\"alvas-api\"}[5m])) / sum(rate(http_requests_total{job=\"alvas-api\"}[5m])))",
+          "expr": "sum(rate(http_requests_total{job=\"alvas-api\",code=~\"2..\"}[5m])) / sum(rate(http_requests_total{job=\"alvas-api\"}[5m])) * 100",
           "legendFormat": "Availability"
         }
       ]
@@ -51,7 +51,7 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_ms_bucket{job=\"alvas-api\"}[5m])) by (le))",
+          "expr": "http_request_duration_ms{job=\"alvas-api\", quantile=\"0.99\"}",
           "legendFormat": "p99"
         }
       ]
@@ -77,7 +77,7 @@
       },
       "targets": [
         {
-          "expr": "(1 - (1 - sum(rate(http_errors_total{job=\"alvas-api\"}[5m])) / sum(rate(http_requests_total{job=\"alvas-api\"}[5m])))) / 0.001",
+          "expr": "(100 - (sum(rate(http_requests_total{job=\"alvas-api\",code=~\"2..\"}[5m])) / sum(rate(http_requests_total{job=\"alvas-api\"}[5m])) * 100)) / 0.1",
           "legendFormat": "Error Budget Consumido"
         }
       ]
@@ -102,15 +102,15 @@
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
       "targets": [
         {
-          "expr": "histogram_quantile(0.50, sum(rate(http_request_duration_ms_bucket{job=\"alvas-api\"}[5m])) by (le))",
+          "expr": "http_request_duration_ms{job=\"alvas-api\", quantile=\"0.5\"}",
           "legendFormat": "p50"
         },
         {
-          "expr": "histogram_quantile(0.90, sum(rate(http_request_duration_ms_bucket{job=\"alvas-api\"}[5m])) by (le))",
+          "expr": "http_request_duration_ms{job=\"alvas-api\", quantile=\"0.9\"}",
           "legendFormat": "p90"
         },
         {
-          "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_ms_bucket{job=\"alvas-api\"}[5m])) by (le))",
+          "expr": "http_request_duration_ms{job=\"alvas-api\", quantile=\"0.99\"}",
           "legendFormat": "p99"
         }
       ],
@@ -124,11 +124,11 @@
       "gridPos": { "h": 8, "w": 24, "x": 0, "y": 14 },
       "targets": [
         {
-          "expr": "1 - (sum(rate(http_errors_total{job=\"alvas-api\"}[5m])) / sum(rate(http_requests_total{job=\"alvas-api\"}[5m])))",
+          "expr": "sum(rate(http_requests_total{job=\"alvas-api\",code=~\"2..\"}[5m])) / sum(rate(http_requests_total{job=\"alvas-api\"}[5m])) * 100",
           "legendFormat": "Availability SLI"
         },
         {
-          "expr": "0.999",
+          "expr": "99.9",
           "legendFormat": "SLO 99.9%"
         }
       ],
