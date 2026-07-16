@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import app from "../../src/main";
+import { app } from "../../src/main";
 
 describe("http / health", () => {
   it("responde estado operativo sin levantar un servidor real", async () => {

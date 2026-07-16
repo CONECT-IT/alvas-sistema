@@ -307,4 +307,4 @@ if (typeof globalThis.Bun !== "undefined") {
   console.log(`ALVAS API running on http://localhost:${port}`);
 }
 
-export default app;
+export { app };
