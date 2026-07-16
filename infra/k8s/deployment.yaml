@@ -18,8 +18,8 @@ spec:
     spec:
       containers:
         - name: alvas-api
-          image: alvas-api:local
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/conect-it/alvas-api:v1.3.1
+          imagePullPolicy: Always
           ports:
             - containerPort: 8787
               name: http
