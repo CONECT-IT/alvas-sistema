@@ -39,6 +39,8 @@ spec:
               value: "http://localhost:5173,http://localhost:3000"
             - name: DB_PATH
               value: "/app/data/alvas.db"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://jaeger.jaeger.svc.cluster.local:4318"
           volumeMounts:
             - name: data-volume
               mountPath: /app/data

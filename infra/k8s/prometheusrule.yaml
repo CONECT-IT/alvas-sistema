@@ -4,16 +4,14 @@ metadata:
   name: alvas-api-slo
   namespace: monitoring
   labels:
-    release: kube-prometheus-stack
+    release: kube-prometheus
 spec:
   groups:
     - name: alvas-api.slo
       rules:
         - alert: AlvasHighErrorRateBurnRate
           expr: |
-            sum(rate(http_errors_total{job="alvas-api"}[5m]))
-            / sum(rate(http_requests_total{job="alvas-api"}[5m]))
-            / (1 - 0.999) > 1
+            (100 - (sum(rate(http_requests_total{job="alvas-api",code=~"2.."}[5m])) / sum(rate(http_requests_total{job="alvas-api"}[5m])) * 100)) / 0.1 > 1
           for: 5m
           labels:
             severity: critical
@@ -22,7 +20,7 @@ spec:
             description: "El error budget se esta consumiendo a mas de 1x. SLI actual por debajo del SLO 99.9%."
         - alert: AlvasHighLatencyBurnRate
           expr: |
-            histogram_quantile(0.99, sum(rate(http_request_duration_ms_bucket{job="alvas-api"}[5m])) by (le)) > 500
+            http_request_duration_ms{job="alvas-api", quantile="0.99"} > 500
           for: 5m
           labels:
             severity: warning
