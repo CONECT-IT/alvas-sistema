@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import app from "../../src/main";
+import { app } from "../../src/main";
 
 describe("contract / openapi", () => {
   test("expone contrato OpenAPI con rutas principales", async () => {
