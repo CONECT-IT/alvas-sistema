@@ -53,3 +53,9 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # temp/scripts
 fix_prop.js
+
+# SQLite database files
+apps/api/data/
+*.db
+*.sqlite
+*.sqlite3

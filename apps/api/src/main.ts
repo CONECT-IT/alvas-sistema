@@ -262,4 +262,29 @@ app.onError((error, c) => {
   );
 });
 
+if (typeof globalThis.Bun !== "undefined") {
+  const { obtenerDb } = await import("./lib/shared/infrastructure/persistence/drizzle");
+  const db = obtenerDb();
+
+  const env: AppBindings = {
+    DB: db as unknown as D1DatabaseLike,
+    AUTH_SECRET: process.env.AUTH_SECRET || "dev-secret-change-in-production",
+    AUTH_REFRESH_SECRET: process.env.AUTH_REFRESH_SECRET,
+    AUTH_TOKEN_TTL_SEGUNDOS: process.env.AUTH_TOKEN_TTL_SEGUNDOS || "14400",
+    REFRESH_TOKEN_TTL_SEGUNDOS: process.env.REFRESH_TOKEN_TTL_SEGUNDOS || "604800",
+    AUTH_PEPPER: process.env.AUTH_PEPPER,
+    INTEGRACION_WHATSAPP_SECRETO: process.env.INTEGRACION_WHATSAPP_SECRETO,
+    CORS_ORIGINS: process.env.CORS_ORIGINS || "http://localhost:5173,http://localhost:3000",
+  };
+
+  const port = parseInt(process.env.PORT || "8787");
+
+  Bun.serve({
+    port,
+    fetch: (req) => app.fetch(req, env),
+  });
+
+  console.log(`ALVAS API running on http://localhost:${port}`);
+}
+
 export default app;
