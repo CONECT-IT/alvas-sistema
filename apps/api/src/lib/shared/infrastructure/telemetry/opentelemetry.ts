@@ -1,22 +1,59 @@
 // OpenTelemetry instrumentation for ALVAS API
 // This module sets up distributed tracing with Jaeger
 
-const JAEGER_OTLP_ENDPOINT = process.env.OTEL_EXPORTER_OTLP_ENDPOINT || "http://jaeger.jaeger.svc.cluster.local:4318";
 const SERVICE_NAME = "alvas-api";
 
-let traceIdCounter = 0;
+function generateHexId(byteLength: number): string {
+  const bytes = new Uint8Array(byteLength);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
 
 function generateTraceId(): string {
-  traceIdCounter++;
-  return Date.now().toString(16).padStart(16, "0") + traceIdCounter.toString(16).padStart(16, "0");
+  return generateHexId(16);
 }
 
 function generateSpanId(): string {
-  return Math.random().toString(16).substr(2, 16);
+  return generateHexId(8);
 }
 
-export function createSpan(name: string, parentSpanId?: string, parentTraceId?: string) {
-  const traceId = parentTraceId || generateTraceId();
+function getProcessOtlpEndpoint(): string | undefined {
+  const runtime = globalThis as typeof globalThis & {
+    process?: { env?: Record<string, string | undefined> };
+  };
+  return runtime.process?.env?.OTEL_EXPORTER_OTLP_ENDPOINT;
+}
+
+export function parseTraceparent(value?: string): { traceId: string; parentSpanId: string } | undefined {
+  const match = value?.match(/^([\da-f]{2})-([\da-f]{32})-([\da-f]{16})-([\da-f]{2})$/i);
+  if (!match) {
+    return undefined;
+  }
+
+  const version = match[1];
+  const traceId = match[2];
+  const parentSpanId = match[3];
+  if (
+    !version ||
+    !traceId ||
+    !parentSpanId ||
+    version.toLowerCase() === "ff" ||
+    /^0+$/.test(traceId) ||
+    /^0+$/.test(parentSpanId)
+  ) {
+    return undefined;
+  }
+
+  return { traceId: traceId.toLowerCase(), parentSpanId: parentSpanId.toLowerCase() };
+}
+
+export function createSpan(
+  name: string,
+  parentSpanId?: string,
+  parentTraceId?: string,
+  otlpEndpoint = getProcessOtlpEndpoint(),
+) {
+  const traceId = parentTraceId ?? generateTraceId();
   const spanId = generateSpanId();
   const startTime = Date.now();
 
@@ -46,8 +83,6 @@ export function createSpan(name: string, parentSpanId?: string, parentTraceId?: 
         console.error("[TRACE] export called but endTime is null");
         return;
       }
-      console.log(`[TRACE] exporting span: ${this.name} traceId=${this.traceId}`);
-
       const span = {
         resourceSpans: [
           {
@@ -63,7 +98,7 @@ export function createSpan(name: string, parentSpanId?: string, parentTraceId?: 
                   {
                     traceId: this.traceId,
                     spanId: this.spanId,
-                    parentSpanId: this.parentSpanId,
+                    ...(this.parentSpanId ? { parentSpanId: this.parentSpanId } : {}),
                     name: this.name,
                     kind: 1, // SERVER
                     startTimeUnixNano: (this.startTime * 1_000_000).toString(),
@@ -81,8 +116,14 @@ export function createSpan(name: string, parentSpanId?: string, parentTraceId?: 
         ],
       };
 
+      if (!otlpEndpoint) {
+        return;
+      }
+
+      console.log(`[TRACE] exporting span: ${this.name} traceId=${this.traceId}`);
+
       try {
-        const resp = await fetch(`${JAEGER_OTLP_ENDPOINT}/v1/traces`, {
+        const resp = await fetch(`${otlpEndpoint.replace(/\/$/, "")}/v1/traces`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(span),
@@ -99,22 +140,40 @@ export function createSpan(name: string, parentSpanId?: string, parentTraceId?: 
 }
 
 export function tracingMiddleware() {
-  return async (c: { req: { header: (name: string) => string | undefined; method: string; url: string; path: string }; res: { status: number }; set: (key: string, value: unknown) => void }, next: () => Promise<void>) => {
-    const traceId = c.req.header("traceparent")?.split("-")[1] || generateTraceId();
-    const span = createSpan(`HTTP ${c.req.method} ${c.req.path}`);
+  return async (
+    c: {
+      req: { header: (name: string) => string | undefined; method: string; url: string; path: string };
+      res: { status: number };
+      env?: { OTEL_EXPORTER_OTLP_ENDPOINT?: string };
+      set: (key: string, value: unknown) => void;
+    },
+    next: () => Promise<void>,
+  ) => {
+    const parentContext = parseTraceparent(c.req.header("traceparent"));
+    const span = createSpan(
+      `HTTP ${c.req.method} ${c.req.path}`,
+      parentContext?.parentSpanId,
+      parentContext?.traceId,
+      c.env?.OTEL_EXPORTER_OTLP_ENDPOINT ?? getProcessOtlpEndpoint(),
+    );
     span.setAttribute("http.method", c.req.method);
     span.setAttribute("http.url", c.req.url);
     span.setAttribute("http.target", c.req.path);
 
-    c.set("traceId", traceId);
+    c.set("traceId", span.traceId);
     c.set("span", span);
 
-    await next();
-
-    span.setAttribute("http.status_code", c.res.status.toString());
-    if (c.res.status >= 400) {
+    try {
+      await next();
+      span.setAttribute("http.status_code", c.res.status.toString());
+      if (c.res.status >= 400) {
+        span.status = "ERROR";
+      }
+    } catch (error) {
       span.status = "ERROR";
+      throw error;
+    } finally {
+      span.end();
     }
-    span.end();
   };
 }

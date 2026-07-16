@@ -34,6 +34,7 @@ type AppBindings = {
   AUTH_PEPPER?: string;
   INTEGRACION_WHATSAPP_SECRETO?: string;
   CORS_ORIGINS?: string;
+  OTEL_EXPORTER_OTLP_ENDPOINT?: string;
 };
 
 type AppVariables = {
