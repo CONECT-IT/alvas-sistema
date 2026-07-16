@@ -4,7 +4,7 @@ metadata:
   name: alvas-api
   labels:
     app: alvas-api
-    version: v1.5.2
+    version: v1.6.1
 spec:
   replicas: 1
   selector:
@@ -14,13 +14,13 @@ spec:
     metadata:
       labels:
         app: alvas-api
-        version: v1.5.2
+        version: v1.6.1
     spec:
       imagePullSecrets:
         - name: ghcr-secret
       containers:
         - name: alvas-api
-          image: ghcr.io/conect-it/alvas-api:v1.5.2
+          image: ghcr.io/conect-it/alvas-api:v1.6.1
           imagePullPolicy: Always
           ports:
             - containerPort: 8787
