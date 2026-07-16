@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "wrangler dev",
+    "start": "bun run src/main.ts",
     "lint": "eslint . --max-warnings=0",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -13,6 +14,7 @@
     "test:contract": "bun test test/contract/",
     "test:bdd": "cross-env NODE_OPTIONS=\"--import tsx\" cucumber-js \"test/bdd/features/**/*.feature\" --import \"test/bdd/features/**/*.ts\"",
     "build": "echo 'No build step needed for Wrangler'",
+    "db:migrate:local": "cd ../.. && bunx drizzle-kit push --force",
     "seed:generate": "bun ../../scripts/generate-seed-sql.mjs",
     "seed:local": "wrangler d1 execute alvas-dev --local --file ../../database/seeds/seed.sql",
     "seed:staging": "wrangler d1 execute alvas-staging --remote --env staging --file ../../database/seeds/seed.sql",

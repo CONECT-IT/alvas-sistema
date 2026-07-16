@@ -4,9 +4,9 @@ metadata:
   name: alvas-api
   labels:
     app: alvas-api
-    version: vX.Y.Z
+    version: v1.0.0
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: alvas-api
@@ -14,11 +14,12 @@ spec:
     metadata:
       labels:
         app: alvas-api
-        version: vX.Y.Z
+        version: v1.0.0
     spec:
       containers:
         - name: alvas-api
-          image: ghcr.io/conect-it/alvas-api:vX.Y.Z
+          image: ghcr.io/conect-it/alvas-api:v1.3.1
+          imagePullPolicy: Always
           ports:
             - containerPort: 8787
               name: http
@@ -27,6 +28,18 @@ spec:
               value: "14400"
             - name: REFRESH_TOKEN_TTL_SEGUNDOS
               value: "604800"
+            - name: AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: alvas-secrets
+                  key: auth-secret
+            - name: CORS_ORIGINS
+              value: "http://localhost:5173,http://localhost:3000"
+            - name: DB_PATH
+              value: "/app/data/alvas.db"
+          volumeMounts:
+            - name: data-volume
+              mountPath: /app/data
           readinessProbe:
             httpGet:
               path: /health
@@ -39,6 +52,10 @@ spec:
               port: http
             initialDelaySeconds: 15
             periodSeconds: 20
+      volumes:
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: alvas-data-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -51,3 +68,23 @@ spec:
     - port: 80
       targetPort: 8787
       name: http
+  type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: alvas-data-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: alvas-secrets
+type: Opaque
+stringData:
+  auth-secret: "dev-secret-change-in-production-minikube"
