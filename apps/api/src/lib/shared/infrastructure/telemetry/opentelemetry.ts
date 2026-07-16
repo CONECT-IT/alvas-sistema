@@ -37,12 +37,16 @@ export function createSpan(name: string, parentSpanId?: string, parentTraceId?: 
 
     end() {
       this.endTime = Date.now();
-      this.export();
+      this.export().catch((e) => console.error("Trace export failed:", e));
       return this;
     },
 
     async export() {
-      if (!this.endTime) return;
+      if (!this.endTime) {
+        console.error("[TRACE] export called but endTime is null");
+        return;
+      }
+      console.log(`[TRACE] exporting span: ${this.name} traceId=${this.traceId}`);
 
       const span = {
         resourceSpans: [
@@ -78,13 +82,17 @@ export function createSpan(name: string, parentSpanId?: string, parentTraceId?: 
       };
 
       try {
-        await fetch(`${JAEGER_OTLP_ENDPOINT}/v1/traces`, {
+        const resp = await fetch(`${JAEGER_OTLP_ENDPOINT}/v1/traces`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(span),
         });
+        console.log(`[TRACE] OTLP response: ${resp.status} ${resp.statusText}`);
+        if (!resp.ok) {
+          console.error(`[TRACE] OTLP export FAILED: ${resp.status} ${await resp.text()}`);
+        }
       } catch (error) {
-        console.error("Failed to export trace:", error);
+        console.error("[TRACE] Failed to export trace:", error);
       }
     },
   };

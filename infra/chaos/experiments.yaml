@@ -1,20 +1,4 @@
 apiVersion: chaos-mesh.org/v1alpha1
-kind: PodChaos
-metadata:
-  name: alvas-pod-kill
-  namespace: alvas
-spec:
-  action: pod-kill
-  mode: one
-  selector:
-    namespaces:
-      - alvas
-    labelSelectors:
-      app: alvas-api
-  scheduler:
-    cron: "@every 2m"
----
-apiVersion: chaos-mesh.org/v1alpha1
 kind: NetworkChaos
 metadata:
   name: alvas-network-delay-1500ms
@@ -31,26 +15,4 @@ spec:
     latency: "1500ms"
     jitter: "100ms"
     correlation: "100"
-  duration: "60s"
-  scheduler:
-    cron: "@every 5m"
----
-apiVersion: chaos-mesh.org/v1alpha1
-kind: StressChaos
-metadata:
-  name: alvas-cpu-stress
-  namespace: alvas
-spec:
-  mode: one
-  selector:
-    namespaces:
-      - alvas
-    labelSelectors:
-      app: alvas-api
-  stressors:
-    cpu:
-      load: 80
-      workers: 2
-  duration: "20s"
-  scheduler:
-    cron: "@every 5m"
+  duration: "180s"
